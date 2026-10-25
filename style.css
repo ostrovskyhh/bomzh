@@ -601,6 +601,121 @@ main { flex: 1; min-height: 0; position: relative; }
 .vd-card { margin: 10px auto 12px; max-width: 280px; padding: 16px 14px; border-radius: 12px; background: #F4EEDC; color: #2A241F; text-align: center; font-size: 15px; line-height: 1.5; box-shadow: 0 6px 18px rgba(0,0,0,.3); animation: vdIn .25s ease-out; }
 @keyframes vdIn { from { transform: translateY(-14px) rotate(-3deg); opacity: 0; } }
 .vd-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Чат района */
+.chat-btn { position: absolute; left: 10px; bottom: 12px; z-index: 6; width: 46px; height: 46px; border-radius: 50%; border: 0; font-size: 22px; background: rgba(20,16,12,.75); box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+.chat-btn .dot { top: 2px; right: 2px; }
+.chat { display: flex; flex-direction: column; gap: 8px; }
+.chat-tabs { position: static; margin: 0; }
+.chat-list { height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; }
+.chat-empty, .chat-sys { text-align: center; color: var(--muted); font-size: 12.5px; padding: 6px; }
+.chat-sys { background: rgba(242,199,68,.1); border-radius: 10px; color: #F3E6CF; }
+.chat-msg { display: flex; gap: 6px; align-items: flex-end; }
+.chat-msg.me { flex-direction: row-reverse; }
+.chat-ava { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--card2); font-weight: 800; font-size: 13px; }
+.chat-bubble { max-width: 78%; padding: 6px 10px; border-radius: 12px; background: var(--card); font-size: 13.5px; line-height: 1.35; word-break: break-word; }
+.chat-msg.me .chat-bubble { background: #3A5A2E; }
+.chat-bubble b { display: block; font-size: 11.5px; color: var(--gold); margin-bottom: 2px; }
+.chat-bubble b small { color: var(--muted); font-weight: 500; }
+.chat-bubble b i { font-style: normal; margin-left: 6px; cursor: pointer; }
+.chat-input { display: flex; gap: 6px; }
+.chat-input input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--card2); background: var(--card); color: var(--text); font: inherit; }
+.chat-rules { color: var(--muted); font-size: 11px; text-align: center; }
+/* Банды и турнир */
+.premium-hero.clan-hero { background: linear-gradient(135deg, #2A2A3A, #6A1B2E); }
+.premium-hero.crime-hero { background: linear-gradient(135deg, #111, #3A3A3A); }
+.clan-hero + .btn-row { margin-bottom: 6px; }
+#clanEmoji { padding: 8px; border-radius: 12px; background: var(--card); color: var(--text); border: 1px solid var(--card2); font-size: 18px; }
+.tour-box { margin: 10px 0; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, #3A2A0A, #6A4A0A); display: grid; gap: 6px; }
+.tour-box small { color: #F3E6CF; font-size: 12px; line-height: 1.35; }
+.tour-box.open { box-shadow: 0 0 0 2px var(--gold); }
+.tour-table { display: grid; gap: 3px; margin-top: 4px; }
+.tour-table div { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 4px 8px; border-radius: 8px; background: rgba(0,0,0,.25); font-size: 12.5px; }
+.tour-table div.me { background: rgba(242,199,68,.25); }
+.tour-table i { font-style: normal; color: var(--muted); }
+.story-btn { margin-top: 8px; }
+/* Отношения и дети */
+.love-card .progress { margin: 6px 0; }
+.kids-note { display: block; color: var(--muted); font-size: 11px; text-align: center; margin: 6px 0 10px; }
+/* Криминал: отмычка и покер */
+.lp-lock { display: flex; justify-content: center; gap: 14px; height: 150px; margin: 6px 0; }
+.lp-pin { position: relative; width: 34px; border-radius: 10px; background: rgba(255,255,255,.1); overflow: hidden; }
+.lp-zone { position: absolute; left: 0; right: 0; height: 18%; background: rgba(108,195,106,.5); }
+.lp-mark { position: absolute; left: 4px; right: 4px; height: 6px; border-radius: 3px; background: var(--gold); }
+.lp-pin.set { background: rgba(108,195,106,.55); }
+.lp-pin.set .lp-mark { display: none; }
+.lp-car { text-align: center; font-size: 34px; margin-bottom: 6px; }
+.pk { text-align: center; }
+.pk-title { font-weight: 800; margin-bottom: 8px; }
+.pk-row { margin: 8px 0; }
+.pk-row small { display: block; color: var(--muted); margin-bottom: 4px; }
+.pk-hand { display: flex; justify-content: center; gap: 6px; }
+.pk-hand.small .pk-card { width: 40px; height: 56px; font-size: 15px; }
+.pk-card { width: 54px; height: 76px; border-radius: 8px; background: #fff; color: #222; font-weight: 800; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,.35); animation: cerBadge .35s ease-out both; }
+.pk-card i { font-style: normal; font-size: 22px; }
+.pk-card.red { color: #C62828; }
+.pk-card.back { background: repeating-linear-gradient(45deg, #8E1B2E, #8E1B2E 6px, #B3122E 6px, #B3122E 12px); color: transparent; }
+/* Погода */
+.weather-fx { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.weather-fx.p-night { background: rgba(10, 18, 50, .38); }
+.weather-fx.p-evening { background: rgba(120, 60, 20, .12); }
+.weather-fx.w-fog { background: linear-gradient(transparent, rgba(220,220,230,.45)); }
+.weather-fx.w-rain::before, .weather-fx.w-snow::before { content: ''; position: absolute; inset: 0; background: rgba(60,70,90,.15); }
+.weather-fx .rd { position: absolute; top: -20px; width: 2px; height: 16px; background: rgba(180,200,255,.7); animation: rainFall linear infinite; }
+@keyframes rainFall { to { transform: translate(-30px, 460px); } }
+.weather-fx .sf { position: absolute; top: -10px; width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: .9; animation: snow linear infinite; animation-duration: 6s !important; }
+.weather-fx .star { position: absolute; top: 4%; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: twinkle 2s ease-in-out infinite; }
+.weather-fx .star:nth-child(odd) { top: 12%; } .weather-fx .star:nth-child(3n) { top: 20%; }
+@keyframes twinkle { 50% { opacity: .2; } }
+.weather-fx .moon { position: absolute; right: 18%; top: 6%; font-size: 28px; }
+.weather-chip { position: absolute; right: 10px; bottom: 14px; z-index: 6; border: 0; padding: 5px 10px; border-radius: 12px; background: rgba(20,16,12,.72); color: #F3E6CF; font-size: 11px; }
+/* Коллекции */
+.coll-head { display: flex; align-items: center; gap: 8px; }
+.coll-head span { font-size: 22px; }
+.coll-head b { flex: 1; }
+.coll-head i { font-style: normal; color: var(--gold); font-weight: 800; }
+.coll-items { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: 8px 0 4px; }
+.coll-items div { text-align: center; padding: 4px 2px; border-radius: 8px; background: rgba(255,255,255,.05); opacity: .45; }
+.coll-items div.got { opacity: 1; background: rgba(242,199,68,.15); }
+.coll-items span { font-size: 20px; display: block; }
+.coll-items small { font-size: 9px; display: block; line-height: 1.1; color: var(--muted); }
+/* Недельная цепочка */
+.weekly { display: grid; gap: 6px; }
+.wk { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: var(--card); opacity: .55; }
+.wk.cur { opacity: 1; box-shadow: 0 0 0 2px var(--gold); }
+.wk.done { opacity: .7; }
+.wk > span { font-size: 20px; }
+.wk > div { flex: 1; min-width: 0; }
+.wk small { display: block; color: var(--muted); font-size: 11.5px; }
+.wk .progress { margin: 4px 0 2px; }
+.weekly-note { display: block; color: var(--muted); font-size: 11px; text-align: center; margin: 6px 0; }
+/* Рамки аватара */
+.avatar.frame-bronze, .chat-ava.frame-bronze, .top-ava.frame-bronze { box-shadow: 0 0 0 3px #CD7F32; }
+.avatar.frame-silver, .chat-ava.frame-silver, .top-ava.frame-silver { box-shadow: 0 0 0 3px #C0C0C0; }
+.avatar.frame-gold, .chat-ava.frame-gold, .top-ava.frame-gold { box-shadow: 0 0 0 3px #F2C744, 0 0 10px rgba(242,199,68,.7); }
+.avatar.frame-diamond, .chat-ava.frame-diamond, .top-ava.frame-diamond { box-shadow: 0 0 0 3px #7FDBFF, 0 0 14px rgba(127,219,255,.8); animation: frameGlow 2s ease-in-out infinite; }
+.avatar.frame-vip, .chat-ava.frame-vip, .top-ava.frame-vip { box-shadow: 0 0 0 3px #B06CFF, 0 0 10px rgba(176,108,255,.7); }
+.avatar.frame-champ, .chat-ava.frame-champ, .top-ava.frame-champ { box-shadow: 0 0 0 3px #F2C744, 0 0 0 6px #B3122E; }
+.avatar.frame-fire, .chat-ava.frame-fire, .top-ava.frame-fire { box-shadow: 0 0 0 3px #FF6A00, 0 0 12px rgba(255,106,0,.8); }
+@keyframes frameGlow { 50% { box-shadow: 0 0 0 3px #B6F0FF, 0 0 20px rgba(127,219,255,1); } }
+.frames { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.frame-pick { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border: 0; border-radius: 12px; background: var(--card); color: var(--text); }
+.frame-pick.on { box-shadow: inset 0 0 0 2px var(--gold); }
+.frame-pick:disabled { opacity: .4; }
+.frame-pick small { font-size: 10px; }
+/* Подсказки и настройки */
+.tip { text-align: center; }
+.tip-e { font-size: 52px; }
+.tip ul { text-align: left; padding-left: 4px; margin: 8px 0; }
+.tip li { list-style: none; margin-bottom: 8px; padding-left: 18px; position: relative; font-size: 14px; line-height: 1.4; }
+.tip li::before { content: '•'; position: absolute; left: 4px; color: var(--gold); font-weight: 800; }
+.help b { display: block; margin: 10px 0 6px; }
+.help-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.set-block { padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+.set-block b { display: block; margin-bottom: 6px; font-size: 14px; }
+.set-block input[type=range] { width: 100%; accent-color: var(--gold); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.pills button { padding: 6px 10px; border-radius: 10px; border: 0; background: var(--card2); color: var(--text); font-size: 12.5px; }
+.pills button.on { background: var(--gold); color: #2A1608; font-weight: 700; }
 /* Переход к заданию: подсветка цели на 5 секунд */
 .goal.go { cursor: pointer; }
 .goal .go-arrow { font-style: normal; color: var(--gold); font-weight: 800; }

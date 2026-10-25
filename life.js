@@ -251,6 +251,7 @@ function finishDate(g, d, perf) {
       confetti(80);
       text = `${perfText}Она согласилась быть твоей девушкой! 💍 Теперь радость растёт сама (+0.5/мин). А там и до свадьбы недалеко…`;
     }
+    if (typeof onDateSuccess === 'function') text += onDateSuccess(g, d, perf);
     resultModal({ emoji: '💘', title: `Свидание: ${d.name}`, text, btn: 'Счастье!' });
     haptic('success');
     return;

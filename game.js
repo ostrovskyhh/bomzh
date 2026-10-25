@@ -1158,7 +1158,7 @@ function renderShop() {
     html = `<div class="info-card">Приличная одежда открывает работу и девушек, но милостыню в ней почти не подают: в лохмотьях — 100%, в базовой — 40%, в приличной — 10%, в деловой — 0%.</div>` +
       Object.keys(CLOTHES).map((slot) => `<div class="subhead">${SLOT_NAMES[slot]}</div>` + CLOTHES[slot].filter((it) => !it.season || S.owned[slot].includes(it.id)).map((it) => {
       const owned = S.owned[slot].includes(it.id), worn = S.eq[slot] === it.id;
-      const bonuses = joinFx([it.tap ? `+${it.tap} за тап` : '', it.energy ? `+${it.energy} энергии` : '', it.pvp ? '🏆 за драки' : it.season ? '🎃 сезонная' : '']) || 'Без бонусов';
+      const bonuses = joinFx([it.tap ? `+${it.tap} за тап` : '', it.energy ? `+${it.energy} энергии` : '', it.ach ? '🏅 за достижение' : it.pvp ? '🏆 за драки' : it.season ? '🎃 сезонная' : '']) || 'Без бонусов';
       let btn;
       if (worn) btn = '<button class="btn" disabled>Надето</button>';
       else if (owned) btn = `<button class="btn green" data-act="wear" data-id="${slot}:${it.id}">Надеть</button>`;

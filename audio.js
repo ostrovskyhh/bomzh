@@ -6,6 +6,10 @@ const Sound = (() => {
   let track = null, timer = null, nextTime = 0, step = 0;
 
   const opts = () => (typeof S !== 'undefined' && S.settings) || { sfx: true, music: true };
+  // Громкость 0–100 и звуковая тема: classic, retro (квадратные «пищалки»), soft (тихо и мягко)
+  const musicVol = () => (opts().musicVol ?? 70) / 100;
+  const sfxVol = () => (opts().sfxVol ?? 80) / 100;
+  const theme = () => opts().sfxTheme || 'classic';
 
   function init() {
     if (ctx) return ctx;
@@ -53,6 +57,8 @@ const Sound = (() => {
 
   // Тон с огибающей: f — частота, slide — куда съезжает, filter — {type, f, q}
   function tone({ f = 440, type = 'sine', t = 0, dur = 0.15, vol = 0.3, attack = 0.004, slide = null, filter = null, rv = 0, bus = sfxBus, vibrato = 0 }) {
+    if (bus === sfxBus && theme() === 'retro') { type = 'square'; vol *= 0.45; rv = 0; filter = filter || { f: 4000 }; }
+    if (bus === sfxBus && theme() === 'soft') { type = type === 'square' || type === 'sawtooth' ? 'triangle' : type; vol *= 0.55; rv = Math.max(rv, 0.3); }
     const now = ctx.currentTime + t;
     const o = ctx.createOscillator();
     o.type = type;
@@ -214,11 +220,66 @@ const Sound = (() => {
     }
   }
 
+  // ---------- Лоу-фай для главного экрана: бочка-снейр, мягкие аккорды, треск винила ----------
+  const LOFI = { bpm: 78, chords: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [55, 59, 62, 65]], roots: [33, 29, 36, 31], scale: [69, 72, 74, 76, 79, 81] };
+  function scheduleLofi(t, s) {
+    const beat = 60 / LOFI.bpm;
+    const bar = Math.floor(s / 8) % 4, e = s % 8;
+    const swing = e % 2 === 1 ? beat * 0.12 : 0;
+    const at = t + swing - ctx.currentTime;
+    const m = { bus: musicBus };
+    if (e === 0 || e === 5) tone({ ...m, t: at, f: 60, slide: 38, type: 'sine', dur: 0.35, vol: 0.32 });
+    if (e === 2 || e === 6) noise({ ...m, t: at, dur: 0.16, vol: 0.09, type: 'bandpass', f: 1800, q: 0.8 });
+    if (e % 2 === 1 || Math.random() < 0.3) noise({ ...m, t: at, dur: 0.05, vol: 0.02, type: 'highpass', f: 8000 });
+    if (Math.random() < 0.5) noise({ ...m, t: at + Math.random() * beat, dur: 0.01, vol: 0.012, type: 'highpass', f: 5000 }); // треск
+    if (e === 0) LOFI.chords[bar].forEach((n, i) => tone({ ...m, t: at + i * 0.03, f: N(n), dur: beat * 3.6, vol: 0.022, attack: 0.05, rv: 0.4, filter: { f: 1400 } }));
+    if (e === 0 || e === 4) tone({ ...m, t: at, f: N(LOFI.roots[bar]), type: 'triangle', dur: beat * 1.8, vol: 0.12, filter: { f: 400 } });
+    if (e % 2 === 0 && Math.random() < 0.22) tone({ ...m, t: at, f: N(pickN(LOFI.scale)), dur: beat * 1.5, vol: 0.03, rv: 0.5, vibrato: 2 });
+  }
+
+  // ---------- Дворовый вальс: гармошка и гитара на три четверти ----------
+  const WALTZ = { bpm: 150, chords: [[57, 60, 64], [52, 56, 59], [57, 60, 64], [50, 53, 57], [52, 56, 59], [57, 60, 64]], roots: [45, 40, 45, 38, 40, 45], scale: [69, 71, 72, 74, 76, 77, 79, 81] };
+  function scheduleWaltz(t, s) {
+    const beat = 60 / WALTZ.bpm;
+    const bar = Math.floor(s / 3) % WALTZ.chords.length, e = s % 3;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    if (e === 0) tone({ ...m, t: at, f: N(WALTZ.roots[bar]), type: 'triangle', dur: beat * 0.9, vol: 0.16, filter: { f: 600 } });
+    else WALTZ.chords[bar].forEach((n) => tone({ ...m, t: at, f: N(n), type: 'sawtooth', dur: beat * 0.55, vol: 0.012, filter: { f: 1600 }, vibrato: 3 }));
+    if (e === 0 || Math.random() < 0.4) {
+      const n = pickN(WALTZ.scale.filter((x) => WALTZ.chords[bar].some((c) => (c - x) % 12 === 0)).concat(pickN(WALTZ.scale)));
+      tone({ ...m, t: at, f: N(n), type: 'sawtooth', dur: beat * (e === 0 ? 1.8 : 0.9), vol: 0.025, filter: { f: 2200 }, vibrato: 4, rv: 0.3 });
+    }
+  }
+
+  // ---------- 8-бит: чиптюн-арпеджио и квадратный бас ----------
+  const CHIP = { bpm: 128, prog: [[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]], scale: [72, 74, 76, 79, 81, 84] };
+  function scheduleChip(t, s) {
+    const beat = 60 / CHIP.bpm / 2;
+    const bar = Math.floor(s / 16) % 4, e = s % 16;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    const ch = CHIP.prog[bar];
+    tone({ ...m, t: at, f: N(ch[e % 3] + 12), type: 'square', dur: beat * 0.8, vol: 0.018, filter: { f: 3500 } });
+    if (e % 4 === 0) tone({ ...m, t: at, f: N(ch[0] - 24), type: 'square', dur: beat * 1.6, vol: 0.04, filter: { f: 800 } });
+    if (e % 8 === 4) noise({ ...m, t: at, dur: 0.06, vol: 0.06, type: 'highpass', f: 3000 });
+    if (e % 4 === 2 && Math.random() < 0.6) tone({ ...m, t: at, f: N(pickN(CHIP.scale)), type: 'square', dur: beat * 1.8, vol: 0.02, filter: { f: 4000 } });
+  }
+
+  const pickN = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  // Каждой мелодии — свой «шаг» сетки и планировщик
+  const TRACKS = {
+    lounge: { step: () => 60 / LOUNGE.bpm / 2, play: scheduleLounge },
+    lofi: { step: () => 60 / LOFI.bpm / 2, play: scheduleLofi },
+    waltz: { step: () => 60 / WALTZ.bpm, play: scheduleWaltz },
+    chip: { step: () => 60 / CHIP.bpm / 2, play: scheduleChip },
+  };
+
   function scheduler() {
-    const beat = 60 / LOUNGE.bpm / 2;
+    const tr = TRACKS[track] || TRACKS.lounge;
     while (nextTime < ctx.currentTime + 0.15) {
-      scheduleLounge(nextTime, step);
-      nextTime += beat;
+      tr.play(nextTime, step);
+      nextTime += tr.step();
       step++;
     }
   }
@@ -232,18 +293,27 @@ const Sound = (() => {
     musicBus.gain.cancelScheduledValues(now);
     musicBus.gain.setValueAtTime(musicBus.gain.value, now);
     if (name) {
-      if (!timer) { nextTime = now + 0.1; step = 0; timer = setInterval(scheduler, 30); }
-      musicBus.gain.linearRampToValueAtTime(0.75, now + 1.5);
+      step = 0; nextTime = now + 0.1;
+      if (!timer) timer = setInterval(scheduler, 30);
+      musicBus.gain.linearRampToValueAtTime(0.75 * musicVol(), now + 1.5);
     } else {
       musicBus.gain.linearRampToValueAtTime(0, now + 0.8);
       setTimeout(() => { if (!track && timer) { clearInterval(timer); timer = null; } }, 900);
     }
   }
 
+  // Применить громкость из настроек сразу, без перезапуска
+  function applyVolume() {
+    if (!ctx) return;
+    sfxBus.gain.value = 0.6 * sfxVol();
+    if (track) { musicBus.gain.cancelScheduledValues(ctx.currentTime); musicBus.gain.setValueAtTime(0.75 * musicVol(), ctx.currentTime); }
+  }
+
   function play(name) {
     if (!opts().sfx || !SFX[name]) return;
     if (!init()) return;
     if (ctx.state === 'suspended') ctx.resume();
+    sfxBus.gain.value = 0.6 * sfxVol();
     try { SFX[name](); } catch (e) { /* звук не критичен */ }
   }
 
@@ -258,5 +328,5 @@ const Sound = (() => {
     if (document.hidden) ctx.suspend(); else ctx.resume();
   });
 
-  return { play, music, unlock, get track() { return track; } };
+  return { play, music, unlock, applyVolume, get track() { return track; } };
 })();
