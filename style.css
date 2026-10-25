@@ -1341,3 +1341,30 @@ button:disabled { pointer-events: none; }
 .avatar.frame-neon, .chat-ava.frame-neon, .top-ava.frame-neon { box-shadow: 0 0 0 3px #FF2BD6, 0 0 10px #FF2BD6, 0 0 22px #6A2BFF; animation: frameGlow 1.4s ease-in-out infinite; }
 .avatar.frame-rainbow, .chat-ava.frame-rainbow, .top-ava.frame-rainbow { animation: rainbowFrame 2.4s linear infinite; }
 @keyframes rainbowFrame { 0% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 12px #FF5A5A; } 20% { box-shadow: 0 0 0 3px #FF9A3A, 0 0 12px #FF9A3A; } 40% { box-shadow: 0 0 0 3px #F2C744, 0 0 12px #F2C744; } 60% { box-shadow: 0 0 0 3px #3CCB5A, 0 0 12px #3CCB5A; } 80% { box-shadow: 0 0 0 3px #2F7DD0, 0 0 12px #2F7DD0; } 100% { box-shadow: 0 0 0 3px #B06CFF, 0 0 12px #B06CFF; } }
+
+/* ---------- 2.4: банды ---------- */
+.seg-mini { display: flex; gap: 6px; margin: 8px 0; }
+.seg-mini button { flex: 1; padding: 9px 6px; border: 0; border-radius: 12px; background: var(--card); color: var(--muted); font-weight: 700; font-size: 12px; }
+.seg-mini button.on { background: var(--gold); color: #2A1A06; }
+.gang-mode { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 800; vertical-align: middle; }
+.gang-mode.open { background: rgba(60,203,90,.18); color: #3CCB5A; }
+.gang-mode.invite { background: rgba(242,199,68,.18); color: var(--gold); }
+.gang-place { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; background: var(--card); box-shadow: inset 0 0 0 2px rgba(255,255,255,.1); }
+.gang-place.p1 { background: linear-gradient(135deg, #F2C744, #B8860B); color: #2A1A06; }
+.gang-place.p2 { background: linear-gradient(135deg, #E0E0E0, #9E9E9E); color: #222; }
+.gang-place.p3 { background: linear-gradient(135deg, #CD7F32, #8B5A2B); color: #fff; }
+.gang-game { padding: 12px; border-radius: 16px; background: var(--card); margin-bottom: 10px; }
+.gang-game .progress { margin: 8px 0 4px; }
+.gang-game .btn { margin-top: 8px; }
+.gg-head { display: flex; gap: 10px; align-items: center; }
+.gg-head > span { font-size: 30px; }
+.gg-head small { display: block; color: var(--muted); font-size: 11px; }
+.gang-game.pot { background: linear-gradient(150deg, rgba(255,138,58,.18), var(--card)); }
+.gang-game.war { background: linear-gradient(150deg, rgba(179,18,46,.25), var(--card)); }
+.pot-sum { margin: 8px 0 4px; font-size: 13px; }
+.wall { text-align: center; }
+.wall-bouts { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+.wall-bout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; background: var(--card); font-size: 13px; opacity: 0; animation: lootIn .3s ease forwards; }
+.wall-bout.a span:first-child { color: #3CCB5A; font-weight: 800; } .wall-bout.b span:last-child { color: #FF5A5A; font-weight: 800; }
+.wall-result { font-size: 20px; font-weight: 900; padding: 10px; border-radius: 14px; opacity: 0; animation: lootIn .4s ease forwards; }
+.wall-result.win { background: rgba(60,203,90,.18); color: #3CCB5A; } .wall-result.lose { background: rgba(255,90,90,.15); color: #FF5A5A; }

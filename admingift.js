@@ -19,7 +19,8 @@ async function giftClaim() {
     });
     save(true);
     confetti(70); sfx('jackpot');
-    resultModal({ emoji: '🎁', title: 'Подарок от администрации!', text: lines.join('<br>'), btn: 'Спасибо!' });
+    const pot = gifts.every((g) => (g.note || '').startsWith('🍲'));
+    resultModal({ emoji: pot ? '🍲' : '🎁', title: pot ? 'Котёл банды твой!' : 'Подарок от администрации!', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' });
   } catch (e) { /* сервер выключен — заберём позже */ }
 }
 HOOKS.load.push(() => setTimeout(giftClaim, 4000));
