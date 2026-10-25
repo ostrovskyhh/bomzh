@@ -29,22 +29,23 @@ const SLEEP_SPEED = 10; // во сне энергия идёт в 10 раз бы
 const FOOD_PER_TAP = 0.15;
 
 // tier: 0 — лохмотья, 1 — базовая, 2 — приличная, 3 — деловая (нужно для работы и свиданий)
+// Бонусы: tap — к тапу, energy — к макс. энергии, crit — к шансу крита, mood — радость в минуту, pity — милостыня (доля)
 const TIERS = ['лохмотья', 'базовая', 'приличная', 'деловая'];
 const CLOTHES = {
   hat: [
     { id: 'none', name: 'Без шапки', price: 0, tier: 0 },
     { id: 'shapka', name: 'Вязаная шапка', price: 40, tier: 0, pity: 0.1 },
-    { id: 'ushanka', name: 'Ушанка', price: 300, tier: 1, tap: 1, pity: 0.2 },
-    { id: 'kepka', name: 'Кепка-восьмиклинка', price: 3000, tier: 2, tap: 2, pity: 0.3 },
-    { id: 'cilinder', name: 'Цилиндр', price: 80000, tier: 3, tap: 4, pity: 0.8 },
+    { id: 'ushanka', name: 'Ушанка', price: 300, tier: 1, tap: 1, energy: 5 },
+    { id: 'kepka', name: 'Кепка-восьмиклинка', price: 3000, tier: 2, tap: 2, crit: 0.01 },
+    { id: 'cilinder', name: 'Цилиндр', price: 80000, tier: 3, tap: 4, crit: 0.02, mood: 0.2 },
   ],
   body: [
     { id: 'rvan', name: 'Рваный пиджак', price: 0, tier: 0 },
     { id: 'telnyashka', name: 'Тельняшка', price: 120, tier: 0, tap: 1, pity: 0.1 },
     { id: 'base', name: 'Рубашка и брюки с рынка', price: 200, tier: 1 },
     { id: 'pukhovik', name: 'Пуховик', price: 2500, tier: 1, tap: 2, energy: 15 },
-    { id: 'malinovy', name: 'Малиновый пиджак', price: 30000, tier: 2, tap: 4, pity: 0.5 },
-    { id: 'kostum', name: 'Деловой костюм', price: 150000, tier: 3, tap: 8, pity: 1 },
+    { id: 'malinovy', name: 'Малиновый пиджак', price: 30000, tier: 2, tap: 4, crit: 0.01 },
+    { id: 'kostum', name: 'Деловой костюм', price: 150000, tier: 3, tap: 8, mood: 0.3 },
   ],
   shoes: [
     { id: 'none', name: 'Босиком', price: 0, tier: 0 },
@@ -576,6 +577,7 @@ function mods() {
     for (const k in d) { if (ADD_MODS.includes(k)) m[k] += d[k]; else m[k] *= d[k]; }
   }
   if (S.girlfriend) m.mpm += 0.5;
+  m.crit += sumGear('crit'); m.mpm += sumGear('mood');
   if (S.mood < 20) { m.tap *= 0.7; m.work *= 0.7; } else if (S.mood >= 80) { m.tap *= 1.15; m.pity *= 1.15; m.work *= 1.15; }
   if (S.health < 30) m.tap *= 0.6;
   if (S.food < 20) { m.tap *= 0.5; m.pity *= 0.5; }
@@ -603,7 +605,14 @@ function pityPerSec() {
   if (S.busy) return 0;
   let v = PITY_BASE / 3600 * PITY_BY_TIER[pityTier()];
   if (S.mood < 25) v *= 1.2;
-  return v * mods().pity;
+  return v * mods().pity * (1 + sumGear('pity'));
+}
+// Радость в минуту. Чем лучше жильё, тем медленнее грусть; на самом дне она затягивает вдвое медленнее,
+// а несколько дебаффов разом не роняют радость быстрее 2.5/мин
+function moodDelta(m = mods()) {
+  let d = m.mpm - Math.max(0.15, 0.5 - S.housing * 0.06);
+  if (d < 0 && S.mood < 30) d *= 0.5;
+  return clamp(d, -2.5, 3);
 }
 function critChance() { return 0.03 + mods().crit; }
 function healthDelta() {
@@ -617,7 +626,7 @@ function healthDelta() {
 
 // Курс обменника плавает со временем (две синусоиды — похоже на настоящий график)
 function bottleRate(t = Date.now()) {
-  return 0.4 * (1 + 0.3 * Math.sin(t / 420000) + 0.12 * Math.sin(t / 97000 + 1)) * mods().rate;
+  return 0.56 * (1 + 0.3 * Math.sin(t / 420000) + 0.12 * Math.sin(t / 97000 + 1)) * mods().rate;
 }
 function capRate() { return Math.round(40 * scale()); }
 const EXCHANGE_FEE = 0.05;
@@ -730,16 +739,95 @@ function cloudWrite() {
   } catch (e) { cloudBusy = false; }
 }
 
+// ---------- Сервер: главное хранилище профиля, одно на телефон и компьютер ----------
+// Игра пишет на сервер только после того, как прочитала оттуда профиль, — иначе пустой
+// прогресс с нового устройства мог бы затереть настоящий.
+const SERVER_EVERY = 15000;
+const DEVICE_ID = (() => {
+  try {
+    let d = localStorage.getItem('bomzh_device');
+    if (!d) { d = Math.random().toString(36).slice(2, 10); localStorage.setItem('bomzh_device', d); }
+    return d;
+  } catch (e) { return 'nostore'; }
+})();
+let serverReady = false, serverBase = 0, srvTimer = null, srvLastAt = 0, srvBusy = false, SAVE_LOCK = false;
+let LOADED = false; // до загрузки в S лежит пустой профиль — его нельзя сохранять
+
+function serverOk() { return typeof REF_API !== 'undefined' && REF_API && tg && tg.initData; }
+async function serverCall(path, extra) {
+  const r = await fetch(`${REF_API}/api/save/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+    body: JSON.stringify({ initData: tg.initData, device: DEVICE_ID, ...extra }),
+  });
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r.json();
+}
+async function serverGet() {
+  const j = await serverCall('get', {});
+  return j.data ? parseSave(j.data) : null;
+}
+async function serverWrite(force) {
+  if (!serverReady || srvBusy || SAVE_LOCK || !serverOk()) return;
+  srvBusy = true; srvLastAt = Date.now();
+  try {
+    const j = await serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, base: serverBase, force: !!force });
+    if (j.conflict) {
+      // Пока это окно было открыто, играли на другом устройстве
+      const remote = parseSave(j.data);
+      if (remote) adoptOrAsk(remote);
+    } else if (j.ok) serverBase = Math.max(serverBase, j.savedAt || 0);
+  } catch (e) { /* сервер выключен — сохранимся в следующий раз */ }
+  srvBusy = false;
+}
+// На сервере профиль новее: если здесь почти ничего не наиграно — молча берём его, иначе спрашиваем
+function adoptOrAsk(remote) {
+  const unsynced = (S.savedAt || 0) - serverBase;
+  const remoteBetter = (remote.savedAt || 0) > (S.savedAt || 0) && (remote.xp || 0) >= (S.xp || 0);
+  if (unsynced < 60000 || remoteBetter) { adoptSave(remote); return; }
+  serverReady = false;
+  ALT_SAVE = remote;
+  if (typeof showSavePick === 'function') showSavePick();
+}
+function adoptSave(remote) {
+  SAVE_LOCK = true;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(remote)); } catch (e) { /* нет доступа */ }
+  toast('☁️ Подгружаю прогресс с другого устройства…', 'good');
+  setTimeout(() => location.reload(), 700);
+}
+// Проверка при возврате в игру и после неудачной загрузки
+function serverSync() {
+  if (!serverOk() || srvBusy || SAVE_LOCK || ALT_SAVE) return;
+  serverGet().then((remote) => {
+    serverReady = true;
+    if (remote && (remote.savedAt || 0) > serverBase && (remote.savedAt || 0) !== (S.savedAt || 0)) {
+      if (serverBase === 0 && (remote.savedAt || 0) < (S.savedAt || 0) && (remote.xp || 0) <= (S.xp || 0) * 1.02 + 50) serverBase = remote.savedAt;
+      else { adoptOrAsk(remote); return; }
+    }
+    serverWrite();
+  }).catch(() => {});
+}
+
 function save(now) {
+  if (SAVE_LOCK || !LOADED) return;
   S.lastSeen = Date.now();
   S.savedAt = Date.now();
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* приватный режим */ }
+  if (serverOk()) {
+    clearTimeout(srvTimer);
+    srvTimer = setTimeout(serverWrite, now ? 0 : Math.max(0, SERVER_EVERY - (Date.now() - srvLastAt)));
+  }
   if (!cloudOk()) return;
   clearTimeout(cloudTimer);
   const wait = now ? 0 : Math.max(0, CLOUD_EVERY - (Date.now() - cloudLastAt));
   cloudTimer = setTimeout(cloudWrite, wait);
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden && typeof S !== 'undefined' && S.storySeen) save(true); });
+document.addEventListener('visibilitychange', () => {
+  if (typeof S === 'undefined' || !S.storySeen) return;
+  if (document.hidden) save(true);
+  else serverSync();
+});
+setInterval(() => { if (!serverReady && typeof S !== 'undefined' && S.storySeen) serverSync(); }, 60000);
 
 function parseSave(json) {
   if (!json) return null;
@@ -774,23 +862,35 @@ function cloudRead(cb) {
 function load(done) {
   let local = null;
   try { local = parseSave(localStorage.getItem(SAVE_KEY)); } catch (e) { /* нет доступа */ }
-  const finish = (cloud) => {
-    const both = [local, cloud].filter(Boolean).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
-    if (both[0]) S = both[0];
+  // Читаем сразу три копии: в браузере, в облаке Telegram и на сервере — берём самую свежую
+  let cloud = null, server = null, waiting = 0, finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true; clearTimeout(timer);
+    const all = [local, cloud, server].filter(Boolean).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+    if (all[0]) S = all[0];
     // Конфликт: новее оказалось сохранение с меньшим прогрессом (играл на двух устройствах раздельно)
-    if (both.length === 2 && (both[1].xp || 0) > (both[0].xp || 0) * 1.02 + 50) ALT_SAVE = both[1];
+    const alt = all.slice(1).sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
+    if (alt && (alt.xp || 0) > (all[0].xp || 0) * 1.02 + 50) ALT_SAVE = alt;
+    LOADED = true;
     done();
+    if (serverReady && !ALT_SAVE && (!server || (S.savedAt || 0) > serverBase)) setTimeout(() => serverWrite(), 1500);
   };
-  if (!cloudOk()) { finish(null); return; }
-  let finished = false;
-  const timer = setTimeout(() => { if (!finished) { finished = true; finish(null); } }, 3000);
-  try {
-    cloudRead((cloud) => {
-      if (finished) return;
-      finished = true; clearTimeout(timer);
-      finish(cloud);
-    });
-  } catch (e) { finished = true; clearTimeout(timer); finish(null); }
+  const part = () => { if (--waiting <= 0) finish(); };
+  const timer = setTimeout(finish, 6000);
+  if (cloudOk()) {
+    waiting++;
+    try { cloudRead((c) => { cloud = c; part(); }); } catch (e) { part(); }
+  }
+  if (serverOk()) {
+    waiting++;
+    serverGet().then((s) => {
+      if (finished) return; // опоздал — проверим позже через serverSync
+      server = s; serverReady = true; serverBase = s ? (s.savedAt || 0) : 0;
+      part();
+    }).catch(part);
+  }
+  if (!waiting) finish();
 }
 
 // =====================================================================
@@ -1216,7 +1316,7 @@ function renderShop() {
     html = `<div class="info-card">Приличная одежда открывает работу и девушек, но милостыню в ней почти не подают: в лохмотьях — 100%, в базовой — 40%, в приличной — 10%, в деловой — 0%.</div>` +
       Object.keys(CLOTHES).map((slot) => `<div class="subhead">${SLOT_NAMES[slot]}</div>` + CLOTHES[slot].filter((it) => !it.season || S.owned[slot].includes(it.id)).map((it) => {
       const owned = S.owned[slot].includes(it.id), worn = S.eq[slot] === it.id;
-      const bonuses = joinFx([it.tap ? `+${it.tap} за тап` : '', it.energy ? `+${it.energy} энергии` : '', it.ach ? '🏅 за достижение' : it.pvp ? '🏆 за драки' : it.season ? '🎃 сезонная' : '']) || 'Без бонусов';
+      const bonuses = joinFx([it.tap ? `+${it.tap} за тап` : '', it.energy ? `+${it.energy} энергии` : '', it.crit ? `+${Math.round(it.crit * 100)}% крит` : '', it.mood ? `+${it.mood} радости/мин` : '', it.pity ? `+${Math.round(it.pity * 100)}% милостыни` : '', it.ach ? '🏅 за достижение' : it.pvp ? '🏆 за драки' : it.season ? '🎃 сезонная' : '']) || 'Без бонусов';
       let btn;
       if (worn) btn = '<button class="btn" disabled>Надето</button>';
       else if (owned) btn = `<button class="btn green" data-act="wear" data-id="${slot}:${it.id}">Надеть</button>`;
@@ -1761,9 +1861,14 @@ const ACTIONS = {
   reset: () => {
     const doReset = () => {
       S = freshState(); save();
-      // Стираем и облачную копию, иначе после перезапуска она «вернётся»
-      if (cloudOk()) tg.CloudStorage.removeItems([`${SAVE_KEY}_meta`, SAVE_KEY], () => location.reload());
-      else location.reload();
+      SAVE_LOCK = true;
+      // Стираем облачную копию и перезаписываем серверную, иначе после перезапуска старый прогресс «вернётся»
+      const wipeCloud = () => {
+        if (cloudOk()) tg.CloudStorage.removeItems([`${SAVE_KEY}_meta`, SAVE_KEY], () => location.reload());
+        else location.reload();
+      };
+      if (serverOk()) serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, base: 0, force: true }).catch(() => {}).finally(wipeCloud);
+      else wipeCloud();
     };
     if (tg && tg.initData && tg.showConfirm) tg.showConfirm('Точно начать заново? Весь прогресс пропадёт.', (ok) => ok && doReset());
     else if (confirm('Точно начать заново?')) doReset();
@@ -2639,7 +2744,7 @@ function tick() {
   const m = mods();
   if (!(S.busy && S.busy.type === 'sleep')) S.energy = Math.min(maxEnergy(), S.energy + regenPerMin() * dm);
   S.food = Math.max(0, S.food - dm);
-  S.mood = clamp(S.mood + (m.mpm - 0.5) * dm, 0, maxMood());
+  S.mood = clamp(S.mood + moodDelta(m) * dm, 0, maxMood());
   S.health = clamp(S.health + healthDelta() * dm, 0, maxHealth());
   S.fatigue = Math.max(0, S.fatigue - 2 * dm);
   if (now - S.lastGym > 10 * 60000) {
@@ -2709,7 +2814,7 @@ function init() {
   $('trashBtn').onclick = openTrash;
   $('eatBtn').onclick = () => showScreen('shop', 'food');
   $('sleepBtn').onclick = () => { startSleep(); updateHud(); save(); };
-  $('resCaps').onclick = () => showScreen('shop', 'premium');
+  $('resCaps').onclick = () => openDonate();
   $('profileBtn').onclick = openProfile;
   document.querySelectorAll('.seg button').forEach((b) => {
     b.onclick = () => { TABS[b.closest('.seg').dataset.group] = b.dataset.tab; renderCurrent(true); haptic('light'); };

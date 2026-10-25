@@ -827,7 +827,8 @@ const SEASONS = [
 const SEASON_BEFORE = 20, SEASON_AFTER = 10;
 
 // Сезонные шапки — в общем списке одежды, но купить их можно только в ивенте
-SEASONS.forEach((s) => CLOTHES.hat.push({ id: s.hat, name: s.hatName, price: 0, tier: 0, season: true }));
+// Праздничные шапки: средний бонус, чтобы их хотелось носить, но цилиндр оставался лучше по тапу
+SEASONS.forEach((s) => CLOTHES.hat.push({ id: s.hat, name: s.hatName, price: 0, tier: 2, tap: 3, mood: 0.3, season: true }));
 
 function activeSeasons(now = new Date()) {
   const day = 86400000;

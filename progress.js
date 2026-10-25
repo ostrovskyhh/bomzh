@@ -152,14 +152,14 @@ Object.assign(HATS, {
 });
 // Шапка выдаётся, когда достижение доходит до 3-го уровня
 const ACH_HATS = [
-  { hat: 'goldushanka', name: 'Золотая ушанка', ach: 'taps', tier: 3 },
-  { hat: 'hardhat', name: 'Каска ударника', ach: 'shifts', tier: 3 },
-  { hat: 'beret', name: 'Берет отличника', ach: 'lessons', tier: 3 },
-  { hat: 'cowboy', name: 'Шляпа шулера', ach: 'casino', tier: 3 },
-  { hat: 'headband', name: 'Повязка бойца', ach: 'fights', tier: 3 },
+  { hat: 'goldushanka', name: 'Золотая ушанка', ach: 'taps', tier: 3, tap: 6 },
+  { hat: 'hardhat', name: 'Каска ударника', ach: 'shifts', tier: 3, tap: 3, energy: 25 },
+  { hat: 'beret', name: 'Берет отличника', ach: 'lessons', tier: 3, tap: 3, mood: 0.4 },
+  { hat: 'cowboy', name: 'Шляпа шулера', ach: 'casino', tier: 3, tap: 3, crit: 0.04 },
+  { hat: 'headband', name: 'Повязка бойца', ach: 'fights', tier: 3, tap: 4, crit: 0.02, energy: 10 },
 ];
-ACH_HATS.forEach((h) => CLOTHES.hat.push({ id: h.hat, name: h.name, price: 0, tier: 0, season: true, ach: h }));
-CLOTHES.hat.push({ id: 'weekcap', name: 'Кепка чемпиона недели', price: 0, tier: 0, season: true, ach: { name: 'недельная цепочка' } });
+ACH_HATS.forEach((h) => CLOTHES.hat.push({ id: h.hat, name: h.name, price: 0, tier: h.tier, tap: h.tap, energy: h.energy, crit: h.crit, mood: h.mood, season: true, ach: h }));
+CLOTHES.hat.push({ id: 'weekcap', name: 'Кепка чемпиона недели', price: 0, tier: 3, tap: 5, crit: 0.02, mood: 0.2, season: true, ach: { name: 'недельная цепочка' } });
 
 // Рамка аватара: открывается числом уровней достижений и особыми заслугами
 const FRAMES = [

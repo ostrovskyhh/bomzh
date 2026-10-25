@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.7">
+  <link rel="stylesheet" href="style.css?v=1.8">
 </head>
 <body>
   <!-- Общие паттерны для всех SVG (полоски тельняшки, кирпичи и т.д.) -->
@@ -57,10 +57,10 @@
           <div class="tap-hint" id="tapHint">Тапай по Валере!</div>
         </div>
         <div class="bars">
-          <div class="bar"><i class="ic" data-ic="energy"></i><div class="track"><div class="fill energy" id="energyFill"></div></div><span id="energyText"></span></div>
-          <div class="bar"><i class="ic" data-ic="food"></i><div class="track"><div class="fill food" id="foodFill"></div></div><span id="foodText"></span></div>
-          <div class="bar"><i class="ic" data-ic="heart"></i><div class="track"><div class="fill health" id="healthFill"></div></div><span id="healthText"></span></div>
-          <div class="bar"><i class="ic" data-ic="smile"></i><div class="track"><div class="fill mood" id="moodFill"></div></div><span id="moodText"></span></div>
+          <div class="bar" data-act="goStat" data-id="energy"><i class="ic" data-ic="energy"></i><div class="track"><div class="fill energy" id="energyFill"></div></div><span id="energyText"></span></div>
+          <div class="bar" data-act="goStat" data-id="food"><i class="ic" data-ic="food"></i><div class="track"><div class="fill food" id="foodFill"></div></div><span id="foodText"></span></div>
+          <div class="bar" data-act="goStat" data-id="health"><i class="ic" data-ic="heart"></i><div class="track"><div class="fill health" id="healthFill"></div></div><span id="healthText"></span></div>
+          <div class="bar" data-act="goStat" data-id="mood"><i class="ic" data-ic="smile"></i><div class="track"><div class="fill mood" id="moodFill"></div></div><span id="moodText"></span></div>
         </div>
         <div class="actions">
           <button class="btn act primary" id="exchangeBtn"><span class="act-emoji">💱</span><div><b>Обменник</b><small id="exchangeInfo"></small></div></button>
@@ -78,7 +78,6 @@
           <button data-tab="transport"><i>🛴</i><span>Транспорт</span></button>
           <button data-tab="pets"><i>🐕</i><span>Питомцы</span></button>
           <button data-tab="season" class="season-tab hidden" id="seasonTab"><i>🎃</i><span>Ивент</span></button>
-          <button data-tab="premium"><i>⭐</i><span>Донат</span></button>
         </div>
         <div class="list" id="shopList"></div>
       </section>
@@ -113,6 +112,7 @@
         <div class="seg tiles" data-group="tasks">
           <button data-tab="story"><i>📖</i><span>Сюжет</span></button>
           <button data-tab="tasks"><i>📋</i><span>Задания</span></button>
+          <button data-tab="pass"><i>🎫</i><span>Пропуск</span></button>
           <button data-tab="ach"><i>🏅</i><span>Достижения</span></button>
           <button data-tab="coll"><i>🧩</i><span>Коллекции</span></button>
           <button data-tab="prestige"><i>⭐</i><span>Престиж</span></button>
@@ -135,34 +135,38 @@
   <div id="toastRoot"></div>
 
   <!-- ?v= — номер версии. Меняй его при каждом обновлении, иначе Telegram покажет старые файлы из кэша -->
-  <script src="audio.js?v=1.7"></script>
-  <script src="art.js?v=1.7"></script>
-  <script src="game.js?v=1.7"></script>
-  <script src="systems.js?v=1.7"></script>
-  <script src="minigames.js?v=1.7"></script>
-  <script src="fights.js?v=1.7"></script>
-  <script src="casino.js?v=1.7"></script>
-  <script src="quests.js?v=1.7"></script>
-  <script src="life.js?v=1.7"></script>
-  <script src="family.js?v=1.7"></script>
-  <script src="careers.js?v=1.7"></script>
-  <script src="cutscenes.js?v=1.7"></script>
-  <script src="extras.js?v=1.7"></script>
-  <script src="config.js?v=1.7"></script>
-  <script src="referral.js?v=1.7"></script>
-  <script src="online.js?v=1.7"></script>
-  <script src="gym.js?v=1.7"></script>
-  <script src="ux.js?v=1.7"></script>
-  <script src="lotto.js?v=1.7"></script>
-  <script src="changelog.js?v=1.7"></script>
-  <script src="social.js?v=1.7"></script>
-  <script src="arena.js?v=1.7"></script>
-  <script src="life2.js?v=1.7"></script>
-  <script src="crime.js?v=1.7"></script>
-  <script src="world.js?v=1.7"></script>
-  <script src="progress.js?v=1.7"></script>
-  <script src="tips.js?v=1.7"></script>
-  <script src="promo.js?v=1.7"></script>
-  <script src="boot.js?v=1.7"></script>
+  <script src="audio.js?v=1.8"></script>
+  <script src="art.js?v=1.8"></script>
+  <script src="game.js?v=1.8"></script>
+  <script src="systems.js?v=1.8"></script>
+  <script src="minigames.js?v=1.8"></script>
+  <script src="fights.js?v=1.8"></script>
+  <script src="casino.js?v=1.8"></script>
+  <script src="quests.js?v=1.8"></script>
+  <script src="life.js?v=1.8"></script>
+  <script src="family.js?v=1.8"></script>
+  <script src="careers.js?v=1.8"></script>
+  <script src="cutscenes.js?v=1.8"></script>
+  <script src="extras.js?v=1.8"></script>
+  <script src="config.js?v=1.8"></script>
+  <script src="referral.js?v=1.8"></script>
+  <script src="online.js?v=1.8"></script>
+  <script src="gym.js?v=1.8"></script>
+  <script src="ux.js?v=1.8"></script>
+  <script src="lotto.js?v=1.8"></script>
+  <script src="changelog.js?v=1.8"></script>
+  <script src="social.js?v=1.8"></script>
+  <script src="arena.js?v=1.8"></script>
+  <script src="life2.js?v=1.8"></script>
+  <script src="crime.js?v=1.8"></script>
+  <script src="world.js?v=1.8"></script>
+  <script src="progress.js?v=1.8"></script>
+  <script src="tips.js?v=1.8"></script>
+  <script src="promo.js?v=1.8"></script>
+  <script src="donate.js?v=1.8"></script>
+  <script src="duels.js?v=1.8"></script>
+  <script src="pass.js?v=1.8"></script>
+  <script src="balance.js?v=1.8"></script>
+  <script src="boot.js?v=1.8"></script>
 </body>
 </html>

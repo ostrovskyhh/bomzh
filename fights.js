@@ -85,11 +85,11 @@ function eloDelta(op, won) { const exp = 1 / (1 + Math.pow(10, (op.rating - figh
 const LOOT_CHANCE = 0.35;
 const DAY_WIN_CAPS = 1;
 const PVP_HATS = [
-  { id: 'bandana', name: 'Бандана бойца' },
-  { id: 'boxhelm', name: 'Боксёрский шлем' },
-  { id: 'crown', name: 'Корона ринга' },
+  { id: 'bandana', name: 'Бандана бойца', tier: 2, tap: 3, crit: 0.02 },
+  { id: 'boxhelm', name: 'Боксёрский шлем', tier: 2, tap: 4, crit: 0.03, energy: 10 },
+  { id: 'crown', name: 'Корона ринга', tier: 3, tap: 6, crit: 0.04, mood: 0.3 },
 ];
-PVP_HATS.forEach((h) => CLOTHES.hat.push({ id: h.id, name: h.name, price: 0, tier: 0, season: true, pvp: true }));
+PVP_HATS.forEach((h) => CLOTHES.hat.push({ price: 0, season: true, pvp: true, ...h }));
 // Разовая награда за первый выход в лигу (индекс как в LEAGUES)
 const LEAGUE_PRIZES = [null, { caps: 3, money: 3000, hat: 'bandana' }, { caps: 8, money: 15000, hat: 'boxhelm' }, { caps: 15, money: 60000, hat: 'crown' }];
 // Сундуки за серию: money — во сколько наград за бой, items — сколько вещей, tries — насколько редкие

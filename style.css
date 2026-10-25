@@ -167,6 +167,8 @@ main { flex: 1; min-height: 0; position: relative; }
 /* ---------- Полоски ---------- */
 .bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 8px; }
 .bar { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.bar[data-act] { cursor: pointer; border-radius: 8px; }
+.bar[data-act]:active { background: rgba(255,255,255,.08); }
 .bar span { min-width: 54px; text-align: right; color: var(--muted); }
 .track { flex: 1; height: 10px; background: var(--card); border-radius: 99px; overflow: hidden; }
 .fill { height: 100%; border-radius: 99px; transition: width .25s; }
@@ -837,6 +839,8 @@ main { flex: 1; min-height: 0; position: relative; }
 .cut-list .btn { font-size: 12.5px; padding: 10px 6px; text-align: left; }
 /* Красная точка на разделе с наградой или задачей */
 .seg.tiles button { position: relative; }
+.res.has-dot { position: relative; }
+.res.has-dot::after { content: ''; position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px var(--card); }
 .seg.tiles button.has-dot::after { content: ''; position: absolute; top: 4px; right: 12%; width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px var(--card); }
 /* Недоступные кнопки: нажатие ловит общий обработчик и объясняет, чего не хватает (ux.js) */
 button:disabled { pointer-events: none; }
@@ -1114,3 +1118,40 @@ button:disabled { pointer-events: none; }
   .mg-arena { height: 250px; }
   .f-ava { height: 110px; }
 }
+
+/* ---------- 1.8: онлайн, вызовы, КНБ ---------- */
+.online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3CCB5A; box-shadow: 0 0 0 2px rgba(60,203,90,.25); margin-right: 6px; vertical-align: middle; }
+.top-ava { position: relative; }
+.online-dot.on-ava { position: absolute; right: -2px; bottom: -2px; margin: 0; box-shadow: 0 0 0 2px var(--card); }
+.online-txt { color: #3CCB5A; }
+.duel-btns { display: flex; gap: 6px; margin: 8px 0 4px; flex-wrap: wrap; }
+.rps-board { display: flex; align-items: center; justify-content: space-around; gap: 8px; margin: 10px 0; }
+.rps-side { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; text-align: center; font-size: 13px; }
+.rps-hand { font-size: 56px; line-height: 1; height: 64px; }
+.rps-hand.flip { transform: scaleX(-1); }
+.rps-hand.shake { animation: rpsShake .26s ease-in-out 3; }
+@keyframes rpsShake { 0%, 100% { translate: 0 0; } 50% { translate: 0 -16px; } }
+.rps-score { font-size: 28px; font-weight: 800; }
+.rps-btns .btn span { font-size: 26px; }
+.rps-wait { animation: rpsShake .5s ease-in-out infinite; }
+.premium-hero.pass-hero { background: linear-gradient(135deg, #3A1A6A, #B06CFF); }
+.pass-hero > div:last-child { flex: 1; }
+.pass-hero .progress { margin: 6px 0 2px; background: rgba(0,0,0,.25); }
+.bp-track { display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x proximity; }
+.bp-col { flex: 0 0 82px; display: flex; flex-direction: column; gap: 6px; scroll-snap-align: start; }
+.bp-lv { text-align: center; font-weight: 800; font-size: 13px; padding: 3px 0; border-radius: 8px; background: var(--card); opacity: .6; }
+.bp-col.reached .bp-lv { opacity: 1; background: #7A3AB0; color: #fff; }
+.bp-col.next .bp-lv { opacity: 1; box-shadow: inset 0 0 0 2px #B06CFF; }
+.bp-cell { min-height: 92px; border: 0; border-radius: 12px; background: var(--card); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 4px; }
+.bp-cell i { font-style: normal; font-size: 24px; }
+.bp-cell small { font-size: 10px; line-height: 1.2; text-align: center; opacity: .85; }
+.bp-cell.paid { background: linear-gradient(160deg, rgba(242,199,68,.22), var(--card)); }
+.bp-cell.ready { box-shadow: inset 0 0 0 2px #3CCB5A; animation: frameGlow 1.6s ease-in-out infinite; }
+.bp-cell.got { opacity: .45; }
+.bp-cell.locked { opacity: .55; }
+.bp-cell:disabled { cursor: default; }
+.info-card.good { box-shadow: inset 0 0 0 1px #3CCB5A; }
+.avatar.frame-season, .chat-ava.frame-season, .top-ava.frame-season { box-shadow: 0 0 0 3px #B06CFF, 0 0 0 6px #F2C744; }
+.ev-hint { font-weight: 500; opacity: .75; font-size: 11px; }
+.diff-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px; margin-right: 4px; vertical-align: middle; background: rgba(255,255,255,.08); }
+.diff-tag.easy { color: #3CCB5A; } .diff-tag.even { color: #F2C744; } .diff-tag.hard { color: #FF5A5A; }

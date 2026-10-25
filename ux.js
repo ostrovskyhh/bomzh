@@ -5,19 +5,22 @@
 function saveSummary(s) {
   return `ур. ${levelInfo(s.xp || 0).level} · ${fmt(s.money || 0)} ₽ · ${HOUSING[s.housing || 0].name}${s.savedAt ? ` · ${new Date(s.savedAt).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''}`;
 }
-HOOKS.init.push(() => setTimeout(() => {
+function showSavePick() {
   if (!ALT_SAVE) return;
   const alt = ALT_SAVE;
   openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">☁️</div></div>
     <h3>Найдено два сохранения</h3>
-    <p>Похоже, ты играл на разных устройствах. Выбери, какой прогресс оставить — второй будет удалён.</p>
+    <p>Похоже, ты играл на разных устройствах. Выбери, какой прогресс оставить — он станет общим для всех устройств, второй будет удалён.</p>
     <div class="btns" style="flex-direction:column;gap:8px">
       <button class="btn primary wide" data-act="pickSave" data-id="alt">📈 ${saveSummary(alt)}</button>
       <button class="btn wide" data-act="pickSave" data-id="cur">📱 ${saveSummary(S)}</button></div>`, { center: true, locked: true });
-}, 1200));
+}
+HOOKS.load.push(() => setTimeout(showSavePick, 1200));
 ACTIONS.pickSave = (id) => {
+  if (ALT_SAVE) serverBase = Math.max(serverBase, ALT_SAVE.savedAt || 0);
   if (id === 'alt' && ALT_SAVE) { S = ALT_SAVE; renderedLook = ''; }
   ALT_SAVE = null;
+  if (serverOk()) serverReady = true;
   closeModal();
   save(true);
   if (id === 'alt') setTimeout(() => location.reload(), 600); else toast('Оставлен текущий прогресс', 'good');
@@ -221,7 +224,40 @@ Object.assign(ACTIONS, {
     const t = TASKS.find((x) => x.id === id);
     if (GO_KEYS[id]) goTo(GO_KEYS[id], t ? t.name : '');
   },
+  // Нажатие на шкалу — туда, где её поднимают
+  goStat: (id) => {
+    if (S.busy) { toast('Сначала закончи текущее дело'); return; }
+    goTo(STAT_FIX[id], '');
+  },
+  // Нажатие на дебафф — туда, где его лечат
+  effect: (id) => {
+    const e = activeEffects().find((x) => x.id === id);
+    if (!e) return;
+    const d = EFFECTS[id];
+    const fix = d.kind !== 'good' && (EFFECT_FIX[id] || (d.kind === 'disease' ? EFFECT_FIX._disease : null));
+    if (!fix || S.busy) { toast(e.diag ? `${d.name}: ${d.desc}` : `${d.hidden} Сходи к врачу`); return; }
+    goTo(fix, e.diag ? `${d.emoji} ${d.name}` : d.hidden);
+  },
 });
+const STAT_FIX = {
+  energy: ['game', null, '#sleepBtn', 'Поспи или выпей кофе в разделе «Еда»'],
+  food: ['shop', 'food', '#shopList .card:not(.locked)', 'Поешь — еда здесь'],
+  health: ['life', 'health', '#lifeList .card:not(.locked)', 'Подлечись у врачей'],
+  mood: ['fun', 'rest', '#funList .card:not(.locked)', 'Отдохни — так радость растёт быстрее всего'],
+};
+const EFFECT_FIX = {
+  _disease: ['life', 'health', '#lifeList .card:not(.locked)', 'Лечится у врачей'],
+  heartburn: ['life', 'health', '#lifeList .card:not(.locked)', 'Таблетки в аптеке или подожди'],
+  poison: ['life', 'health', '#lifeList .card:not(.locked)', 'Вылечат в поликлинике'],
+  backpain: ['life', 'health', '#lifeList .card:not(.locked)', 'Вылечат в поликлинике'],
+  stuffed: ['life', 'health', '#lifeList .card:not(.locked)', 'Аптека поможет быстрее'],
+  hiccup: ['life', 'health', '#lifeList .card:not(.locked)', 'Аптека поможет быстрее'],
+  foodcoma: ['game', null, '#sleepBtn', 'Проспись'],
+  runs: ['life', 'health', '#lifeList .card:not(.locked)', 'Аптека поможет быстрее'],
+  hangover: ['fun', 'rest', '#funList .card:not(.locked)', 'Отдых и баня снимают похмелье'],
+  bloat: ['life', 'health', '#lifeList .card:not(.locked)', 'Аптека поможет быстрее'],
+  heartbreak: ['fun', 'rest', '#funList .card:not(.locked)', 'Отдых и друзья лечат сердце'],
+};
 
 // =====================================================================
 // 8. Нажал на недоступную кнопку — объясняем, чего не хватает
