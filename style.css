@@ -1277,3 +1277,67 @@ button:disabled { pointer-events: none; }
 @keyframes kingRef { 0% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 16px rgba(255,90,90,.8); } 33% { box-shadow: 0 0 0 3px #F2C744, 0 0 18px rgba(242,199,68,.9); } 66% { box-shadow: 0 0 0 3px #B06CFF, 0 0 18px rgba(176,108,255,.9); } 100% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 16px rgba(255,90,90,.8); } }
 .romance .btn small, .romance .btn small { display: block; font-weight: 500; font-size: 11px; opacity: .8; }
 .romance.tempt .big-emoji { animation: dcPulse 1.6s ease-in-out infinite; }
+
+/* ---------- 2.3: окно ставки КНБ ---------- */
+.rps-menu { text-align: center; }
+.rm-hands, .dc-icon.rps { display: flex; justify-content: center; gap: 10px; white-space: nowrap; }
+.rm-hands span, .dc-icon.rps span { font-size: 40px; line-height: 1.2; display: inline-block; animation: rmWave 1.4s ease-in-out infinite; }
+.rm-hands span:nth-child(2), .dc-icon.rps span:nth-child(2) { animation-delay: .15s; }
+.rm-hands span:nth-child(3), .dc-icon.rps span:nth-child(3) { animation-delay: .3s; }
+@keyframes rmWave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.rps-menu h3 { margin: 6px 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rps-menu p { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.rm-stakes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.rm-stake { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border: 0; border-radius: 14px; background: linear-gradient(160deg, #F2C744, #D99A1A); color: #2A1A06; }
+.rm-stake b { font-size: 17px; }
+.rm-stake small { font-size: 11px; opacity: .8; }
+.rm-stake.free { grid-column: 1 / -1; background: var(--card); color: var(--text); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+.rm-stake:disabled { background: var(--card); color: var(--muted); opacity: .6; }
+.rm-stake:not(:disabled):active { transform: scale(.96); }
+
+/* ---------- 2.3: ночь казино, сундук, друзья, косметика ---------- */
+.night-banner { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px; margin-bottom: 10px; background: linear-gradient(135deg, #14122A, #2A1F4A); font-size: 12px; }
+.night-banner b { font-size: 14px; }
+.night-banner p { margin: 2px 0 0; opacity: .85; }
+.night-banner.on { background: linear-gradient(135deg, #1A0B3A, #5A1B7A 60%, #B3122E); box-shadow: 0 0 22px rgba(176,108,255,.45); }
+.night-banner.on b { color: #FFD86B; letter-spacing: 1px; text-shadow: 0 0 10px rgba(255,216,107,.7); }
+.nb-moon { font-size: 34px; animation: prBob 3s ease-in-out infinite; }
+.nb-moon.big { font-size: 64px; text-align: center; }
+.night-pop { text-align: center; }
+.night-gift { margin-bottom: 10px; animation: dcPulse 1.4s ease-in-out infinite; }
+.casino-lobby.night { box-shadow: 0 0 0 2px #B06CFF, 0 0 26px rgba(176,108,255,.55); }
+.casino-lobby.night .lobby-sign { color: #FF6AD5; text-shadow: 0 0 6px #FF6AD5, 0 0 18px #B06CFF; }
+.chest-pin { position: absolute; left: 10px; top: 142px; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 58%; background: rgba(20, 16, 12, .72); padding: 5px 10px 5px 6px; border-radius: 12px; box-shadow: 0 0 0 1px rgba(242,199,68,.5); animation: dcPulse 1.6s ease-in-out infinite; cursor: pointer; }
+.chest-pin > span { font-size: 22px; }
+.chest-pin b { display: block; font-size: 11px; white-space: nowrap; }
+.chest-pin small { display: block; font-size: 10px; color: var(--gold); white-space: nowrap; }
+.chest-game { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 10px 0; }
+.cg-locks { font-size: 26px; letter-spacing: 6px; }
+.cg-chest { font-size: 96px; line-height: 1; border: 0; background: none; padding: 10px; }
+.cg-bar { width: 80%; }
+.chest-loot div { padding: 6px 0; font-size: 15px; font-weight: 700; opacity: 0; animation: lootIn .35s ease forwards; }
+@keyframes lootIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.premium-hero.friends-hero { background: linear-gradient(135deg, #1B4E6A, #3CCB5A); }
+.fr-out { display: inline-flex; align-items: center; gap: 6px; margin: 4px 8px 4px 0; font-size: 12px; color: var(--muted); }
+.fr-visit { text-align: center; }
+.fv-house { font-size: 72px; line-height: 1.1; }
+.btn.danger { background: #B3122E; color: #fff; }
+.tap-cosm { position: absolute; font-size: 22px; pointer-events: none; animation: tapCosm .9s ease-out forwards; z-index: 5; }
+@keyframes tapCosm { from { transform: translate(0, 0) scale(.6); opacity: 1; } to { transform: translate(var(--dx), -90px) scale(1.2); opacity: 0; } }
+.starter-pack { position: relative; text-align: center; padding: 16px 12px 12px; margin-bottom: 10px; border-radius: 18px; background: linear-gradient(150deg, #1B5E20, #3CCB5A 55%, #F2C744); box-shadow: 0 0 20px rgba(60,203,90,.45); }
+.starter-pack b { display: block; font-size: 18px; }
+.starter-pack small { display: block; font-size: 11px; opacity: .9; margin-bottom: 8px; }
+.sp-e { font-size: 46px; line-height: 1.1; }
+.sp-badge { position: absolute; top: 10px; right: 10px; padding: 3px 8px; border-radius: 999px; background: #B3122E; color: #fff; font-weight: 900; font-size: 12px; transform: rotate(8deg); }
+.sp-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; font-size: 12px; font-weight: 700; }
+.sp-items span { padding: 6px; border-radius: 10px; background: rgba(0,0,0,.25); }
+.cosm-title { font-weight: 800; font-size: 13px; margin: 10px 0 6px; }
+.cosm-title small { font-weight: 500; color: var(--muted); }
+.cosm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.cosm { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 14px; background: var(--card); text-align: center; }
+.cosm > span { font-size: 30px; line-height: 1.1; }
+.cosm b { font-size: 11px; }
+.cosm.on { box-shadow: inset 0 0 0 2px var(--gold); }
+.avatar.frame-neon, .chat-ava.frame-neon, .top-ava.frame-neon { box-shadow: 0 0 0 3px #FF2BD6, 0 0 10px #FF2BD6, 0 0 22px #6A2BFF; animation: frameGlow 1.4s ease-in-out infinite; }
+.avatar.frame-rainbow, .chat-ava.frame-rainbow, .top-ava.frame-rainbow { animation: rainbowFrame 2.4s linear infinite; }
+@keyframes rainbowFrame { 0% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 12px #FF5A5A; } 20% { box-shadow: 0 0 0 3px #FF9A3A, 0 0 12px #FF9A3A; } 40% { box-shadow: 0 0 0 3px #F2C744, 0 0 12px #F2C744; } 60% { box-shadow: 0 0 0 3px #3CCB5A, 0 0 12px #3CCB5A; } 80% { box-shadow: 0 0 0 3px #2F7DD0, 0 0 12px #2F7DD0; } 100% { box-shadow: 0 0 0 3px #B06CFF, 0 0 12px #B06CFF; } }

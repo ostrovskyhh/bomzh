@@ -39,7 +39,7 @@ function duelIncoming(ch) {
   sfx('notify'); haptic('heavy');
   const fight = ch.kind === 'fight';
   openModal(`<div class="duel-call ${fight ? 'fight' : 'rps'}">
-      <div class="dc-glow"></div><div class="dc-icon">${fight ? '🥊' : '✊✌️✋'}</div>
+      <div class="dc-glow"></div><div class="dc-icon ${fight ? '' : 'rps'}">${fight ? '🥊' : '<span>✊</span><span>✌️</span><span>✋</span>'}</div>
       <div class="dc-from"><div class="top-ava">${esc((ch.from || '?')[0].toUpperCase())}</div><div><b>${esc(ch.from)}</b><small>ур. ${ch.level}</small></div></div>
       <h3>${fight ? 'Вызов на бой!' : 'Вызов в КНБ!'}</h3>
       ${ch.stake ? `<div class="dc-stake">Ставка <b>${fmt(ch.stake)} ₽</b> · победитель забирает ${fmt(Math.round(ch.stake * 2 * (1 - RPS_FEE)))} ₽</div>` : ''}
@@ -121,10 +121,13 @@ obWaitingModal = () => {
 };
 
 function duelRpsMenu(pid, name) {
-  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">✊✌️✋</div></div>
-    <h3>КНБ с ${esc(name)}</h3><p>До трёх побед. На какую ставку играем? Победитель забирает обе ставки (комиссия ${RPS_FEE * 100}%).</p>
-    <div class="btns" style="flex-wrap:wrap;gap:8px">${RPS_STAKES.map((s) => `<button class="btn ${S.money >= s ? 'primary' : ''}" data-act="duelRps" data-id="${s}:${pid}" ${S.money >= s ? '' : 'disabled'}>${s ? `${fmt(s)} ₽` : 'Просто так'}</button>`).join('')}</div>
-    <div class="btns"><button class="btn wide" data-act="close">Отмена</button></div>`, { center: true });
+  openModal(`<div class="rps-menu">
+      <div class="rm-hands"><span>✊</span><span>✌️</span><span>✋</span></div>
+      <h3>КНБ с ${esc(name)}</h3>
+      <p>До трёх побед. Выбери ставку — победитель забирает обе (комиссия ${RPS_FEE * 100}%).</p>
+      <div class="rm-stakes">${RPS_STAKES.map((s) => `<button class="rm-stake ${s ? '' : 'free'}" data-act="duelRps" data-id="${s}:${pid}" ${S.money >= s ? '' : `disabled data-why="Не хватает ${fmt(s - S.money)} ₽"`}>
+        <b>${s ? fmtShort(s) + ' ₽' : 'Без ставки'}</b><small>${s ? `выигрыш ${fmtShort(Math.round(s * 2 * (1 - RPS_FEE)))} ₽` : 'просто на интерес'}</small></button>`).join('')}</div>
+      <div class="btns"><button class="btn wide" data-act="close">Отмена</button></div></div>`, { center: true });
 }
 
 // ---------- Список игроков онлайн ----------

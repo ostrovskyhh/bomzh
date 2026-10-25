@@ -240,4 +240,4 @@ EXTRA_TABS.shop.pets = () => {
 
 // Точка на «Питомцах», когда можно заняться с питомцем
 const _sectionAlertsPet = sectionAlerts;
-sectionAlerts = () => { const a = _sectionAlertsPet(); if (a.shop) a.shop.pets = !!S.pet && PET_ACTS.some((x) => x.id !== 'pat' && !petCd(x.id) && !petActWhy(x)); return a; };
+sectionAlerts = () => { const a = _sectionAlertsPet(); if (a.shop) a.shop.pets = a.shop.pets || !!S.pet && PET_ACTS.some((x) => x.id !== 'pat' && !petCd(x.id) && !petActWhy(x)); return a; };

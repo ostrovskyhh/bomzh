@@ -78,7 +78,7 @@ function cheatRisk(base) { return clamp(base + Math.max(0, (50 - (S.trust === un
 
 let APPROACH = null;
 
-function caught(g, reason) {
+function caughtCheating(g, reason) {
   const partner = GIRLS.find((x) => x.id === S.girlfriend);
   if (S.married) { startDivorce(true, reason); return; }
   girlState(partner.id).rel = 30;
@@ -125,7 +125,7 @@ ACTIONS.romance = (choice) => {
     track('cheat');
     S.karma = Math.max(0, (S.karma || 0) - 1);
     if (Math.random() < cheatRisk(0.45)) {
-      caught(g, `Тебя видели с ${short}!`);
+      caughtCheating(g, `Тебя видели с ${short}!`);
       sfx('bad'); haptic('error');
       return;
     }
