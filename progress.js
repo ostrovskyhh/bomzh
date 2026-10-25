@@ -45,8 +45,9 @@ function buildDailyTasks() {
   const chosen = seedPick(pool, DAILY_COUNT, seed);
   const list = chosen.map((t) => {
     const goal = Math.max(1, Math.round(t.base * (1 + t.grow * (lv - 1))));
-    const caps = slotRand(seed, t.id.length) < 0.3;
-    return { id: t.id, name: t.text(goal), goal, reward: caps ? { caps: 1 + Math.floor(lv / 10) } : { money: Math.round(80 * (1 + lv * 0.35) * (1 + goal / (t.base * 4))) } };
+    // Крышки — редкая награда: примерно одно задание из десяти и только 1 штука
+    const caps = slotRand(seed, t.id.length) < 0.1;
+    return { id: t.id, name: t.text(goal), goal, reward: caps ? { caps: 1 } : { money: Math.round(80 * (1 + lv * 0.35) * (1 + goal / (t.base * 4))) } };
   });
   TASKS.splice(0, TASKS.length, ...list);
   S.tasks.list = list.map((t) => t.id).join(',');
@@ -73,9 +74,9 @@ HOOKS.track.push((key, n) => {
 const WEEKLY = [
   { key: 'fightWin', goal: 10, text: 'Выиграй 10 драк', reward: { money: 3000 } },
   { key: 'shift', goal: 15, text: 'Отработай 15 смен', reward: { money: 6000 } },
-  { key: 'gymGame', goal: 10, text: 'Сделай 10 тренировок-мини-игр', reward: { caps: 5 } },
+  { key: 'gymGame', goal: 10, text: 'Сделай 10 тренировок-мини-игр', reward: { caps: 2 } },
   { key: 'earned', goal: 200000, text: 'Заработай 200 000 ₽', reward: { money: 20000 } },
-  { key: 'boss', goal: 3, text: 'Победи 3 сложных бота или живых игроков', reward: { caps: 25, hat: 'weekcap' } },
+  { key: 'boss', goal: 3, text: 'Победи 3 сложных бота или живых игроков', reward: { caps: 6, hat: 'weekcap' } },
 ];
 function weeklyValue(k) { return k === 'earned' ? S.stats.earned : k === 'boss' ? counter('hardWin') + counter('onlineWin') : counter(k); }
 function weeklyState() {

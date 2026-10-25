@@ -106,8 +106,8 @@ function dropCollectible() {
   const done = collDone(set);
   setTimeout(() => {
     if (done) {
-      addCaps(10); confetti(100); sfx('ach');
-      resultModal({ emoji: set.emoji, title: `Коллекция собрана: ${set.name}!`, text: `+10 крышек и бонус навсегда: <b>${set.bonus}</b>`, btn: 'Ура!' });
+      addCaps(3); confetti(100); sfx('ach');
+      resultModal({ emoji: set.emoji, title: `Коллекция собрана: ${set.name}!`, text: `+3 крышки и бонус навсегда: <b>${set.bonus}</b>`, btn: 'Ура!' });
       track('collectionDone');
     } else {
       const have = set.items.filter(([x]) => collHas(x)).length;
@@ -122,7 +122,7 @@ onTrashExtra = (function (orig) { return () => { orig(); if (Math.random() < COL
 EXTRA_TABS.tasks.coll = () => {
   const total = COLLECTIONS.reduce((a, s) => a + s.items.length, 0);
   const have = COLLECTIONS.reduce((a, s) => a + s.items.filter(([x]) => collHas(x)).length, 0);
-  return `<div class="info-card">🧩 Редкости попадаются в мусорках (шанс ${Math.round(COLL_DROP * 100)}%) и на криминальных делах. Собрал набор — бонус навсегда и 10 крышек. Дубликаты Шнырь покупает сразу.<br>Собрано <b>${have} из ${total}</b></div>` +
+  return `<div class="info-card">🧩 Редкости попадаются в мусорках (шанс ${Math.round(COLL_DROP * 100)}%) и на криминальных делах. Собрал набор — бонус навсегда и 3 крышки. Дубликаты Шнырь покупает сразу.<br>Собрано <b>${have} из ${total}</b></div>` +
     COLLECTIONS.map((set) => {
       const n = set.items.filter(([x]) => collHas(x)).length, done = n === set.items.length;
       return `<div class="card card-col coll ${done ? 'current' : ''}"><div class="coll-head"><span>${set.emoji}</span><b>${set.name}</b><i>${n}/${set.items.length}</i></div>

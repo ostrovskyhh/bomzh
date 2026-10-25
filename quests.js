@@ -78,6 +78,9 @@ const QUESTS = [
 // Порядок глав до обновления — чтобы старые сохранения продолжили с той же главы
 const QUESTS_V1 = ['start', 'basics', 'trash', 'box', 'gym', 'school', 'job', 'fight', 'choice', 'h_rank', 'd_deals', 'edik1', 'h_college', 'd_league', 'barsik', 'biz', 'h_career', 'd_ring', 'edik2', 'final'];
 
+// Крышки — донатная валюта: за главы сюжета их стало примерно втрое меньше
+QUESTS.forEach((q) => { if (q.reward && q.reward.caps) q.reward.caps = Math.max(1, Math.round(q.reward.caps * 0.35)); });
+
 function questList() { return QUESTS.filter((q) => !q.path || q.path === S.quest.path); }
 function currentQuest() { return questList()[S.quest.idx] || null; }
 function goalsDone(q) { return q.goals.every((g) => g.cur() >= g.need); }

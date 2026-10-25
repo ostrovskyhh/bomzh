@@ -217,7 +217,7 @@ const LOOT = [
   { name: 'Лотерейный билет', art: 'ticket', rarity: 'rare', w: 5, give: () => {
       if (Math.random() < 0.3) { const m = Math.round(700 * scale()); addMoney(m); addMood(15); return `Выигрыш! +${fmt(m)} ₽`; }
       addMood(-3); return 'Пусто… «Попробуйте ещё раз»'; } },
-  { name: 'Золотая крышка', art: 'goldcap', rarity: 'epic', w: 2, give: () => (addCaps(3), '+3 золотые крышки') },
+  { name: 'Золотая крышка', art: 'goldcap', rarity: 'epic', w: 0.7, give: () => (addCaps(1), '+1 золотая крышка') },
   { name: 'Крыса!', emoji: '🐀', rarity: 'bad', w: 9, give: () => {
       hurt(8);
       if (Math.random() < 0.4) { addEffect('ratbite'); return 'Цапнула за ногу! −8 здоровья. Нога как-то странно опухает…'; }
@@ -261,7 +261,7 @@ const SLOT_SYMS = [['🍾', 32, 2], ['🥖', 26, 3], ['🐀', 20, 5], ['🍒', 1
 const SLOT_PAIR = 1.4;
 const BETS = [10, 50, 200, 1000, 5000, 25000];
 
-const DAILY = [{ money: 30 }, { money: 60 }, { caps: 2 }, { money: 150 }, { money: 300 }, { caps: 5 }, { caps: 10 }];
+const DAILY = [{ money: 30 }, { money: 60 }, { money: 100 }, { money: 150 }, { caps: 1 }, { money: 400 }, { caps: 3 }];
 
 const TASKS = [
   { id: 'taps', name: 'Натапай 300 раз', goal: 300, reward: { money: 60 } },
@@ -514,11 +514,14 @@ function addXp(v) {
   if (after > before) {
     for (let l = before + 1; l <= after; l++) {
       addMoney(40 * l * l);
-      addCaps(l % 5 === 0 ? 3 : 1);
+      addCaps(levelCaps(l));
     }
     pendingLevelUp = { from: before, to: after };
   }
 }
+
+// Крышки — донатная валюта: за уровни дают только на каждом пятом
+function levelCaps(l) { return l % 5 === 0 ? 2 : 0; }
 
 function unlocksAt(l) {
   const out = [];
@@ -538,11 +541,11 @@ function showLevelUp() {
   pendingLevelUp = null;
   let money = 0, caps = 0;
   const unlocks = [];
-  for (let l = from + 1; l <= to; l++) { money += 40 * l * l; caps += l % 5 === 0 ? 3 : 1; unlocks.push(...unlocksAt(l)); }
+  for (let l = from + 1; l <= to; l++) { money += 40 * l * l; caps += levelCaps(l); unlocks.push(...unlocksAt(l)); }
   openModal(`
     <div class="big-art"><div class="rays"></div><div class="levelup-num">${to}</div></div>
     <h3>Новый уровень!</h3>
-    <p>Награда: <b style="color:var(--gold)">+${fmt(money)} ₽</b> и <b style="color:var(--gold)">+${caps} кр.</b>
+    <p>Награда: <b style="color:var(--gold)">+${fmt(money)} ₽</b>${caps ? ` и <b style="color:var(--gold)">+${caps} кр.</b>` : ''}
     ${unlocks.length ? `<br><br>Открылось:<br>${unlocks.join('<br>')}` : ''}</p>
     <div class="btns"><button class="btn primary wide" data-act="close">Круто!</button></div>
   `, { center: true });
@@ -698,13 +701,45 @@ function reqHTML(req) {
 
 function cloudOk() { return tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('6.9'); }
 
-function save() {
+// Облако Telegram хранит не больше 4096 символов в одной записи, а сохранение давно больше.
+// Поэтому режем его на куски и пишем по очереди в два слота (a/b): сначала куски, потом «оглавление».
+// Так с телефона и с компьютера открывается один и тот же прогресс, и недописанная копия никогда не читается.
+const CLOUD_CHUNK = 3900;
+const CLOUD_EVERY = 8000; // писать в облако не чаще раза в 8 секунд
+let cloudTimer = null, cloudLastAt = 0, cloudBusy = false, cloudSlot = 'a';
+
+function cloudWrite() {
+  if (!cloudOk() || cloudBusy) return;
+  cloudBusy = true;
+  cloudLastAt = Date.now();
+  const json = JSON.stringify(S);
+  const slot = cloudSlot === 'a' ? 'b' : 'a';
+  const parts = Math.ceil(json.length / CLOUD_CHUNK);
+  let left = parts, failed = false;
+  const done = () => {
+    if (failed) { cloudBusy = false; return; }
+    tg.CloudStorage.setItem(`${SAVE_KEY}_meta`, JSON.stringify({ slot, n: parts, at: S.savedAt }), () => { cloudSlot = slot; cloudBusy = false; });
+  };
+  try {
+    for (let i = 0; i < parts; i++) {
+      tg.CloudStorage.setItem(`${SAVE_KEY}_${slot}${i}`, json.slice(i * CLOUD_CHUNK, (i + 1) * CLOUD_CHUNK), (err) => {
+        if (err) failed = true;
+        if (--left === 0) done();
+      });
+    }
+  } catch (e) { cloudBusy = false; }
+}
+
+function save(now) {
   S.lastSeen = Date.now();
   S.savedAt = Date.now();
-  const json = JSON.stringify(S);
-  try { localStorage.setItem(SAVE_KEY, json); } catch (e) { /* приватный режим */ }
-  if (cloudOk()) { try { tg.CloudStorage.setItem(SAVE_KEY, json, () => {}); } catch (e) { /* нет облака */ } }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* приватный режим */ }
+  if (!cloudOk()) return;
+  clearTimeout(cloudTimer);
+  const wait = now ? 0 : Math.max(0, CLOUD_EVERY - (Date.now() - cloudLastAt));
+  cloudTimer = setTimeout(cloudWrite, wait);
 }
+document.addEventListener('visibilitychange', () => { if (document.hidden && typeof S !== 'undefined' && S.storySeen) save(true); });
 
 function parseSave(json) {
   if (!json) return null;
@@ -715,22 +750,45 @@ function parseSave(json) {
   } catch (e) { return null; }
 }
 
+// Сохранение, которое проиграло при загрузке, — если в нём прогресса больше, игра спросит, какое оставить
+let ALT_SAVE = null;
+
+// Читаем облако: сначала «оглавление» и куски, если их нет — старое сохранение одной записью
+function cloudRead(cb) {
+  tg.CloudStorage.getItem(`${SAVE_KEY}_meta`, (err, metaRaw) => {
+    let meta = null;
+    try { meta = !err && metaRaw ? JSON.parse(metaRaw) : null; } catch (e) { meta = null; }
+    if (!meta || !meta.n) {
+      tg.CloudStorage.getItem(SAVE_KEY, (e2, value) => cb(e2 ? null : parseSave(value)));
+      return;
+    }
+    cloudSlot = meta.slot;
+    const keys = Array.from({ length: meta.n }, (_, i) => `${SAVE_KEY}_${meta.slot}${i}`);
+    tg.CloudStorage.getItems(keys, (e3, values) => {
+      if (e3 || !values) { cb(null); return; }
+      cb(parseSave(keys.map((k) => values[k] || '').join('')));
+    });
+  });
+}
+
 function load(done) {
   let local = null;
   try { local = parseSave(localStorage.getItem(SAVE_KEY)); } catch (e) { /* нет доступа */ }
   const finish = (cloud) => {
-    const best = [local, cloud].filter(Boolean).sort((a, b) => b.savedAt - a.savedAt)[0];
-    if (best) S = best;
+    const both = [local, cloud].filter(Boolean).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+    if (both[0]) S = both[0];
+    // Конфликт: новее оказалось сохранение с меньшим прогрессом (играл на двух устройствах раздельно)
+    if (both.length === 2 && (both[1].xp || 0) > (both[0].xp || 0) * 1.02 + 50) ALT_SAVE = both[1];
     done();
   };
   if (!cloudOk()) { finish(null); return; }
   let finished = false;
-  const timer = setTimeout(() => { if (!finished) { finished = true; finish(null); } }, 1500);
+  const timer = setTimeout(() => { if (!finished) { finished = true; finish(null); } }, 3000);
   try {
-    tg.CloudStorage.getItem(SAVE_KEY, (err, value) => {
+    cloudRead((cloud) => {
       if (finished) return;
       finished = true; clearTimeout(timer);
-      finish(err ? null : parseSave(value));
+      finish(cloud);
     });
   } catch (e) { finished = true; clearTimeout(timer); finish(null); }
 }
@@ -1701,7 +1759,12 @@ const ACTIONS = {
   // --- профиль ---
   story: () => showStory(0),
   reset: () => {
-    const doReset = () => { S = freshState(); save(); location.reload(); };
+    const doReset = () => {
+      S = freshState(); save();
+      // Стираем и облачную копию, иначе после перезапуска она «вернётся»
+      if (cloudOk()) tg.CloudStorage.removeItems([`${SAVE_KEY}_meta`, SAVE_KEY], () => location.reload());
+      else location.reload();
+    };
     if (tg && tg.initData && tg.showConfirm) tg.showConfirm('Точно начать заново? Весь прогресс пропадёт.', (ok) => ok && doReset());
     else if (confirm('Точно начать заново?')) doReset();
   },

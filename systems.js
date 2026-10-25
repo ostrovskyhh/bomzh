@@ -739,7 +739,7 @@ Object.assign(ACTIONS, {
 // Достижения — многоуровневые и долгие
 // =====================================================================
 
-const ACH_REWARDS = [2, 5, 10, 25, 50];
+const ACH_REWARDS = [1, 2, 4, 8, 15];
 const ACH_TIERS = ['I', 'II', 'III', 'IV', 'V'];
 const ACHS = [
   { id: 'taps', name: 'Тапер', emoji: '👆', key: 'taps', goals: [1000, 10000, 50000, 200000, 1000000], unit: 'тапов' },
@@ -784,7 +784,7 @@ HOOKS.tick.push(() => {
 
 EXTRA_TABS.tasks.ach = () => {
   const done = ACHS.reduce((s, a) => s + achTier(a), 0), total = ACHS.reduce((s, a) => s + a.goals.length, 0);
-  return `<div class="info-card">Открыто <b>${done} из ${total}</b> уровней достижений. Награда растёт с уровнем: 2 → 5 → 10 → 25 → 50 крышек.</div>` +
+  return `<div class="info-card">Открыто <b>${done} из ${total}</b> уровней достижений. Награда растёт с уровнем: ${ACH_REWARDS.join(' → ')} крышек.</div>` +
     ACHS.map((a) => {
       const t = achTier(a), v = achValue(a), max = t >= a.goals.length;
       const goal = a.goals[Math.min(t, a.goals.length - 1)];
@@ -854,7 +854,7 @@ HOOKS.track.push((k) => { if (k === 'events') seasonDrop(1); if (k === 'fightWin
 function seasonShop(s) {
   return [
     { id: 'hat', name: s.hatName, emoji: '🎩', cost: 60, desc: 'Эксклюзив ивента — навсегда твоя', cond: () => !S.owned.hat.includes(s.hat), run: () => { S.owned.hat.push(s.hat); S.eq.hat = s.hat; renderScene(); } },
-    { id: 'caps', name: 'Праздничные крышки', emoji: '🟡', cost: 40, desc: '+5 золотых крышек', run: () => addCaps(5) },
+    { id: 'caps', name: 'Праздничные крышки', emoji: '🟡', cost: 60, desc: '+2 золотые крышки', run: () => addCaps(2) },
     { id: 'mood', name: 'Праздничное настроение', emoji: '🥳', cost: 15, desc: 'Радость на максимум и +25% к доходу на 15 минут', run: () => { S.mood = maxMood(); addEffect('barin', 15); } },
     { id: 'money', name: 'Конверт с деньгами', emoji: '🧧', cost: 10, desc: `+${fmt(150 * scale())} ₽`, run: () => addMoney(Math.round(150 * scale())) },
   ];

@@ -601,6 +601,14 @@ main { flex: 1; min-height: 0; position: relative; }
 .vd-card { margin: 10px auto 12px; max-width: 280px; padding: 16px 14px; border-radius: 12px; background: #F4EEDC; color: #2A241F; text-align: center; font-size: 15px; line-height: 1.5; box-shadow: 0 6px 18px rgba(0,0,0,.3); animation: vdIn .25s ease-out; }
 @keyframes vdIn { from { transform: translateY(-14px) rotate(-3deg); opacity: 0; } }
 .vd-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Акции на крышки */
+.promo-hero { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(135deg, #B3122E, #F08A2B); box-shadow: 0 0 0 2px #F2C744; animation: promoGlow 1.6s ease-in-out infinite; }
+.promo-hero .e { font-size: 38px; }
+.promo-hero b { font-size: 16px; }
+.promo-hero p { margin: 3px 0 0; font-size: 12.5px; opacity: .95; }
+@keyframes promoGlow { 50% { box-shadow: 0 0 0 2px #FFE27A, 0 0 18px rgba(242,199,68,.7); } }
+.promo-tag { display: inline-block; margin-left: 4px; padding: 1px 6px; border-radius: 8px; background: #B3122E; color: #fff; font-size: 11px; font-weight: 800; }
+[data-act="prem"] s { opacity: .6; font-weight: 500; margin-right: 3px; }
 /* Чат района */
 .chat-btn { position: absolute; left: 10px; bottom: 12px; z-index: 6; width: 46px; height: 46px; border-radius: 50%; border: 0; font-size: 22px; background: rgba(20,16,12,.75); box-shadow: 0 3px 10px rgba(0,0,0,.35); }
 .chat-btn .dot { top: 2px; right: 2px; }
@@ -1050,6 +1058,12 @@ button:disabled { pointer-events: none; }
 .roul-bets button { background: var(--card2); border-radius: 10px; padding: 7px 2px; font-size: 11px; font-weight: 700; }
 .roul-bets button small { display: block; color: var(--gold); font-size: 10px; }
 .roul-bets button.on { background: var(--gold); color: #3A2608; } .roul-bets button.on small { color: #3A2608; }
+.roul-bets button, .roul-nums button { position: relative; border: 0; color: var(--text); }
+.roul-nums { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; margin-bottom: 8px; }
+.roul-nums button { padding: 6px 0; border-radius: 6px; font-size: 11.5px; font-weight: 800; }
+.roul-nums button.red { background: #8E1B2E; } .roul-nums button.black { background: #1E1E26; }
+.chip-on { position: absolute; top: -6px; right: -4px; min-width: 18px; padding: 1px 4px; border-radius: 9px; background: var(--gold); color: #3A2608; font-style: normal; font-size: 9.5px; font-weight: 800; box-shadow: 0 1px 4px rgba(0,0,0,.5); z-index: 1; }
+.roul-sum { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 6px; }
 .dice-table { background: radial-gradient(ellipse at 50% 40%, #2A6A45, #0C3A24); border-radius: 18px; padding: 24px 10px 14px; margin-bottom: 12px; box-shadow: inset 0 0 0 3px #C9A23A; }
 .dice-pair { display: flex; justify-content: center; gap: 18px; }
 .dice-pair.tumble .die { transform: rotate(14deg); }

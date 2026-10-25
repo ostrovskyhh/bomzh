@@ -47,7 +47,12 @@ const ROUL_BETS = [
   { id: 'd3', name: '25–36', x: 3, win: (n) => n >= 25 },
   { id: 'zero', name: '🟢 Зеро', x: 36, win: (n) => n === 0 },
 ];
+// Отдельные числа 0–36: прямая ставка ×36
+for (let n = 0; n <= 36; n++) if (n) ROUL_BETS.push({ id: 'n' + n, name: String(n), x: 36, num: true, win: (k) => k === n });
 let roulAngle = 0, roulBet = 'red', roulSpinning = false;
+// Несколько ставок за спин: { id ставки: сумма фишек }
+let ROUL_STAKES = {};
+function roulTotal() { return Object.values(ROUL_STAKES).reduce((a, b) => a + b, 0); }
 
 function wheelSVG() {
   const a = 360 / WHEEL.length, R = 120, c = 130;
@@ -64,20 +69,39 @@ function wheelSVG() {
     <circle cx="130" cy="130" r="14" fill="#F6CF55"/></g></svg>`;
 }
 
+function chipLabel(v) { return v >= 1000000 ? `${v / 1000000}M` : v >= 1000 ? `${Math.round(v / 100) / 10}K` : String(v); }
+
+function roulBoardHTML() {
+  const cell = (b) => {
+    const st = ROUL_STAKES[b.id];
+    const color = b.num ? (REDS.includes(+b.name) ? 'red' : 'black') : b.id === 'zero' ? 'zero' : '';
+    return `<button class="${b.num ? 'rn ' + color : ''} ${b.id === 'zero' ? 'rz' : ''}" data-act="roulBet" data-id="${b.id}" data-silent="1">${b.name}${b.num ? '' : `<small>x${b.x}</small>`}${st ? `<i class="chip-on">${chipLabel(st)}</i>` : ''}</button>`;
+  };
+  return `<div class="roul-bets" id="roulBets">${ROUL_BETS.filter((b) => !b.num).map(cell).join('')}</div>
+    <div class="roul-nums">${ROUL_BETS.filter((b) => b.num).map(cell).join('')}</div>
+    <div class="roul-sum">Ставок: <b>${Object.keys(ROUL_STAKES).length}</b> · всего <b>${fmt(roulTotal())} ₽</b>
+      <button class="btn small" data-act="roulClear" data-silent="1" ${roulTotal() ? '' : 'disabled data-why="Ставок пока нет"'}>Сбросить</button></div>`;
+}
+function roulRefresh() { const el = $('roulBoard'); if (el) el.innerHTML = roulBoardHTML(); }
+
 function openRoulette() {
+  ROUL_STAKES = {};
   openModal(`<h3>🎡 Рулетка</h3>
     <div class="roul-wrap"><div class="roul-pointer">▼</div>${wheelSVG()}<div class="roul-result" id="roulRes"></div></div>
-    <div class="roul-bets" id="roulBets">${ROUL_BETS.map((b) => `<button class="${b.id === roulBet ? 'on' : ''}" data-act="roulBet" data-id="${b.id}" data-silent="1">${b.name}<small>x${b.x}</small></button>`).join('')}</div>
+    <p class="mg-hint">Выбери фишку и тапай по полям — можно ставить на несколько сразу. Число — ×36.</p>
     ${betPicker()}
+    <div id="roulBoard">${roulBoardHTML()}</div>
     <div class="btns"><button class="btn primary wide" data-act="roulSpin" id="roulBtn">Крутить</button></div>`, { center: true });
   $('wheelRot').style.transform = `rotate(${roulAngle}deg)`;
 }
 
 function roulSpin() {
   if (roulSpinning) return;
-  const bet = S.bet;
-  if (S.money < bet) { toast('Не хватает денег на ставку', 'bad'); return; }
-  S.money -= bet;
+  const total = roulTotal();
+  if (!total) { toast('Сначала поставь фишки на поля', 'bad'); return; }
+  if (S.money < total) { toast(`Не хватает ${fmt(total - S.money)} ₽ на все ставки`, 'bad'); return; }
+  S.money -= total;
+  const stakes = { ...ROUL_STAKES };
   roulSpinning = true;
   $('roulBtn').disabled = true;
   $('roulRes').className = 'roul-result';
@@ -96,15 +120,24 @@ function roulSpin() {
   setTimeout(() => {
     roulSpinning = false;
     if (!$('roulRes')) return;
-    const b = ROUL_BETS.find((x) => x.id === roulBet);
-    const won = b.win(n);
+    // Каждая ставка считается отдельно
+    let win = 0, best = 0;
+    for (const [id, v] of Object.entries(stakes)) {
+      const b = ROUL_BETS.find((x) => x.id === id);
+      if (b && b.win(n)) { win += v * b.x; best = Math.max(best, b.x); }
+    }
     const color = n === 0 ? 'zero' : REDS.includes(n) ? 'red' : 'black';
     $('roulRes').className = `roul-result show ${color}`;
     $('roulRes').textContent = n;
-    if (won) { addMoney(bet * b.x); addMood(Math.min(20, 4 + b.x)); sfx(b.x >= 36 ? 'jackpot' : 'win'); if (b.x >= 3) confetti(50); toast(`🎡 ${n}! Выигрыш ${fmt(bet * b.x)} ₽`, 'good'); }
-    else { addMood(-3); sfx('lose'); toast(`🎡 Выпало ${n}. Ставка сгорела`, 'bad'); }
+    const net = win - total;
+    if (win) { addMoney(win); track('roulWin'); }
+    if (net > 0) { addMood(Math.min(20, 4 + best)); sfx(best >= 36 ? 'jackpot' : 'win'); if (best >= 3 || net > total) confetti(50); toast(`🎡 ${n}! Выигрыш ${fmt(win)} ₽ (чистыми +${fmt(net)})`, 'good'); }
+    else if (win) { sfx('coin'); toast(`🎡 ${n}. Вернул ${fmt(win)} из ${fmt(total)} ₽`, 'bad'); }
+    else { addMood(-3); sfx('lose'); toast(`🎡 Выпало ${n}. Все ставки сгорели`, 'bad'); }
     $('roulBtn').disabled = false;
+    // Ставки остаются на столе — можно сразу крутить ещё раз тем же набором
     document.querySelector('.bets').outerHTML = betPicker();
+    roulRefresh();
     updateHud(); save();
   }, 5100);
 }
@@ -249,7 +282,15 @@ function crashBoom() {
 
 Object.assign(ACTIONS, {
   roulette: () => openRoulette(),
-  roulBet: (id) => { roulBet = id; document.querySelectorAll('#roulBets button').forEach((b) => b.classList.toggle('on', b.dataset.id === id)); sfx('chip'); },
+  roulBet: (id) => {
+    if (roulSpinning) return;
+    const chip = S.bet;
+    if (S.money < roulTotal() + chip) { toast(`Не хватает денег: на столе уже ${fmt(roulTotal())} ₽`, 'bad'); sfx('error'); return; }
+    ROUL_STAKES[id] = (ROUL_STAKES[id] || 0) + chip;
+    roulRefresh();
+    sfx('chip');
+  },
+  roulClear: () => { if (roulSpinning) return; ROUL_STAKES = {}; roulRefresh(); sfx('whoosh'); },
   roulSpin: () => roulSpin(),
   dice: () => openDice(),
   diceBet: (id) => { diceBet = id; document.querySelectorAll('.roul-bets.four button').forEach((b) => b.classList.toggle('on', b.dataset.id === id)); sfx('chip'); },

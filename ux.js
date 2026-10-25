@@ -1,6 +1,28 @@
 // Удобства: пересчёт опыта под новую кривую, окно «энергия кончилась», красные точки на разделах,
 // готовые награды наверху списков, подсказка «почему нельзя» при нажатии на недоступную кнопку.
 
+// ---------- Разные сохранения на телефоне и компьютере: спрашиваем, какое оставить ----------
+function saveSummary(s) {
+  return `ур. ${levelInfo(s.xp || 0).level} · ${fmt(s.money || 0)} ₽ · ${HOUSING[s.housing || 0].name}${s.savedAt ? ` · ${new Date(s.savedAt).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''}`;
+}
+HOOKS.init.push(() => setTimeout(() => {
+  if (!ALT_SAVE) return;
+  const alt = ALT_SAVE;
+  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">☁️</div></div>
+    <h3>Найдено два сохранения</h3>
+    <p>Похоже, ты играл на разных устройствах. Выбери, какой прогресс оставить — второй будет удалён.</p>
+    <div class="btns" style="flex-direction:column;gap:8px">
+      <button class="btn primary wide" data-act="pickSave" data-id="alt">📈 ${saveSummary(alt)}</button>
+      <button class="btn wide" data-act="pickSave" data-id="cur">📱 ${saveSummary(S)}</button></div>`, { center: true, locked: true });
+}, 1200));
+ACTIONS.pickSave = (id) => {
+  if (id === 'alt' && ALT_SAVE) { S = ALT_SAVE; renderedLook = ''; }
+  ALT_SAVE = null;
+  closeModal();
+  save(true);
+  if (id === 'alt') setTimeout(() => location.reload(), 600); else toast('Оставлен текущий прогресс', 'good');
+};
+
 // ---------- Новая кривая опыта: старым игрокам сохраняем уровень и прогресс внутри него ----------
 HOOKS.load.unshift(() => {
   if (S.xpV2) return;

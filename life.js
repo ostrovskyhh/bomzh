@@ -739,7 +739,7 @@ LOOT.push(
       return `Вернул владельцу. Тот прослезился и дал ${fmt(m)} ₽ вознаграждения. +10 😊`; } },
   { name: 'Шуба «почти норка»', emoji: '🧥', rarity: 'rare', w: 2, give: () => { const m = Math.round(400 * scale()); addMoney(m); return `Моль поела, но Шнырь взял: +${fmt(m)} ₽`; } },
   { name: '5000 в старых джинсах', emoji: '💵', rarity: 'epic', w: 1, give: () => { const m = 5000; addMoney(m); addMood(25); return `Пятитысячная купюра в кармане! +${fmt(m)} ₽, +25 😊`; } },
-  { name: 'Конверт с крышками', emoji: '✉️', rarity: 'epic', w: 1, give: () => (addCaps(5), '+5 золотых крышек') },
+  { name: 'Конверт с крышками', emoji: '✉️', rarity: 'epic', w: 0.5, give: () => (addCaps(2), '+2 золотые крышки') },
   // Приколы и неудачи
   { name: 'Сосед Гена спит в баке', emoji: '😪', rarity: 'bad', w: 5, give: () => {
       addMood(-5);

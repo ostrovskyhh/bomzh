@@ -83,7 +83,7 @@ function eloDelta(op, won) { const exp = 1 / (1 + Math.pow(10, (op.rating - figh
 // =====================================================================
 
 const LOOT_CHANCE = 0.35;
-const DAY_WIN_CAPS = 3;
+const DAY_WIN_CAPS = 1;
 const PVP_HATS = [
   { id: 'bandana', name: 'Бандана бойца' },
   { id: 'boxhelm', name: 'Боксёрский шлем' },
@@ -91,18 +91,18 @@ const PVP_HATS = [
 ];
 PVP_HATS.forEach((h) => CLOTHES.hat.push({ id: h.id, name: h.name, price: 0, tier: 0, season: true, pvp: true }));
 // Разовая награда за первый выход в лигу (индекс как в LEAGUES)
-const LEAGUE_PRIZES = [null, { caps: 10, money: 3000, hat: 'bandana' }, { caps: 25, money: 15000, hat: 'boxhelm' }, { caps: 50, money: 60000, hat: 'crown' }];
+const LEAGUE_PRIZES = [null, { caps: 3, money: 3000, hat: 'bandana' }, { caps: 8, money: 15000, hat: 'boxhelm' }, { caps: 15, money: 60000, hat: 'crown' }];
 // Сундуки за серию: money — во сколько наград за бой, items — сколько вещей, tries — насколько редкие
 const CHESTS = {
-  3: { name: 'Пакет с района', emoji: '🛍️', caps: 2, money: 2, items: 1, tries: 1 },
-  5: { name: 'Спортивная сумка', emoji: '🎒', caps: 5, money: 4, items: 2, tries: 2, spirit: 15 },
-  10: { name: 'Кейс чемпиона', emoji: '💼', caps: 15, money: 8, items: 3, tries: 4, spirit: 30 },
+  3: { name: 'Пакет с района', emoji: '🛍️', caps: 0, money: 2, items: 1, tries: 1 },
+  5: { name: 'Спортивная сумка', emoji: '🎒', caps: 1, money: 4, items: 2, tries: 2, spirit: 15 },
+  10: { name: 'Кейс чемпиона', emoji: '💼', caps: 4, money: 8, items: 3, tries: 4, spirit: 30 },
 };
 function chestFor(streak) { return streak >= 10 && streak % 10 === 0 ? CHESTS[10] : CHESTS[streak]; }
 function nextChest(streak) { for (let n = streak + 1; ; n++) if (chestFor(n)) return [n, chestFor(n)]; }
 // Недельный сезон: в понедельник награда по лучшей лиге недели и мягкий сброс рейтинга
 const WEEK_MIN_FIGHTS = 5;
-const WEEK_PRIZES = [{ caps: 5, money: 1000 }, { caps: 15, money: 5000 }, { caps: 40, money: 20000 }, { caps: 100, money: 80000 }];
+const WEEK_PRIZES = [{ caps: 1, money: 1000 }, { caps: 4, money: 5000 }, { caps: 12, money: 20000 }, { caps: 30, money: 80000 }];
 
 function leagueIdx(r) { return LEAGUES.indexOf(league(r)); }
 function weekId(t = Date.now()) { return Math.floor(((t - new Date(t).getTimezoneOffset() * 60000) / 86400000 + 3) / 7); }
@@ -137,7 +137,7 @@ function winPrizes(op, reward) {
     addCaps(ch.caps);
     const items = Array.from({ length: ch.items }, () => itemLine(lootItem(ch.tries)));
     if (ch.spirit) addEffect('fightspirit', ch.spirit);
-    lines.push(`${ch.emoji} <b>${ch.name}</b> за серию из ${st.streak} побед: +${fmt(m)} ₽, +${ch.caps} кр., ${items.join(', ')}${ch.spirit ? `, 🔥 Боевой дух на ${ch.spirit} мин` : ''}`);
+    lines.push(`${ch.emoji} <b>${ch.name}</b> за серию из ${st.streak} побед: +${fmt(m)} ₽, ${ch.caps ? `+${ch.caps} кр., ` : ''}${items.join(', ')}${ch.spirit ? `, 🔥 Боевой дух на ${ch.spirit} мин` : ''}`);
   }
   return lines;
 }
@@ -193,7 +193,7 @@ function prizesCard() {
   return `<div class="subhead">Призы</div>
     <div class="prizes">
       <div class="prize-row ${dayDone ? 'got' : ''}"><span>🌅</span><div><b>Первая победа дня</b><small>Награда ×2 и +${DAY_WIN_CAPS} кр.</small></div><i>${dayDone ? '✓' : ''}</i></div>
-      <div class="prize-row"><span>${ch.emoji}</span><div><b>${ch.name}</b> · серия ${st.streak}/${n}<small>+${ch.caps} кр., ${ch.items} ${ch.items > 1 ? 'вещи' : 'вещь'} с рынка${ch.spirit ? ', 🔥 Боевой дух' : ''}</small></div><i></i></div>
+      <div class="prize-row"><span>${ch.emoji}</span><div><b>${ch.name}</b> · серия ${st.streak}/${n}<small>${ch.caps ? `+${ch.caps} кр., ` : ''}${ch.items} ${ch.items > 1 ? 'вещи' : 'вещь'} с рынка${ch.spirit ? ', 🔥 Боевой дух' : ''}</small></div><i></i></div>
       <div class="prize-row"><span>🧥</span><div><b>Карманы соперника</b><small>${Math.round(LOOT_CHANCE * 100)}% за победу найти хлам для Шныря, в высоких лигах дороже</small></div><i></i></div>
       <div class="prize-row"><span>📅</span><div><b>Сезон недели</b> · ещё ${timeLeftText(weekEnds() - Date.now())}
         <small>${st.weekFights >= WEEK_MIN_FIGHTS ? `Сейчас: ${LEAGUES[st.weekBest].emoji} +${fmt(wp.money)} ₽ и +${wp.caps} кр.` : `Проведи ${WEEK_MIN_FIGHTS} драк за неделю (${st.weekFights}/${WEEK_MIN_FIGHTS})`}. Потом рейтинг сбросится наполовину</small></div><i></i></div>
