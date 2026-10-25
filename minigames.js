@@ -102,7 +102,9 @@ function mgEnd() {
   mg.timers.forEach((t) => { clearInterval(t); clearTimeout(t); });
   if (mg.raf) cancelAnimationFrame(mg.raf);
   MG = null;
-  mg.finish(mg.score, mg);
+  // Если в подсчёте итогов ошибка — не оставляем игрока перед замершим полем
+  try { mg.finish(mg.score, mg); }
+  catch (e) { console.error(e); closeModal(); toast('Что-то пошло не так с мини-игрой — попробуй ещё раз', 'bad'); }
 }
 
 function shakeArena() {
