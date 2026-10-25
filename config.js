@@ -2,7 +2,7 @@
 
 // Адрес сервера рефералок — твой постоянный адрес из ngrok, без слэша в конце.
 // Пример: 'https://bomzh-game.ngrok-free.app'. Пустая строка — рефералка выключена.
-const REF_API = '';
+const REF_API = 'https://wagon-flounder-thinner.ngrok-free.dev';
 
 // Ссылка на твоего бота — её получат друзья в приглашении. Пример: 'https://t.me/bomzh_simulator_bot'
-const BOT_LINK = '';
+const BOT_LINK = 'https://t.me/bomzhik_simulator_bot';
