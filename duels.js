@@ -1,12 +1,15 @@
 // Живые игроки: кто сейчас в игре, вызов конкретного игрока на бой или в «камень-ножницы-бумагу»
 // (бот присылает ему уведомление), и сама онлайн-КНБ до трёх побед со ставками. Сервер — bot/duels.py.
 
-const DUEL_PING_EVERY = 30000;
+const DUEL_PING_EVERY = 10000; // так вызов доходит до игрока, который уже в игре, за считанные секунды
 const RPS_E = { rock: '✊', scissors: '✌️', paper: '✋' };
 const RPS_N = { rock: 'Камень', scissors: 'Ножницы', paper: 'Бумага' };
 const RPS_STAKES = [0, 100, 1000, 10000, 100000];
 const RPS_FEE = 0.05; // комиссия с выигрыша
-let DUEL = { pid: '', online: 0, pingAt: 0, inbox: [], seen: {}, list: null, listAt: 0, listLoading: false };
+let DUEL = { pid: '', online: 0, pingAt: 0, inbox: [], seen: {}, list: null, listAt: 0, listLoading: false, out: null, deepLink: '' };
+
+// Игра открыта кнопкой «Принять вызов» из сообщения бота: ?duel=ID
+try { DUEL.deepLink = new URLSearchParams(location.search).get('duel') || ''; } catch (e) { /* нет адреса */ }
 
 // ---------- Отметка «я в игре» и входящие вызовы ----------
 async function duelPing() {
@@ -15,59 +18,106 @@ async function duelPing() {
   try {
     const r = await apiPost('duel/ping', { busy: !!(OB || RP || S.busy) });
     DUEL.pid = r.pid; DUEL.online = r.online; DUEL.inbox = r.inbox || [];
+    if (DUEL.deepLink) {
+      const ch = DUEL.inbox.find((c) => c.id === DUEL.deepLink);
+      if (!ch) toast('Этот вызов уже не действует', 'bad');
+      DUEL.deepLink = '';
+      if (ch) { DUEL.seen[ch.id] = true; closeModal(); duelIncoming(ch); }
+    }
   } catch (e) { /* сервер выключен */ }
 }
 HOOKS.tick.push(() => {
-  if (onlineOn() && S.storySeen && Date.now() - DUEL.pingAt > DUEL_PING_EVERY) duelPing();
+  if (onlineOn() && S.storySeen && !document.hidden && Date.now() - DUEL.pingAt > DUEL_PING_EVERY) duelPing();
   // Новый вызов показываем, как только не мешает другое окно
   const ch = DUEL.inbox.find((c) => !DUEL.seen[c.id]);
   if (ch && !modalOpen() && !OB && !RP) { DUEL.seen[ch.id] = true; duelIncoming(ch); }
 });
-document.addEventListener('visibilitychange', () => { if (!document.hidden && typeof S !== 'undefined') setTimeout(duelPing, 500); });
+HOOKS.load.push(() => { if (DUEL.deepLink) setTimeout(duelPing, 1500); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && typeof S !== 'undefined') setTimeout(duelPing, 300); });
 
 function duelIncoming(ch) {
   sfx('notify'); haptic('heavy');
-  const what = ch.kind === 'fight' ? '🥊 на бой' : `✊ в «Камень-ножницы-бумагу»${ch.stake ? ` на ${fmt(ch.stake)} ₽` : ''}`;
-  openModal(`<div class="big-art" style="height:100px"><div class="rays"></div><div class="big-emoji" style="line-height:100px">⚔️</div></div>
-    <h3>Тебя вызывают!</h3><p><b>${esc(ch.from)}</b> (ур. ${ch.level}) вызывает тебя ${what}.</p>
-    <p class="test-note">Вызов действует ещё <span data-until="${Date.now() + ch.left * 1000}"></span></p>
-    <div class="btns" style="flex-direction:column;gap:8px">
-      <button class="btn primary wide" data-act="duelAccept" data-id="${ch.id}">✅ Принять</button>
-      <button class="btn wide" data-act="duelDecline" data-id="${ch.id}">Отказаться</button></div>`, { center: true, locked: true });
+  const fight = ch.kind === 'fight';
+  openModal(`<div class="duel-call ${fight ? 'fight' : 'rps'}">
+      <div class="dc-glow"></div><div class="dc-icon">${fight ? '🥊' : '✊✌️✋'}</div>
+      <div class="dc-from"><div class="top-ava">${esc((ch.from || '?')[0].toUpperCase())}</div><div><b>${esc(ch.from)}</b><small>ур. ${ch.level}</small></div></div>
+      <h3>${fight ? 'Вызов на бой!' : 'Вызов в КНБ!'}</h3>
+      ${ch.stake ? `<div class="dc-stake">Ставка <b>${fmt(ch.stake)} ₽</b> · победитель забирает ${fmt(Math.round(ch.stake * 2 * (1 - RPS_FEE)))} ₽</div>` : ''}
+      <div class="dc-timer">⏳ <span data-until="${Date.now() + ch.left * 1000}"></span></div>
+      <div class="btns" style="flex-direction:column;gap:8px">
+        <button class="btn primary wide big-accept" data-act="duelAccept" data-id="${ch.id}">✅ Принять</button>
+        <button class="btn wide" data-act="duelDecline" data-id="${ch.id}">Отказаться</button></div></div>`, { center: true, locked: true });
 }
 
 // ---------- Вызов игрока ----------
+const NOTIFY_TEXT = {
+  ok: '📨 Бот отправил ему уведомление с кнопкой «Принять»',
+  gap: '📨 Уведомление уже отправлено',
+  blocked: '⚠️ Уведомление не дошло: игрок не запускал бота или заблокировал его. Перешли ему ссылку на игру',
+  error: '⚠️ Telegram не принял уведомление, попробуй «Напомнить» через минуту',
+  off: '⚠️ Бот не подключён к серверу — уведомление не отправлено',
+};
 async function duelChallenge(kind, pid, stake = 0) {
   if (!onlineOn()) { toast('Вызовы работают в игре внутри Telegram', 'bad'); return; }
+  if (DUEL.sending) return;
   if (kind === 'fight') {
     if (level() < FIGHT_LEVEL) { toast(`Драки открываются с ${FIGHT_LEVEL} уровня`, 'bad'); return; }
     if (!obCanFight()) return;
   } else if (!rpCan(stake)) return;
+  DUEL.sending = true;
+  closeModal();
+  toast('⚔️ Отправляем вызов…');
   try {
     const r = await apiPost('duel/challenge', { kind, pid, stake, level: level(), fighter: kind === 'fight' ? obFighter() : undefined });
     if (r.error) { toast(r.error, 'bad'); return; }
-    const note = r.online ? 'Он сейчас в игре' : r.notified ? 'Бот отправил ему уведомление' : 'Он не в сети — ждём 5 минут';
+    const vs = { id: r.id, name: r.to, online: r.online, notify: r.notify || (r.notified ? 'ok' : 'error'), seen: false, until: Date.now() + 5 * 60000 };
+    DUEL.out = vs;
     if (kind === 'fight') {
       obPay();
       obStart(r.view);
-      OB.vs = { name: r.to, note };
+      OB.vs = vs;
       obWaitingModal();
     } else {
       rpPay(stake);
-      rpStart(r.view, { name: r.to, note });
+      rpStart(r.view, vs);
     }
+    sfx('whoosh');
     track('duelCall');
   } catch (e) { toast(refErrorText(e), 'bad'); }
+  finally { DUEL.sending = false; }
 }
 
-// Ожидание вызванного соперника — своё окно вместо «отправь код другу»
+// Окно ожидания вызванного соперника (и для боя, и для КНБ): статус доставки, таймер, «Напомнить»
+function duelWaitHTML(vs, kind, cancelAct) {
+  return `<div class="duel-wait">
+      <div class="dw-radar"><span></span><span></span><span></span><div class="dw-icon">${kind === 'fight' ? '🥊' : '✊'}</div></div>
+      <h3>Вызов: ${esc(vs.name)}</h3>
+      <div class="dw-steps">
+        <div class="ok">✅ Вызов отправлен</div>
+        <div class="${vs.notify === 'ok' || vs.notify === 'gap' ? 'ok' : 'warn'}" id="dwNotify">${vs.online ? '🟢 Игрок сейчас в игре — увидит вызов через пару секунд' : NOTIFY_TEXT[vs.notify] || NOTIFY_TEXT.error}</div>
+        <div class="${vs.seen ? 'ok' : 'wait'}" id="dwSeen">${vs.seen ? '👀 Игрок увидел вызов' : '⏳ Ждём, когда игрок откроет вызов'}</div>
+      </div>
+      <div class="dc-timer">Вызов действует ещё <span data-until="${vs.until}"></span></div>
+      <div class="btns" style="flex-direction:column;gap:8px">
+        ${vs.notify === 'blocked' ? '<button class="btn primary wide" data-act="duelShareLink">📨 Переслать ссылку на игру</button>' : '<button class="btn wide" data-act="duelRemind">🔔 Напомнить ещё раз</button>'}
+        <button class="btn wide" data-act="${cancelAct}">Отменить вызов</button></div></div>`;
+}
+// Пока ждём — раз в 2 секунды узнаём, увидел ли игрок вызов
+setInterval(async () => {
+  const vs = DUEL.out;
+  const waiting = vs && ((OB && OB.vs === vs && OB.view.status === 'waiting') || (RP && RP.vs === vs && RP.view.status === 'waiting'));
+  if (!waiting) { if (vs && !(OB && OB.vs === vs) && !(RP && RP.vs === vs)) DUEL.out = null; return; }
+  try {
+    const s = await apiPost('duel/status', { id: vs.id });
+    if (s.seen && !vs.seen) { vs.seen = true; sfx('notify'); if ($('dwSeen')) { $('dwSeen').className = 'ok'; $('dwSeen').textContent = '👀 Игрок увидел вызов'; } }
+    if (s.notified && vs.notify !== 'ok' && $('dwNotify')) { vs.notify = 'ok'; $('dwNotify').className = 'ok'; $('dwNotify').textContent = NOTIFY_TEXT.ok; }
+  } catch (e) { /* сеть */ }
+}, 2000);
+
 const _obWaitingModal = obWaitingModal;
 obWaitingModal = () => {
   if (!OB || !OB.vs) { _obWaitingModal(); return; }
-  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">🥊</div></div>
-    <h3>Вызов отправлен</h3><p>Ждём, пока <b>${esc(OB.vs.name)}</b> примет бой. ${OB.vs.note}.</p>
-    <div class="btns"><button class="btn wide" data-act="obLeave">Отменить вызов</button></div>
-    <p class="test-note">Вызов действует 5 минут</p>`, { center: true, locked: true });
+  openModal(duelWaitHTML(OB.vs, 'fight', 'obLeave'), { center: true, locked: true });
 };
 
 function duelRpsMenu(pid, name) {
@@ -95,7 +145,7 @@ function duelListHTML() {
   const l = DUEL.list;
   if (!l) return '<div class="info-card">⏳ Смотрим, кто в игре…</div>';
   if (!l.length) return '<div class="info-card">Сейчас в игре никого, кроме тебя. Вызови игрока из топа — бот пришлёт ему уведомление.</div>';
-  return l.map((p) => card({ thumb: `<div class="top-ava frame-${esc(p.frame || 'none')}">${esc((p.name || '?')[0].toUpperCase())}</div>`,
+  return l.map((p) => card({ thumb: `<div class="top-ava frame-${esc(p.frame || 'none')}">${avaFace(p.name, p.avatar)}</div>`,
     title: `<span class="online-dot"></span>${esc(p.name)}`, desc: `Ур. ${p.level} · рейтинг ${p.rating}${p.busy ? ' · занят' : ''}`, extra: duelBtns(p.pid, p.name) })).join('');
 }
 function openOnlineList() {
@@ -121,7 +171,7 @@ EXTRA_TABS.tasks.top = function topWithDuels() {
     <button class="btn wide" data-act="openOnlineList">Кто онлайн</button></div>`;
   const rows = d.top.map((p, i) => `<details class="top-row ${p.me ? 'me' : ''}"><summary>
       <div class="rank r${i + 1}">${i + 1}</div>
-      <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${esc((p.name || '?')[0].toUpperCase())}${p.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
+      <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}${p.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
       <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
         <div class="card-desc">${p.online && !p.me ? '<b class="online-txt">в игре</b> · ' : ''}Ур. ${p.stats.level} · ${esc(HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>
@@ -132,7 +182,9 @@ EXTRA_TABS.tasks.top = function topWithDuels() {
 // =====================================================================
 // Камень-ножницы-бумага онлайн
 // =====================================================================
-let RP = null; // { code, view, timer, shown, busy, animating, vs, paid, done }
+let RP = null; // { code, view, timer, shown, busy, animating, vs, done, deadline, lastPoll }
+const RPS_TIME = 15;
+const RPS_RING = 2 * Math.PI * 34; // длина окружности таймера
 
 function rpCan(stake) {
   if (S.busy) { toast('Валера занят', 'bad'); return false; }
@@ -144,54 +196,91 @@ function rpRefund(stake) { if (stake) S.money += stake; }
 
 function rpStart(view, vs) {
   rpStop();
-  RP = { code: view.code, view, timer: null, shown: view.log.length, busy: false, animating: false, vs, done: false };
+  RP = { code: view.code, view, timer: null, shown: view.log.length, busy: false, animating: false, vs, done: false, lastPoll: 0, picked: null,
+    deadline: view.status === 'active' && view.left != null ? Date.now() + view.left * 1000 : 0 };
   if (view.status === 'waiting') rpWaitingModal(); else rpGameModal();
-  RP.timer = setInterval(rpPoll, 1000);
+  // Один частый цикл: плавный таймер на экране + опрос сервера (чаще, пока ждём ход соперника)
+  RP.timer = setInterval(rpLoop, 100);
 }
 function rpStop() { if (RP && RP.timer) clearInterval(RP.timer); }
 
-function rpWaitingModal() {
-  const st = RP.view.stake;
-  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji rps-wait" style="line-height:90px">✊</div></div>
-    <h3>${RP.vs ? 'Вызов отправлен' : 'Ищем соперника…'}</h3>
-    <p>${RP.vs ? `Ждём, пока <b>${esc(RP.vs.name)}</b> примет игру. ${RP.vs.note}.` : 'Как только кто-то из живых игроков выберет ту же ставку — начнём.'}<br>Ставка: <b>${st ? `${fmt(st)} ₽` : 'без ставки'}</b></p>
-    <div class="btns"><button class="btn wide" data-act="rpLeave">Отменить</button></div>`, { center: true, locked: true });
+function rpLoop() {
+  if (!RP) return;
+  const v = RP.view;
+  const fast = v.status === 'waiting' || (v.status === 'active' && (v.myMoved || (RP.deadline && RP.deadline - Date.now() < 1500)));
+  if (!RP.busy && Date.now() - RP.lastPoll > (fast ? 400 : 1000)) rpPoll();
+  rpTimerRender();
 }
+
+function rpWaitingModal() {
+  if (RP.vs) { openModal(duelWaitHTML(RP.vs, 'rps', 'rpLeave'), { center: true, locked: true }); return; }
+  const st = RP.view.stake;
+  openModal(`<div class="duel-wait">
+      <div class="dw-radar"><span></span><span></span><span></span><div class="dw-icon">✊</div></div>
+      <h3>Ищем соперника…</h3>
+      <p>Как только живой игрок выберет ту же ставку — начнём.<br>Ставка: <b>${st ? `${fmt(st)} ₽` : 'без ставки'}</b></p>
+      <div class="btns"><button class="btn wide" data-act="rpLeave">Отменить</button></div></div>`, { center: true, locked: true });
+}
+
+function rpPips(n, win) { return Array.from({ length: win }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join(''); }
 
 function rpGameModal() {
   const v = RP.view;
-  openModal(`<div class="rps">
-      <div class="f-round" id="rpRound"></div>
-      <div class="ob-timer"><div id="rpTimer"></div></div>
-      <div class="rps-board">
-        <div class="rps-side"><b>Ты</b><div class="rps-hand" id="rpMe">❔</div><div class="rps-score" id="rpMeS">0</div></div>
-        <div class="f-vs">VS</div>
-        <div class="rps-side"><b>${esc(v.op.name)} <small>ур. ${v.op.level}</small></b><div class="rps-hand flip" id="rpOp">❔</div><div class="rps-score" id="rpOpS">0</div></div>
+  openModal(`<div class="rps2">
+      <div class="r2-head"><span id="rpRound">Раунд ${v.round}</span>${v.stake ? `<span class="r2-pot">🏆 ${fmt(Math.round(v.stake * 2 * (1 - RPS_FEE)))} ₽</span>` : ''}</div>
+      <div class="r2-score">
+        <div class="r2-pl me"><div class="top-ava">${esc((playerName() || 'Я')[0].toUpperCase())}</div><b>Ты</b><div class="r2-pips" id="rpMeS">${rpPips(v.me.score, v.win)}</div></div>
+        <div class="r2-pl op"><div class="top-ava">${esc((v.op.name || '?')[0].toUpperCase())}</div><b>${esc(v.op.name)}</b><div class="r2-pips" id="rpOpS">${rpPips(v.op.score, v.win)}</div></div>
       </div>
-      <div class="f-log" id="rpLog">До ${v.win} побед${v.stake ? ` · на кону ${fmt(v.stake * 2)} ₽` : ''}. 15 секунд на ход!</div>
-      <div class="f-btns rps-btns" id="rpBtns"></div>
+      <div class="r2-arena">
+        <div class="r2-hand me" id="rpMe">❔</div>
+        <div class="r2-vs"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34" class="bg"/><circle cx="40" cy="40" r="34" class="fg" id="rpRing" stroke-dasharray="${RPS_RING}" stroke-dashoffset="0"/></svg><b id="rpSec">15</b></div>
+        <div class="r2-hand op" id="rpOp">🤔</div>
+      </div>
+      <div class="r2-status" id="rpLog">До ${v.win} побед. Выбирай!</div>
+      <div class="r2-banner" id="rpBanner"></div>
+      <div class="r2-btns" id="rpBtns">${Object.keys(RPS_E).map((m) => `<button class="r2-btn" data-act="rpMove" data-id="${m}" data-silent="1"><span>${RPS_E[m]}</span>${RPS_N[m]}</button>`).join('')}</div>
       <button class="btn small ob-leave" data-act="rpLeave">🏳️ Сдаться</button>
     </div>`, { center: true, locked: true });
-  sfx('bell');
+  sfx('bell'); haptic('medium');
   rpRender();
+}
+
+function rpTimerRender() {
+  if (!RP || !$('rpRing')) return;
+  const v = RP.view;
+  const left = v.status === 'active' && RP.deadline ? Math.max(0, (RP.deadline - Date.now()) / 1000) : 0;
+  $('rpRing').style.strokeDashoffset = RPS_RING * (1 - clamp(left / RPS_TIME, 0, 1));
+  $('rpRing').classList.toggle('low', left <= 5);
+  const sec = Math.ceil(left);
+  if ($('rpSec').textContent !== String(sec)) { $('rpSec').textContent = sec; if (sec <= 3 && sec > 0 && !v.myMoved) sfx('tick'); }
 }
 
 function rpRender() {
   const v = RP.view;
   if (!$('rpBtns')) return;
-  const sc = RP.animating ? null : v;
-  if (sc) { $('rpMeS').textContent = v.me.score; $('rpOpS').textContent = v.op.score; }
-  $('rpRound').textContent = v.status === 'finished' ? 'Игра окончена' : `Раунд ${v.round}`;
-  $('rpTimer').style.width = (v.left != null ? clamp(v.left / 15, 0, 1) * 100 : 0) + '%';
-  $('rpTimer').classList.toggle('low', v.left != null && v.left <= 5);
+  if (!RP.animating) {
+    $('rpMeS').innerHTML = rpPips(v.me.score, v.win);
+    $('rpOpS').innerHTML = rpPips(v.op.score, v.win);
+    $('rpRound').textContent = v.status === 'finished' ? 'Игра окончена' : `Раунд ${v.round}`;
+  }
   const can = v.status === 'active' && !v.myMoved && !RP.animating;
-  $('rpBtns').innerHTML = Object.keys(RPS_E).map((m) => `<button class="btn f-btn" data-act="rpMove" data-id="${m}" data-silent="1" ${can ? '' : 'disabled'}><span>${RPS_E[m]}</span>${RPS_N[m]}</button>`).join('');
-  if (v.status === 'active' && v.myMoved && !RP.animating) $('rpLog').textContent = v.opMoved ? 'Оба сходили…' : '⏳ Ждём ход соперника…';
+  $('rpBtns').querySelectorAll('.r2-btn').forEach((b) => {
+    b.disabled = !can;
+    b.classList.toggle('picked', RP.picked === b.dataset.id && v.myMoved);
+    b.classList.toggle('dim', v.myMoved && RP.picked !== b.dataset.id);
+  });
+  if (!RP.animating && v.status === 'active') {
+    $('rpOp').textContent = v.opMoved ? '✔️' : '🤔';
+    $('rpOp').className = `r2-hand op${v.opMoved ? ' ready' : ''}`;
+    if (!v.myMoved) { $('rpMe').textContent = '❔'; $('rpMe').className = 'r2-hand me'; $('rpLog').textContent = v.opMoved ? 'Соперник уже выбрал — твой ход!' : 'Выбирай!'; }
+    else $('rpLog').textContent = v.opMoved ? 'Вскрываемся…' : 'Ждём соперника…';
+  }
 }
 
 async function rpPoll() {
   if (!RP || RP.busy) return;
-  RP.busy = true;
+  RP.busy = true; RP.lastPoll = Date.now();
   try { rpApply(await apiPost('rps/state', { code: RP.code })); } catch (e) { /* сеть моргнула */ }
   if (RP) RP.busy = false;
 }
@@ -199,15 +288,19 @@ async function rpPoll() {
 async function rpApply(v) {
   if (!RP) return;
   const wasWaiting = RP.view.status === 'waiting';
+  const prevRound = RP.view.round;
   RP.view = v;
-  if (wasWaiting && v.status === 'active') { sfx('notify'); haptic('heavy'); rpGameModal(); return; }
+  if (v.status === 'active' && v.left != null && (v.round !== prevRound || !RP.deadline || Math.abs(RP.deadline - (Date.now() + v.left * 1000)) > 1500)) RP.deadline = Date.now() + v.left * 1000;
+  if (wasWaiting && v.status === 'active') { sfx('notify'); haptic('heavy'); RP.deadline = Date.now() + (v.left || RPS_TIME) * 1000; rpGameModal(); return; }
   if (wasWaiting && v.status === 'finished') { rpStop(); rpRefund(v.stake); RP = null; closeModal(); toast(v.reason || 'Игра не состоялась'); save(); return; }
   if (!$('rpBtns')) return;
   while (RP && RP.shown < v.log.length && !RP.animating) {
     RP.animating = true;
+    rpRender();
     await rpAnimate(v.log[RP.shown]);
     if (!RP) return;
     RP.shown++;
+    RP.picked = null;
     RP.animating = false;
   }
   rpRender();
@@ -217,22 +310,35 @@ async function rpApply(v) {
 async function rpAnimate(e) {
   const me = $('rpMe'), op = $('rpOp');
   if (!me) return;
+  me.className = 'r2-hand me'; op.className = 'r2-hand op';
   me.textContent = op.textContent = '✊';
-  me.classList.add('shake'); op.classList.add('shake');
-  sfx('tap');
-  await wait(800);
-  me.classList.remove('shake'); op.classList.remove('shake');
+  // «Камень… Ножницы… Бумага… Раз!» — три взмаха кулаками
+  for (const word of ['Камень…', 'Ножницы…', 'Бумага…']) {
+    $('rpLog').textContent = word;
+    me.classList.remove('pump'); op.classList.remove('pump'); void me.offsetWidth;
+    me.classList.add('pump'); op.classList.add('pump');
+    sfx('tap'); haptic('light');
+    await wait(330);
+    if (!$('rpMe')) return;
+  }
+  me.classList.remove('pump'); op.classList.remove('pump');
   me.textContent = e.my ? RPS_E[e.my] : '💤';
   op.textContent = e.op ? RPS_E[e.op] : '💤';
-  const res = e.res === 'me' ? '✅ Раунд твой!' : e.res === 'op' ? '❌ Раунд за соперником' : '🤝 Ничья в раунде';
+  me.classList.add('reveal'); op.classList.add('reveal');
+  if (e.res === 'me') { me.classList.add('win'); op.classList.add('lose'); }
+  else if (e.res === 'op') { op.classList.add('win'); me.classList.add('lose'); }
+  const banner = $('rpBanner');
+  const txt = e.res === 'me' ? 'Раунд твой!' : e.res === 'op' ? 'Раунд за соперником' : 'Ничья';
+  banner.className = `r2-banner show ${e.res}`;
+  banner.textContent = txt;
   sfx(e.res === 'me' ? 'coin' : e.res === 'op' ? 'punch' : 'whoosh');
-  if (e.res === 'me') haptic('success'); else if (e.res === 'op') haptic('heavy');
-  $('rpLog').textContent = `${e.my ? RPS_N[e.my] : 'Не успел'} против «${e.op ? RPS_N[e.op] : 'не успел'}» — ${res}`;
-  const v = RP.view;
-  const meS = v.log.slice(0, RP.shown + 1).filter((x) => x.res === 'me').length;
-  const opS = v.log.slice(0, RP.shown + 1).filter((x) => x.res === 'op').length;
-  $('rpMeS').textContent = meS; $('rpOpS').textContent = opS;
-  await wait(1100);
+  haptic(e.res === 'me' ? 'success' : e.res === 'op' ? 'heavy' : 'light');
+  $('rpLog').textContent = `${e.my ? RPS_N[e.my] : 'Не успел'} — ${e.op ? RPS_N[e.op].toLowerCase() : 'соперник не успел'}`;
+  const upto = RP.view.log.slice(0, RP.shown + 1);
+  $('rpMeS').innerHTML = rpPips(upto.filter((x) => x.res === 'me').length, RP.view.win);
+  $('rpOpS').innerHTML = rpPips(upto.filter((x) => x.res === 'op').length, RP.view.win);
+  await wait(1300);
+  if (banner) banner.className = 'r2-banner';
 }
 
 function rpFinish(v) {
@@ -247,12 +353,12 @@ function rpFinish(v) {
     addXp(12); addMood(10);
     S.rpsWins = (S.rpsWins || 0) + 1;
     track('rpsWin');
-    emoji = '🏆'; title = 'Победа в КНБ!'; good = true;
-    text = `${v.reason}. ${esc(v.op.name)} повержен!${prize ? `<br>+${fmt(prize)} ₽` : ''}<br>+12 опыта, +10 😊`;
-    confetti(50); sfx('win');
+    emoji = '👑'; title = 'Победа!'; good = true;
+    text = `${v.reason}. ${esc(v.op.name)} повержен!${prize ? `<br><b class="gold">+${fmt(prize)} ₽</b>` : ''}<br>+12 опыта, +10 😊`;
+    confetti(80); sfx('win');
   } else if (v.winner === 'op') {
     addMood(-4); addXp(4);
-    emoji = '😤'; title = 'Проигрыш'; text = `${v.reason}. ${esc(v.op.name)} оказался хитрее.${v.stake ? `<br>Ставка ${fmt(v.stake)} ₽ ушла сопернику` : ''}`;
+    emoji = '😤'; title = 'Поражение'; text = `${v.reason}. ${esc(v.op.name)} оказался хитрее.${v.stake ? `<br>Ставка ${fmt(v.stake)} ₽ ушла сопернику` : ''}`;
     sfx('lose');
   } else {
     rpRefund(v.stake); addXp(5);
@@ -280,7 +386,25 @@ Object.assign(ACTIONS, {
   openOnlineList: () => openOnlineList(),
   duelFight: (pid) => duelChallenge('fight', pid),
   duelRpsMenu: (pid, btn) => duelRpsMenu(pid, btn.dataset.name || 'игроком'),
-  duelRps: (id) => { const [s, pid] = id.split(':'); closeModal(); duelChallenge('rps', pid, +s); },
+  duelRps: (id) => { const [s, pid] = id.split(':'); duelChallenge('rps', pid, +s); },
+  duelRemind: async () => {
+    const vs = DUEL.out;
+    if (!vs) return;
+    if (Date.now() - (vs.remindAt || 0) < 60000) { toast('Напомнить можно раз в минуту'); return; }
+    vs.remindAt = Date.now();
+    try {
+      const r = await apiPost('duel/remind', { id: vs.id });
+      if (r.error) { toast(r.error, 'bad'); return; }
+      vs.notify = r.notify;
+      toast(r.notify === 'ok' ? '🔔 Бот напомнил о вызове' : NOTIFY_TEXT[r.notify] || NOTIFY_TEXT.error, r.notify === 'ok' ? 'good' : 'bad');
+      if ($('dwNotify')) { $('dwNotify').className = r.notify === 'ok' ? 'ok' : 'warn'; $('dwNotify').textContent = NOTIFY_TEXT[r.notify] || NOTIFY_TEXT.error; }
+    } catch (e) { toast(refErrorText(e), 'bad'); }
+  },
+  duelShareLink: () => {
+    const text = 'Вызываю тебя в «Симуляторе бомжа»! ⚔️ Запусти бота и открой игру — вызов ждёт 5 минут';
+    const url = `https://t.me/share/url?url=${encodeURIComponent(BOT_LINK || 'https://t.me')}&text=${encodeURIComponent(text)}`;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
+  },
   duelAccept: async (id) => {
     const ch = DUEL.inbox.find((c) => c.id === id);
     if (!ch) { closeModal(); return; }
@@ -309,9 +433,11 @@ Object.assign(ACTIONS, {
   },
   rpMove: async (move) => {
     if (!RP || RP.view.status !== 'active' || RP.view.myMoved || RP.animating) return;
-    sfx('tap');
+    sfx('chip'); haptic('medium');
     RP.view.myMoved = true;
+    RP.picked = move;
     $('rpMe').textContent = RPS_E[move];
+    $('rpMe').className = 'r2-hand me picked';
     rpRender();
     try { rpApply(await apiPost('rps/move', { code: RP.code, move, round: RP.view.round })); } catch (e) { if (RP) { RP.view.myMoved = false; rpRender(); } }
   },

@@ -488,7 +488,7 @@ openSettings = (function (orig) {
   return function () {
     orig();
     const note = document.querySelector('#modalRoot .test-note');
-    if (note) note.textContent = `Симулятор бомжа · версия ${GAME_VERSION}`;
+    if (note) note.textContent = `Симулятор бомжа · версия ${typeof CHANGELOG !== 'undefined' ? CHANGELOG[0].v : GAME_VERSION}`;
     const btns = document.querySelector('#modalRoot .btns');
     if (!btns) return;
     btns.insertAdjacentHTML('beforebegin', `

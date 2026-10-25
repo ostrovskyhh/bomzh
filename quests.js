@@ -5,6 +5,17 @@
 const qc = (key, need, text) => ({ key, text, need, cur: () => counter(key) - ((S.quest.base || {})[key] || 0) });
 const qv = (fn, need, text) => ({ text, need, cur: fn });
 
+// Цель «Карьеры»: лучшая должность среди всех работ. В тексте видно, какая она сейчас и где лучше расти
+function bestJobPos() {
+  let best = null;
+  JOBS.forEach((j) => { if (!jobShifts(j.id)) return; const r = jobRank(j.id); if (!best || r > best.r) best = { j, r }; });
+  return best;
+}
+function careerGoal() {
+  return { key: 'promotion', need: 2, cur: () => { const b = bestJobPos(); return b ? b.r : 0; },
+    get text() { const b = bestJobPos(); return `Дослужись до 3-й должности (сейчас: ${b ? `«${posName(b.j.id, b.r)}» — ${b.j.name}` : 'нет работы'})`; } };
+}
+
 const QUESTS = [
   { id: 'start', who: '🧔', name: 'Михалыч', title: 'Первые бутылки', text: 'Ну что, Валера, будем выживать? На лавке не разжиреешь. Собери бутылки и сдай их Шнырю в обменник.',
     goals: [qc('taps', 50, 'Натапай 50 раз'), qc('sold', 30, 'Обменяй 30 бутылок')], reward: { money: 30, xp: 20 } },
@@ -52,8 +63,9 @@ const QUESTS = [
     goals: [qv(() => Object.keys(S.biz).length, 1, 'Открой бизнес'), qv(() => S.transport, 1, 'Купи транспорт')], reward: { money: 5000, caps: 4, xp: 400 } },
   { id: 'love', who: '💘', name: 'Сердце Валеры', title: 'Не хлебом единым', text: 'Деньги есть, крыша над головой есть, а приходишь домой — и поговорить не с кем. Может, пора кого-то встретить?',
     goals: [qc('date', 3, 'Сходи на 3 свидания'), qv(() => (S.girlfriend ? 1 : 0), 1, 'Найди девушку')], reward: { money: 3000, caps: 3, xp: 300, buff: ['inlove', 15] } },
-  { id: 'h_career', path: 'honest', who: '🏢', name: 'HR-менеджер', title: 'Карьера', text: 'Мы видим ваш потенциал, Валерий. Колледж и опыт — и место в офисе ваше.',
-    goals: [qv(() => S.edu, 3, 'Окончи колледж'), qv(() => Math.max(...JOBS.map((j) => jobRank(j.id))), 2, 'Получи второе повышение на работе')], reward: { money: 15000, caps: 5, xp: 600 } },
+  { id: 'h_career', path: 'honest', who: '🏢', name: 'HR-менеджер', title: 'Карьера', text: 'Мы видим ваш потенциал, Валерий. Нам нужен человек с дипломом колледжа, опытом и хорошей должностью — тогда место в офисе ваше.',
+    help: 'Колледж — в «Жизнь → Учёба». Смены — в «Жизнь → Работа», подойдёт любая работа. Должность растёт так: наработай смены → в карточке работы появится «Аттестация» → сдай её (или дай «конверт»). Нужна 3-я должность на любой одной работе.',
+    goals: [qv(() => S.edu, 3, 'Окончи колледж'), qc('shift', 8, 'Отработай 8 смен на любой работе'), careerGoal()], reward: { money: 15000, caps: 5, xp: 600 } },
   { id: 'h_court', path: 'honest', who: '⚖️', name: 'Адвокат Розенберг', title: 'Суд против Эдика', text: 'Валерий, у нас есть шанс отсудить квартиру по закону. Но нужен диплом, чтобы судья воспринял всерьёз, и деньги на экспертизу подписи. Эдик будет давить — держитесь.',
     goals: [qv(() => S.edu, 4, 'Окончи университет'), qv(() => S.money, 50000, 'Собери 50 000 ₽ на экспертизу'), qc('promotion', 1, 'Получи ещё одно повышение')], reward: { money: 20000, caps: 6, xp: 700 } },
   { id: 'd_ring', path: 'dark', who: '💎', name: 'Хозяин ринга', title: 'Подпольный ринг', text: 'Говорят, ты резкий. На моём ринге бьются за большие деньги. Докажи, что достоин.',
@@ -134,6 +146,7 @@ EXTRA_TABS.tasks.story = () => {
     const bossReady = q.boss && done;
     html += `<div class="quest-card"><div class="q-who">${q.who}</div><div class="q-name">${q.name}</div><h3>${q.title}</h3><p>«${q.text}»</p>
       <div class="goals">${questGoalsHTML(q)}</div>
+      ${q.help && !done ? `<div class="q-help">💡 ${q.help}</div>` : ''}
       <div class="q-reward">🎁 ${rewardHTML(q.reward)}</div>
       ${bossReady ? `<button class="btn primary wide" data-act="bossFight" ${cdLeft('boss') > 0 ? 'disabled' : ''}>👊 Драться: ${q.boss.name || 'Эдик'}${cdLeft('boss') > 0 ? ` (<span data-until="${S.cd.boss}"></span>)` : ''}</button>`
         : `<button class="btn ${done ? 'primary' : ''} wide" data-act="questDone" ${done && !q.boss ? '' : 'disabled'}>${done ? 'Получить награду' : 'Выполняется…'}</button>`}</div>`;

@@ -626,7 +626,7 @@ function healthDelta() {
 
 // Курс обменника плавает со временем (две синусоиды — похоже на настоящий график)
 function bottleRate(t = Date.now()) {
-  return 0.56 * (1 + 0.3 * Math.sin(t / 420000) + 0.12 * Math.sin(t / 97000 + 1)) * mods().rate;
+  return 0.8 * (1 + 0.3 * Math.sin(t / 420000) + 0.12 * Math.sin(t / 97000 + 1)) * mods().rate;
 }
 function capRate() { return Math.round(40 * scale()); }
 const EXCHANGE_FEE = 0.05;
@@ -642,6 +642,14 @@ function fmt(n) {
   if (Math.abs(n) < 10000) return n.toLocaleString('ru-RU');
   const units = [['млрд', 1e9], ['млн', 1e6], ['K', 1e3]];
   for (const [u, v] of units) if (Math.abs(n) >= v) return (n / v).toFixed(n / v < 100 ? 1 : 0).replace('.0', '') + ' ' + u;
+  return String(n);
+}
+// Короткая запись для плашек наверху: 9999, 12.5K, 118K, 3.4M, 1.2B — всегда в одну строку
+function fmtShort(n) {
+  n = Math.floor(n);
+  const a = Math.abs(n);
+  if (a < 10000) return String(n);
+  for (const [u, v] of [['B', 1e9], ['M', 1e6], ['K', 1e3]]) if (a >= v) return (n / v).toFixed(a / v < 100 ? 1 : 0).replace('.0', '') + u;
   return String(n);
 }
 function fmtTime(sec) {
@@ -2670,9 +2678,9 @@ function floatAt(el, text, kind) {
 
 function updateHud() {
   clampStats();
-  $('money').textContent = fmt(S.money);
-  $('bottles').textContent = fmt(S.bottles);
-  $('caps').textContent = fmt(S.caps);
+  $('money').textContent = fmtShort(S.money);
+  $('bottles').textContent = fmtShort(S.bottles);
+  $('caps').textContent = fmtShort(S.caps);
   const li = levelInfo();
   $('plevel').textContent = `Ур. ${li.level} · ${EDU[S.edu].name}`;
   $('xpFill').style.width = (li.cur / li.need) * 100 + '%';

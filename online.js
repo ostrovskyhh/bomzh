@@ -92,7 +92,7 @@ EXTRA_TABS.tasks.top = function topTab() {
     ${TOP.error ? `<div class="info-card warn">${TOP.error}</div>` : ''}`;
   const rows = d.top.map((p, i) => `<details class="top-row ${p.me ? 'me' : ''}"><summary>
       <div class="rank r${i + 1}">${i + 1}</div>
-      <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${esc((p.name || '?')[0].toUpperCase())}</div>
+      <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}</div>
       <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
         <div class="card-desc">Ур. ${p.stats.level} · ${esc(HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>${topStatsHTML(p.stats)}</details>`).join('');

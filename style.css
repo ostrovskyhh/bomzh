@@ -70,7 +70,16 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   background: var(--card); border-radius: 999px;
   padding: 5px 9px 5px 6px; font-weight: 700; font-size: 13px;
 }
-.res .ic { width: 18px; height: 18px; }
+.res .ic { width: 18px; height: 18px; flex: none; }
+.res { flex: none; white-space: nowrap; }
+.res span { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.res-row { flex: none; }
+@media (max-width: 380px) {
+  .res-row { gap: 4px; }
+  .res { font-size: 12px; padding: 4px 7px 4px 4px; }
+  .res .ic { width: 16px; height: 16px; }
+  .pname { max-width: 70px; }
+}
 .res.caps b {
   background: var(--gold); color: #3A2608; width: 16px; height: 16px; border-radius: 50%;
   display: grid; place-items: center; font-size: 13px; line-height: 1; margin-left: 2px;
@@ -1155,3 +1164,116 @@ button:disabled { pointer-events: none; }
 .ev-hint { font-weight: 500; opacity: .75; font-size: 11px; }
 .diff-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px; margin-right: 4px; vertical-align: middle; background: rgba(255,255,255,.08); }
 .diff-tag.easy { color: #3CCB5A; } .diff-tag.even { color: #F2C744; } .diff-tag.hard { color: #FF5A5A; }
+
+/* ---------- 1.9: зал, подарки ---------- */
+.gy-reps-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 10px 4px; }
+.gy-icon { font-size: 54px; line-height: 1; }
+.gy-lane { position: relative; width: 100%; height: 34px; border-radius: 17px; background: rgba(255,255,255,.08); overflow: hidden; }
+.gy-zone { position: absolute; top: 0; bottom: 0; background: rgba(60,203,90,.35); border-radius: 10px; transition: left .2s ease; }
+.gy-zone i { position: absolute; left: 33%; width: 34%; top: 0; bottom: 0; background: rgba(242,199,68,.75); border-radius: 8px; }
+.gy-mark { position: absolute; top: -3px; bottom: -3px; width: 6px; margin-left: -3px; border-radius: 3px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.8); }
+.gy-dots { display: flex; gap: 8px; }
+.gy-dots span { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.12); }
+.gy-dots span.perfect { background: #F2C744; } .gy-dots span.good { background: #3CCB5A; } .gy-dots span.miss { background: #FF5A5A; }
+.gy-combo-txt { min-height: 18px; font-weight: 800; color: #FF8A3A; }
+.gift-player { margin: 4px 0; justify-content: flex-start; }
+.gift-form { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.gift-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.gift-form input { padding: 10px; border-radius: 10px; border: 0; background: var(--card); color: var(--text); font-size: 15px; }
+
+/* ---------- 2.0: премиальная КНБ, вызовы, сюжет ---------- */
+.q-help { margin: 8px 0; padding: 10px 12px; border-radius: 12px; background: rgba(242,199,68,.1); font-size: 12px; line-height: 1.45; }
+.duel-call { position: relative; text-align: center; padding-top: 6px; overflow: hidden; }
+.dc-glow { position: absolute; inset: -40% -20% auto; height: 220px; background: radial-gradient(circle, rgba(242,199,68,.35), transparent 65%); animation: dcPulse 1.6s ease-in-out infinite; pointer-events: none; }
+.duel-call.fight .dc-glow { background: radial-gradient(circle, rgba(179,18,46,.45), transparent 65%); }
+.dc-icon { position: relative; font-size: 64px; line-height: 1.1; animation: dcPop .5s cubic-bezier(.3,1.6,.5,1); }
+.dc-from { position: relative; display: inline-flex; align-items: center; gap: 10px; margin: 8px 0 2px; padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--card); text-align: left; }
+.dc-from small { display: block; color: var(--muted); font-size: 11px; }
+.dc-stake { margin: 6px auto; padding: 8px 12px; border-radius: 12px; background: rgba(242,199,68,.12); font-size: 13px; }
+.dc-timer { color: var(--muted); font-size: 12px; margin: 6px 0 10px; }
+.big-accept { font-size: 17px; padding: 14px; animation: dcPulse 1.4s ease-in-out infinite; }
+@keyframes dcPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes dcPop { from { transform: scale(.3) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.duel-wait { text-align: center; }
+.dw-radar { position: relative; width: 120px; height: 120px; margin: 4px auto 8px; }
+.dw-radar span { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(242,199,68,.6); animation: dwRing 2.4s ease-out infinite; opacity: 0; }
+.dw-radar span:nth-child(2) { animation-delay: .8s; } .dw-radar span:nth-child(3) { animation-delay: 1.6s; }
+.dw-icon { position: absolute; inset: 30px; display: grid; place-items: center; font-size: 40px; border-radius: 50%; background: var(--card); box-shadow: 0 0 24px rgba(242,199,68,.35); }
+@keyframes dwRing { from { transform: scale(.4); opacity: .9; } to { transform: scale(1.15); opacity: 0; } }
+.dw-steps { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; text-align: left; font-size: 13px; }
+.dw-steps div { padding: 8px 10px; border-radius: 10px; background: var(--card); }
+.dw-steps .ok { box-shadow: inset 3px 0 0 #3CCB5A; } .dw-steps .warn { box-shadow: inset 3px 0 0 #FF8A3A; } .dw-steps .wait { box-shadow: inset 3px 0 0 var(--muted); opacity: .85; }
+.rps2 { position: relative; text-align: center; }
+.r2-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+.r2-pot { padding: 3px 10px; border-radius: 999px; background: linear-gradient(135deg, #8A5D12, #F2C744); color: #2A1A06; font-size: 12px; }
+.r2-score { display: flex; justify-content: space-between; gap: 8px; }
+.r2-pl { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 0; font-size: 12px; }
+.r2-pl b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r2-pips { display: flex; gap: 5px; }
+.r2-pips i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.12); transition: background .3s, transform .3s; }
+.r2-pl.me .r2-pips i.on { background: #3CCB5A; transform: scale(1.15); box-shadow: 0 0 8px rgba(60,203,90,.8); }
+.r2-pl.op .r2-pips i.on { background: #FF5A5A; transform: scale(1.15); box-shadow: 0 0 8px rgba(255,90,90,.8); }
+.r2-arena { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 8px; }
+.r2-hand { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 52px; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.14), rgba(255,255,255,.03)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.08); transition: transform .25s, box-shadow .25s, filter .25s, opacity .25s; }
+.r2-hand.op { transform: scaleX(-1); }
+.r2-hand.ready { box-shadow: inset 0 0 0 2px #3CCB5A; font-size: 34px; }
+.r2-hand.picked { box-shadow: inset 0 0 0 3px #F2C744, 0 0 18px rgba(242,199,68,.5); }
+.r2-hand.pump { animation: r2Pump .3s ease-in-out; }
+.r2-hand.op.pump { animation-name: r2PumpOp; }
+.r2-hand.reveal { animation: r2Reveal .35s cubic-bezier(.3,1.6,.5,1); }
+.r2-hand.op.reveal { animation-name: r2RevealOp; }
+.r2-hand.win { box-shadow: inset 0 0 0 3px #3CCB5A, 0 0 26px rgba(60,203,90,.7); }
+.r2-hand.lose { filter: grayscale(.8) brightness(.7); opacity: .7; }
+@keyframes r2Pump { 50% { transform: translateY(-18px) rotate(-12deg); } }
+@keyframes r2PumpOp { 0%, 100% { transform: scaleX(-1); } 50% { transform: scaleX(-1) translateY(-18px) rotate(-12deg); } }
+@keyframes r2Reveal { from { transform: scale(.4); } to { transform: scale(1); } }
+@keyframes r2RevealOp { from { transform: scaleX(-1) scale(.4); } to { transform: scaleX(-1) scale(1); } }
+.r2-vs { position: relative; width: 72px; height: 72px; }
+.r2-vs svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.r2-vs circle { fill: none; stroke-width: 6; }
+.r2-vs .bg { stroke: rgba(255,255,255,.08); }
+.r2-vs .fg { stroke: #F2C744; stroke-linecap: round; transition: stroke-dashoffset .1s linear; }
+.r2-vs .fg.low { stroke: #FF5A5A; }
+.r2-vs b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; }
+.r2-status { min-height: 20px; font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+.r2-banner { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) scale(.5); opacity: 0; pointer-events: none; padding: 10px 18px; border-radius: 14px; font-weight: 900; font-size: 18px; white-space: nowrap; background: rgba(20,20,28,.92); transition: transform .3s cubic-bezier(.3,1.6,.5,1), opacity .2s; }
+.r2-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.r2-banner.me { color: #3CCB5A; box-shadow: 0 0 0 2px #3CCB5A; } .r2-banner.op { color: #FF5A5A; box-shadow: 0 0 0 2px #FF5A5A; } .r2-banner.draw { color: #F2C744; box-shadow: 0 0 0 2px #F2C744; }
+.r2-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.r2-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; border: 0; border-radius: 16px; background: linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.03)); color: var(--text); font-weight: 700; font-size: 12px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); transition: transform .15s, opacity .2s, box-shadow .2s; }
+.r2-btn span { font-size: 34px; line-height: 1; }
+.r2-btn:not(:disabled):active { transform: scale(.94); }
+.r2-btn.picked { box-shadow: inset 0 0 0 2px #F2C744, 0 0 16px rgba(242,199,68,.45); transform: translateY(-3px); }
+.r2-btn.dim, .r2-btn:disabled:not(.picked) { opacity: .4; }
+.gold { color: var(--gold); }
+
+/* ---------- 2.1: питомцы, аватарки ---------- */
+.avatar.emoji-ava { background: var(--card); font-size: 22px; }
+.frames.avatars .avatar.emoji-ava { font-size: 20px; }
+.pet-room { text-align: center; }
+.pr-art { width: 120px; height: 120px; margin: 0 auto; animation: prBob 2.4s ease-in-out infinite; }
+.pr-art svg { width: 100%; height: 100%; }
+@keyframes prBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.pr-lvl { margin: 6px 0; font-size: 13px; }
+.pr-lvl .progress { margin-top: 4px; }
+.pr-bonus { font-size: 12px; padding: 8px 10px; border-radius: 10px; background: rgba(242,199,68,.1); margin: 6px 0; }
+.pr-stats { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.pr-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.pr-act { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border: 0; border-radius: 14px; background: var(--card); color: var(--text); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.pr-act span { font-size: 26px; }
+.pr-act small { font-size: 10px; color: var(--muted); line-height: 1.25; }
+.pr-act:not(:disabled):active { transform: scale(.95); }
+.pr-act:disabled { opacity: .5; }
+.pet-box .progress { margin: 6px 0; }
+.pet-field { position: relative; height: 230px; border-radius: 14px; background: radial-gradient(circle at 50% 80%, rgba(60,203,90,.18), transparent 70%); overflow: hidden; }
+.pet-mini { position: absolute; left: 50%; bottom: 4px; width: 70px; height: 70px; transform: translateX(-50%); opacity: .8; }
+.pet-mini svg { width: 100%; height: 100%; }
+.pet-toy { position: absolute; width: 52px; height: 52px; border: 0; border-radius: 50%; font-size: 30px; background: rgba(255,255,255,.12); transition: left .25s ease, top .25s ease; }
+
+/* ---------- 2.2: рамки за приглашения, романтика ---------- */
+.avatar.frame-recruit, .chat-ava.frame-recruit, .top-ava.frame-recruit { box-shadow: 0 0 0 3px #3CCB5A, 0 0 0 5px #1B5E20, 0 0 12px rgba(60,203,90,.6); }
+.avatar.frame-leader, .chat-ava.frame-leader, .top-ava.frame-leader { box-shadow: 0 0 0 3px #2F7DD0, 0 0 0 6px #F2C744, 0 0 14px rgba(47,125,208,.7); animation: frameGlow 2.2s ease-in-out infinite; }
+.avatar.frame-kingref, .chat-ava.frame-kingref, .top-ava.frame-kingref { position: relative; box-shadow: 0 0 0 3px #F2C744, 0 0 18px rgba(242,199,68,.9); animation: kingRef 3s linear infinite; }
+@keyframes kingRef { 0% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 16px rgba(255,90,90,.8); } 33% { box-shadow: 0 0 0 3px #F2C744, 0 0 18px rgba(242,199,68,.9); } 66% { box-shadow: 0 0 0 3px #B06CFF, 0 0 18px rgba(176,108,255,.9); } 100% { box-shadow: 0 0 0 3px #FF5A5A, 0 0 16px rgba(255,90,90,.8); } }
+.romance .btn small, .romance .btn small { display: block; font-weight: 500; font-size: 11px; opacity: .8; }
+.romance.tempt .big-emoji { animation: dcPulse 1.6s ease-in-out infinite; }

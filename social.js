@@ -160,7 +160,7 @@ async function chatPoll() {
     for (const m of r.messages) {
       const b = (() => { try { return JSON.parse(m.badge || '{}'); } catch (e) { return {}; } })();
       list.insertAdjacentHTML('beforeend', m.sys ? `<div class="chat-sys">${esc(m.text)}</div>`
-        : `<div class="chat-msg ${m.me ? 'me' : ''}"><div class="chat-ava frame-${esc(b.frame || 'none')}">${esc((m.name || '?')[0])}</div><div class="chat-bubble">
+        : `<div class="chat-msg ${m.me ? 'me' : ''}"><div class="chat-ava frame-${esc(b.frame || 'none')}">${avaFace(m.name, b.avatar)}</div><div class="chat-bubble">
           <b>${esc(m.name)}<small> · ур. ${b.lvl || 1} · ${new Date(m.ts * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</small>${c.admin ? `<i data-act="chatDel" data-id="${m.id}">🗑</i>` : ''}</b>${esc(m.text)}</div></div>`);
       c.last = Math.max(c.last, m.id);
     }

@@ -3,129 +3,63 @@
 
 EXERCISES.push({ id: 'bag', name: 'Боксёрская груша', emoji: '🥊', energy: 25, food: 12, fatigue: 25, form: 1, strength: 1.5, health: 1, mood: 4, desc: 'Сила и форма для драк' });
 
-// Как называется и как играется каждое упражнение. max — счёт, который даёт 100% прироста
+// Тренировка — один короткий «подход» из 6 повторений (~10 секунд): по полоске бегает метка,
+// жми, когда она в зелёной зоне, в золотой середине — идеально. Серия идеальных даёт комбо.
+// У каждого упражнения свой характер: скорость, ширина зоны и как она ведёт себя после повтора.
+// Не хочется играть — «Быстрая тренировка»: без мини-игры, но только 70% прироста.
+const GYM_REPS = 6;
+const GYM_QUICK = 0.7;
 const GYM_GAMES = {
-  cardio: { title: 'Бег в ритме', hint: 'Жми, когда сжимающееся кольцо совпадёт с кругом. Сбился — сбавил темп', max: 12, run: gameRhythm },
-  power: { title: 'Жим штанги', hint: 'Быстро тапай, чтобы поднять штангу до верха. Остановишься — штанга опустится', max: 6, run: gamePress },
-  stretch: { title: 'Растяжка', hint: 'Держи кнопку и отпусти, когда полоска в зелёной зоне. Перетянешь — больно', max: 8, run: gameStretch },
-  bag: { title: 'Комбо на груше', hint: 'Повтори комбинацию ударов по порядку как можно быстрее', max: 8, run: gameCombo },
+  cardio: { title: 'Бег', icon: '🏃', hint: 'Метка бегает быстро, зона широкая. Жми в зелёном — держи темп!', speed: 1.5, zone: 0.26, grow: 0.12, move: true },
+  power: { title: 'Жим штанги', icon: '🏋️', hint: 'Метка медленная, но зона узкая. Поймай момент — и штанга наверху!', speed: 0.8, zone: 0.16, grow: 0.08, move: false },
+  stretch: { title: 'Растяжка', icon: '🧘', hint: 'Спокойно: метка плавная, зона широкая. Идеальные повторы снимают усталость', speed: 0.7, zone: 0.3, grow: 0.06, move: true },
+  bag: { title: 'Груша', icon: '🥊', hint: 'После каждого удара зона прыгает в новое место. Бей точно!', speed: 1.2, zone: 0.2, grow: 0.1, move: true },
 };
+Object.values(GYM_GAMES).forEach((g) => { g.max = GYM_REPS * 2; });
 
-// ---------- Бег: ритм ----------
-function gameRhythm(mg) {
+function gameReps(mg, cfg) {
   const arena = $('mgArena');
-  arena.innerHTML = `<div class="gy-ring-wrap"><div class="gy-target"></div><div class="gy-ring" id="gyRing"></div><div class="gy-runner">🏃</div></div>
-    <button class="btn primary wide mg-big" id="gyBtn">👟 Шаг!</button>`;
-  let start = performance.now(), period = 1100, beats = 0;
-  const ring = $('gyRing');
+  arena.innerHTML = `<div class="gy-reps-wrap"><div class="gy-icon" id="gyIcon">${cfg.icon}</div>
+      <div class="gy-lane"><div class="gy-zone" id="gyZone"><i></i></div><div class="gy-mark" id="gyMark"></div></div>
+      <div class="gy-dots" id="gyDots">${'<span></span>'.repeat(GYM_REPS)}</div><div class="gy-combo-txt" id="gyCombo"></div></div>
+    <button class="btn primary wide mg-big" id="gyBtn">${cfg.icon} Повтор!</button>`;
+  let pos = 0, dir = 1, last = performance.now(), speed = cfg.speed, reps = 0, combo = 0, zone = 0.5 - cfg.zone / 2, lock = false;
+  const place = () => { $('gyZone').style.left = zone * 100 + '%'; $('gyZone').style.width = cfg.zone * 100 + '%'; };
+  place();
   const loop = (now) => {
     if (!mgAlive(mg)) return;
-    const t = ((now - start) % period) / period; // 0 → 1: кольцо сжимается от 2.2 до 0.6
-    ring.style.transform = `translate(-50%, -50%) scale(${2.2 - t * 1.6})`;
+    const dt = (now - last) / 1000; last = now;
+    pos += dir * speed * dt;
+    if (pos >= 1) { pos = 1; dir = -1; } else if (pos <= 0) { pos = 0; dir = 1; }
+    $('gyMark').style.left = pos * 100 + '%';
     mg.raf = requestAnimationFrame(loop);
   };
   mg.raf = requestAnimationFrame(loop);
   $('gyBtn').onpointerdown = (e) => {
     e.preventDefault();
-    if (!mgAlive(mg)) return;
-    const t = ((performance.now() - start) % period) / period;
-    const scale = 2.2 - t * 1.6, err = Math.abs(scale - 1);
-    if (err < 0.12) { mgScore(2); sfx('crit'); floatAt($('gyBtn'), 'Идеально!', 'good'); }
-    else if (err < 0.3) { mgScore(1); sfx('tap'); floatAt($('gyBtn'), 'Хорошо', 'good'); }
-    else { sfx('error'); shakeArena(); floatAt($('gyBtn'), 'Сбился!', 'bad'); }
-    beats++;
-    period = Math.max(650, 1100 - beats * 30); // темп растёт
-    start = performance.now() - period * 0.05;
+    if (!mgAlive(mg) || lock) return;
+    const center = zone + cfg.zone / 2;
+    const dot = $('gyDots').children[reps];
+    let res;
+    if (Math.abs(pos - center) <= cfg.zone * 0.17) res = 'perfect';
+    else if (pos >= zone && pos <= zone + cfg.zone) res = 'good';
+    else res = 'miss';
+    if (res === 'perfect') {
+      combo++;
+      mgScore(2 + (combo >= 3 ? 1 : 0));
+      sfx('crit'); haptic('medium');
+      floatAt($('gyBtn'), combo >= 3 ? `Комбо ×${combo}!` : 'Идеально!', 'good');
+    } else if (res === 'good') { combo = 0; mgScore(1); sfx('gym'); haptic('light'); floatAt($('gyBtn'), 'Хорошо', 'good'); }
+    else { combo = 0; sfx('error'); shakeArena(); floatAt($('gyBtn'), 'Мимо', 'bad'); }
+    dot.className = res;
+    $('gyCombo').textContent = combo >= 2 ? `🔥 серия ${combo}` : '';
+    $('gyIcon').animate([{ transform: 'translateY(0) scale(1)' }, { transform: `translateY(${res === 'miss' ? 4 : -14}px) scale(${res === 'perfect' ? 1.25 : 1.05})` }, { transform: 'translateY(0) scale(1)' }], { duration: 260 });
+    reps++;
+    if (reps >= GYM_REPS) { lock = true; setTimeout(mgEnd, 450); return; }
+    speed += cfg.speed * cfg.grow; // каждый повтор чуть быстрее
+    if (cfg.move) { zone = rand(0.05, 0.95 - cfg.zone); place(); }
+    lock = true; setTimeout(() => { lock = false; }, 160); // защита от двойного нажатия
   };
-}
-
-// ---------- Жим: быстрые тапы против веса ----------
-function gamePress(mg) {
-  const arena = $('mgArena');
-  arena.innerHTML = `<div class="gy-press"><div class="gy-bar-track"><div class="gy-bar-fill" id="gyFill"></div><div class="gy-barbell" id="gyBell">🏋️</div></div><div class="gy-reps" id="gyReps"></div></div>
-    <button class="btn primary wide mg-big" id="gyBtn">💪 Жми!</button>`;
-  let h = 0, last = performance.now(), weight = 0.38;
-  const loop = (now) => {
-    if (!mgAlive(mg)) return;
-    const dt = (now - last) / 1000; last = now;
-    h = Math.max(0, h - weight * dt);
-    $('gyFill').style.height = h * 100 + '%';
-    $('gyBell').style.bottom = `calc(${h * 100}% - 14px)`;
-    mg.raf = requestAnimationFrame(loop);
-  };
-  mg.raf = requestAnimationFrame(loop);
-  $('gyBtn').onpointerdown = (e) => {
-    e.preventDefault();
-    if (!mgAlive(mg)) return;
-    h += 0.075 * (1 + S.strength / 200);
-    haptic('light');
-    if (h >= 1) {
-      h = 0;
-      weight += 0.06; // каждый повтор тяжелее
-      mgScore(1);
-      sfx('gym');
-      $('gyReps').textContent += '🏋️';
-      floatAt($('gyBtn'), 'Повтор!', 'good');
-    }
-  };
-}
-
-// ---------- Растяжка: держи и отпусти в зоне ----------
-function gameStretch(mg) {
-  const arena = $('mgArena');
-  arena.innerHTML = `<div class="gy-stretch"><div class="gy-st-track"><div class="gy-st-zone" id="gyZone"></div><div class="gy-st-fill" id="gyFill"></div></div><div class="gy-pose" id="gyPose">🙆</div></div>
-    <button class="btn primary wide mg-big" id="gyBtn">Держи и тянись…</button>`;
-  let holding = false, v = 0, last = performance.now(), tries = 0, zone = 0;
-  const newZone = () => { zone = rand(0.45, 0.75); $('gyZone').style.left = zone * 100 + '%'; };
-  newZone();
-  const loop = (now) => {
-    if (!mgAlive(mg)) return;
-    const dt = (now - last) / 1000; last = now;
-    if (holding) v = Math.min(1, v + dt * (0.45 + tries * 0.05));
-    $('gyFill').style.width = v * 100 + '%';
-    mg.raf = requestAnimationFrame(loop);
-  };
-  mg.raf = requestAnimationFrame(loop);
-  const btn = $('gyBtn');
-  btn.onpointerdown = (e) => { e.preventDefault(); if (mgAlive(mg)) { holding = true; v = 0; $('gyPose').textContent = '🧘'; } };
-  const release = (e) => {
-    if (!holding || !mgAlive(mg)) return;
-    e.preventDefault();
-    holding = false;
-    const inZone = v >= zone && v <= zone + 0.15;
-    if (inZone) { const perfect = Math.abs(v - (zone + 0.075)) < 0.03; mgScore(perfect ? 2 : 1); sfx(perfect ? 'crit' : 'good'); floatAt(btn, perfect ? 'Идеально!' : 'Хорошо', 'good'); }
-    else if (v > zone + 0.15) { sfx('error'); shakeArena(); floatAt(btn, 'Перетянул!', 'bad'); }
-    else { sfx('error'); floatAt(btn, 'Мало', 'bad'); }
-    $('gyPose').textContent = '🙆';
-    tries++;
-    if (tries >= 5) setTimeout(mgEnd, 400); else newZone();
-  };
-  btn.onpointerup = release;
-  btn.onpointerleave = release;
-}
-
-// ---------- Груша: повтори комбо ----------
-function gameCombo(mg) {
-  const arena = $('mgArena');
-  const PUNCHES = [['⬅️', 'Левой'], ['➡️', 'Правой'], ['⬆️', 'Апперкот'], ['⬇️', 'По корпусу']];
-  arena.innerHTML = `<div class="gy-combo"><div class="gy-bag" id="gyBag">🥊</div><div class="gy-seq" id="gySeq"></div></div>
-    <div class="gy-pads">${PUNCHES.map(([e, n], i) => `<button class="btn" data-i="${i}">${e}<small>${n}</small></button>`).join('')}</div>`;
-  let seq = [], pos = 0, len = 3;
-  const show = () => { $('gySeq').innerHTML = seq.map((i, k) => `<span class="${k < pos ? 'ok' : ''}">${PUNCHES[i][0]}</span>`).join(''); };
-  const next = () => { seq = Array.from({ length: len }, () => Math.floor(Math.random() * 4)); pos = 0; show(); };
-  next();
-  arena.querySelectorAll('.gy-pads .btn').forEach((b) => {
-    b.onpointerdown = (e) => {
-      e.preventDefault();
-      if (!mgAlive(mg)) return;
-      const i = +b.dataset.i;
-      $('gyBag').animate([{ transform: 'rotate(0)' }, { transform: `rotate(${i === 0 ? 12 : i === 1 ? -12 : 0}deg) translateY(${i === 2 ? -10 : 4}px)` }, { transform: 'rotate(0)' }], { duration: 180 });
-      if (i === seq[pos]) {
-        pos++; sfx('punch'); show();
-        if (pos >= seq.length) { mgScore(1); sfx('crit'); floatAt($('gyBag'), `Комбо ×${len}!`, 'good'); len = Math.min(6, len + 1); setTimeout(() => mgAlive(mg) && next(), 250); }
-      } else { sfx('error'); shakeArena(); floatAt($('gyBag'), 'Сбился!', 'bad'); pos = 0; show(); }
-    };
-  });
 }
 
 // ---------- Вкладка зала ----------
@@ -158,13 +92,14 @@ EXTRA_TABS.life.gym = () => {
     <div class="places">${GYMS.map((x) => `<button class="${x.id === g.id ? 'on' : ''}" data-act="gymPlace" data-id="${x.id}" ${reqOk(x.req) ? '' : `disabled data-why="Нужно: ${reqList(x.req).filter((r) => !r.ok).map((r) => r.text).join(', ')}"`}>
       <span>${x.emoji}</span>${x.name}<small>${x.price ? fmt(x.price) + ' ₽' : 'бесплатно'} · до ${x.cap}</small></button>`).join('')}</div>
     <div class="info-card">${g.emoji} <b>${g.name}</b>: ${g.desc}. Прирост ×${g.gain}, потолок формы и силы — ${g.cap}.${hasEffect('protein') ? ' 🥛 Протеин: прирост +50%!' : ''}
-      <br>🎮 Каждое упражнение — мини-игра: сыграл лучше — накачался больше (до ×1.4).</div>
+      <br>🎮 Подход — 6 повторов секунд на 10: жми в зелёной зоне, в золотой — идеально (до ×1.4). Некогда — ⚡ «Быстро»: без игры, ×${GYM_QUICK}.</div>
     ${EXERCISES.map((ex) => {
       const why = gymCheck(ex, g);
       const gains = joinFx([ex.form ? `до +${(ex.form * g.gain * 1.4).toFixed(1)} формы` : '', ex.strength ? `до +${(ex.strength * g.gain * 1.4).toFixed(1)} силы` : '', plus(ex.health, '❤️'), plus(ex.mood, '😊')]);
       return card({ thumb: ex.emoji, title: `${ex.name} <span class="tag-line">🎮 ${GYM_GAMES[ex.id].title}</span>`,
         desc: `${ex.desc}<br><b>${gains}</b><br>−${ex.energy} ⚡ · −${ex.food} 🍞 · усталость ${ex.fatigue > 0 ? '+' : ''}${ex.fatigue}`,
-        btn: `<button class="btn ${why ? '' : 'primary'}" data-act="gym" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>${g.price ? `<i class="ic" data-ic="coin"></i>${fmt(g.price)}` : 'Начать'}</button>` });
+        btn: `<div class="btn-col"><button class="btn ${why ? '' : 'primary'}" data-act="gym" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>${g.price ? `<i class="ic" data-ic="coin"></i>${fmt(g.price)}` : '🎮 Подход'}</button>
+          <button class="btn small" data-act="gymQuick" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>⚡ Быстро</button></div>` });
     }).join('')}
     ${hasEffect('backpain') ? '<div class="info-card warn">🦴 Сорвана спина — в зал нельзя. Купи мазь в аптеке.</div>' : ''}`;
 };
@@ -178,7 +113,18 @@ ACTIONS.gym = (exId) => {
   S.energy -= ex.energy;
   feed(-ex.food);
   const gm = GYM_GAMES[ex.id];
-  runGame({ title: `${ex.emoji} ${gm.title}`, hint: gm.hint, duration: ex.id === 'stretch' ? 0 : 20, setup: (mg) => gm.run(mg), finish: (score) => finishWorkout(ex, g, score) });
+  runGame({ title: `${ex.emoji} ${gm.title}`, hint: gm.hint, duration: 0, setup: (mg) => gameReps(mg, gm), finish: (score) => finishWorkout(ex, g, score) });
+};
+// Без мини-игры: сразу результат, но прирост меньше
+ACTIONS.gymQuick = (exId) => {
+  const g = GYMS.find((x) => x.id === S.gymPlace) || GYMS[0];
+  const ex = EXERCISES.find((x) => x.id === exId);
+  const why = gymCheck(ex, g);
+  if (why) { toast(why, 'bad'); return; }
+  S.money -= g.price;
+  S.energy -= ex.energy;
+  feed(-ex.food);
+  finishWorkout(ex, g, Math.round(GYM_GAMES[ex.id].max * GYM_QUICK));
 };
 
 function finishWorkout(ex, g, score) {
