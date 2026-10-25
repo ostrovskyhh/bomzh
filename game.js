@@ -494,7 +494,9 @@ function takeMoney(part, cap) {
 
 // ---------- Опыт и уровни ----------
 
-function xpNeed(l) { return Math.round(30 * l ** 1.5); }
+// До 5 уровня быстро, дальше каждый уровень требует на 10% больше прежней формулы (10 ур. ×1.5, 20 ур. ×2.5)
+function xpNeedV1(l) { return Math.round(30 * l ** 1.5); }
+function xpNeed(l) { return l <= 5 ? xpNeedV1(l) : Math.round(xpNeedV1(l) * (1 + 0.1 * (l - 5))); }
 function levelInfo(xp = S.xp) {
   let l = 1, rest = xp;
   while (rest >= xpNeed(l)) { rest -= xpNeed(l); l++; }
@@ -1113,7 +1115,9 @@ const TABS = { shop: 'housing', life: 'work', fun: 'casino', tasks: 'tasks' };
 let currentScreen = 'game';
 
 function priceBtn(act, id, price, can, label) {
-  return `<button class="btn ${can ? 'primary' : ''}" data-act="${act}" data-id="${id}" ${can ? '' : 'disabled'}>${label || (price ? `<i class="ic" data-ic="coin"></i>${fmt(price)}` : 'Бесплатно')}</button>`;
+  // data-why — подсказка при нажатии на недоступную кнопку (см. ux.js)
+  const why = !can && price > S.money ? ` data-why="Не хватает ${fmt(Math.ceil(price - S.money))} ₽"` : '';
+  return `<button class="btn ${can ? 'primary' : ''}" data-act="${act}" data-id="${id}" ${can ? '' : 'disabled'}${why}>${label || (price ? `<i class="ic" data-ic="coin"></i>${fmt(price)}` : 'Бесплатно')}</button>`;
 }
 function card({ thumb, title, desc = '', extra = '', btn = '', cls = '' }) {
   return `<div class="card ${cls}"><div class="thumb">${thumb}</div>

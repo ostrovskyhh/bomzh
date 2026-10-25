@@ -601,6 +601,75 @@ main { flex: 1; min-height: 0; position: relative; }
 .vd-card { margin: 10px auto 12px; max-width: 280px; padding: 16px 14px; border-radius: 12px; background: #F4EEDC; color: #2A241F; text-align: center; font-size: 15px; line-height: 1.5; box-shadow: 0 6px 18px rgba(0,0,0,.3); animation: vdIn .25s ease-out; }
 @keyframes vdIn { from { transform: translateY(-14px) rotate(-3deg); opacity: 0; } }
 .vd-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Переход к заданию: подсветка цели на 5 секунд */
+.goal.go { cursor: pointer; }
+.goal .go-arrow { font-style: normal; color: var(--gold); font-weight: 800; }
+.goal-hl { position: relative; z-index: 3; animation: goalHl 1s ease-in-out infinite; border-radius: 14px; }
+@keyframes goalHl { 0%, 100% { box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(242,199,68,.6); } 50% { box-shadow: 0 0 0 6px rgba(242,199,68,.35), 0 0 28px rgba(242,199,68,.8); } }
+/* Окно «Что нового» */
+.news-list { text-align: left; margin: 8px 0; max-height: 50vh; overflow-y: auto; }
+.news-list h4 { margin: 10px 0 6px; color: var(--gold); font-size: 14px; }
+.news-list li { margin: 0 0 6px 0; font-size: 13.5px; line-height: 1.35; list-style: none; }
+/* Лотерея */
+.premium-hero.lotto-hero { background: linear-gradient(135deg, #1B5E20, #F2C744); }
+.tk { text-align: center; }
+.tk-head { padding: 12px; border-radius: 14px 14px 0 0; background: var(--tk); color: #fff; font-weight: 800; font-size: 17px; }
+.tk-head small { display: block; font-weight: 500; font-size: 12px; opacity: .9; margin-top: 2px; }
+.tk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; background: #F4EEDC; border-radius: 0 0 14px 14px; }
+.tk-cell { position: relative; height: 62px; border: 0; border-radius: 10px; background: #fff; color: #2A241F; font-weight: 800; font-size: 14px; overflow: hidden; }
+.tk-cell i { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #B0B0B0, #B0B0B0 6px, #C8C8C8 6px, #C8C8C8 12px); transition: opacity .35s, transform .35s; }
+.tk-cell i::after { content: '🪙'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 20px; opacity: .6; }
+.tk-cell.open i { opacity: 0; transform: scale(1.3) rotate(8deg); }
+.tk-cell.win { background: #FFE082; box-shadow: 0 0 0 3px #F2C744; animation: tkWin .6s ease-in-out 3; }
+@keyframes tkWin { 50% { transform: scale(1.08); } }
+.tk-result { min-height: 30px; margin: 10px 0; font-size: 16px; }
+.tk-win { color: var(--gold); }
+.tk-lose { color: var(--muted); }
+/* Русское лото */
+.loto { text-align: center; }
+.loto-top { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+.loto-barrel { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #fff, #E8D9B0); color: #8E1B2E; font-size: 26px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.4); }
+.loto-call { font-size: 16px; font-weight: 700; max-width: 180px; text-align: left; }
+.loto-rivals { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+.loto-rival { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 10px; background: var(--card); font-size: 12px; }
+.loto-rival span { font-size: 18px; }
+.loto-rival i { font-style: normal; color: var(--gold); font-weight: 800; }
+.loto-card { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; padding: 6px; border-radius: 10px; background: #F4EEDC; }
+.loto-n, .loto-e { height: 34px; border-radius: 6px; font-size: 14px; font-weight: 800; }
+.loto-n { border: 0; background: #fff; color: #2A241F; padding: 0; }
+.loto-e { background: #E6DCC2; }
+.loto-n.hint { box-shadow: inset 0 0 0 2px #F2C744; }
+.loto-n.on { background: #C62828; color: #fff; }
+.loto-called { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 6px 0; min-height: 22px; }
+.loto-called i { font-style: normal; font-size: 11px; padding: 2px 6px; border-radius: 8px; background: var(--card); }
+/* Приказ о приёме / назначении */
+.cer { text-align: center; }
+.cer-badge { position: relative; height: 92px; display: grid; place-items: center; }
+.cer-badge span { position: relative; font-size: 58px; animation: cerBadge .7s cubic-bezier(.2,.9,.3,1.5) both; }
+@keyframes cerBadge { from { transform: scale(0) rotate(-30deg); } }
+.cer-doc { position: relative; margin: 4px auto 10px; max-width: 290px; padding: 14px 14px 12px; border-radius: 6px; background: #F4EEDC; color: #2A241F; text-align: left;
+  box-shadow: 0 8px 20px rgba(0,0,0,.4); animation: cerDoc .55s cubic-bezier(.2,.8,.3,1.1) both; overflow: hidden; }
+@keyframes cerDoc { from { transform: translateY(60px) rotate(6deg); opacity: 0; } }
+.cer-head { font-size: 11px; letter-spacing: 2px; font-weight: 800; color: #6A5A45; text-align: center; border-bottom: 1px solid #CDBF9F; padding-bottom: 6px; margin-bottom: 8px; }
+.cer-line { font-size: 13px; }
+.cer-pos { margin: 6px 0 2px; font-size: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cer-pos s { color: #9A8B73; font-size: 13px; }
+.cer-pos i { font-style: normal; color: #B3122E; }
+.cer-job { font-size: 12px; color: #6A5A45; }
+.cer-sign { margin-top: 10px; font-size: 11px; color: #6A5A45; }
+.cer-sign i { font-family: cursive; color: #2F5DA8; }
+.cer-stamp { position: absolute; right: 10px; bottom: 12px; padding: 4px 10px; border: 3px solid #C62828; border-radius: 8px; color: #C62828; font-weight: 800; letter-spacing: 2px;
+  transform: rotate(-14deg); opacity: 0; animation: cerStamp .35s cubic-bezier(.3,1.6,.5,1) .85s forwards; }
+@keyframes cerStamp { from { transform: rotate(-14deg) scale(3); opacity: 0; } to { transform: rotate(-14deg) scale(1); opacity: .9; } }
+.cer.hire .cer-stamp { border-color: #2E7D32; color: #2E7D32; }
+.cer-mult { font-size: 14px; color: var(--muted); }
+.cer-mult b { font-size: 22px; color: var(--gold); }
+.cer-text { font-size: 13px; margin: 8px 0; }
+.vd-rule { font-size: 12px; line-height: 1.35; padding: 7px 10px; border-radius: 10px; background: rgba(242, 199, 68, .14); color: #F3E6CF; text-align: center; }
+.vd-card small { font-size: 12.5px; }
+.vd-trap { display: inline-block; margin-top: 4px; font-size: 12.5px; color: #B3122E; font-weight: 700; }
+.vd-time { height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; margin: -4px 0 10px; }
+.vd-time div { height: 100%; width: 100%; background: var(--gold); }
 /* Лечение курсом */
 .course { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 12px; }
 .course span { padding: 3px 8px; border-radius: 8px; background: var(--card2); white-space: nowrap; }
@@ -638,6 +707,40 @@ main { flex: 1; min-height: 0; position: relative; }
 @keyframes csFx { to { transform: translateY(330px) rotate(200deg); opacity: .3; } }
 .cs-caption { min-height: 58px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--card2); font-size: 15px; line-height: 1.4; font-weight: 600; cursor: pointer; }
 .cs-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.cs-nav { display: flex; gap: 6px; }
+.cs-nav .btn { min-width: 44px; }
+.cs .cs-dots { justify-content: center; margin-top: 8px; }
+.cut-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; max-height: 50vh; overflow-y: auto; }
+.cut-list .btn { font-size: 12.5px; padding: 10px 6px; text-align: left; }
+/* Красная точка на разделе с наградой или задачей */
+.seg.tiles button { position: relative; }
+.seg.tiles button.has-dot::after { content: ''; position: absolute; top: 4px; right: 12%; width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px var(--card); }
+/* Недоступные кнопки: нажатие ловит общий обработчик и объясняет, чего не хватает (ux.js) */
+button:disabled { pointer-events: none; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Спортзал: мини-игры */
+.gy-ring-wrap { position: relative; height: 190px; margin-bottom: 10px; }
+.gy-target, .gy-ring { position: absolute; left: 50%; top: 50%; width: 90px; height: 90px; border-radius: 50%; transform: translate(-50%, -50%); }
+.gy-target { border: 6px solid var(--green); box-shadow: 0 0 14px rgba(108,195,106,.5); }
+.gy-ring { border: 4px solid var(--gold); }
+.gy-runner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 36px; }
+.gy-press { display: flex; align-items: flex-end; justify-content: center; gap: 14px; height: 200px; margin-bottom: 10px; }
+.gy-bar-track { position: relative; width: 60px; height: 190px; border-radius: 14px; background: rgba(255,255,255,.08); overflow: visible; }
+.gy-bar-fill { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 14px; background: linear-gradient(0deg, #C0392B, #F2C744); }
+.gy-barbell { position: absolute; left: 50%; transform: translateX(-50%); font-size: 30px; }
+.gy-reps { width: 60px; font-size: 18px; line-height: 1.3; word-break: break-all; }
+.gy-stretch { text-align: center; margin: 20px 0 12px; }
+.gy-st-track { position: relative; height: 22px; border-radius: 11px; background: rgba(255,255,255,.1); overflow: hidden; }
+.gy-st-zone { position: absolute; top: 0; bottom: 0; width: 15%; background: rgba(108,195,106,.45); }
+.gy-st-fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #6CC36A, #F2C744, #D9534F); opacity: .85; }
+.gy-pose { font-size: 54px; margin-top: 14px; }
+.gy-combo { text-align: center; margin: 6px 0 10px; }
+.gy-bag { font-size: 64px; display: inline-block; }
+.gy-seq { display: flex; justify-content: center; gap: 6px; margin-top: 6px; font-size: 26px; min-height: 36px; }
+.gy-seq span.ok { opacity: .3; }
+.gy-pads { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.gy-pads .btn { display: flex; flex-direction: column; align-items: center; font-size: 22px; padding: 8px 2px; }
+.gy-pads .btn small { font-size: 10px; }
 .cs-dots { display: flex; gap: 5px; }
 .cs-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--card2); }
 .cs-dots i.on { background: var(--gold); }
@@ -698,6 +801,36 @@ main { flex: 1; min-height: 0; position: relative; }
 .sk-bar b.gold { background: #F2C744; } .sk-bar b.burn { background: #5A2A1A; }
 /* Навыки, настройки, админка */
 .lvl-dots { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-left: 4px; }
+/* Общий топ */
+.premium-hero.top-hero { background: linear-gradient(135deg, #7A5A10, #E0A92E); }
+.top-why { margin: 8px 0; }
+.top-why summary, .top-row summary { list-style: none; cursor: pointer; }
+.top-why summary::-webkit-details-marker, .top-row summary::-webkit-details-marker { display: none; }
+.top-why > summary { padding: 9px 12px; border-radius: 12px; background: var(--card); font-size: 13px; font-weight: 700; color: var(--gold); }
+.top-why > summary::after { content: ' ▾'; }
+.top-why .info-card { margin-top: 8px; }
+.top-parts { display: grid; gap: 4px; margin-top: 6px; }
+.top-parts div { display: flex; justify-content: space-between; padding: 6px 12px; border-radius: 10px; background: var(--card); font-size: 13px; }
+.top-parts b { color: var(--green); }
+.top-row { margin-bottom: 8px; border-radius: 16px; background: var(--card); overflow: hidden; }
+.top-row.me { box-shadow: 0 0 0 2px var(--gold); }
+.top-row > summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.top-row .card-body { flex: 1; min-width: 0; }
+.top-row .card-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-score { text-align: right; font-weight: 800; color: var(--gold); font-size: 15px; }
+.top-score small { display: block; font-size: 10px; color: var(--muted); font-weight: 500; }
+.top-stats { padding: 0 10px 10px; }
+.top-stats b { font-size: 12px; }
+/* Онлайн-бой */
+.online-box { margin: 10px 0; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, #1E2A4A, #3A1E4A); display: grid; gap: 8px; }
+.online-box small { color: #C9C3DA; font-size: 12px; line-height: 1.35; }
+.online-box .code-row { margin: 0; }
+.online-box input { text-transform: uppercase; letter-spacing: 3px; font-weight: 800; }
+.ob-code { margin: 12px auto; font-size: 40px; font-weight: 800; letter-spacing: 8px; color: var(--gold); text-align: center; }
+.ob-timer { height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; margin: 4px 0 8px; }
+.ob-timer div { height: 100%; background: var(--green); transition: width 1s linear; }
+.ob-timer div.low { background: var(--red); }
+.ob-leave { margin: 8px auto 0; display: block; }
 .ref-box { margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--card); }
 .ref-box > b { display: block; margin-bottom: 6px; }
 .ref-box small { display: block; color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.35; }

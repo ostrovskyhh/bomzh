@@ -2,7 +2,7 @@
 
 // ---------- Цели квестов ----------
 // qc — счётчик с момента начала главы, qv — значение, которое должно достичь порога
-const qc = (key, need, text) => ({ text, need, cur: () => counter(key) - ((S.quest.base || {})[key] || 0) });
+const qc = (key, need, text) => ({ key, text, need, cur: () => counter(key) - ((S.quest.base || {})[key] || 0) });
 const qv = (fn, need, text) => ({ text, need, cur: fn });
 
 const QUESTS = [
@@ -27,35 +27,71 @@ const QUESTS = [
   // --- Честный путь ---
   { id: 'h_rank', path: 'honest', who: '🧔', name: 'Михалыч', title: 'Уважаемый человек', text: 'Правильно, Валера. Работай честно — и люди потянутся. Покажи себя на работе и обзаведись шалашом.',
     goals: [qv(() => Math.max(...JOBS.map((j) => jobRank(j.id))), 1, 'Получи первое повышение на работе'), qv(() => S.ownedHousing || 0, 2, 'Купи шалаш')], reward: { money: 600, caps: 2, xp: 150 } },
+  { id: 'h_shelter', path: 'honest', who: '🥣', name: 'Тётя Валя из ночлежки', title: 'Тёплый суп', text: 'Валерочка, ты же сам с лавки поднялся. Помоги ночлежке: поработай с нами и подкорми ребят. Добро возвращается.',
+    goals: [qc('stateShift', 5, 'Отработай 5 смен на госслужбе (дворник, почта…)'), qc('eat', 5, 'Пообедай 5 раз — повариха проверит'), qc('leisureGame', 1, 'Сходи с ребятами на рыбалку или шашлыки')], reward: { money: 1500, caps: 3, xp: 250, buff: ['inlove', 10] } },
   // --- Тёмная дорожка ---
   { id: 'd_deals', path: 'dark', who: '🦊', name: 'Шнырь', title: 'Дела Шныря', text: 'Вот это я понимаю! Тащи мне товар и разберись с конкурентами.',
     goals: [qc('marketSold', 15, 'Продай Шнырю 15 вещей'), qc('fightWin', 5, 'Выиграй 5 драк')], reward: { money: 800, caps: 2, xp: 150 } },
+  { id: 'd_crew', path: 'dark', who: '🦊', name: 'Шнырь', title: 'Своя бригада', text: 'Одному на районе не выжить, Валера. Кривой и Гоша Лом готовы работать с нами — но им надо показать, что ты не фраер. Подкачайся, набей пару морд и покажи, что у тебя водятся деньги.',
+    goals: [qv(() => Math.floor(S.strength), 20, 'Сила 20+'), qc('fightWin', 5, 'Выиграй ещё 5 драк'), qv(() => S.money, 5000, 'Держи в кармане 5 000 ₽')], reward: { money: 2000, caps: 3, xp: 250 } },
   { id: 'edik1', who: '🕵️', name: 'Слухи', title: 'Эдик на рынке', text: 'Говорят, Эдик — тот самый, что тебя кинул, — крутится на рынке. Нужно подняться повыше, чтобы до него добраться.',
     goals: [qv(() => level(), 8, 'Достигни 8 уровня'), qv(() => S.ownedHousing || 0, 3, 'Купи гараж')], reward: { money: 2000, caps: 3, xp: 250 } },
   { id: 'h_college', path: 'honest', who: '👩‍🏫', name: 'Завуч', title: 'Учиться, учиться и учиться', text: 'Эдика честно не победить без образования. Получи диплом ПТУ и наработай опыт.',
     goals: [qv(() => S.edu, 2, 'Окончи ПТУ'), qc('shift', 15, 'Отработай 15 смен')], reward: { money: 3000, caps: 3, xp: 300 } },
+  { id: 'd_racket', path: 'dark', who: '🥩', name: 'Бугай с рынка', title: 'Крыша для ларька', text: 'Эдик держит рынок через Бугая — двухметрового громилу. Шнырь говорит: «Уложишь Бугая — рынок наш, и Эдик занервничает». Готовься, бить он умеет.',
+    goals: [qv(() => level(), 9, 'Достигни 9 уровня'), qv(() => Math.floor(S.strength), 25, 'Сила 25+')],
+    boss: { name: 'Бугай с рынка', style: 'brawler', eq: { hat: 'kepka', body: 'pukhovik', shoes: 'boots' }, lvl: 0, form: 35, strength: 45, tier: 3, intro: '«Чё, бомжара, рынок захотел?»' },
+    reward: { money: 5000, caps: 4, xp: 350 } },
   { id: 'd_league', path: 'dark', who: '🥊', name: 'Промоутер', title: 'Районная лига', text: 'Шнырь замолвил за тебя словечко. Пробейся в районную лигу — там крутятся люди Эдика.',
     goals: [qv(() => (S.fight ? S.fight.rating : 1000), 1200, 'Рейтинг драк 1200+'), qv(() => (S.fight ? S.fight.best : 0), 3, 'Серия из 3 побед')], reward: { money: 3500, caps: 3, xp: 300 } },
   { id: 'barsik', who: '🧔', name: 'Михалыч', title: 'Где Барсик?', text: 'Валера! Видел у Эдикова дома рыжего кота. Не твой ли Барсик? Поищи зацепки по району.',
     goals: [qc('trash', 5, 'Обыщи 5 мусорок'), qc('events', 10, 'Расспроси улицу (10 событий)')], reward: { money: 1000, xp: 200, pet: 'cat' } },
+  { id: 'd_casino', path: 'dark', who: '🎰', name: 'Крупье Лёша', title: 'Ночь в «Золотой крышке»', text: 'Люди Эдика каждую ночь проигрывают в казино его деньги. Втерись к ним в доверие за игровым столом — и узнаешь, где он прячет документы на твою квартиру.',
+    goals: [qc('casino', 15, 'Сыграй в казино 15 раз'), qc('bjWin', 3, 'Выиграй 3 раздачи в блекджек'), qv(() => (S.fight ? S.fight.rating : 1000), 1300, 'Рейтинг драк 1300+ (чтобы уважали)')], reward: { money: 8000, caps: 4, xp: 400 } },
   { id: 'biz', who: '💼', name: 'Бизнес-тренер', title: 'Своё дело', text: 'Хватит работать на дядю. Открой бизнес и обзаведись колёсами.',
     goals: [qv(() => Object.keys(S.biz).length, 1, 'Открой бизнес'), qv(() => S.transport, 1, 'Купи транспорт')], reward: { money: 5000, caps: 4, xp: 400 } },
+  { id: 'love', who: '💘', name: 'Сердце Валеры', title: 'Не хлебом единым', text: 'Деньги есть, крыша над головой есть, а приходишь домой — и поговорить не с кем. Может, пора кого-то встретить?',
+    goals: [qc('date', 3, 'Сходи на 3 свидания'), qv(() => (S.girlfriend ? 1 : 0), 1, 'Найди девушку')], reward: { money: 3000, caps: 3, xp: 300, buff: ['inlove', 15] } },
   { id: 'h_career', path: 'honest', who: '🏢', name: 'HR-менеджер', title: 'Карьера', text: 'Мы видим ваш потенциал, Валерий. Колледж и опыт — и место в офисе ваше.',
     goals: [qv(() => S.edu, 3, 'Окончи колледж'), qv(() => Math.max(...JOBS.map((j) => jobRank(j.id))), 2, 'Получи второе повышение на работе')], reward: { money: 15000, caps: 5, xp: 600 } },
+  { id: 'h_court', path: 'honest', who: '⚖️', name: 'Адвокат Розенберг', title: 'Суд против Эдика', text: 'Валерий, у нас есть шанс отсудить квартиру по закону. Но нужен диплом, чтобы судья воспринял всерьёз, и деньги на экспертизу подписи. Эдик будет давить — держитесь.',
+    goals: [qv(() => S.edu, 4, 'Окончи университет'), qv(() => S.money, 50000, 'Собери 50 000 ₽ на экспертизу'), qc('promotion', 1, 'Получи ещё одно повышение')], reward: { money: 20000, caps: 6, xp: 700 } },
   { id: 'd_ring', path: 'dark', who: '💎', name: 'Хозяин ринга', title: 'Подпольный ринг', text: 'Говорят, ты резкий. На моём ринге бьются за большие деньги. Докажи, что достоин.',
     goals: [qv(() => (S.fight ? S.fight.rating : 1000), 1500, 'Рейтинг драк 1500+'), qc('fightWin', 30, 'Выиграй 30 драк')], reward: { money: 18000, caps: 5, xp: 600 } },
+  { id: 'd_betrayal', path: 'dark', who: '🐀', name: 'Шнырь', title: 'Крыса в бригаде', text: 'Кривой шепнул: Шнырь всё это время сливал тебя Эдику. За каждую твою драку Эдик платил ему процент. Шнырь ждёт тебя у гаражей — «поговорить». Разговор будет коротким.',
+    goals: [qv(() => level(), 14, 'Достигни 14 уровня'), qv(() => Math.floor(S.form), 30, 'Форма 30+')],
+    boss: { name: 'Шнырь «Крыса»', style: 'coward', eq: { hat: 'kepka', body: 'rvan', shoes: 'kedy' }, lvl: 1, form: 45, strength: 50, tier: 3, intro: '«Валерка, это бизнес, ничего личного!»' },
+    reward: { money: 15000, caps: 6, xp: 700 } },
   { id: 'edik2', who: '🕵️', name: 'Детектив', title: 'Логово Эдика', text: 'Эдик живёт в элитном районе. Туда пускают только своих — нужна квартира и уровень.',
     goals: [qv(() => level(), 15, 'Достигни 15 уровня'), qv(() => S.ownedHousing || 0, 5, 'Купи квартиру')], reward: { money: 30000, caps: 6, xp: 800 } },
+  { id: 'd_heist', path: 'dark', who: '🔦', name: 'Кривой', title: 'Склад Эдика', text: 'Шныря больше нет, бригада теперь твоя. Кривой знает, где склад Эдика: там его «чёрная касса». Ночью пройдём через мусорки и гаражи — и оставим Эдика без денег перед разборкой.',
+    goals: [qc('trash', 8, 'Разведай подходы: 8 мусорок'), qc('marketSold', 10, 'Сбыть добычу Кривому: 10 вещей'), qv(() => S.transport, 6, 'Нужна машина для вывоза («Жигули»+)')], reward: { money: 40000, caps: 8, xp: 900 } },
   { id: 'final', who: '😈', name: 'Эдик «Риелтор»', title: 'Финальная разборка', text: '«А, Валера… Не думал, что ты выберешься со дна. Квартиру не верну. Разве что… отберёшь силой».',
     boss: true, goals: [qv(() => level(), 18, 'Достигни 18 уровня')], reward: { money: 100000, caps: 20, xp: 2000 } },
+  // --- После Эдика: новая жизнь ---
+  { id: 'family', who: '💒', name: 'Михалыч', title: 'Семейное счастье', text: 'Квартиру вернул, Барсика вернул. Валера, а жениться когда? Не век же одному в особняке куковать.',
+    goals: [qv(() => (S.married ? 1 : 0), 1, 'Сыграй свадьбу'), qv(() => S.ownedHousing || 0, 6, 'Купи особняк')], reward: { money: 150000, caps: 15, xp: 2500 } },
+  { id: 'legend', who: '👑', name: 'Весь район', title: 'Легенда района', text: 'О тебе рассказывают на каждой лавке: бомж, который вернул всё. Осталось стать лучшим в деле — и пройти путь заново, уже легендой.',
+    goals: [qc('promotion', 3, 'Получи ещё 3 повышения'), qv(() => S.onlineWins || 0, 3, 'Победи 3 живых игроков онлайн'), qv(() => (S.prestige || 0), 1, 'Начни новый круг (престиж)')], reward: { money: 300000, caps: 30, xp: 4000 } },
 ];
+
+// Порядок глав до обновления — чтобы старые сохранения продолжили с той же главы
+const QUESTS_V1 = ['start', 'basics', 'trash', 'box', 'gym', 'school', 'job', 'fight', 'choice', 'h_rank', 'd_deals', 'edik1', 'h_college', 'd_league', 'barsik', 'biz', 'h_career', 'd_ring', 'edik2', 'final'];
 
 function questList() { return QUESTS.filter((q) => !q.path || q.path === S.quest.path); }
 function currentQuest() { return questList()[S.quest.idx] || null; }
 function goalsDone(q) { return q.goals.every((g) => g.cur() >= g.need); }
 
 HOOKS.load.push(() => {
-  if (!S.quest) S.quest = { idx: 0, path: null, base: { ...(S.counters || {}) }, bossCd: 0 };
+  if (!S.quest) S.quest = { idx: 0, path: null, base: { ...(S.counters || {}) }, bossCd: 0, v2: true };
+  if (!S.quest.v2) {
+    // В старом списке глава под номером idx — находим её в новом списке по id
+    const old = QUESTS_V1.filter((id) => { const q = QUESTS.find((x) => x.id === id); return !q.path || q.path === S.quest.path; });
+    const id = old[S.quest.idx];
+    const list = QUESTS.filter((q) => !q.path || q.path === S.quest.path);
+    S.quest.idx = id ? list.findIndex((q) => q.id === id) : list.findIndex((q) => q.id === 'family');
+    S.quest.v2 = true;
+  }
   if (!S.tut && S.storySeen && S.stats.taps > 50) S.tut = { done: true }; // старым игрокам обучение не навязываем
 });
 TABS.tasks = 'story';
@@ -68,9 +104,10 @@ const _itemPrice = itemPrice;
 itemPrice = (id, t) => Math.round(_itemPrice(id, t) * (S.quest && S.quest.path === 'dark' ? 1.15 : 1));
 
 function questGoalsHTML(q) {
-  return q.goals.map((g) => {
+  return q.goals.map((g, i) => {
     const cur = Math.min(g.need, Math.max(0, g.cur()));
-    return `<div class="goal ${cur >= g.need ? 'ok' : ''}"><span>${cur >= g.need ? '✅' : '▫️'} ${g.text}</span><b>${fmt(cur)}/${fmt(g.need)}</b>
+    const go = cur < g.need && typeof goalTarget === 'function' && goalTarget(g);
+    return `<div class="goal ${cur >= g.need ? 'ok' : ''} ${go ? 'go' : ''}" ${go ? `data-act="goGoal" data-id="${i}"` : ''}><span>${cur >= g.need ? '✅' : '▫️'} ${g.text}${go ? ' <i class="go-arrow">➜</i>' : ''}</span><b>${fmt(cur)}/${fmt(g.need)}</b>
       <div class="progress"><div style="width:${(cur / g.need) * 100}%"></div></div></div>`;
   }).join('');
 }
@@ -95,11 +132,15 @@ EXTRA_TABS.tasks.story = () => {
     html += `<div class="quest-card"><div class="q-who">${q.who}</div><div class="q-name">${q.name}</div><h3>${q.title}</h3><p>«${q.text}»</p>
       <div class="goals">${questGoalsHTML(q)}</div>
       <div class="q-reward">🎁 ${rewardHTML(q.reward)}</div>
-      ${bossReady ? `<button class="btn primary wide" data-act="bossFight" ${cdLeft('boss') > 0 ? 'disabled' : ''}>👊 Драться с Эдиком${cdLeft('boss') > 0 ? ` (<span data-until="${S.cd.boss}"></span>)` : ''}</button>`
+      ${bossReady ? `<button class="btn primary wide" data-act="bossFight" ${cdLeft('boss') > 0 ? 'disabled' : ''}>👊 Драться: ${q.boss.name || 'Эдик'}${cdLeft('boss') > 0 ? ` (<span data-until="${S.cd.boss}"></span>)` : ''}</button>`
         : `<button class="btn ${done ? 'primary' : ''} wide" data-act="questDone" ${done && !q.boss ? '' : 'disabled'}>${done ? 'Получить награду' : 'Выполняется…'}</button>`}</div>`;
   }
   const past = list.slice(0, S.quest.idx).reverse();
-  if (past.length) html += `<div class="subhead">Пройдено</div>` + past.map((x) => `<div class="card done-q"><div class="thumb">${x.who}</div><div class="card-body"><div class="card-title">✅ ${x.title}</div><div class="card-desc">${x.name}</div></div></div>`).join('');
+  if (typeof cutGalleryCount === 'function' && cutGalleryCount()) html += `<button class="btn wide" data-act="cutGallery">🎬 Пересмотреть мультики (${cutGalleryCount()})</button>`;
+  if (past.length) html += `<div class="subhead">Пройдено</div>` + past.map((x) => {
+    const cut = typeof cutForQuest === 'function' ? cutForQuest(x.id) : null;
+    return `<div class="card done-q"><div class="thumb">${x.who}</div><div class="card-body"><div class="card-title">✅ ${x.title}</div><div class="card-desc">${x.name}</div></div>${cut ? `<button class="btn small" data-act="cutReplay" data-id="${cut}">🎬</button>` : ''}</div>`;
+  }).join('');
   return html;
 };
 
@@ -138,13 +179,15 @@ Object.assign(ACTIONS, {
     const q = currentQuest();
     if (!q || !q.boss || cdLeft('boss') > 0) return;
     if (S.health < 50) { toast('Перед боссом подлечись: нужно здоровье 50+', 'bad'); return; }
-    const lvl = Math.max(20, level() + 2);
-    const edik = { name: 'Эдик «Риелтор»', level: lvl, style: 'tactic', eq: { hat: 'cilinder', body: 'kostum', shoes: 'boots' }, form: 70, strength: 65, tier: 6, rating: 2000 };
-    startFight(edik, {
-      intro: '«Ну давай, бомжара, покажи, чему научился»',
+    // boss: true — финальный Эдик; объект — босс главы (Бугай, Шнырь…)
+    const b = q.boss === true
+      ? { name: 'Эдик «Риелтор»', style: 'tactic', eq: { hat: 'cilinder', body: 'kostum', shoes: 'boots' }, level: Math.max(20, level() + 2), form: 70, strength: 65, tier: 6, intro: '«Ну давай, бомжара, покажи, чему научился»' }
+      : { ...q.boss, level: level() + (q.boss.lvl || 0) };
+    startFight({ ...b, rating: 1500 + b.level * 20 }, {
+      intro: b.intro,
       onEnd: (won) => {
         if (won) { completeQuest(q); track('bossWin'); }
-        else { setCd('boss', 300); resultModal({ emoji: '😈', rays: 'bad', title: 'Эдик победил', text: '«Возвращайся на свою лавку». Подкачайся и приходи через 5 минут.', btn: 'Я вернусь' }); sfx('lose'); }
+        else { setCd('boss', 300); resultModal({ emoji: '😈', rays: 'bad', title: `${b.name} победил`, text: 'Подкачай силу и форму в зале и приходи через 5 минут.', btn: 'Я вернусь' }); sfx('lose'); }
         save();
       },
     });

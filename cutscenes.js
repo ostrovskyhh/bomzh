@@ -48,6 +48,66 @@ const CUTS = {
     { bg: 5, actors: [{ a: 'mihalych', x: 20, anim: 'jump', say: 'Ура!' }, { a: 'valera', x: 50, mood: 'happy', anim: 'jump' }, { a: 'barsik', x: 78, anim: 'jump' }], fx: '🎉', text: 'Конец? Нет — только начало новой жизни!' },
   ],
 
+  // ---------- Тёмная дорожка ----------
+  ch_d_crew: [
+    { bg: 3, night: true, actors: [{ a: 'shnyr', x: 24, say: 'Знакомься, это наши' }, { a: '🧔‍♂️', x: 58, anim: 'in-right' }, { a: '💪', x: 80, anim: 'in-right' }], text: 'Гаражи. Шнырь привёл Кривого и Гошу Лома.' },
+    { bg: 3, night: true, actors: [{ a: 'valera', x: 34, mood: 'ok', say: 'Работаем по-честному. Между собой' }, { a: 'shnyr', x: 70, anim: 'bounce', say: 'Конечно, Валера!' }], text: 'Шнырь улыбается слишком широко…' },
+    { bg: 3, night: true, cam: 'zoom', actors: [{ a: 'valera', x: 50, mood: 'happy', anim: 'jump', say: 'Бригада в сборе!' }], fx: '💸', text: 'У Валеры появилась своя бригада.' },
+  ],
+  boss_d_racket: [
+    { bg: 3, actors: [{ a: 'valera', x: 26, anim: 'in-left' }, { a: '🦍', x: 72, anim: 'in-right', say: 'Чё, рынок захотел?' }], props: [{ e: '🥩', x: 50, y: 70 }], text: 'Бугай — два метра мышц и ни одной мысли.' },
+    { bg: 'red', cam: 'shake', actors: [{ a: 'valera', x: 30, anim: 'shake', say: 'Рынок теперь мой' }, { a: '🦍', x: 70, anim: 'shake' }], fx: '💥', text: 'БОЙ!' },
+  ],
+  ch_d_racket: [
+    { bg: 3, cam: 'shake', actors: [{ a: 'valera', x: 32, mood: 'happy', say: 'Следующий!' }, { a: '🦍', x: 70, anim: 'fall' }], fx: '⭐', text: 'Бугай повержен на глазах у всего рынка.' },
+    { bg: 3, actors: [{ a: 'valera', x: 30, mood: 'happy' }, { a: 'shnyr', x: 70, anim: 'jump', say: 'Ларьки теперь платят нам!' }], fx: '💸', text: 'Продавцы несут конверты уже Валере.' },
+    { bg: 5, night: true, actors: [{ a: 'edik', x: 50, mood: 'sad', anim: 'shake', say: 'Кто посмел?!' }], text: 'Где-то в элитном районе Эдик разбил бокал.' },
+  ],
+  ch_d_casino: [
+    { bg: 'gold', night: true, actors: [{ a: 'valera', x: 30, mood: 'ok', say: 'Ещё карту' }, { a: '🤵', x: 70, say: 'Вы везунчик, Валерий' }], props: [{ e: '🃏', x: 50, y: 60, anim: 'float' }], text: '«Золотая крышка». Люди Эдика за соседним столом.' },
+    { bg: 'gold', night: true, actors: [{ a: '🕴️', x: 66, say: 'Документы шеф держит в сейфе на складе' }, { a: 'valera', x: 30 }], text: 'После третьей бутылки охранник Эдика разговорился.' },
+    { bg: 'night', cam: 'zoom', actors: [{ a: 'valera', x: 50, mood: 'happy', say: 'Склад, значит…' }], text: 'Теперь Валера знает, где искать.' },
+  ],
+  boss_d_betrayal: [
+    { bg: 3, night: true, actors: [{ a: '🧔‍♂️', x: 30, say: 'Шнырь сливал тебя Эдику' }, { a: 'valera', x: 64, mood: 'sad', anim: 'shake', say: 'Не может быть…' }], text: 'Кривой показывает переписку Шныря с Эдиком.' },
+    { bg: 3, night: true, actors: [{ a: 'valera', x: 28, mood: 'ok', say: 'Как ты мог, Шнырь?' }, { a: 'shnyr', x: 70, anim: 'bounce', say: 'Это бизнес, ничего личного!' }], text: 'У гаражей. Один на один.' },
+    { bg: 'red', cam: 'shake', actors: [{ a: 'valera', x: 30, anim: 'shake' }, { a: 'shnyr', x: 70, anim: 'shake' }], fx: '💥', text: 'БОЙ!' },
+  ],
+  ch_d_betrayal: [
+    { bg: 3, night: true, actors: [{ a: 'valera', x: 32, mood: 'ok' }, { a: 'shnyr', x: 70, mood: 'sad', anim: 'fall' }], text: 'Шнырь лежит. Карман порван, из него сыплются Эдиковы деньги.' },
+    { bg: 3, night: true, actors: [{ a: 'shnyr', x: 64, mood: 'sad', say: 'Валерка, прости! Я всё расскажу!' }, { a: 'valera', x: 30, say: 'Уходи из города' }], text: '' },
+    { bg: 3, actors: [{ a: 'valera', x: 40, mood: 'happy', say: 'Теперь бригада моя' }, { a: '🧔‍♂️', x: 64, anim: 'jump' }, { a: '💪', x: 84, anim: 'jump' }], fx: '⭐', text: 'Кривой и Гоша Лом остаются с Валерой.' },
+  ],
+  ch_d_heist: [
+    { bg: 'night', actors: [{ a: 'valera', x: 30, anim: 'in-left', say: 'Тихо…' }, { a: '🔦', x: 70, anim: 'float' }], text: 'Три часа ночи. Склад Эдика.' },
+    { bg: 'night', cam: 'shake', actors: [{ a: '🚨', x: 50, anim: 'bounce' }, { a: 'valera', x: 28, anim: 'shake', say: 'Сигнализация!' }], text: 'Гоша Лом задел ящик.' },
+    { bg: 'night', actors: [{ a: '🚗', x: 50, anim: 'drive' }], fx: '💸', text: 'Ушли! Чёрная касса Эдика — в багажнике «Жигулей».' },
+    { bg: 6, night: true, cam: 'zoom', actors: [{ a: 'edik', x: 50, mood: 'sad', anim: 'shake', say: 'ВАЛЕРА!!!' }], text: 'Эдик остался без денег. Теперь он сам придёт драться.' },
+  ],
+  // ---------- Честный путь ----------
+  ch_h_shelter: [
+    { bg: 2, actors: [{ a: 'valera', x: 32, mood: 'happy', say: 'Налетай, мужики!' }, { a: '👵', x: 70, say: 'Добро возвращается' }], props: [{ e: '🥣', x: 52, y: 70, anim: 'bounce' }], text: 'Ночлежка. Валера разливает суп тем, кто вчера был им самим.' },
+    { bg: 2, actors: [{ a: 'mihalych', x: 50, anim: 'jump', say: 'Вот теперь ты человек, Валера' }], fx: '❤️', text: 'Михалыч гордится.' },
+  ],
+  ch_h_court: [
+    { bg: 'gold', actors: [{ a: '👨‍⚖️', x: 50, anim: 'bounce', say: 'Слушается дело…' }], text: 'Районный суд. Валера против Эдика.' },
+    { bg: 'gold', actors: [{ a: 'valera', x: 28, mood: 'ok', say: 'Подпись поддельная!' }, { a: 'edik', x: 70, mood: 'sad', anim: 'shake', say: 'Это клевета!' }], props: [{ e: '📜', x: 50, y: 40, anim: 'float' }], text: 'Экспертиза: подпись на договоре — не Валерина.' },
+    { bg: 'gold', cam: 'zoom', actors: [{ a: 'valera', x: 50, mood: 'happy', anim: 'jump' }], fx: '⭐', text: 'Суд признал сделку незаконной. Эдику остаётся только драться.' },
+  ],
+  // ---------- Общие ----------
+  ch_love: [
+    { bg: 4, night: true, actors: [{ a: 'valera', x: 46, mood: 'sad', say: 'Поговорить бы с кем…' }], text: 'Вечер. Тихо. Даже Барсик спит.' },
+    { bg: 5, actors: [{ a: 'valera', x: 34, mood: 'happy', say: 'Ты моя' }, { a: 'girl', x: 66, anim: 'jump' }], fx: '❤️', text: 'Теперь вечера проходят совсем иначе.' },
+  ],
+  ch_family: [
+    { bg: 6, actors: [{ a: 'valera', x: 30, mood: 'happy' }, { a: 'girl', x: 52 }, { a: 'barsik', x: 74, anim: 'jump' }], fx: '❤️', text: 'Особняк, жена, кот. Всё, о чём мечтал на лавке.' },
+    { bg: 6, actors: [{ a: 'mihalych', x: 50, anim: 'bounce', say: 'А я говорил!' }], text: 'Михалыч приходит в гости каждое воскресенье.' },
+  ],
+  ch_legend: [
+    { bg: 0, actors: [{ a: 'valera', x: 50, mood: 'happy', say: 'Я помню эту лавку' }], text: 'Новый круг. Та же лавка, но Валера уже другой.' },
+    { bg: 0, cam: 'zoom', actors: [{ a: 'mihalych', x: 26, anim: 'jump' }, { a: 'valera', x: 50, mood: 'happy', anim: 'jump' }, { a: 'barsik', x: 76, anim: 'jump' }], fx: '👑', text: 'Легенда района. Путь начинается заново.' },
+  ],
+
   // ---------- Переезды ----------
   house_1: [
     { bg: 0, night: true, actors: [{ a: 'valera', x: 50, mood: 'sad', anim: 'shake', say: 'Брр… холодно' }], fx: '❄️', text: 'Ещё одна ночь на лавке.' },
@@ -136,18 +196,38 @@ function cutBg(bg) {
 }
 
 let CUT = null;
+// Кадры листаются вручную: «Далее» / «Назад» или тап по картинке. Тап во время печати — сразу весь текст
 function playCutscene(id, onDone) {
   const frames = CUTS[id];
   if (!frames || (S.settings && S.settings.cuts === false)) { if (onDone) onDone(); return; }
-  CUT = { id, frames, i: -1, onDone, timer: null };
+  if (!S.cutSeen) S.cutSeen = {};
+  S.cutSeen[id] = true;
+  CUT = { id, frames, i: -1, onDone, timer: null, typing: false };
   openModal(`<div class="cs">
       <div class="cs-stage" id="csStage"></div>
       <div class="cs-caption" id="csCap"></div>
-      <div class="cs-foot"><div class="cs-dots" id="csDots">${frames.map(() => '<i></i>').join('')}</div>
-        <button class="btn small" data-act="cutSkip" data-silent="1">Пропустить ⏭</button></div>
+      <div class="cs-dots" id="csDots">${frames.map(() => '<i></i>').join('')}</div>
+      <div class="cs-foot">
+        <button class="btn small" data-act="cutSkip" data-silent="1">Пропустить ⏭</button>
+        <div class="cs-nav"><button class="btn small" id="csBack" data-act="cutBack" data-silent="1">◀</button>
+        <button class="btn primary" id="csNext" data-act="cutNextBtn" data-silent="1">Далее ▶</button></div></div>
     </div>`, { center: true, locked: true });
-  $('csStage').onclick = () => cutNext();
-  $('csCap').onclick = () => cutNext();
+  $('csStage').onclick = () => cutTap();
+  $('csCap').onclick = () => cutTap();
+  cutNext();
+}
+
+function cutTap() {
+  const c = CUT;
+  if (!c) return;
+  if (c.typing) { c.full(); return; }
+  cutNext();
+}
+
+function cutBack() {
+  const c = CUT;
+  if (!c || c.i <= 0) return;
+  c.i -= 2;
   cutNext();
 }
 
@@ -157,6 +237,8 @@ function cutNext() {
   clearTimeout(c.timer);
   c.i++;
   if (c.i >= c.frames.length) { cutEnd(); return; }
+  $('csBack').disabled = c.i === 0;
+  $('csNext').textContent = c.i === c.frames.length - 1 ? 'Готово ✓' : 'Далее ▶';
   const f = c.frames[c.i];
   const fx = f.fx ? Array.from({ length: 14 }, (_, k) => `<span class="cs-fx" style="left:${rand(2, 94)}%;animation-delay:${(k * 0.18).toFixed(2)}s">${f.fx}</span>`).join('') : '';
   const props = (f.props || []).map((p) => `<span class="cs-prop ${p.anim || ''}" style="left:${p.x}%;top:${p.y}%">${p.e}</span>`).join('');
@@ -164,18 +246,19 @@ function cutNext() {
   stage.className = `cs-stage ${f.cam ? 'cam-' + f.cam : ''} ${f.night ? 'night' : ''}`;
   stage.innerHTML = `<div class="cs-bg">${cutBg(f.bg)}</div>${props}${f.actors.map(actorHTML).join('')}${fx}<div class="cs-vignette"></div>`;
   $('csDots').querySelectorAll('i').forEach((d, k) => d.classList.toggle('on', k <= c.i));
-  // Подпись печатается по буквам; время кадра зависит от длины реплик
+  // Подпись печатается по буквам; дальше игрок листает сам
   const cap = $('csCap');
   const text = f.text || f.actors.filter((a) => a.say).map((a) => a.say).join(' — ');
   cap.textContent = '';
-  const talk = f.actors.reduce((a, x) => a + (x.say ? x.say.length : 0), 0);
   let n = 0;
+  c.typing = true;
+  c.full = () => { clearTimeout(c.timer); c.typing = false; if ($('csCap')) $('csCap').textContent = text; };
   const type = () => {
     if (CUT !== c || !$('csCap')) return;
     n += 2;
     cap.textContent = text.slice(0, n);
     if (n < text.length) c.timer = setTimeout(type, 28);
-    else c.timer = setTimeout(cutNext, 2000 + talk * 35);
+    else c.typing = false;
   };
   type();
   sfx(f.fx === '💥' || f.cam === 'shake' ? 'heavy' : f.fx === '❤️' ? 'good' : f.fx === '🎉' || f.fx === '⭐' ? 'win' : 'whoosh');
@@ -193,6 +276,32 @@ function cutEnd() {
 }
 
 ACTIONS.cutSkip = () => cutEnd();
+ACTIONS.cutBack = () => cutBack();
+ACTIONS.cutNextBtn = () => { if (CUT && CUT.typing) CUT.full(); else cutNext(); };
+
+// ---------- Галерея: пересмотреть увиденные мультики ----------
+
+const CUT_TITLES = {
+  ch_fight: '👊 Слава на районе', path_honest: '😇 Честный путь', path_dark: '😈 Тёмная дорожка', ch_d_crew: '🦊 Своя бригада',
+  boss_d_racket: '🥩 Бугай с рынка', ch_d_racket: '🥩 Рынок наш', ch_edik1: '🕵️ Эдик на рынке', ch_h_shelter: '🥣 Тёплый суп', ch_barsik: '🐈 Барсик нашёлся',
+  ch_d_casino: '🎰 Ночь в казино', ch_love: '💘 Не хлебом единым', ch_h_court: '⚖️ Суд против Эдика', boss_d_betrayal: '🐀 Крыса в бригаде',
+  ch_d_betrayal: '🐀 Предатель наказан', ch_edik2: '🏰 Логово Эдика', ch_d_heist: '🔦 Склад Эдика', boss: '😈 Последний разговор', ch_final: '🎉 Эдик повержен',
+  ch_family: '💒 Семейное счастье', ch_legend: '👑 Легенда района',
+  house_1: '📦 Коробка', house_2: '⛺ Шалаш', house_3: '🚪 Гараж', house_4: '🛏️ Общага', house_5: '🛁 Квартира', house_6: '🏰 Особняк',
+  wedding: '💍 Свадьба', divorce: '💔 Развод', top_clerk: '🏛️ Глава района', top_deputy: '🎖️ Спикер', top_director: '🏢 Генеральный',
+};
+function cutSeenList() { return Object.keys(CUT_TITLES).filter((id) => CUTS[id] && S.cutSeen && S.cutSeen[id]); }
+function cutGalleryCount() { return cutSeenList().length; }
+function cutForQuest(qid) { return ['ch_' + qid, 'boss_' + qid].find((id) => CUTS[id] && S.cutSeen && S.cutSeen[id]) || null; }
+
+function openCutGallery() {
+  const list = cutSeenList();
+  openModal(`<h3>🎬 Мультики</h3><p>Все мультики, которые ты уже видел. Листай кадры сам — кнопками «Далее» и «Назад».</p>
+    <div class="cut-list">${list.map((id) => `<button class="btn" data-act="cutReplay" data-id="${id}" data-from="gallery">${CUT_TITLES[id]}</button>`).join('')}</div>
+    <div class="btns"><button class="btn primary wide" data-act="close">Закрыть</button></div>`, { center: true });
+}
+ACTIONS.cutGallery = () => openCutGallery();
+ACTIONS.cutReplay = (id, btn) => playCutscene(id, btn && btn.dataset.from === 'gallery' ? openCutGallery : null);
 
 // ---------- Где показываются мультики ----------
 
@@ -212,8 +321,9 @@ ACTIONS.questPath = (id) => { const q = currentQuest(); if (!q || !q.choice) ret
 const _bossFightCut = ACTIONS.bossFight;
 ACTIONS.bossFight = () => {
   const q = currentQuest();
-  if (!q || !q.boss || cdLeft('boss') > 0 || S.health < 50 || !cutOnce('boss')) { _bossFightCut(); return; }
-  playCutscene('boss', () => _bossFightCut());
+  const id = q && (q.boss === true ? 'boss' : 'boss_' + q.id);
+  if (!q || !q.boss || !CUTS[id] || cdLeft('boss') > 0 || S.health < 50 || !cutOnce('cut_' + id)) { _bossFightCut(); return; }
+  playCutscene(id, () => _bossFightCut());
 };
 
 // Переезд: мультик один раз для каждого жилья (при покупке или аренде)

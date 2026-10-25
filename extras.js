@@ -510,23 +510,51 @@ function openAdmin() {
     </div>
     <div class="btns" style="flex-direction:column;gap:8px">
       <button class="btn primary wide" data-act="adm" data-id="all">🔓 Открыть всё</button>
+      <small style="color:var(--muted);text-align:center">40 уровень, всё образование, одежда, жильё, транспорт с гаражами, все работы на высшей должности, бизнесы, питомцы, девушки, навыки 5 ур., лига 💎, полные шкалы</small>
+      <button class="btn wide" data-act="adm" data-id="quest">📖 Пропустить главу сюжета</button>
       <button class="btn wide" data-act="adm" data-id="off">Выйти из админки</button>
       <button class="btn wide" data-act="settings">Назад</button></div>`, { center: true });
 }
 
+// «Открыть всё»: снимает все требования — уровень, учёба, одежда, жильё, транспорт с гаражами, все работы на высшей
+// должности, бизнесы, питомцы, девушки, навыки 5 ур., лиги драк, полные шкалы. Сюжет листается отдельной кнопкой
 function unlockAll() {
-  while (level() < 30) addXp(xpNeed(level()) - levelInfo().cur);
+  pendingLevelUp = null;
+  let xp = 0;
+  for (let i = 1; i < 40; i++) xp += xpNeed(i);
+  if (S.xp < xp) S.xp = xp;
   addMoney(50000000); addCaps(1000);
   S.edu = EDU.length - 1; S.study = null;
   for (const slot of Object.keys(CLOTHES)) CLOTHES[slot].forEach((it) => { if (!S.owned[slot].includes(it.id)) S.owned[slot].push(it.id); });
+  S.eq = { hat: 'cilinder', body: 'kostum', shoes: 'boots' }; // работы смотрят на надетую одежду
   PETS.forEach((p) => { if (!S.pets.includes(p.id)) S.pets.push(p.id); });
-  S.ownedHousing = HOUSING.length - 1; S.housing = S.ownedHousing; S.housingMode = 'own'; S.debt = 0; S.breakdowns = [];
+  S.shelter = [];
+  S.ownedHousing = HOUSING.length - 1; S.housing = S.ownedHousing; S.housingMode = 'own'; S.debt = 0; S.missed = 0; S.breakdowns = [];
   S.transport = TRANSPORT.length - 1; S.transportBroken = false;
   S.garages = TRANSPORT.map((t, i) => i).filter((i) => TRANSPORT[i].garage);
-  JOBS.forEach((j) => { S.jobs[j.id] = Math.max(jobShifts(j.id), 80); if (!S.jobPos) S.jobPos = {}; S.jobPos[j.id] = 4; });
-  S.form = 100; S.strength = 100;
+  if (!S.jobPos) S.jobPos = {};
+  if (!S.hired) S.hired = {};
+  JOBS.forEach((j) => { S.jobs[j.id] = Math.max(jobShifts(j.id), 80); S.jobPos[j.id] = 4; S.hired[j.id] = true; });
+  BUSINESSES.forEach((b) => { if (!S.biz[b.id]) S.biz[b.id] = { lvl: 1, cash: 0, last: Date.now(), started: Date.now(), eventAt: Date.now() + 20 * 60000 }; });
+  GIRLS.forEach((g) => { const st = girlState(g.id); st.met = true; st.rel = Math.max(st.rel, 60); });
+  if (!S.trickLvl) S.trickLvl = {};
+  TRICKS.forEach((t) => { S.trickLvl[t.id] = TRICK_MAX; });
+  const fs = fightState(); fs.rating = Math.max(fs.rating, 1800);
+  S.form = 100; S.strength = 100; S.fatigue = 0;
+  S.effects = S.effects.filter((e) => EFFECTS[e.id].kind === 'good');
+  S.energy = maxEnergy(); S.food = maxFood(); S.health = maxHealth(); S.mood = maxMood(); S.over = 0;
+  S.cd = {}; S.busy = null;
   renderedLook = '';
   renderScene();
+}
+
+// Пропустить текущую главу сюжета (для проверки). Выбор пути — сразу честный, если не выбран
+function skipChapter() {
+  const q = currentQuest();
+  if (!q) { toast('Сюжет уже пройден'); return; }
+  if (q.choice) { S.quest.path = S.quest.path || 'honest'; S.quest.idx++; S.quest.base = { ...(S.counters || {}) }; toast(`📖 Выбран путь: ${S.quest.path === 'honest' ? 'честный' : 'тёмный'}`, 'good'); return; }
+  closeModal();
+  completeQuest(q);
 }
 
 Object.assign(ACTIONS, {
@@ -549,6 +577,7 @@ Object.assign(ACTIONS, {
     if (id === 'cure') S.effects = S.effects.filter((e) => EFFECTS[e.id].kind === 'good');
     if (id === 'cd') { S.cd = {}; S.busy = null; }
     if (id === 'all') unlockAll();
+    if (id === 'quest') { skipChapter(); save(); return; }
     if (id === 'off') { S.admin = false; closeModal(); toast('Админка скрыта'); save(); return; }
     toast('✅ Готово', 'good');
     save();

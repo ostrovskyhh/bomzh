@@ -709,6 +709,8 @@ Object.assign(ACTIONS, {
         prestige: (S.prestige || 0) + 1, pp: (S.pp || 0) + prestigeGain(), perks: S.perks, ach: S.ach, achNotified: S.achNotified,
         counters: S.counters, settings: S.settings, log: S.log, pets: S.pets, pet: S.pet, seasonCur: S.seasonCur,
         tut: { step: 99, done: true }, storySeen: true, questHistory: [...(S.questHistory || []), S.quest && S.quest.path].filter(Boolean),
+        quest: { idx: 0, path: null, base: { ...(S.counters || {}) }, bossCd: 0, v2: true }, xpV2: true, cutSeen: S.cutSeen || {},
+        onlineWins: S.onlineWins || 0, admin: S.admin,
       };
       const seasonal = { hat: S.owned.hat.filter((id) => (CLOTHES.hat.find((h) => h.id === id) || {}).season) };
       S = { ...freshState(), ...sysDefaults(), ...keep };

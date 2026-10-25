@@ -12,57 +12,119 @@ JOBS.push(
   { id: 'deputy', name: 'Депутат', emoji: '🎖️', state: true, official: true, pay: 70000, energy: 25, food: 20, mood: -4, req: { level: 19, edu: 5, body: 3, shoes: 3, rank: ['clerk', 3] } },
 );
 
-// Мини-игра «Одобрить или отказать»: gen() возвращает { text, ok }
-const DOC_FIELDS = ['печать', 'подпись', 'дата'];
-const DOC_TYPES = ['Справка о доходах', 'Заявление на субсидию', 'Разрешение на ларёк', 'Прописка', 'Жалоба на соседей', 'Заявка на ремонт дороги'];
-const DOC_JOKES = [['Заявление от Эдика: «Дайте денег просто так»', 0], ['Справка, что Шнырь — честный человек', 0], ['Прошение Михалыча о бесплатной лавке', 1], ['Заявка: «Покрасить бордюр в цвет надежды»', 1]];
-const BILLS = [
-  ['Бесплатные пирожки пенсионерам', 1], ['Налог на воздух', 0], ['Ремонт дорог во дворах', 1], ['Депутатам — зарплату ×10', 0],
-  ['Пункты приёма бутылок в каждом дворе', 1], ['Запрет на смех по вторникам', 0], ['Новые лавочки в парках', 1], ['Штраф за грустное лицо', 0],
-  ['Бесплатный Wi-Fi в метро', 1], ['Обязательный галстук для голубей', 0], ['Ночлежки для бездомных', 1], ['Налог на шаурму', 0],
-];
+// Мини-игра «Одобрить или отказать»: gen(mg) возвращает { text, ok }.
+// У чиновников и депутатов на каждое решение есть секунды, ошибка стоит дороже, а правила меняются по ходу.
+
+// ---------- Документы для чиновника ----------
+const DOC_FIELDS = ['печать', 'подпись', 'дата', 'номер'];
+const DOC_TYPES = ['Справка о доходах', 'Заявление на субсидию', 'Разрешение на ларёк', 'Прописка', 'Жалоба на соседей', 'Заявка на ремонт дороги',
+  'Лицензия на такси', 'Разрешение на шашлычную', 'Справка для ипотеки', 'Заявка на снос гаражей', 'Разрешение на митинг', 'Акт приёмки дороги'];
+const DOC_JOKES = [['Заявление от Эдика: «Дайте денег просто так»', 0], ['Справка, что Шнырь — честный человек', 0], ['Прошение Михалыча о бесплатной лавке', 1],
+  ['Заявка: «Покрасить бордюр в цвет надежды»', 1], ['Жалоба голубей на бабушек с хлебом', 0], ['Просьба школы о новых партах', 1]];
+const DOC_TRAPS = ['В папке конверт 💰 «за срочность»', 'Приписка карандашом: «Это от Эдика, подпиши не глядя»', 'Подпись: «Валера» — но это не твой почерк'];
+function ddmm(d) { return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`; }
 function genDoc() {
-  if (Math.random() < 0.2) { const [t, ok] = pick(DOC_JOKES); return { text: `📄 ${t}`, ok }; }
-  const miss = Math.random() < 0.45 ? pick(DOC_FIELDS) : null;
-  return { text: `📄 <b>${pick(DOC_TYPES)}</b><br>${DOC_FIELDS.map((f) => `${f === miss ? '❌' : '✅'} ${f}`).join(' · ')}`, ok: miss ? 0 : 1 };
+  const r = Math.random();
+  if (r < 0.12) { const [t, ok] = pick(DOC_JOKES); return { text: `📄 ${t}`, ok }; }
+  const now = new Date();
+  const until = new Date(now.getTime() + Math.round(rand(-25, 40)) * 86400000);
+  const expired = until < new Date(now.toDateString());
+  const miss = Math.random() < 0.35 ? pick(DOC_FIELDS) : null;
+  const trap = Math.random() < 0.12 ? pick(DOC_TRAPS) : null;
+  const marks = DOC_FIELDS.map((f) => `${f === miss ? '❌' : '✅'} ${f}`).join(' · ');
+  return { text: `📄 <b>${pick(DOC_TYPES)}</b><br><small>${marks}</small><br>Действует до <b>${ddmm(until)}</b>${trap ? `<br><span class="vd-trap">${trap}</span>` : ''}`,
+    ok: miss || expired || trap ? 0 : 1 };
 }
+
 function genHomework() {
   const x = Math.floor(rand(2, 13)), y = Math.floor(rand(2, 13)), ok = Math.random() < 0.5;
   const ans = ok ? x * y : x * y + pick([-10, -2, -1, 1, 2, 10]);
   return { text: `📓 Домашка Вовочки:<br><b>${x} × ${y} = ${ans}</b>`, ok: ok ? 1 : 0 };
 }
-function genBill() { const [t, ok] = pick(BILLS); return { text: `📜 Законопроект:<br><b>«${t}»</b>`, ok }; }
+
+// ---------- Законы для депутата: [текст, полезный ли, метки] ----------
+const BILLS = [
+  ['Бесплатные пирожки пенсионерам', 1, ['pension']], ['Налог на воздух', 0, ['tax']], ['Ремонт дорог во дворах', 1, ['big']], ['Депутатам — зарплату ×10', 0, ['self']],
+  ['Пункты приёма бутылок в каждом дворе', 1, []], ['Запрет на смех по вторникам', 0, []], ['Новые лавочки в парках', 1, []], ['Штраф за грустное лицо', 0, ['tax']],
+  ['Бесплатный Wi-Fi в метро', 1, ['big']], ['Обязательный галстук для голубей', 0, []], ['Ночлежки для бездомных', 1, ['big']], ['Налог на шаурму', 0, ['tax']],
+  ['Надбавка к пенсии ветеранам труда', 1, ['pension', 'big']], ['Налог на роскошные яхты', 1, ['tax']], ['Бесплатный проезд пенсионерам', 1, ['pension']],
+  ['Новая поликлиника в спальном районе', 1, ['big']], ['Мост через реку за 5 млрд', 1, ['big']], ['Запрет кормить уток', 0, []],
+  ['Служебные лимузины всем депутатам', 0, ['self', 'big']], ['Налог на солнечный свет', 0, ['tax']], ['Отмена пенсий после 60', 0, ['pension']],
+  ['Освещение во всех дворах', 1, []], ['Детские площадки в каждом квартале', 1, []], ['Налоговый вычет за спорт', 1, ['tax']],
+  ['Переименовать город в «Эдикград»', 0, []], ['Обязательная зарядка по утрам по ТВ', 0, []], ['Бесплатные курсы для безработных', 1, ['big']],
+  ['Запрет на шум после 23:00', 1, []], ['Повысить налог на зарплату всем', 0, ['tax']], ['Санаторий для депутатов на Мальдивах', 0, ['self', 'big']],
+  ['Ремонт школ и детских садов', 1, ['big']], ['Штраф за немытую машину', 0, ['tax']], ['Пандусы во всех подъездах', 1, []],
+  ['Субсидии фермерам', 1, ['big']], ['Запретить кошкам гулять', 0, []], ['Пенсионерам — бесплатные лекарства', 1, ['pension', 'big']],
+];
+const BILL_AMENDMENTS = ['…и премию депутатам ×5', '…а заодно продлить полномочия до 2099 года', '…и дачу председателю комитета'];
+// Установки фракции: меняют правильный ответ. Посреди заседания установка может смениться
+const PARTY_LINES = [
+  { text: 'Голосуй по совести: полезное — «За», бред — «Против»', ok: (b) => b[1] },
+  { text: 'Фракция велела: ПРОТИВ любых законов о налогах', ok: (b) => (b[2].includes('tax') ? 0 : b[1]) },
+  { text: 'Перед выборами: ЗА всё, что касается пенсионеров', ok: (b) => (b[2].includes('pension') ? 1 : b[1]) },
+  { text: 'Бюджет пуст: ПРОТИВ всех дорогих проектов (💰)', ok: (b) => (b[2].includes('big') ? 0 : b[1]) },
+];
+function genBill(mg) {
+  const b = pick(BILLS);
+  const amend = Math.random() < 0.2 ? pick(BILL_AMENDMENTS) : null;
+  const line = mg.partyLine || PARTY_LINES[0];
+  return { text: `📜 Законопроект:<br><b>«${b[0]}»</b>${b[2].includes('big') ? ' 💰' : ''}${amend ? `<br><span class="vd-trap">${amend}</span>` : ''}`,
+    ok: amend || b[2].includes('self') ? 0 : line.ok(b) };
+}
 
 function gameVerdict(mg, cfg) {
   const arena = $('mgArena');
+  let timer = null;
+  // Установка фракции на заседании: в начале и смена на середине
+  if (cfg.party) {
+    mg.partyLine = pick(PARTY_LINES);
+    mg.timers.push(setTimeout(() => {
+      if (!mgAlive(mg)) return;
+      mg.partyLine = pick(PARTY_LINES.filter((l) => l !== mg.partyLine));
+      sfx('notify'); haptic('heavy');
+      floatAt($('mgArena'), '📢 Новая установка!', 'bad');
+    }, 15000));
+  }
+  const rule = () => (cfg.party ? `📢 ${mg.partyLine.text}<br><small>Поправки в пользу депутатов — всегда «Против»</small>` : typeof cfg.rule === 'function' ? cfg.rule() : cfg.rule);
+  const answer = (b, it) => {
+    clearTimeout(timer);
+    if (!mgAlive(mg)) return;
+    arena.querySelectorAll('.vd-btns .btn').forEach((x) => { x.dataset.done = 1; });
+    const right = b ? +b.dataset.v === it.ok : false;
+    if (right) { mgScore(1); sfx('chip'); } else { mgScore(-(cfg.penalty || 1)); sfx('error'); haptic('error'); shakeArena(); }
+    floatAt(b || arena, right ? '✓' : b ? `✗ −${cfg.penalty || 1}` : '⏰ Не успел!', right ? 'good' : 'bad');
+    setTimeout(show, right ? 200 : 500);
+  };
   const show = () => {
     if (!mgAlive(mg)) return;
-    const it = cfg.gen();
-    arena.innerHTML = `<div class="vd-card">${it.text}</div><div class="vd-btns">
-      <button class="btn green" data-v="1">${cfg.yes}</button><button class="btn dark-path" data-v="0">${cfg.no}</button></div><p class="mg-hint">${cfg.rule}</p>`;
+    const it = cfg.gen(mg);
+    arena.innerHTML = `<div class="vd-rule">${rule()}</div><div class="vd-card">${it.text}</div>
+      ${cfg.limit ? '<div class="vd-time"><div id="vdTime"></div></div>' : ''}
+      <div class="vd-btns"><button class="btn green" data-v="1">${cfg.yes}</button><button class="btn dark-path" data-v="0">${cfg.no}</button></div>`;
     arena.querySelectorAll('.vd-btns .btn').forEach((b) => {
-      b.onpointerdown = (e) => {
-        e.preventDefault();
-        if (!mgAlive(mg) || b.dataset.done) return;
-        arena.querySelectorAll('.vd-btns .btn').forEach((x) => { x.dataset.done = 1; });
-        const right = +b.dataset.v === it.ok;
-        if (right) { mgScore(1); sfx('chip'); } else { mgScore(-1); sfx('error'); haptic('error'); shakeArena(); }
-        floatAt(b, right ? '✓' : '✗', right ? 'good' : 'bad');
-        setTimeout(show, right ? 200 : 450);
-      };
+      b.onpointerdown = (e) => { e.preventDefault(); if (!b.dataset.done) answer(b, it); };
     });
+    if (cfg.limit) {
+      const bar = $('vdTime');
+      bar.style.transition = 'none'; bar.style.width = '100%';
+      requestAnimationFrame(() => { bar.style.transition = `width ${cfg.limit}ms linear`; bar.style.width = '0%'; });
+      timer = setTimeout(() => answer(null, it), cfg.limit);
+      mg.timers.push(timer);
+    }
   };
   show();
 }
 
 Object.assign(JOB_GAMES, {
   dvornik: { type: 'targets', title: 'Подмети двор', hint: 'Тапай по мусору 🍂. Кота и бабушку не мети!', good: ['🍂', '🍁', '🥤', '📰', '🚬'], bad: ['🐈', '👵'], goodRate: 0.75, every: 600, life: 1300, target: 26 },
-  postman: { type: 'lanes', title: 'Разнеси почту', hint: 'Собирай письма ✉️, уворачивайся от собак и ям', good: ['✉️', '📦', '📰'], bad: ['🐕', '🕳️', '🚧'], player: '🚲', target: 18 },
+  postman: { type: 'lanes', title: 'Разнеси почту', hint: 'Собирай письма ✉️, уворачивайся от собак и ям. Врезался — минус одно письмо', good: ['✉️', '✉️', '📦', '📰'], bad: ['🐕', '🕳️', '🚧'], target: 13, speed: 0.8, goodRate: 0.62 },
   cook: { type: 'orders', title: 'Крути шаурму', hint: 'Собери шаурму по заказу. Лишний лук — злой клиент', items: ['🫓', '🥩', '🍗', '🧅', '🍅', '🥒', '🧀', '🌶️', '🥬'], size: [3, 4], target: 7 },
   police: { type: 'targets', title: 'Патруль', hint: 'Задерживай нарушителей 🦹. Мирных граждан не трогай!', good: ['🦹', '🥷', '🦹‍♀️', '🧟'], bad: ['🧑', '👵', '🧒', '👩'], goodRate: 0.45, every: 580, life: 1050, target: 16 },
-  teacher: { type: 'verdict', title: 'Проверь домашку', hint: 'Верно решено — «Зачёт», ошибка — «Двойка»', gen: genHomework, yes: '✅ Зачёт', no: '2️⃣ Двойка', rule: 'Решено верно?', target: 16 },
-  clerk: { type: 'verdict', title: 'Разбери бумаги', hint: 'Одобряй документы, только если есть печать, подпись и дата', gen: genDoc, yes: '✅ Одобрить', no: '⛔ Отказать', rule: 'Все три отметки на месте?', target: 16 },
-  deputy: { type: 'verdict', title: 'Заседание', hint: 'Голосуй «За» полезные законы и «Против» бредовые', gen: genBill, yes: '👍 За', no: '👎 Против', rule: 'Закон полезный для людей?', target: 16 },
+  teacher: { type: 'verdict', title: 'Проверь домашку', hint: 'Верно решено — «Зачёт», ошибка — «Двойка». На тетрадь 4 секунды', gen: genHomework, yes: '✅ Зачёт', no: '2️⃣ Двойка', rule: 'Решено верно?', limit: 4000, target: 15 },
+  clerk: { type: 'verdict', title: 'Разбери бумаги', hint: 'Одобряй, только если все 4 отметки на месте, срок не истёк и нет взятки. 3,5 секунды на документ, ошибка −2',
+    gen: genDoc, yes: '✅ Одобрить', no: '⛔ Отказать', rule: () => `Сегодня <b>${ddmm(new Date())}</b>. Нужны: печать, подпись, дата, номер и действующий срок. Взятки — отказ`, limit: 3500, penalty: 2, target: 14 },
+  deputy: { type: 'verdict', title: 'Заседание', hint: 'Голосуй по установке фракции — она сменится посреди заседания! 3,5 секунды на закон, ошибка −2',
+    gen: genBill, yes: '👍 За', no: '👎 Против', party: true, limit: 3500, penalty: 2, target: 14 },
 });
 
 // Должности на каждой работе — пороги смен из RANKS, множитель оплаты из POS_MULT
@@ -98,8 +160,15 @@ jobRank = function (id) {
 function canPromote(id) { const r = jobRank(id); return r < 4 && jobShifts(id) >= RANKS[r + 1].shifts; }
 function bribePrice(j) { return Math.round(j.pay * POS_MULT[jobRank(j.id) + 1] * 4); }
 
+// На «дорожных» работах игрок едет на своём транспорте, а без него — идёт пешком
+function roadPlayer(j) {
+  if (S.transport && !S.transportBroken) return vehicle().emoji;
+  return j.id === 'taxi' ? '🚕' : '🚶';
+}
+
 function startShiftGame(j, onFinish, titleExtra = '') {
-  const cfg = JOB_GAMES[j.id];
+  const base = JOB_GAMES[j.id];
+  const cfg = base.type === 'lanes' ? { ...base, player: roadPlayer(j) } : base;
   const setup = (mg) => {
     if (cfg.type === 'targets') gameTargets(mg, cfg);
     if (cfg.type === 'timing') gameTiming(mg, cfg);
@@ -158,6 +227,54 @@ finishJob = function (j, score, mg) {
   save();
 };
 
+// Анимация приказа: документ въезжает, на него падает штамп, бейдж должности, множитель оплаты растёт
+function jobCeremony({ kind, j, from, to, mult, text, onOk }) {
+  const hire = kind === 'hire';
+  openModal(`<div class="cer ${hire ? 'hire' : 'promo'}">
+      <div class="cer-badge"><div class="rays"></div><span>${j.emoji}</span></div>
+      <div class="cer-doc">
+        <div class="cer-head">${hire ? 'ТРУДОВОЙ ДОГОВОР' : 'ПРИКАЗ'} № ${Math.floor(rand(100, 999))}</div>
+        <div class="cer-line">${hire ? `${esc(playerName())} принят на работу` : `${esc(playerName())} переводится на должность`}</div>
+        <div class="cer-pos">${from ? `<s>${from}</s><i>➜</i>` : ''}<b>${to}</b></div>
+        <div class="cer-job">${j.name}</div>
+        <div class="cer-sign">Директор: <i>✍️ Подпись</i></div>
+        <div class="cer-stamp">${hire ? 'ПРИНЯТ' : 'НАЗНАЧЕН'}</div>
+      </div>
+      <div class="cer-mult">Оплата <b id="cerMult">×1.00</b></div>
+      ${text ? `<p class="cer-text">${text}</p>` : ''}
+      <div class="btns"><button class="btn primary wide" data-act="${onOk ? 'cerGo' : 'close'}">${hire ? '🚀 Начать первую смену' : 'Ура!'}</button></div>
+    </div>`, { center: true, locked: !!onOk });
+  CER_NEXT = onOk || null;
+  sfx('whoosh');
+  setTimeout(() => { if ($('cerMult')) { sfx('heavy'); haptic('heavy'); confetti(hire ? 50 : 90); } }, 900);
+  setTimeout(() => { sfx(hire ? 'good' : 'levelup'); }, 1200);
+  // Множитель «докручивается» до нового значения
+  const start = performance.now();
+  const tick = (now) => {
+    const el = $('cerMult');
+    if (!el) return;
+    const t = Math.min(1, (now - start - 1100) / 700);
+    el.textContent = `×${(1 + (mult - 1) * Math.max(0, t)).toFixed(2)}`;
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+let CER_NEXT = null;
+ACTIONS.cerGo = () => { const f = CER_NEXT; CER_NEXT = null; closeModal(); if (f) f(); };
+
+// Первая смена на новой работе — сначала договор
+const _jobAction = ACTIONS.job;
+ACTIONS.job = (id) => {
+  const j = JOBS.find((x) => x.id === id);
+  if (!S.hired) S.hired = {};
+  const cantWork = S.health < 25 || S.energy < j.energy || S.food < j.food;
+  if (jobShifts(id) || S.hired[id] || S.busy || !reqOk(j.req) || cantWork) { _jobAction(id); return; }
+  S.hired[id] = true;
+  track('hired');
+  jobCeremony({ kind: 'hire', j, to: posName(id, 0), mult: POS_MULT[0],
+    text: `Оклад до <b>${fmt(j.pay * 1.25)} ₽</b> за смену. Наработаешь смены — сдашь аттестацию на «${posName(id, 1)}».`, onOk: () => _jobAction(id) });
+};
+
 function promote(j, how) {
   const r = jobRank(j.id) + 1;
   S.jobPos[j.id] = r;
@@ -165,10 +282,8 @@ function promote(j, how) {
   const bonus = Math.round(j.pay * POS_MULT[r] * 2);
   addMoney(bonus);
   addXp(20 + r * 15);
-  confetti(90);
-  sfx('levelup');
-  const done = () => resultModal({ emoji: '🎖️', title: `Новая должность: ${posName(j.id, r)}!`,
-    text: `${how}<br>Оплата теперь <b>×${POS_MULT[r]}</b>. Премия за повышение: <b style="color:var(--gold)">+${fmt(bonus)} ₽</b>${r < 4 ? `<br><small>Следующая ступень «${posName(j.id, r + 1)}» — после ${RANKS[r + 1].shifts} смен</small>` : '<br>Это вершина карьеры на этой работе!'}`, btn: 'Ура!' });
+  const done = () => jobCeremony({ kind: 'promo', j, from: posName(j.id, r - 1), to: posName(j.id, r), mult: POS_MULT[r],
+    text: `${how}<br>Премия за повышение: <b style="color:var(--gold)">+${fmt(bonus)} ₽</b>${r < 4 ? `<br><small>Следующая ступень «${posName(j.id, r + 1)}» — после ${RANKS[r + 1].shifts} смен</small>` : '<br>Это вершина карьеры на этой работе!'}` });
   if (r === 4 && typeof playCutscene === 'function' && CUTS[`top_${j.id}`]) playCutscene(`top_${j.id}`, done);
   else done();
   save();

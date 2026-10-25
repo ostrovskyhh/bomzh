@@ -206,10 +206,10 @@ function gameLanes(mg, cfg) {
     if (!mgAlive(mg)) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const elapsed = (Date.now() - mg.start) / 1000;
-    const speed = 0.55 + elapsed * 0.02; // доля высоты арены в секунду
+    const speed = (0.55 + elapsed * 0.02) * (cfg.speed || 1); // доля высоты арены в секунду
     if (now > nextSpawn) {
-      nextSpawn = now + Math.max(380, 900 - elapsed * 15);
-      const good = Math.random() < 0.45;
+      nextSpawn = now + Math.max(380, 900 - elapsed * 15) / (cfg.speed || 1);
+      const good = Math.random() < (cfg.goodRate || 0.45);
       const el = document.createElement('div');
       el.className = 'ln-obj';
       el.textContent = pick(good ? cfg.good : cfg.bad);
@@ -225,7 +225,7 @@ function gameLanes(mg, cfg) {
       if (o.y > 0.72 && o.y < 0.9 && o.lane === lane && !o.done) {
         o.done = true;
         if (o.good) { mgScore(1); sfx('coin'); o.el.classList.add('hit'); }
-        else { mgScore(-2); sfx('punch'); haptic('error'); shakeArena(); o.el.classList.add('miss'); }
+        else { mgScore(-1); floatAt(o.el, '−1', 'bad'); sfx('punch'); haptic('error'); shakeArena(); o.el.classList.add('miss'); }
         setTimeout(() => o.el.remove(), 200);
         objs.splice(i, 1);
       } else if (o.y > 1.05) { o.el.remove(); objs.splice(i, 1); }
