@@ -53,10 +53,10 @@ EXTRA_TABS.fun.clan = () => {
       ${GANG.top ? gangListHTML(GANG.top.gangs, false) : '<div class="info-card">⏳ Загружаем список банд…</div>'}
       <div class="info-card">🔒 В закрытые банды вступают по ссылке-приглашению — попроси её у любого бойца.</div>
       <div class="subhead">Основать свою</div>
-      <div class="info-card"><b>${fmt(CLAN_PRICE)} ₽</b>, с ${CLAN_LEVEL_REQ} уровня. Название должно быть уникальным.
+      <div class="info-card"><b>${fmt(CLAN_PRICE)} ₽ + ${CLAN_CAPS} 🟡</b>, с ${CLAN_LEVEL_REQ} уровня. Название должно быть уникальным.
         <div class="code-row"><input id="clanName" maxlength="20" placeholder="Название банды"><select id="clanEmoji">${CLAN_EMOJI.map((e) => `<option>${e}</option>`).join('')}</select></div>
         <div class="seg-mini"><button class="${S.newGangMode !== 'invite' ? 'on' : ''}" data-act="newGangMode" data-id="open">🔓 Вступает кто угодно</button><button class="${S.newGangMode === 'invite' ? 'on' : ''}" data-act="newGangMode" data-id="invite">🔒 Только по приглашению</button></div>
-        ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE, `Основать · ${fmt(CLAN_PRICE)} ₽`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 Основать можно с ${CLAN_LEVEL_REQ} уровня</button>`}</div>`;
+        ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE && S.caps >= CLAN_CAPS, `Основать · ${fmtShort(CLAN_PRICE)} ₽ + ${CLAN_CAPS} 🟡`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 Основать можно с ${CLAN_LEVEL_REQ} уровня</button>`}</div>`;
   }
   const bonus = Math.round(clanBonus() * 100);
   const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>

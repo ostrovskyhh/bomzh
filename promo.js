@@ -38,7 +38,7 @@ payClaim = async function () {
     if (!items || !items.length) return;
     const got = items.map((it) => {
       const id = typeof it === 'string' ? it : it.product;
-      const line = PREM_GIVE[id] ? PREM_GIVE[id]() : '';
+      const line = PREM_GIVE[id] ? PREM_GIVE[id](it) : '';
       const extra = [];
       if (it.bonus) { addCaps(it.bonus); extra.push(`🔥 акция: +${it.bonus} крышек`); }
       if (it.days) { S.vipUntil += it.days * 86400000; extra.push(`🔥 акция: +${it.days} дней VIP`); }

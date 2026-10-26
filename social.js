@@ -211,7 +211,8 @@ Object.assign(ACTIONS, {
 // Банды
 // =====================================================================
 
-const CLAN_PRICE = 100000;
+const CLAN_PRICE = 50000;
+const CLAN_CAPS = 25; // плюс золотые крышки
 const CLAN_LEVEL_REQ = 8;
 const CLAN_BONUS = 0.03; // +3% к тапам, работе и бизнесу за каждый уровень банды выше первого
 const CLAN_EMOJI = ['🏴', '🐺', '🦅', '🐻', '🦊', '🐍', '💀', '🔥', '⚡', '👑', '🍾', '🗡️'];
@@ -287,8 +288,9 @@ Object.assign(ACTIONS, {
   clanCreate: async () => {
     const name = ($('clanName') || {}).value || '';
     if (S.money < CLAN_PRICE || level() < CLAN_LEVEL_REQ) return;
+    if (S.caps < CLAN_CAPS) { toast(`Нужно ещё ${CLAN_CAPS - S.caps} 🟡 — крышки можно купить, нажав на них наверху`, 'bad'); return; }
     const r = await clanCall('clan/create', { name, emoji: ($('clanEmoji') || {}).value }, '🏴 Банда основана!');
-    if (r) { S.money -= CLAN_PRICE; track('clanCreate'); sfx('levelup'); confetti(60); }
+    if (r) { S.money -= CLAN_PRICE; S.caps -= CLAN_CAPS; track('clanCreate'); sfx('levelup'); confetti(60); }
   },
   clanJoin: async (id) => { if (await clanCall('clan/join', { id: +id }, '👋 Добро пожаловать в банду!')) { track('clanJoin'); sfx('good'); } },
   clanLeave: () => {
