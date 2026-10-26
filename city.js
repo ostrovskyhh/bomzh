@@ -265,28 +265,41 @@ EXTRA_TABS.tasks.story = () => {
 };
 
 // ---------- Переезд ----------
+// Что поедет: только уникальные, сезонные и купленные за звёзды вещи (у них в игре флаг season) и премиум-питомцы
+const CLUB_SELL_SHARE = 0.2;
+function moveKeepsItem(slot, id) { const it = CLOTHES[slot].find((x) => x.id === id); return !!(it && it.season); }
+function clubSellPrice() { const b = BUSINESSES.find((x) => x.id === 'club'); return b && S.biz && S.biz.club ? Math.round(b.price * CLUB_SELL_SHARE) : 0; }
+function partnerOf() { return S.girlfriend ? GIRLS.find((g) => g.id === S.girlfriend) : null; }
+let MOVE_PICK = { partner: null, club: null };
+
 function moveStartModal() {
   const q = currentQuest();
   if (city() !== 'zas' || !q || !q.move) return;
   const take = Math.floor(S.money * MOVE_MONEY_SHARE);
-  const w = wife();
-  const kids = (S.kids || []).length;
+  const p = partnerOf(), married = !!(p && S.married);
+  const kids = married ? (S.kids || []).length : 0;
+  const club = clubSellPrice();
+  const keepWear = ['hat', 'body', 'shoes'].reduce((a, s) => a + (S.owned[s] || []).filter((id) => moveKeepsItem(s, id)).length, 0);
+  const premium = (S.pets || []).filter((id) => (PETS.find((x) => x.id === id) || {}).premium).length;
+  const opt = (key, val, label, cls = '') => `<button class="btn move-opt ${cls} ${MOVE_PICK[key] === val ? 'on' : ''}" data-act="movePick" data-id="${key}:${val}">${label}</button>`;
+  const ready = (!p || MOVE_PICK.partner) && (!club || MOVE_PICK.club);
   openModal(`<div class="big-art"><div class="rays bad"></div><div class="big-emoji">🧾</div></div>
     <h3>Налоговая объявила розыск</h3>
-    <p>Недоимка за особняк, бизнесы и машины. Арестуют всё — бежать надо этой ночью. В Москвабаде никто тебя не знает: начнёшь с нуля.</p>
-    <div class="move-box lose"><b>Останется в Засранске</b>Жильё, бизнесы, транспорт и гаражи, хлам и вещи в шкафу, питомцы (Михалыч присмотрит), работа и должности, засранские дипломы, 90% рублей</div>
-    <div class="move-box keep"><b>Поедет с тобой</b>${fmt(take)} ₽ (10%), все крышки, уровень и опыт, форма и сила, надетая одежда, престиж и перки, достижения. Друзья и банда никуда не денутся</div>
-    ${w ? `<div class="move-box fam"><b>👰 ${w.name}${kids ? ` и дети (${kids})` : ''}</b>Можно взять семью с собой. Откажешься — развод${kids ? `, и ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% любого дохода уйдёт на алименты` : ''}.</div>`
-      : S.girlfriend ? `<div class="move-box fam"><b>💔 ${GIRLS.find((g) => g.id === S.girlfriend).name}</b>Девушка не готова бросить всё и уехать — вы расстанетесь.</div>` : ''}
-    <div class="btns">${w ? `<button class="btn primary wide" data-act="moveGo" data-id="family">👨‍👩‍👧 Уезжаем всей семьёй</button>
-      <button class="btn wide dark-path" data-act="moveGo" data-id="alone">🧳 Еду один (развод${kids ? ' и алименты' : ''})</button>`
-      : '<button class="btn primary wide" data-act="moveGo" data-id="alone">🧳 Бежать в Москвабад</button>'}
+    <p>Недоимка за особняк, бизнесы и машины. Арестуют всё — бежать надо этой ночью. В Москвабаде никто тебя не знает: начнёшь новую главу с нуля.</p>
+    <div class="move-box lose"><b>Останется в Засранске</b>Жильё, бизнесы, транспорт и гаражи, обычная одежда (даже надетая), хлам, питомцы (Михалыч присмотрит), работа и должности, засранские дипломы, 90% рублей</div>
+    <div class="move-box keep"><b>Поедет с тобой</b>${fmt(take)} ₽ (10%), все крышки, уровень и опыт, форма и сила, престиж и перки, достижения${keepWear ? `, ${keepWear} уник. вещ. (сезонные, за достижения и за звёзды)` : ''}${premium ? `, премиум-питомцы (${premium})` : ''}. Друзья и банда никуда не денутся</div>
+    ${p ? `<div class="move-box fam"><b>${married ? '👰' : '💑'} ${p.name}${kids ? ` и дети (${kids})` : ''}</b>
+      ${married ? `Взять семью с собой или развестись${kids ? `. При разводе ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% любого дохода уйдёт на алименты` : ''}.` : 'Позвать её с собой в новый город или расстаться.'}
+      <div class="move-opts">${opt('partner', 'take', married ? '👨‍👩‍👧 Едем вместе' : '💑 Едем вместе')}${opt('partner', 'leave', married ? `💔 Развод${kids ? ' и алименты' : ''}` : '💔 Расстаться', 'dark-path')}</div></div>` : ''}
+    ${club ? `<div class="move-box fam"><b>🪩 Ночной клуб «Золотая крышка»</b>Бизнесы с собой не увезёшь. Клуб можно успеть продать перекупщику за 20% цены — <b>${fmt(club)} ₽</b> поедут с тобой целиком.
+      <div class="move-opts">${opt('club', 'sell', `💰 Продать за ${fmt(club)} ₽`)}${opt('club', 'leave', '🏚️ Бросить', 'dark-path')}</div></div>` : ''}
+    <div class="btns"><button class="btn primary wide" data-act="moveGo" ${ready ? '' : 'disabled data-why="Сначала реши, что делать с семьёй и клубом"'}>🧳 Бежать в Москвабад</button>
       <button class="btn wide" data-act="close">Подожду ещё</button></div>`, { center: true });
 }
 
-function moveCut(family) {
-  const w = family ? wife() : null;
-  const kids = family ? (S.kids || []).length : 0;
+function moveCut(opts) {
+  const w = opts.partner === 'take' ? partnerOf() : null;
+  const kids = w && S.married ? (S.kids || []).length : 0;
   return [
     { bg: 0, actors: [{ a: 'valera', x: 50, mood: 'sad', say: 'С этой лавки всё началось…' }], props: [{ e: '🍾', x: 72, y: 80 }], text: 'Засранск. Когда-то у Валеры были только лавка в парке и пустая бутылка.' },
     { bg: 2, actors: [{ a: 'valera', x: 36, mood: 'happy' }, { a: 'mihalych', x: 70, anim: 'bounce', say: 'Держись, Валера!' }], fx: '🔥', text: 'Коробка, шалаш, гараж… Михалыч всегда был рядом.' },
@@ -300,29 +313,41 @@ function moveCut(family) {
   ];
 }
 
-function doMove(family) {
-  const w = wife();
-  const kids = (S.kids || []).length;
+function doMove(opts) {
+  if (typeof opts !== 'object' || !opts) opts = { partner: opts === 'family' || opts === true ? 'take' : 'leave', club: 'leave' };
+  const p = partnerOf(), married = !!(p && S.married);
+  const kids = married ? (S.kids || []).length : 0;
   const was = S.money;
-  S.money = Math.floor(Math.max(0, S.money) * MOVE_MONEY_SHARE);
-  const lines = [`💸 С собой: <b>${fmt(S.money)} ₽</b> из ${fmt(was)} ₽`];
-  if (w && family) lines.push(`👨‍👩‍👧 ${w.name}${kids ? ` и дети (${kids})` : ''} едут с тобой`);
-  else if (w) {
+  const club = opts.club === 'sell' ? clubSellPrice() : 0;
+  S.money = Math.floor(Math.max(0, S.money) * MOVE_MONEY_SHARE) + club;
+  const lines = [`💸 С собой: <b>${fmt(S.money)} ₽</b> (10% от ${fmt(was)} ₽${club ? ` + ${fmt(club)} ₽ за клуб` : ''})`];
+  if (p && opts.partner === 'take') lines.push(`${married ? '👨‍👩‍👧' : '💑'} ${p.name}${kids ? ` и дети (${kids}) едут` : ' едет'} с тобой`);
+  else if (p && married) {
     S.married = false; S.girlfriend = null; S.love = 0; S.engaged = null;
     S.kids = []; S.pregnant = 0;
     addEffect('heartbreak', 30);
+    track('divorce');
     if (kids) { S.alimony = { until: Date.now() + ALIMONY_DAYS * GAME_DAY, paid: 0 }; lines.push(`💔 Развод. Дети остались с мамой: ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% любого дохода — алименты`); }
     else lines.push('💔 Развод. Она осталась в Засранске');
-  } else if (S.girlfriend) { lines.push('💔 Девушка осталась в Засранске'); S.girlfriend = null; S.love = 0; S.engaged = null; }
+  } else if (p) { lines.push('💔 Вы расстались — она осталась в Засранске'); S.girlfriend = null; S.love = 0; S.engaged = null; addEffect('heartbreak', 15); }
   const keepGirl = S.girlfriend ? { [S.girlfriend]: girlState(S.girlfriend) } : {};
+  // Одежда: с собой только уникальные вещи. Обычная остаётся, даже надетая — в Москвабад приезжаешь в рванье
+  const owned = {}, eq = {};
+  const base = { hat: 'none', body: 'rvan', shoes: 'none' };
+  ['hat', 'body', 'shoes'].forEach((s) => {
+    owned[s] = [...new Set([base[s], ...(S.owned[s] || []).filter((id) => moveKeepsItem(s, id))])];
+    eq[s] = owned[s].includes(S.eq[s]) ? S.eq[s] : base[s];
+  });
+  const keptPets = (S.pets || []).filter((id) => (PETS.find((x) => x.id === id) || {}).premium);
+  lines.push(`👕 Одежда: ${owned.hat.length + owned.body.length + owned.shoes.length - 3 ? 'с собой только уникальные вещи' : 'вся осталась — придётся одеться заново'}`);
   Object.assign(S, {
+    owned, eq, pets: keptPets, pet: keptPets.includes(S.pet) ? S.pet : keptPets[0] || null,
     city: 'msk', moves: (S.moves || 0) + 1, movedAt: Date.now(),
     housing: 0, ownedHousing: 0, housingMode: 'own', billDue: 0, debt: 0, missed: 0, breakdowns: [],
     biz: {}, transport: 0, fuel: 100, transportBroken: false, garages: [],
     jobs: {}, jobPos: {}, hired: {}, edu: 0, study: null, busy: null,
-    pets: [], pet: null, shelter: [], petNames: {}, inv: {}, bottles: 0, wanted: 0,
+    shelter: [], petNames: {}, inv: {}, bottles: 0, wanted: 0,
     girls: keepGirl, gfDates: 0,
-    owned: { hat: [...new Set(['none', S.eq.hat])], body: [...new Set(['rvan', S.eq.body])], shoes: [...new Set(['none', S.eq.shoes])] },
     quest: { idx: 0, path: S.quest.path, base: { ...(S.counters || {}) }, bossCd: 0, v2: true },
   });
   if (S.girlfriend) S.loveFor = S.girlfriend;
@@ -339,13 +364,15 @@ function doMove(family) {
 
 Object.assign(ACTIONS, {
   moveStart: () => moveStartModal(),
-  moveGo: (id) => {
+  movePick: (arg) => { const [k, v] = arg.split(':'); MOVE_PICK[k] = v; moveStartModal(); },
+  moveGo: () => {
     const q = currentQuest();
     if (city() !== 'zas' || !q || !q.move) return;
-    const family = id === 'family' && !!wife();
+    const opts = { partner: partnerOf() ? MOVE_PICK.partner || 'leave' : null, club: clubSellPrice() ? MOVE_PICK.club || 'leave' : null };
     closeModal();
-    CUTS.move_msk = moveCut(family);
-    playCutscene('move_msk', () => doMove(family));
+    MOVE_PICK = { partner: null, club: null };
+    CUTS.move_msk = moveCut(opts);
+    playCutscene('move_msk', () => doMove(opts));
   },
 });
 CUT_TITLES.move_msk = '🚂 Переезд в Москвабад';
@@ -383,9 +410,7 @@ const MSK_SKY = `<svg class="msk-sky" viewBox="0 0 360 120" preserveAspectRatio=
   <g fill="rgba(255,214,120,.5)"><rect x="40" y="50" width="3" height="3"/><rect x="48" y="62" width="3" height="3"/><rect x="104" y="40" width="3" height="3"/><rect x="158" y="44" width="3" height="3"/><rect x="226" y="50" width="3" height="3"/><rect x="282" y="40" width="3" height="3"/><rect x="286" y="60" width="3" height="3"/></g></svg>`;
 renderScene = (function (orig) {
   return function () {
-    const fresh = renderedHousing !== S.housing;
-    orig();
-    if (fresh && city() === 'msk') $('sceneBg').insertAdjacentHTML('beforeend', MSK_SKY);
+    orig(); // в Москвабаде свои сцены жилья (msk.js) — силуэт города уже нарисован в них
     $('locName').textContent = `${CITIES[city()].emoji} ${cityName()} · ${HOUSING[S.housing].name}`;
   };
 })(renderScene);

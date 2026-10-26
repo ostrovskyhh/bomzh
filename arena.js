@@ -70,6 +70,37 @@ async function tourLoad(force) {
 }
 HOOKS.init.push(() => setTimeout(() => tourLoad(true), 5000));
 
+function tourRules(t) {
+  const lucky = Math.round((t.luckyShare || 0.25) * 100);
+  return `Взнос ${fmt(t.fee)} ₽, ${t.fights} боёв: победа — 3 очка и рейтинг ×2. Спонсор добавляет в банк ${fmt(t.sponsor || 10000)} ₽.
+    Больше всех очков к 20:00 — <b>${100 - lucky}% банка</b>, а ещё один <b>случайный участник — ${lucky}%</b>. Нет живых соперников — дерёшься с турнирными бойцами`;
+}
+
+// Плашка турнира на главном экране: во вторник — обратный отсчёт до 20:00, в понедельник вечером — «завтра турнир»
+HOOKS.hud.push(() => {
+  let pin = $('tourPin');
+  if (!pin) {
+    const anchor = $('invPin');
+    if (!anchor) return;
+    anchor.insertAdjacentHTML('beforebegin', '<div class="inv-pin tour-pin hidden" id="tourPin" data-act="tourOpen"></div>');
+    pin = $('tourPin');
+  }
+  const t = TOUR.data;
+  const show = onlineOn() && t && level() >= FIGHT_LEVEL && (t.phase === 'open' || (t.opensIn && t.opensIn < 6 * 3600)) && !(t.me && t.me.fights >= t.fights);
+  if (!show) { pin.classList.add('hidden'); return; }
+  const left = t.phase === 'open' ? t.endsIn - (Date.now() - TOUR.at) / 1000 : t.opensIn - (Date.now() - TOUR.at) / 1000;
+  const html = t.phase === 'open'
+    ? `<span>🏆</span><div><b>Турнир · банк ${fmt(Math.max(t.pool, t.sponsor || 0))} ₽</b><small>${t.me ? `Твоих боёв ${t.me.fights}/${t.fights} · ` : ''}до конца ${fmtTime(Math.max(0, left))}</small></div>`
+    : `<span>🏆</span><div><b>Скоро турнир района</b><small>через ${fmtTime(Math.max(0, left))}</small></div>`;
+  if (pin.dataset.html !== html) { pin.innerHTML = html; pin.dataset.html = html; }
+  pin.classList.remove('hidden');
+  // Плашки идут столбиком под сюжетом
+  const above = ['questPin'].filter((id) => $(id) && !$(id).classList.contains('hidden')).length;
+  pin.style.top = 58 + above * 42 + 'px';
+});
+ACTIONS.tourOpen = () => showScreen('fun', 'fights');
+setInterval(() => { if (typeof S !== 'undefined' && S.storySeen) tourLoad(); }, 5 * 60000);
+
 function tourHTML() {
   if (!onlineOn()) return '';
   setTimeout(() => tourLoad(), 0);
@@ -78,13 +109,14 @@ function tourHTML() {
   if (!t) return `<div class="tour-box">${head}<small>${TOUR.error || 'Загружаем…'}</small></div>`;
   const prize = t.prize ? `<button class="btn primary wide" data-act="tourClaim">🏆 Забрать выигрыш · ${fmt(t.prize)} ₽</button>` : '';
   if (t.phase !== 'open') {
-    return `<div class="tour-box">${head}<small>Взнос ${fmt(t.fee)} ₽ — всё идёт в общий банк. ${t.fights} турнирных боёв, за победу 3 очка и рейтинг ×2. Кто набрал больше всех очков к 20:00 — забирает весь банк.</small>
-      <small>⏳ Следующий турнир через <b>${fmtTime(t.opensIn)}</b>${t.last ? ` · прошлый выиграл <b>${esc(t.last.name)}</b> (${fmt(t.last.pool)} ₽)` : ''}</small>${prize}</div>`;
+    return `<div class="tour-box">${head}<small>${tourRules(t)}</small>
+      <small>⏳ Следующий турнир через <b>${leftText(t.opensIn * 1000)}</b>${t.last ? ` · прошлый выиграл <b>${esc(t.last.name)}</b> (банк ${fmt(t.last.pool)} ₽)${t.lucky ? `, 🍀 счастливчик — ${esc(t.lucky.name)}` : ''}` : ''}</small>${prize}</div>`;
   }
   const me = t.me;
   const table = t.table.length ? `<div class="tour-table">${t.table.map((r, i) => `<div class="${r.me ? 'me' : ''}"><span>${i + 1}. ${esc(r.name)}</span><b>${r.points} очк.</b><i>${r.fights}/${t.fights}</i></div>`).join('')}</div>` : '';
   return `<div class="tour-box open">${head}
-    <small>Банк: <b>${fmt(t.pool)} ₽</b> · участников ${t.count} · до конца <b>${fmtTime(t.endsIn)}</b></small>
+    <small>Банк: <b>${fmt(Math.max(t.pool, t.sponsor || 0))} ₽</b> · участников ${t.count} · до конца <b>${leftText(t.endsIn * 1000)}</b></small>
+    <small>${tourRules(t)}</small>
     ${me ? `<small>Твои очки: <b>${me.points}</b> · боёв ${me.fights}/${t.fights}</small>
       ${me.fights < t.fights ? `<button class="btn primary wide" data-act="tourFight">🥊 Турнирный бой</button>` : '<small>Все бои проведены — ждём итогов в 20:00</small>'}`
     : priceBtn('tourJoin', '', t.fee, S.money >= t.fee, `Записаться · взнос ${fmt(t.fee)} ₽`).replace('class="btn', 'class="btn wide')}
@@ -130,7 +162,7 @@ Object.assign(ACTIONS, {
       const r = await apiPost('tour/opponent');
       if (r.error) { toast(r.error, 'bad'); return; }
       const o = r.opponent;
-      const op = { name: `${o.name} (турнир)`, style: pick(Object.keys(STYLES)), eq: o.eq && o.eq.body ? o.eq : { hat: 'none', body: 'base', shoes: 'base' },
+      const op = { name: o.bot ? o.name : `${o.name} (турнир)`, style: pick(Object.keys(STYLES)), eq: o.eq && o.eq.body ? o.eq : { hat: 'none', body: 'base', shoes: 'base' },
         level: o.level || 5, form: o.form || 20, strength: o.strength || 20, tier: o.tier || 2, rating: fightState().rating };
       S.energy -= FIGHT_COST.energy;
       feed(-FIGHT_COST.food);

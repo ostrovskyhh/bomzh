@@ -1519,11 +1519,12 @@ button:disabled { pointer-events: none; }
 .rh-note { position: absolute; top: 50%; font-size: 30px; transform: translate(-50%, -50%); transition: opacity .2s, transform .2s; }
 .rh-note.hit { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } .rh-note.miss { opacity: .2; }
 .rh-lyric { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 10px; font-style: italic; }
-.ice-rink { position: relative; height: 120px; margin: 10px 0; border-radius: 16px; background: linear-gradient(180deg, #CFEFFF, #8FC9E8); overflow: hidden; }
+.ice-rink { position: relative; height: 170px; margin: 14px 12px 0; border-radius: 16px; background: linear-gradient(180deg, #CFEFFF, #8FC9E8); overflow: hidden; }
 .ice-zone { position: absolute; left: 36%; right: 36%; top: 0; bottom: 0; background: rgba(60,203,90,.28); border-left: 2px dashed #3CCB5A; border-right: 2px dashed #3CCB5A; }
-.ice-pair { position: absolute; top: 50%; font-size: 34px; transform: translate(-50%, -50%); transition: filter .2s; }
+.ice-pair { position: absolute; top: 50%; font-size: 44px; white-space: nowrap; transform: translate(-50%, -50%); transition: filter .2s; }
 .ice-pair.ok { filter: drop-shadow(0 0 8px #FF6FB0); }
-.ice-btns .btn { flex: 1; font-size: 26px; }
+.ice-btns { position: absolute; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ice-btns .btn { font-size: 30px; padding: 14px 0; touch-action: none; }
 .pr-wrap { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin: 10px 0 14px; }
 .pr-glass { position: relative; width: 84px; height: 140px; border: 3px solid rgba(255,255,255,.65); border-top: 0; border-radius: 0 0 40px 40px; overflow: hidden; background: rgba(255,255,255,.05); }
 .pr-wine { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(180deg, #B3123E, #6A0A24); }
@@ -1727,7 +1728,6 @@ button:disabled { pointer-events: none; }
 .vt-goal { position: absolute; top: 4px; left: 0; right: 0; text-align: center; font-size: 13px; color: var(--gold); }
 /* ---------- 2.9: города ---------- */
 #sceneBg .msk-sky { position: absolute; left: 0; right: 0; top: 4%; height: 40% !important; width: 100%; pointer-events: none; opacity: .75; }
-.city-msk #sceneBg > svg:first-child { filter: hue-rotate(-12deg) saturate(1.15) brightness(.95); }
 .move-box { margin: 8px 0; padding: 10px 12px; border-radius: 12px; font-size: 13px; text-align: left; line-height: 1.4; }
 .move-box b { display: block; margin-bottom: 2px; font-size: 13.5px; }
 .move-box.lose { background: rgba(224,65,46,.12); border: 1px solid rgba(224,65,46,.35); }
@@ -1795,3 +1795,67 @@ button:disabled { pointer-events: none; }
 .sq-rep { margin-left: auto; font-style: normal; font-size: 11px; color: var(--muted); }
 .sq-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; } .sq-foot small { color: var(--gold); font-size: 12px; }
 .sq-card .btn-row { display: flex; gap: 8px; margin-top: 8px; } .sq-card .btn-row .btn:first-child { flex: 1; }
+
+/* ---------- 3.0: Москвабад как новая глава, переезд, турнир ---------- */
+.city-msk .tabbar { background: linear-gradient(180deg, #1C2234, #151A28); box-shadow: 0 -1px 0 rgba(79,209,255,.25); }
+.city-msk .tabbar button.on { color: #7FDBFF; }
+.city-msk .loc-name { background: rgba(20,30,60,.72); }
+.chapter-card { text-align: center; }
+.chapter-card .cc-sky { height: 150px; margin: -18px -16px 12px; border-radius: 24px 24px 0 0; overflow: hidden; position: relative; }
+.chapter-card .cc-sky svg { width: 100%; height: 100%; display: block; }
+.chapter-card .cc-num { margin-top: -54px; position: relative; font-weight: 900; letter-spacing: 6px; font-size: 13px; color: #7FDBFF; text-shadow: 0 2px 6px #000; }
+.chapter-card .cc-title { position: relative; font-weight: 900; font-size: 40px; color: #fff; text-shadow: 0 4px 0 rgba(0,0,0,.4), 0 0 20px rgba(79,209,255,.5); margin-bottom: 8px; }
+.chapter-card .cc-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 14px; }
+.chapter-card .cc-list span { padding: 6px 10px; border-radius: 12px; background: rgba(79,209,255,.12); border: 1px solid rgba(79,209,255,.3); font-size: 12.5px; }
+.move-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.move-opt { font-size: 13px !important; padding: 10px 6px !important; opacity: .75; }
+.move-opt.on { opacity: 1; box-shadow: 0 0 0 3px var(--gold); }
+.tour-pin { border: 1px solid rgba(242,199,68,.7); } .tour-pin small { color: var(--gold) !important; }
+/* ---------- 3.0: казино — своя ставка, общая ракета, кейсы, барахолка ---------- */
+.bets .bet-custom { border: 1px dashed rgba(242,199,68,.6); }
+.bets .bet-custom.on { background: var(--gold); color: #2A1A00; }
+.bet-input { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
+.bet-input input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--card2); background: var(--card2); color: var(--text); font: inherit; }
+.crash-phase { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 13px; font-weight: 700; color: #FFE9A8; text-shadow: 0 2px 4px #000; }
+.crash-auto { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0; font-size: 14px; }
+.crash-auto input[type=number] { width: 72px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--card2); background: var(--card2); color: var(--text); font: inherit; text-align: center; }
+.crash-players { margin-top: 10px; text-align: left; font-size: 12.5px; }
+.crash-players > b { display: block; margin-bottom: 4px; color: var(--muted); font-weight: 700; }
+.crash-players > div { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 3px; }
+.crash-players > div.won { background: rgba(108,195,106,.15); } .crash-players em { font-style: normal; color: var(--gold); }
+.crash-note { display: block; margin-top: 8px; color: var(--muted); font-size: 11.5px; }
+.casino-hero.cases { background: linear-gradient(135deg, #3A2A6A, #6A3AB0); } .casino-hero.flea { background: linear-gradient(135deg, #2A5A3A, #3E8A55); }
+.case-odds { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 10px; }
+.case-odds span { padding: 3px 8px; border-radius: 10px; font-size: 11px; background: color-mix(in srgb, var(--c) 22%, transparent); color: var(--c); border: 1px solid var(--c); }
+.case-roll { position: relative; height: 130px; overflow: hidden; border-radius: 14px; background: #15121A; box-shadow: inset 0 0 0 2px rgba(242,199,68,.35); margin: 10px 0; }
+.case-strip { display: flex; gap: 6px; padding: 10px 0 0 6px; will-change: transform; }
+.case-it { flex: none; width: 90px; height: 108px; border-radius: 10px; background: linear-gradient(180deg, #2A2532, #1E1A24); border-bottom: 4px solid var(--c); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.case-it span { font-size: 40px; } .case-it small { font-size: 10px; text-align: center; padding: 0 4px; color: #ccc; line-height: 1.1; }
+.case-marker { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--gold); z-index: 2; box-shadow: 0 0 10px var(--gold); }
+.case-win { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); text-align: left; animation: popIn .35s; }
+.case-win span { font-size: 46px; } .case-win b { display: block; font-size: 17px; } .case-win small { color: var(--c); font-weight: 700; }
+
+/* ---------- 3.0: ринг и админ-меню ---------- */
+.ring-ladder { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0; }
+.ring-ladder span { display: flex; flex-direction: column; align-items: center; padding: 6px 8px; border-radius: 12px; background: rgba(255,255,255,.06); font-size: 22px; opacity: .55; }
+.ring-ladder span small { font-size: 10px; } .ring-ladder span.cur { opacity: 1; box-shadow: 0 0 0 2px var(--gold); } .ring-ladder span.done { opacity: 1; background: rgba(108,195,106,.2); }
+.ring-ladder i { font-style: normal; opacity: .4; }
+.ring-opts, .ring-bets { display: grid; gap: 6px; } .ring-bets { grid-template-columns: repeat(4, 1fr); }
+.ring-opts button, .ring-bets button { border: 0; padding: 10px; border-radius: 12px; background: var(--card2); color: var(--text); font: inherit; text-align: left; }
+.ring-bets button { text-align: center; font-size: 12.5px; } .ring-bets small, .ring-opts small { display: block; color: var(--muted); font-size: 11px; }
+.ring-opts button.on, .ring-bets button.on { box-shadow: 0 0 0 2px var(--gold); background: rgba(242,199,68,.14); }
+.adm-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+.adm-tabs button { border: 0; padding: 8px 2px; border-radius: 10px; background: var(--card2); color: var(--muted); font: inherit; font-size: 11.5px; font-weight: 700; }
+.adm-tabs button.on { background: var(--gold); color: #2A1A00; }
+.adm-body { text-align: left; } .adm-body .subhead { margin-top: 10px; }
+.adm-stats { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; } .adm-stats span { padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,.06); font-size: 12px; }
+.adm-row { display: flex; gap: 6px; margin: 6px 0; } .adm-row input, .adm-row select { flex: 1; min-width: 0; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--card2); background: var(--card2); color: var(--text); font: inherit; }
+.adm-save { width: 100%; height: 90px; border-radius: 10px; background: var(--card2); color: var(--text); border: 1px solid var(--card2); font: 11px monospace; padding: 8px; box-sizing: border-box; }
+.fr-visit2 .fv2-scene { position: relative; height: 230px; margin: -18px -16px 10px; border-radius: 24px 24px 0 0; overflow: hidden; }
+.fr-visit2 .fv2-scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fv2-valera { position: absolute; left: 50%; bottom: 8px; width: 110px; height: 165px; transform: translateX(-50%); filter: drop-shadow(0 6px 8px rgba(0,0,0,.35)); }
+.fv2-valera svg, .fv2-pet svg { width: 100%; height: 100%; }
+.fv2-pet { position: absolute; right: 18%; bottom: 8px; width: 80px; height: 70px; }
+.fv2-tag { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: 10px; background: rgba(0,0,0,.55); font-size: 12px; color: #fff; }
+.fv2-acts { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 6px; margin: 8px 0; }
+.fv2-more { text-align: left; margin-bottom: 10px; } .fv2-more summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 6px 0; }

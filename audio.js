@@ -59,6 +59,8 @@ const Sound = (() => {
   function tone({ f = 440, type = 'sine', t = 0, dur = 0.15, vol = 0.3, attack = 0.004, slide = null, filter = null, rv = 0, bus = sfxBus, vibrato = 0 }) {
     if (bus === sfxBus && theme() === 'retro') { type = 'square'; vol *= 0.45; rv = 0; filter = filter || { f: 4000 }; }
     if (bus === sfxBus && theme() === 'soft') { type = type === 'square' || type === 'sawtooth' ? 'triangle' : type; vol *= 0.55; rv = Math.max(rv, 0.3); }
+    // «Стекло» (Москвабад): звонкие чистые синусы чуть выше и с хвостом — как интерфейс дорогого смартфона
+    if (bus === sfxBus && theme() === 'glass') { type = 'sine'; f *= 1.26; if (slide) slide *= 1.26; vol *= 0.6; rv = Math.max(rv, 0.25); dur = Math.min(dur, 0.35); }
     const now = ctx.currentTime + t;
     const o = ctx.createOscillator();
     o.type = type;
@@ -266,6 +268,36 @@ const Sound = (() => {
     if (e % 4 === 2 && Math.random() < 0.6) tone({ ...m, t: at, f: N(pickN(CHIP.scale)), type: 'square', dur: beat * 1.8, vol: 0.02, filter: { f: 4000 } });
   }
 
+  // ---------- Москвабад: дип-хаус «в метро» — ровная бочка, хэты на слабую долю, минорные септаккорды ----------
+  const METRO = { bpm: 120, chords: [[57, 60, 64, 67], [53, 57, 60, 64], [55, 58, 62, 65], [52, 55, 59, 62]], roots: [33, 29, 31, 28], pluck: [69, 72, 74, 76, 79] };
+  function scheduleMetro(t, s) {
+    const six = 60 / METRO.bpm / 4;
+    const bar = Math.floor(s / 16) % 4, e = s % 16;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    if (e % 4 === 0) tone({ ...m, t: at, f: 58, slide: 40, type: 'sine', dur: 0.28, vol: 0.34 });
+    if (e % 4 === 2) noise({ ...m, t: at, dur: 0.09, vol: 0.05, type: 'highpass', f: 7500 });
+    if (e === 4 || e === 12) noise({ ...m, t: at, dur: 0.14, vol: 0.06, type: 'bandpass', f: 1500, q: 0.9, rv: 0.3 });
+    if ([2, 3, 6, 10, 11, 14].includes(e)) tone({ ...m, t: at, f: N(METRO.roots[bar] + (e === 14 ? 7 : 0)), type: 'triangle', dur: six * 1.6, vol: 0.13, filter: { f: 420 } });
+    if (e === 0) METRO.chords[bar].forEach((n, i) => tone({ ...m, t: at + i * 0.02, f: N(n), type: 'sawtooth', dur: six * 14, vol: 0.008, attack: 0.25, rv: 0.5, filter: { f: 1100 } }));
+    if (e % 2 === 1 && Math.random() < 0.18) tone({ ...m, t: at, f: N(pickN(METRO.pluck)), dur: six * 3, vol: 0.03, rv: 0.55, filter: { f: 3000 } });
+  }
+
+  // ---------- Москвабад: неоновый синтвейв — ночной проспект, арпеджио и гулкий снейр ----------
+  const NEON = { bpm: 100, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], roots: [45, 41, 36, 43], lead: [69, 71, 72, 74, 76, 79] };
+  function scheduleNeon(t, s) {
+    const eighth = 60 / NEON.bpm / 2;
+    const bar = Math.floor(s / 8) % 4, e = s % 8;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    const ch = NEON.prog[bar];
+    if (e === 0 || e === 4) tone({ ...m, t: at, f: 62, slide: 42, type: 'sine', dur: 0.3, vol: 0.3 });
+    if (e === 2 || e === 6) noise({ ...m, t: at, dur: 0.22, vol: 0.08, type: 'bandpass', f: 1700, q: 0.7, rv: 0.6 });
+    tone({ ...m, t: at, f: N(NEON.roots[bar] - (e % 2 ? 0 : 12)), type: 'sawtooth', dur: eighth * 0.85, vol: 0.05, filter: { f: 500 } });
+    tone({ ...m, t: at, f: N(ch[e % 3] + 12), type: 'square', dur: eighth * 0.7, vol: 0.012, rv: 0.35, filter: { f: 2600 } });
+    if (e === 0 && Math.random() < 0.7) tone({ ...m, t: at, f: N(pickN(NEON.lead)), type: 'sawtooth', dur: eighth * 5, vol: 0.022, attack: 0.08, vibrato: 4, rv: 0.6, filter: { f: 2200 } });
+  }
+
   const pickN = (arr) => arr[Math.floor(Math.random() * arr.length)];
   // Каждой мелодии — свой «шаг» сетки и планировщик
   const TRACKS = {
@@ -273,6 +305,8 @@ const Sound = (() => {
     lofi: { step: () => 60 / LOFI.bpm / 2, play: scheduleLofi },
     waltz: { step: () => 60 / WALTZ.bpm, play: scheduleWaltz },
     chip: { step: () => 60 / CHIP.bpm / 2, play: scheduleChip },
+    metro: { step: () => 60 / METRO.bpm / 4, play: scheduleMetro },
+    neon: { step: () => 60 / NEON.bpm / 2, play: scheduleNeon },
   };
 
   function scheduler() {

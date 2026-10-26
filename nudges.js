@@ -91,9 +91,16 @@ HOOKS.hud.push(() => {
   const html = `<span>🧾</span><div><b>Долг по счетам: ${fmt(S.debt)} ₽</b><small>${S.missed ? `Просрочка ${S.missed} мес. · ` : ''}нажми, чтобы оплатить</small></div>`;
   if (pin.dataset.html !== html) { pin.innerHTML = html; pin.dataset.html = html; }
   pin.classList.remove('hidden');
-  // Плашки стоят столбиком: сюжет → хлам → долг
-  const above = ['questPin', 'invPin'].filter((id) => $(id) && !$(id).classList.contains('hidden')).length;
-  pin.style.top = 58 + above * 42 + 'px';
+});
+// Все плашки слева на главном экране — столбиком по порядку, без наложений: сюжет → турнир → хлам → долг
+HOOKS.hud.push(() => {
+  let top = 58;
+  ['questPin', 'tourPin', 'invPin', 'debtPin'].forEach((id) => {
+    const el = $(id);
+    if (!el || el.classList.contains('hidden')) return;
+    el.style.top = top + 'px';
+    top += el.offsetHeight + 6 || 42;
+  });
 });
 ACTIONS.debtOpen = () => {
   if (!(S.debt > 0)) return;

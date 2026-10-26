@@ -61,7 +61,7 @@ function gameRhythm(mg, cfg = {}) {
 function gameSkate(mg) {
   const arena = $('mgArena');
   arena.innerHTML = `<div class="ice-rink"><div class="ice-zone"></div><div class="ice-pair" id="icePair">⛸️💑</div></div>
-    <div class="btn-row ice-btns"><button class="btn mg-big" id="skL">⬅️</button><button class="btn mg-big" id="skR">➡️</button></div>`;
+    <div class="ice-btns"><button class="btn primary" id="skL">⬅️</button><button class="btn primary" id="skR">➡️</button></div>`;
   const t0 = performance.now();
   let pos = 0.5, vel = 0, last = t0, inZone = 0, fell = 0;
   const loop = (now) => {

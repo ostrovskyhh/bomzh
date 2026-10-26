@@ -287,9 +287,18 @@ function whyDisabled(b) {
   return 'Сейчас это недоступно';
 }
 
+// Кнопка, которую только что нажали, ещё была доступна: если она выключилась от этого же нажатия
+// (ставка в казино — кнопки гаснут, пока идёт раунд), подсказку «почему недоступно» не показываем
+let PRESS = { el: null, at: 0 };
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest && e.target.closest('button');
+  PRESS = { el: b && !b.disabled ? b : null, at: Date.now() };
+}, true);
+
 // Недоступные кнопки не ловят нажатия (pointer-events: none), поэтому ищем кнопку под пальцем вручную
 document.addEventListener('click', (e) => {
   if (e.target.closest('button:not(:disabled), [data-act]:not(:disabled)')) return;
+  if (PRESS.el && Date.now() - PRESS.at < 1500) return;
   const x = e.clientX, y = e.clientY;
   const root = modalOpen() ? $('modalRoot') : document.querySelector('.screen.active') || document;
   const b = [...root.querySelectorAll('button:disabled')].find((el) => {

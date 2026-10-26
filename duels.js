@@ -195,7 +195,13 @@ function rpCan(stake) {
   return true;
 }
 function rpPay(stake) { if (stake) S.money -= stake; }
-function rpRefund(stake) { if (stake) S.money += stake; }
+// Выигрыш и возврат ставки начисляет сервер (rps/claim) — один раз за партию, по его подсчёту, а не по нашему
+async function rpClaim(code, label) {
+  try {
+    const { amount } = await apiPost('rps/claim', { code });
+    if (amount > 0) { addMoney(amount); toast(`: +${fmt(amount)} ₽`, 'good'); saveSoon(); }
+  } catch (e) { /* сеть моргнула — сервер помнит выплату ещё 10 минут */ }
+}
 
 function rpStart(view, vs) {
   rpStop();
@@ -295,7 +301,7 @@ async function rpApply(v) {
   RP.view = v;
   if (v.status === 'active' && v.left != null && (v.round !== prevRound || !RP.deadline || Math.abs(RP.deadline - (Date.now() + v.left * 1000)) > 1500)) RP.deadline = Date.now() + v.left * 1000;
   if (wasWaiting && v.status === 'active') { sfx('notify'); haptic('heavy'); RP.deadline = Date.now() + (v.left || RPS_TIME) * 1000; rpGameModal(); return; }
-  if (wasWaiting && v.status === 'finished') { rpStop(); rpRefund(v.stake); RP = null; closeModal(); toast(v.reason || 'Игра не состоялась'); save(); return; }
+  if (wasWaiting && v.status === 'finished') { const code = RP.code; rpStop(); rpClaim(code, '↩️ Ставка вернулась'); RP = null; closeModal(); toast(v.reason || 'Игра не состоялась'); save(); return; }
   if (!$('rpBtns')) return;
   while (RP && RP.shown < v.log.length && !RP.animating) {
     RP.animating = true;
@@ -352,7 +358,7 @@ function rpFinish(v) {
   let emoji, title, text, good = false;
   if (v.winner === 'me') {
     const prize = v.stake ? Math.round(v.stake * 2 * (1 - RPS_FEE)) : 0;
-    if (prize) addMoney(prize);
+    if (prize) rpClaim(v.code, '🏆 Выигрыш КНБ');
     addXp(12); addMood(10);
     S.rpsWins = (S.rpsWins || 0) + 1;
     track('rpsWin');
@@ -364,7 +370,7 @@ function rpFinish(v) {
     emoji = '😤'; title = 'Поражение'; text = `${v.reason}. ${esc(v.op.name)} оказался хитрее.${v.stake ? `<br>Ставка ${fmt(v.stake)} ₽ ушла сопернику` : ''}`;
     sfx('lose');
   } else {
-    rpRefund(v.stake); addXp(5);
+    if (v.stake) rpClaim(v.code, '↩️ Ставка вернулась'); addXp(5);
     emoji = '🤝'; title = 'Ничья'; good = true; text = `${v.reason}${v.stake ? '<br>Ставка вернулась' : ''}`;
   }
   track('rpsGame');
@@ -449,7 +455,7 @@ Object.assign(ACTIONS, {
     const waiting = RP.view.status === 'waiting';
     try {
       const v = await apiPost('rps/leave', { code: RP.code });
-      if (waiting) { rpStop(); rpRefund(RP.view.stake); RP = null; closeModal(); toast('Отменено'); save(); } else rpApply(v);
+      if (waiting) { const code = RP.code; rpStop(); rpClaim(code, '↩️ Ставка вернулась'); RP = null; closeModal(); toast('Отменено'); save(); } else rpApply(v);
     } catch (e) { toast(refErrorText(e), 'bad'); }
   },
 });
