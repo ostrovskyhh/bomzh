@@ -296,9 +296,9 @@ EXTRA_TABS.life.work = () => {
     const cdExam = (S.cd['exam_' + j.id] || 0) > Date.now();
     let btn = S.busy ? busyBtn : `<button class="btn ${ok ? 'primary' : ''}" data-act="job" data-id="${j.id}" ${ok ? '' : 'disabled'}>На смену</button>`;
     let extra = '';
-    if (ok && canPromote(j.id) && !S.busy) {
+    if (ok && canPromote(j.id)) {
       extra = `<div class="promo-row">🎖️ Повышение до «${posName(j.id, r + 1)}»:
-        <button class="btn small primary" data-act="jobExam" data-id="${j.id}" ${cdExam ? 'disabled' : ''}>${cdExam ? `<span data-until="${S.cd['exam_' + j.id]}"></span>` : 'Аттестация'}</button>
+        <button class="btn small primary" data-act="jobExam" data-id="${j.id}" ${cdExam || S.busy ? 'disabled' : ''}>${cdExam ? `<span data-until="${S.cd['exam_' + j.id]}"></span>` : 'Аттестация'}</button>
         ${j.state ? priceBtn('jobBribe', j.id, bribePrice(j), S.money >= bribePrice(j), `💼 Конверт ${fmt(bribePrice(j))}`).replace('class="btn', 'class="btn small') : ''}</div>`;
     }
     const tags = [j.state ? '🏛️ госслужба' : '', j.official ? '✉️ откаты' : '', j.physical ? '💪 сила' : '',
