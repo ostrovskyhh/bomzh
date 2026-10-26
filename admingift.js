@@ -8,9 +8,11 @@ function giftLevels(n) { for (let i = 0; i < n; i++) addXp(xpNeed(level()) - lev
 async function giftClaim() {
   if (!onlineOn() || !S.storySeen || !LOADED) return;
   try {
-    const { gifts } = await apiPost('gift/claim');
-    if (!gifts || !gifts.length) return;
+    const { gifts = [], cmds = [] } = await apiPost('gift/claim');
+    if (!gifts.length && !cmds.length) return;
     const lines = [];
+    if (cmds.some((c) => c.type === 'wipe')) { adminWipe(); return; }
+    cmds.forEach((c) => adminApply(c, lines));
     gifts.forEach((g) => {
       if (g.money) { addMoney(g.money); lines.push(`💰 +${fmt(g.money)} ₽`); }
       if (g.caps) { addCaps(g.caps); lines.push(`🟡 +${fmt(g.caps)} крышек`); }
@@ -19,9 +21,29 @@ async function giftClaim() {
     });
     save(true);
     confetti(70); sfx('jackpot');
-    const pot = gifts.every((g) => (g.note || '').startsWith('🍲'));
-    resultModal({ emoji: pot ? '🍲' : '🎁', title: pot ? 'Котёл банды твой!' : 'Подарок от администрации!', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' });
+    const pot = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍲'));
+    resultModal({ emoji: pot ? '🍲' : gifts.length ? '🎁' : '🛠️', title: pot ? 'Котёл банды твой!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' });
   } catch (e) { /* сервер выключен — заберём позже */ }
+}
+// Команды админа для этой игры (3.1): деньги ±, уровни, VIP, лечение, долги, сообщение
+function adminApply(c, lines) {
+  const n = +c.n || 0;
+  if (c.type === 'money') { S.money = Math.max(0, S.money + n); lines.push(n > 0 ? `💰 +${fmt(n)} ₽` : `💸 −${fmt(-n)} ₽ (списано администрацией)`); }
+  if (c.type === 'caps') { S.caps = Math.max(0, S.caps + n); lines.push(n > 0 ? `🟡 +${fmt(n)} крышек` : `🟡 −${fmt(-n)} крышек`); }
+  if (c.type === 'levels') { giftLevels(n); lines.push(`⭐ +${n} ур.`); }
+  if (c.type === 'setlevel') { let xp = 0; for (let i = 1; i < n; i++) xp += xpNeed(i); S.xp = xp; lines.push(`⭐ Уровень теперь ${n}`); }
+  if (c.type === 'vip') { S.vipUntil = Math.max(Date.now(), S.vipUntil || 0) + n * 86400000; lines.push(`👑 VIP +${n} дн.`); }
+  if (c.type === 'heal') { S.energy = maxEnergy(); S.food = maxFood(); S.health = maxHealth(); S.mood = maxMood(); S.effects = []; S.cd = {}; lines.push('❤️ Шкалы полные, болезни и таймеры сброшены'); }
+  if (c.type === 'debts') { S.debt = 0; S.missed = 0; S.alimony = null; lines.push('🧾 Долги списаны'); }
+  if (c.type === 'note') lines.push(`📨 <i>«${esc(c.text || '')}»</i>`);
+}
+// Сброс прогресса по решению админа: как кнопка «Сбросить прогресс», только без вопроса
+function adminWipe() {
+  S = freshState(); save();
+  SAVE_LOCK = true;
+  const done = () => { if (cloudOk()) tg.CloudStorage.removeItems([`${SAVE_KEY}_meta`, SAVE_KEY], () => location.reload()); else location.reload(); };
+  if (serverOk()) serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, base: 0, force: true }).catch(() => {}).finally(done);
+  else done();
 }
 HOOKS.load.push(() => setTimeout(giftClaim, 4000));
 setInterval(() => { if (!modalOpen()) giftClaim(); }, 60000);

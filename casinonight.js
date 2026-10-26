@@ -4,7 +4,7 @@
 const NIGHT_FROM = 23, NIGHT_TO = 5;
 const NIGHT_BONUS = 0.2;
 
-function casinoNight(d = new Date()) { const h = d.getHours(); return h >= NIGHT_FROM || h < NIGHT_TO; }
+function casinoNight(d = new Date()) { if (typeof S !== 'undefined' && S && S.admin && S.admNightUntil > Date.now()) return true; const h = d.getHours(); return h >= NIGHT_FROM || h < NIGHT_TO; }
 // Ключ ночи: ночь с 25 на 26 — одна, даже после полуночи
 function nightKey(d = new Date()) { const x = new Date(d); if (x.getHours() < NIGHT_TO) x.setDate(x.getDate() - 1); return x.toDateString(); }
 function nightEdge() {
@@ -16,13 +16,27 @@ function nightEdge() {
 }
 function nightGift() { return Math.round(150 * scale() / 10) * 10; }
 
-// Выигрыш в казино ночью — с надбавкой
+// Выигрыш в казино ночью — с надбавкой. Считаем от чистого выигрыша (без возврата ставки), иначе ничья в блекджеке
+// приносила бы деньги. Надбавку показываем тостом: всплывашка над кошельком пряталась под окном игры, и казалось, что бонуса нет
+function nightStake(kind) {
+  if (kind === 'bj' && typeof BJ !== 'undefined' && BJ) return BJ.bet;
+  if (kind === 'roul' && typeof roulTotal === 'function') return roulTotal();
+  if (kind === 'crash' && typeof CR2 !== 'undefined' && CR2 && CR2.view && CR2.view.me) return CR2.view.me.amount;
+  return S.bet || 0;
+}
+function nightTable() {
+  if (typeof currentScreen === 'undefined' || currentScreen !== 'fun' || level() < CASINO_LEVEL) return null;
+  const kind = typeof casinoKind === 'function' ? casinoKind() : null;
+  if (kind) return kind;
+  return TABS.fun === 'lotto' ? 'lotto' : null; // продажа вещей с барахолки и прочие поступления — без надбавки
+}
 addMoney = (function (orig) {
   return function (m) {
-    if (m > 0 && casinoNight() && typeof inCasino === 'function' && inCasino()) {
-      const extra = Math.round(m * NIGHT_BONUS);
-      if (extra > 0) setTimeout(() => floatAt($('resMoney'), `🌙 +${fmt(extra)}`, 'good'), 200);
-      m += extra;
+    const kind = m > 0 && casinoNight() ? nightTable() : null;
+    if (kind) {
+      const profit = kind === 'lotto' ? m : Math.max(0, m - nightStake(kind));
+      const extra = Math.round(profit * NIGHT_BONUS);
+      if (extra > 0) { m += extra; setTimeout(() => toast(`🌙 Ночь казино: +${fmt(extra)} ₽ к выигрышу (+${NIGHT_BONUS * 100}%)`, 'good'), 350); }
     }
     return orig(m);
   };

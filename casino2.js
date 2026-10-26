@@ -187,49 +187,88 @@ crashGo = (function (orig) {
 // =====================================================================
 // 3. Кейсы и Барахолка
 // =====================================================================
+// «Кейсы не как в кс»: у каждого кейса своя тема и свои вещи — их больше нигде не найти.
+// Цена вещи фиксированная: база вещи × качество (как износ в CS), разброс одной и той же вещи одного качества — не больше ±5%
 const RARITY = [
-  { id: 'common', name: 'Ширпотреб', color: '#9AA4B2', chance: 0.6, mult: [0.2, 0.4] },
-  { id: 'uncommon', name: 'Ходовое', color: '#4B8BF5', chance: 0.25, mult: [0.6, 1.0] },
-  { id: 'rare', name: 'Редкое', color: '#9B59F5', chance: 0.1, mult: [1.5, 2.5] },
-  { id: 'epic', name: 'Эпическое', color: '#E84393', chance: 0.04, mult: [4, 6] },
-  { id: 'legend', name: 'Легенда', color: '#F2B33D', chance: 0.01, mult: [10, 20] },
+  { id: 'common', name: 'Ширпотреб', color: '#9AA4B2', chance: 0.6, k: 0.3 },
+  { id: 'uncommon', name: 'Ходовое', color: '#4B8BF5', chance: 0.25, k: 0.8 },
+  { id: 'rare', name: 'Редкое', color: '#9B59F5', chance: 0.1, k: 2 },
+  { id: 'epic', name: 'Эпическое', color: '#E84393', chance: 0.04, k: 5 },
+  { id: 'legend', name: 'Легенда', color: '#F2B33D', chance: 0.01, k: 15 },
 ];
-const CASE_LOOT = {
-  common: [['🧦', 'Носки «Абибас»'], ['🔋', 'Батарейки'], ['🧴', 'Одеколон «Шипр»'], ['🪥', 'Зубная щётка'], ['🧤', 'Перчатки']],
-  uncommon: [['⌚', 'Часы «Командирские»'], ['🕶️', 'Очки-авиаторы'], ['🎧', 'Наушники'], ['🧢', 'Кепка с автографом']],
-  rare: [['📱', 'Смартфон'], ['💍', 'Перстень'], ['🎸', 'Гитара'], ['📷', 'Плёночный фотик']],
-  epic: [['💎', 'Бриллиант'], ['🖼️', 'Картина «Под Айвазовского»'], ['🏆', 'Кубок района']],
-  legend: [['👑', 'Корона Эдика'], ['🟡', 'Золотой слиток'], ['🗿', 'Статуя Михалыча']],
-};
+const QUALITY = [
+  { id: 'fn', name: 'Как новое', chance: 0.12, mult: 1.3 },
+  { id: 'mw', name: 'Слегка б/у', chance: 0.33, mult: 1 },
+  { id: 'ft', name: 'Поношенное', chance: 0.35, mult: 0.85 },
+  { id: 'bs', name: 'Убитое', chance: 0.2, mult: 0.7 },
+];
+// Вещь: [эмодзи, название, множитель цены внутри редкости]
 const CASES = [
-  { id: 'box', name: 'Картонная коробка', emoji: '📦', price: 1000, level: 5 },
-  { id: 'bag', name: 'Спортивная сумка', emoji: '🎒', price: 10000, level: 8 },
-  { id: 'suit', name: 'Чемодан Шныря', emoji: '🧳', price: 100000, level: 12 },
-  { id: 'safe', name: 'Сейф олигарха', emoji: '🗄️', price: 1000000, level: 18 },
-  { id: 'gold', name: 'Золотой кейс', emoji: '🎁', caps: 15, value: 300000, level: 5 },
+  { id: 'box', name: 'Коробка с помойки', emoji: '📦', price: 1000, level: 5, theme: 'Всё, что выкинули жильцы', loot: {
+    common: [['🧦', 'Носки «Абибас»', 0.9], ['🔋', 'Батарейки «почти живые»', 0.85], ['🪥', 'Зубная щётка с историей', 0.8], ['🧴', 'Одеколон «Шипр»', 1.1], ['🥫', 'Шпроты 1987 года', 1.2]],
+    uncommon: [['⌚', 'Часы «Командирские»', 1.2], ['🕶️', 'Очки «Рэй-Бэн» с рынка', 0.9], ['📻', 'Радио «Океан»', 1], ['🧤', 'Перчатки из дерматина', 0.85]],
+    rare: [['📱', 'Раскладушка «Моторола»', 1], ['🎸', 'Гитара без одной струны', 0.9], ['📷', 'Фотоаппарат «Зенит»', 1.1]],
+    epic: [['💍', 'Перстень-печатка', 1.1], ['🖼️', 'Картина «Под Айвазовского»', 0.9]],
+    legend: [['🗿', 'Бюст Михалыча', 1], ['🏆', 'Кубок «Бомж года-1999»', 1.05]] } },
+  { id: 'fish', name: 'Рыбацкий кейс Михалыча', emoji: '🎣', price: 10000, level: 8, theme: 'Снасти и трофеи с Засранского пруда', loot: {
+    common: [['🪱', 'Банка червей', 0.8], ['🧵', 'Леска «Китайская»', 0.85], ['👒', 'Панама рыбака', 1], ['🥾', 'Резиновые сапоги', 1.15], ['🐟', 'Вобла к пиву', 1.1]],
+    uncommon: [['🪝', 'Блесна «Золотая рыбка»', 1.1], ['🔦', 'Налобный фонарик', 0.9], ['🫖', 'Закопчённый котелок', 0.95], ['🪑', 'Раскладной стульчик', 1]],
+    rare: [['🛶', 'Надувная лодка', 1.15], ['🎣', 'Спиннинг «Шимано»', 1], ['📡', 'Эхолот', 0.9]],
+    epic: [['🐋', 'Чучело сома-гиганта', 1.1], ['🥃', 'Фляга Михалыча', 0.9]],
+    legend: [['🐠', 'Золотая рыбка', 1.1], ['🏅', 'Кубок «Рыбак района»', 0.95]] } },
+  { id: 'suit', name: 'Чемодан Шныря', emoji: '🧳', price: 100000, level: 12, theme: 'Товар с рынка, «почти не краденый»', loot: {
+    common: [['📼', 'Кассета «Терминатор»', 0.9], ['💿', 'Диск «Ласковый май»', 0.85], ['🧸', 'Плюшевый Чебурашка', 1], ['🔌', 'Удлинитель на 20 метров', 0.9], ['🧥', 'Кожанка «под Турцию»', 1.25]],
+    uncommon: [['🎧', 'Наушники «Битс»', 1], ['🎮', 'Приставка «Денди»', 1.15], ['📟', 'Пейджер', 0.85], ['👝', 'Барсетка', 0.95]],
+    rare: [['💻', 'Ноутбук «с гарантией»', 1.1], ['🛵', 'Мопед «Альфа»', 1.05], ['⌚', 'Часы «Ролекс» (почти)', 0.85]],
+    epic: [['💎', 'Бриллиант «чистой воды»', 1.1], ['👟', 'Коллекция кроссовок', 0.9]],
+    legend: [['🟡', 'Золотой слиток Шныря', 1], ['📜', 'Документы на весь рынок', 1.1]] } },
+  { id: 'msk', name: 'Москвабадский кейс', emoji: '🏙️', price: 250000, level: 15, theme: 'Столичная жизнь в одном кейсе', loot: {
+    common: [['☕', 'Раф на кокосовом', 0.8], ['🎫', 'Карта «Тройка» с нулём', 0.85], ['🧃', 'Смузи из сельдерея', 0.9], ['🧣', 'Шарф оверсайз', 1.15], ['🛴', 'Сломанный самокат', 1.2]],
+    uncommon: [['🥑', 'Авокадо-тост с золотом', 0.9], ['🎟️', 'Билет в Большой театр', 1.15], ['🪴', 'Монстера в горшке', 0.85], ['📸', 'Полароид', 1.05]],
+    rare: [['📱', 'Айфон последней модели', 1.1], ['🛋️', 'Диван из ЦУМа', 0.95], ['🚲', 'Складной «Бромптон»', 0.95]],
+    epic: [['🔑', 'Ключи от студии', 1.1], ['🖼️', 'NFT с котиком', 0.9]],
+    legend: [['🅿️', 'Место на парковке в Сити', 0.95], ['🪪', 'Пропуск на 95-й этаж', 1.05]] } },
+  { id: 'safe', name: 'Сейф олигарха', emoji: '🗄️', price: 1000000, level: 18, theme: 'Что прячут те, у кого есть всё', loot: {
+    common: [['📰', 'Акции «МММ»', 0.8], ['🧾', 'Чек из Куршевеля', 0.85], ['🖋️', 'Ручка «Монблан» б/у', 1.1], ['🍾', 'Пустой «Кристалл»', 0.9], ['🧦', 'Кашемировые носки', 1.2]],
+    uncommon: [['⛳', 'Клюшка для гольфа', 0.95], ['🕰️', 'Часы «Брегет»', 1.15], ['🍷', 'Вино урожая 1982', 1], ['🐾', 'Ошейник со стразами', 0.85]],
+    rare: [['🛥️', 'Модель яхты', 0.9], ['🌲', 'Подлинник Шишкина', 1.15], ['🚘', 'Ключи от «Майбаха»', 1]],
+    epic: [['📿', 'Колье «Слеза Михалыча»', 1.05], ['🏝️', 'Остров в аренду', 0.95]],
+    legend: [['👑', 'Корона Эдика', 1], ['🛩️', 'Личный самолёт', 1.1]] } },
+  { id: 'gold', name: 'Золотой кейс', emoji: '🎁', caps: 15, value: 300000, level: 5, theme: 'Всё блестящее, что нашлось в районе', loot: {
+    common: [['🪙', 'Монета «Олимпиада-80»', 1], ['🍫', 'Шоколадка в золотой фольге', 0.8], ['🎗️', 'Золотая ленточка', 0.85], ['🧧', 'Конверт с юанями', 1.15], ['🔑', 'Позолоченный ключ', 1.1]],
+    uncommon: [['🥇', 'Медаль «За тапы»', 1], ['🏺', 'Ваза эпохи Мин (копия)', 0.9], ['🎻', 'Скрипка в футляре', 1.1], ['🔮', 'Янтарный шар', 0.95]],
+    rare: [['🗡️', 'Сабля генерала', 1.05], ['🎖️', 'Орден Засранска', 0.95], ['🦚', 'Павлин-чучело', 1]],
+    epic: [['🐉', 'Нефритовый дракон', 1], ['🥚', 'Яйцо Фаберже', 1.1]],
+    legend: [['🗽', 'Золотая статуя Михалыча', 1.05], ['🫅', 'Корона Засранска', 1]] } },
 ];
+// Старые сохранения: вещи без кейса (лента/иконки) берём из общего списка
+const CASE_LOOT = Object.fromEntries(RARITY.map((r) => [r.id, CASES.flatMap((c) => c.loot[r.id])]));
 function caseValue(c) { return c.value || c.price; }
 function rollRarity() { let r = Math.random(); for (const x of RARITY) { if ((r -= x.chance) < 0) return x; } return RARITY[0]; }
+function rollQuality() { let r = Math.random(); for (const x of QUALITY) { if ((r -= x.chance) < 0) return x; } return QUALITY[1]; }
+function caseItemBase(c, rar, f) { return caseValue(c) * rar.k * f; }
 function caseRollItem(c) {
-  const rar = rollRarity(), [e, name] = pick(CASE_LOOT[rar.id]);
-  return { key: `${c.id}:${rar.id}:${name}`, e, name, rar: rar.id, value: Math.round(caseValue(c) * rand(rar.mult[0], rar.mult[1]) / 10) * 10, from: c.id };
+  const rar = rollRarity(), [e, name, f] = pick(c.loot[rar.id]), q = rollQuality();
+  const raw = caseItemBase(c, rar, f) * q.mult * rand(0.96, 1.04);
+  const value = Math.max(10, raw >= 1000 ? Math.round(raw / 10) * 10 : Math.round(raw)); // крупные — до десятков, мелкие — до рубля, чтобы разброс не вышел за ±5%
+  return { key: `${c.id}:${name}:${q.id}`, e, name, rar: rar.id, q: q.id, value, from: c.id };
 }
-function fleaInv() { if (!Array.isArray(S.flea)) S.flea = []; return S.flea; }
-// Цена на барахолке плавает в пределах ±12% по часам — можно ловить момент
-function fleaPrice(it, t = Date.now()) { const h = t / 3600000, k = it.name.length + it.value % 7; return Math.round(it.value * (1 + 0.12 * Math.sin(h * 0.7 + k))); }
+function qualityName(it) { const q = QUALITY.find((x) => x.id === it.q); return q ? q.name : ''; }function fleaInv() { if (!Array.isArray(S.flea)) S.flea = []; return S.flea; }
+// Цена вещи фиксированная — её определили редкость, вещь и качество при выпадении
+function fleaPrice(it) { return it.value; }
 
 CASINO_GAMES.push(
-  { act: 'cases', cls: 'cases', emoji: '📦', name: 'Кейсы', desc: 'Открой кейс — вдруг выпадет легенда! Вещи продаются на барахолке' },
-  { act: 'flea', cls: 'flea', emoji: '🛍️', name: 'Барахолка', desc: 'Продавай вещи из кейсов. Цены меняются каждый час' },
+  { act: 'cases', cls: 'cases', emoji: '📦', name: 'Кейсы не как в кс', desc: 'Тематические кейсы с вещами, которых больше нигде нет. Выбей легенду и продай на барахолке' },
+  { act: 'flea', cls: 'flea', emoji: '🛍️', name: 'Барахолка', desc: 'Продавай вещи из кейсов. Цена зависит от редкости и качества' },
 );
 
 function openCases() {
-  openModal(`<h3>📦 Кейсы</h3><p>Открываешь кейс — выпадает вещь одной из пяти редкостей. Её можно сразу продать или оставить на барахолке и дождаться цены получше.</p>
+  openModal(`<h3>📦 Кейсы не как в кс</h3><p>У каждого кейса своя тема и свои вещи — больше их нигде не найти. Вещь выпадает одной из пяти редкостей и в одном из четырёх качеств: от «Как новое» до «Убитое». Продать можно сразу или позже на барахолке — цена не меняется.</p>
     <div class="case-odds">${RARITY.map((r) => `<span style="--c:${r.color}">${r.name} ${Math.round(r.chance * 1000) / 10}%</span>`).join('')}</div>
     <div class="list">${CASES.map((c) => {
       const ok = level() >= c.level, can = c.caps ? S.caps >= c.caps : S.money >= c.price;
       return card({ thumb: c.emoji, title: c.name, cls: ok ? '' : 'locked',
-        desc: `Вещи стоимостью ${fmt(Math.round(caseValue(c) * 0.2))}–${fmt(caseValue(c) * 20)} ₽${c.caps ? '<br><b style="color:var(--gold)">Премиум-кейс за крышки</b>' : ''}`,
+        desc: `${c.theme}. Вещи от ${fmt(Math.round(caseValue(c) * 0.15))} до ${fmt(Math.round(caseValue(c) * 21))} ₽${c.caps ? '<br><b style="color:var(--gold)">Премиум-кейс за крышки</b>' : ''}`,
         btn: !ok ? `<button class="btn" disabled data-why="Нужен ${c.level} уровень">🔒 ${c.level} ур.</button>`
           : `<button class="btn ${can ? 'primary' : ''}" data-act="caseOpen" data-id="${c.id}" ${can ? '' : `disabled data-why="Не хватает ${c.caps ? 'крышек' : 'денег'}"`}>${c.caps ? `🟡 ${c.caps}` : `${fmt(c.price)} ₽`}</button>` });
     }).join('')}</div>
@@ -266,7 +305,7 @@ function caseOpen(id) {
     track('caseItem');
     if (rar.id === 'legend') track('caseLegend');
     save();
-    $('caseResult').innerHTML = `<div class="case-win" style="--c:${rar.color}"><span>${win.e}</span><div><b>${win.name}</b><small>${rar.name} · стоит ${fmt(fleaPrice(win))} ₽</small></div></div>
+    $('caseResult').innerHTML = `<div class="case-win" style="--c:${rar.color}"><span>${win.e}</span><div><b>${win.name}</b><small>${rar.name} · ${qualityName(win)} · стоит ${fmt(fleaPrice(win))} ₽</small></div></div>
       <div class="btns"><button class="btn primary wide" data-act="fleaSellLast">💰 Продать сразу за ${fmt(fleaPrice(win))} ₽</button>
         <button class="btn wide" data-act="caseAgain" data-id="${c.id}">🔁 Ещё кейс</button>
         <button class="btn wide" data-act="cases">🛍️ Оставить на барахолке</button></div>`;
@@ -277,10 +316,10 @@ function openFlea() {
   const inv = fleaInv();
   const total = inv.reduce((a, it) => a + fleaPrice(it), 0);
   const cheap = inv.filter((it) => it.rar === 'common' || it.rar === 'uncommon');
-  openModal(`<h3>🛍️ Барахолка</h3><p>Вещи из кейсов. Цена каждой меняется в течение часа (±12%) — можно продать сразу или подождать.</p>
+  openModal(`<h3>🛍️ Барахолка</h3><p>Вещи из кейсов. Цена каждой зависит от редкости и качества и не меняется.</p>
     ${inv.length ? `<div class="info-card">Всего вещей: <b>${inv.length}</b> на <b>${fmt(total)} ₽</b></div>
       <div class="list">${inv.map((it, i) => { const rar = RARITY.find((r) => r.id === it.rar); const p = fleaPrice(it); return card({ thumb: it.e, title: `${it.name} <span class="rarity" style="background:${rar.color}33;color:${rar.color}">${rar.name}</span>`,
-        desc: `Цена сейчас: <b>${fmt(p)} ₽</b>${p > it.value ? ' 📈' : p < it.value ? ' 📉' : ''}`, btn: `<button class="btn primary small" data-act="fleaSell" data-id="${i}">Продать</button>` }); }).join('')}</div>
+        desc: `${it.q ? qualityName(it) + ' · ' : ''}<b>${fmt(p)} ₽</b>`, btn: `<button class="btn primary small" data-act="fleaSell" data-id="${i}">Продать</button>` }); }).join('')}</div>
       <div class="btns">${cheap.length ? `<button class="btn wide" data-act="fleaSellCheap">Продать ширпотреб и ходовое (${cheap.length})</button>` : ''}<button class="btn primary wide" data-act="fleaSellAll">Продать всё за ${fmt(total)} ₽</button></div>`
       : '<div class="info-card">Тут пока пусто. Открой кейс в казино — выпавшие вещи появятся здесь.</div>'}
     <div class="btns"><button class="btn wide" data-act="cases">📦 К кейсам</button><button class="btn wide" data-act="close">Закрыть</button></div>`, { center: true });

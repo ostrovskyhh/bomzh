@@ -73,10 +73,10 @@ HOOKS.init.push(() => setTimeout(() => tourLoad(true), 5000));
 function tourRules(t) {
   const lucky = Math.round((t.luckyShare || 0.25) * 100);
   return `Взнос ${fmt(t.fee)} ₽, ${t.fights} боёв: победа — 3 очка и рейтинг ×2. Спонсор добавляет в банк ${fmt(t.sponsor || 10000)} ₽.
-    Больше всех очков к 20:00 — <b>${100 - lucky}% банка</b>, а ещё один <b>случайный участник — ${lucky}%</b>. Нет живых соперников — дерёшься с турнирными бойцами`;
+    Больше всех очков к ${t.endHour || 21}:00 — <b>${100 - lucky}% банка</b>, а ещё один <b>случайный участник — ${lucky}%</b>. Нет живых соперников — дерёшься с турнирными бойцами`;
 }
 
-// Плашка турнира на главном экране: во вторник — обратный отсчёт до 20:00, в понедельник вечером — «завтра турнир»
+// Плашка турнира на главном экране: во вторник — обратный отсчёт до конца, за 6 часов до начала — «скоро турнир»
 HOOKS.hud.push(() => {
   let pin = $('tourPin');
   if (!pin) {
@@ -105,9 +105,9 @@ function tourHTML() {
   if (!onlineOn()) return '';
   setTimeout(() => tourLoad(), 0);
   const t = TOUR.data;
-  const head = '<b>🏆 Турнир района · каждый вторник до 20:00 (МСК)</b>';
+  const head = `<b>🏆 Турнир района · каждый вторник с ${(t && t.startHour) || 9}:00 до ${(t && t.endHour) || 21}:00 (МСК)</b>`;
   if (!t) return `<div class="tour-box">${head}<small>${TOUR.error || 'Загружаем…'}</small></div>`;
-  const prize = t.prize ? `<button class="btn primary wide" data-act="tourClaim">🏆 Забрать выигрыш · ${fmt(t.prize)} ₽</button>` : '';
+  const prize = t.prize ? `<button class="btn primary wide" data-act="tourClaim">🏆 Забрать · ${fmt(t.prize)} ₽</button>` : '';
   if (t.phase !== 'open') {
     return `<div class="tour-box">${head}<small>${tourRules(t)}</small>
       <small>⏳ Следующий турнир через <b>${leftText(t.opensIn * 1000)}</b>${t.last ? ` · прошлый выиграл <b>${esc(t.last.name)}</b> (банк ${fmt(t.last.pool)} ₽)${t.lucky ? `, 🍀 счастливчик — ${esc(t.lucky.name)}` : ''}` : ''}</small>${prize}</div>`;
@@ -118,7 +118,7 @@ function tourHTML() {
     <small>Банк: <b>${fmt(Math.max(t.pool, t.sponsor || 0))} ₽</b> · участников ${t.count} · до конца <b>${leftText(t.endsIn * 1000)}</b></small>
     <small>${tourRules(t)}</small>
     ${me ? `<small>Твои очки: <b>${me.points}</b> · боёв ${me.fights}/${t.fights}</small>
-      ${me.fights < t.fights ? `<button class="btn primary wide" data-act="tourFight">🥊 Турнирный бой</button>` : '<small>Все бои проведены — ждём итогов в 20:00</small>'}`
+      ${me.fights < t.fights ? `<button class="btn primary wide" data-act="tourFight">🥊 Турнирный бой</button>` : `<small>Все бои проведены — ждём итогов в ${t.endHour || 21}:00</small>`}`
     : priceBtn('tourJoin', '', t.fee, S.money >= t.fee, `Записаться · взнос ${fmt(t.fee)} ₽`).replace('class="btn', 'class="btn wide')}
     ${table}${prize}</div>`;
 }
@@ -150,7 +150,7 @@ Object.assign(ACTIONS, {
       TOUR.data = r;
       track('tourJoin');
       sfx('bell');
-      toast('🏆 Ты в турнире! Проведи бои до 20:00', 'good');
+      toast(`🏆 Ты в турнире! Проведи бои до ${(TOUR.data && TOUR.data.endHour) || 21}:00`, 'good');
       save();
       renderCurrent(false);
     } catch (e) { toast(refErrorText(e), 'bad'); }
@@ -192,8 +192,16 @@ Object.assign(ACTIONS, {
   },
   tourClaim: async () => {
     try {
-      const { amount } = await apiPost('tour/claim');
-      if (amount > 0) { addMoney(amount); track('tourPrize'); confetti(120); sfx('jackpot'); resultModal({ emoji: '🏆', title: 'Ты чемпион района!', text: `Весь банк турнира твой: +${fmt(amount)} ₽`, btn: 'Ура!' }); save(); }
+      const r = await apiPost('tour/claim');
+      const amount = r.amount || 0;
+      if (amount > 0) {
+        addMoney(amount); save();
+        // Старый сервер не делил приз по видам — тогда считаем всё победой
+        const win = r.win ?? amount, lucky = r.lucky || 0, refund = r.refund || 0;
+        const lines = [win ? `🏆 Победа в турнире: +${fmt(win)} ₽` : '', lucky ? `🍀 Приз счастливчику: +${fmt(lucky)} ₽` : '', refund ? `↩️ Возврат взноса за сброшенный турнир: +${fmt(refund)} ₽` : ''].filter(Boolean);
+        if (win) { track('tourPrize'); confetti(120); sfx('jackpot'); } else sfx('coin');
+        resultModal({ emoji: win ? '🏆' : lucky ? '🍀' : '↩️', title: win ? 'Ты чемпион района!' : lucky ? 'Тебе повезло!' : 'Взнос вернули', text: lines.join('<br>'), btn: win ? 'Ура!' : 'Отлично' });
+      }
       tourLoad(true);
     } catch (e) { toast(refErrorText(e), 'bad'); }
   },
