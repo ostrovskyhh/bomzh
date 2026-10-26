@@ -54,8 +54,27 @@ ACTIONS.gangView = (id) => gangView(id);
 // =====================================================================
 // 2. Премиальный чат
 // =====================================================================
-const CHAT_EMOJI = ['😂', '👍', '🔥', '❤️', '😎', '🍾', '💰', '🥊', '😢', '🤝', '👑', '🐀'];
-const CHAT_QUICK = ['Всем привет! 👋', 'Кто на бой? 🥊', 'Кто в банду? 🏴', 'Го КНБ ✊', 'GG 🤝'];
+// Смайлы по вкладкам; «Недавние» — последние 16, что ты отправлял
+const CHAT_EMOJI_TABS = [
+  ['😀', ['😂', '🤣', '😅', '😊', '😍', '🥰', '😘', '😎', '🤩', '🥳', '😏', '🤔', '🙄', '😴', '😭', '😢', '😡', '🤯', '😱', '🥶', '🤡', '😇', '🤑', '🫡']],
+  ['👍', ['👍', '👎', '👌', '✌️', '🤞', '🤝', '👏', '🙏', '💪', '👊', '✊', '🫶', '👋', '🤙', '☝️', '🖕']],
+  ['❤️', ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '💔', '💖', '💯', '🔥', '✨', '⭐', '💥', '💫', '🎉']],
+  ['🍾', ['🍾', '🍺', '🍻', '🥃', '🍷', '☕', '🌯', '🍕', '🍔', '🍟', '🥟', '🍢', '🐀', '🐈', '🐕', '🕊️']],
+  ['💰', ['💰', '💸', '💵', '🪙', '👑', '💎', '🏆', '🥇', '🎰', '🎲', '🃏', '🥊', '⚔️', '🏴', '🚗', '🏙️']],
+];
+const CHAT_EMOJI = CHAT_EMOJI_TABS[0][1];
+const CHAT_QUICK = ['Всем привет! 👋', 'Кто на бой? 🥊', 'Кто в банду? 🏴', 'Го КНБ ✊', 'GG 🤝', 'Спасибо! 🙏'];
+const CHAT_MAX = 200;
+// Делим строку на видимые символы, чтобы не разрезать смайл из нескольких кодов (👨‍👩‍👧, ❤️)
+const CHAT_SEG = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('ru', { granularity: 'grapheme' }) : null;
+function chatGraphemes(s) { return CHAT_SEG ? [...CHAT_SEG.segment(s)].map((x) => x.segment) : Array.from(s); }
+const CHAT_EMO_RE = /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\p{Regional_Indicator}|‍|️|⃣|\s)+$/u;
+function chatJumbo(text) { const t = String(text).trim(); if (!t || !CHAT_EMO_RE.test(t)) return 0; const n = chatGraphemes(t.replace(/\s+/g, '')).length; return n <= 3 ? n : 0; }
+function chatEmojiTab(i) {
+  const recent = (S.chatRecent || []).slice(0, 16);
+  const list = i < 0 ? recent : CHAT_EMOJI_TABS[i][1];
+  return list.length ? list.map((e) => `<button data-act="chatEmo" data-id="${e}">${e}</button>`).join('') : '<small class="c2-none">Тут появятся смайлы, которые ты отправлял</small>';
+}
 function chatColor(name) { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 70% 68%)`; }
 function chatDay(ts) {
   const d = new Date(ts * 1000), t = new Date();
@@ -73,14 +92,30 @@ chatOpen = function (room = 'district') {
         <span class="c2-online" id="chatOnline"></span><button class="c2-x" data-act="close">✕</button></div>
       <div class="chat-list c2-list" id="chatList"><div class="chat-empty">Загружаем…</div></div>
       <button class="c2-down hidden" id="chatDown" data-act="chatDown">⬇ Новые</button>
-      <div class="c2-emoji hidden" id="chatEmoji">${CHAT_EMOJI.map((e) => `<button data-act="chatEmo" data-id="${e}">${e}</button>`).join('')}
+      <div class="c2-emoji hidden" id="chatEmoji">
+        <div class="c2-etabs">${(S.chatRecent || []).length ? '<button data-act="chatEmoTab" data-id="-1">🕘</button>' : ''}${CHAT_EMOJI_TABS.map(([e], i) => `<button class="${i === 0 ? 'on' : ''}" data-act="chatEmoTab" data-id="${i}">${e}</button>`).join('')}</div>
+        <div class="c2-egrid" id="chatEGrid">${chatEmojiTab(0)}</div>
         <div class="c2-quick">${CHAT_QUICK.map((q, i) => `<button data-act="chatQuick" data-id="${i}">${q}</button>`).join('')}</div></div>
-      <div class="chat-input c2-input"><button class="c2-emo-btn" data-act="chatEmoToggle">😊</button>
-        <input id="chatText" maxlength="200" placeholder="${room === 'clan' ? 'Написать банде…' : 'Написать району…'}" autocomplete="off">
+      <div class="chat-input c2-input"><button class="c2-emo-btn" id="chatEmoBtn" data-act="chatEmoToggle">😊</button>
+        <input id="chatText" placeholder="${room === 'clan' ? 'Написать банде…' : 'Написать району…'}" autocomplete="off" enterkeyhint="send">
+        <span class="c2-count hidden" id="chatCount"></span>
         <button class="c2-send" data-act="chatSend">➤</button></div>
       <small class="chat-rules">Без мата, ссылок и рекламы · нажми на аватарку, чтобы позвать игрока на бой</small>
     </div>`);
-  $('chatText').addEventListener('keydown', (e) => { if (e.key === 'Enter') ACTIONS.chatSend(); });
+  const sheet = $('chatList').closest('.sheet');
+  if (sheet) sheet.classList.add('chat-sheet');
+  const inp = $('chatText');
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') ACTIONS.chatSend(); });
+  // Лимит считаем по видимым символам: смайл — это один символ, даже если внутри несколько кодов
+  inp.addEventListener('input', () => {
+    const g = chatGraphemes(inp.value);
+    if (g.length > CHAT_MAX) inp.value = g.slice(0, CHAT_MAX).join('');
+    const left = CHAT_MAX - Math.min(g.length, CHAT_MAX);
+    $('chatCount').textContent = left;
+    $('chatCount').classList.toggle('hidden', left > 30);
+  });
+  // Курсор запоминаем: смайл вставляется туда, где он стоял, а не в конец
+  ['keyup', 'click', 'select', 'input'].forEach((ev) => inp.addEventListener(ev, () => { CHAT.caret = inp.selectionStart; }));
   $('chatList').addEventListener('scroll', () => { const l = $('chatList'); if (l.scrollHeight - l.scrollTop - l.clientHeight < 40) $('chatDown').classList.add('hidden'); });
   chatPoll();
   CHAT.timer = setInterval(chatPoll, CHAT_POLL);
@@ -108,9 +143,10 @@ chatPoll = async function () {
         const cont = c.prev && c.prev.name === m.name && m.ts - c.prev.ts < 300 && c.prev.day === day;
         if (m.pid) c.users[m.pid] = { name: m.name, lvl: b.lvl || 1, avatar: b.avatar, frame: b.frame };
         const time = new Date(m.ts * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        const jumbo = chatJumbo(m.text);
         html += `<div class="chat-msg c2-msg ${m.me ? 'me' : ''} ${cont ? 'cont' : ''}">
           <div class="chat-ava frame-${esc(b.frame || 'none')}" ${m.pid && !m.me ? `data-act="chatUser" data-id="${esc(m.pid)}"` : ''}>${cont ? '' : avaFace(m.name, b.avatar)}</div>
-          <div class="chat-bubble c2-bubble">${cont || m.me ? '' : `<b style="color:${chatColor(m.name)}">${esc(m.name)}<small class="c2-lvl">${b.lvl || 1}</small></b>`}
+          <div class="chat-bubble c2-bubble ${jumbo ? `jumbo j${jumbo}` : ''}">${cont || m.me ? '' : `<b style="color:${chatColor(m.name)}">${esc(m.name)}<small class="c2-lvl">${b.lvl || 1}</small></b>`}
             <span class="c2-text">${esc(m.text)}</span><small class="c2-time">${time}${c.admin ? ` <i data-act="chatDel" data-id="${m.id}">🗑</i>` : ''}</small></div></div>`;
         c.prev = { name: m.name, ts: m.ts, day };
       }
@@ -127,16 +163,48 @@ chatPoll = async function () {
   } catch (e) { /* сеть моргнула */ }
 };
 
+// Смайл встаёт на место курсора. Клавиатуру не вызываем на телефоне — иначе она закроет панель смайлов
 function chatInsert(text) {
   const i = $('chatText');
   if (!i) return;
-  i.value = (i.value + text).slice(0, 200);
-  i.focus();
+  const pos = Math.min(CHAT && CHAT.caret != null ? CHAT.caret : i.value.length, i.value.length);
+  const next = i.value.slice(0, pos) + text + i.value.slice(pos);
+  if (chatGraphemes(next).length > CHAT_MAX) { toast('Сообщение слишком длинное', 'bad'); return; }
+  i.value = next;
+  if (CHAT) CHAT.caret = pos + text.length;
+  i.dispatchEvent(new Event('input'));
+  if (!matchMedia('(pointer: coarse)').matches) { i.focus(); i.setSelectionRange(CHAT.caret, CHAT.caret); }
 }
+function chatRemember(text) {
+  const used = chatGraphemes(text).filter((g) => CHAT_EMO_RE.test(g) && /\p{Extended_Pictographic}/u.test(g));
+  if (!used.length) return;
+  S.chatRecent = [...new Set([...used.reverse(), ...(S.chatRecent || [])])].slice(0, 16);
+}
+const _chatSendEmo = ACTIONS.chatSend;
+ACTIONS.chatSend = (...a) => {
+  const i = $('chatText');
+  if (i && i.value.trim()) chatRemember(i.value);
+  if (CHAT) CHAT.caret = null;
+  const e = $('chatEmoji'); if (e) e.classList.add('hidden');
+  if ($('chatEmoBtn')) $('chatEmoBtn').textContent = '😊';
+  const r = _chatSendEmo(...a);
+  if ($('chatCount')) $('chatCount').classList.add('hidden');
+  return r;
+};
 Object.assign(ACTIONS, {
-  chatEmoToggle: () => { const e = $('chatEmoji'); if (e) e.classList.toggle('hidden'); },
+  chatEmoToggle: () => {
+    const e = $('chatEmoji');
+    if (!e) return;
+    e.classList.toggle('hidden');
+    $('chatEmoBtn').textContent = e.classList.contains('hidden') ? '😊' : '⌨️';
+    if (e.classList.contains('hidden')) $('chatText').focus(); else $('chatText').blur();
+  },
+  chatEmoTab: (i, btn) => {
+    $('chatEGrid').innerHTML = chatEmojiTab(+i);
+    document.querySelectorAll('#chatEmoji .c2-etabs button').forEach((b) => b.classList.toggle('on', b === btn));
+  },
   chatEmo: (e) => chatInsert(e),
-  chatQuick: (i) => { const i2 = $('chatText'); if (i2) { i2.value = CHAT_QUICK[+i]; ACTIONS.chatSend(); } const e = $('chatEmoji'); if (e) e.classList.add('hidden'); },
+  chatQuick: (i) => { const i2 = $('chatText'); if (i2) { i2.value = CHAT_QUICK[+i]; ACTIONS.chatSend(); } },
   chatDown: () => { const l = $('chatList'); if (l) l.scrollTop = l.scrollHeight; $('chatDown').classList.add('hidden'); },
   // Нажатие на аватарку — мини-карточка игрока с вызовом на бой, КНБ и «в друзья»
   chatUser: (pid) => {

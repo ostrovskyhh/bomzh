@@ -318,6 +318,7 @@ function wife() { return S.married && S.girlfriend ? GIRLS.find((g) => g.id === 
 function propose() {
   const g = GIRLS.find((x) => x.id === S.girlfriend);
   if (!g || S.married) return;
+  if (S.engaged && S.engaged.gid === g.id) { weddingChoice(g, false); return; }
   const ring = RINGS[girlIdx(g.id)];
   if (S.money < ring || girlState(g.id).rel < 100) return;
   S.money -= ring;
@@ -334,19 +335,47 @@ function propose() {
   }
   sfx('good');
   confetti(60);
-  openModal(`<div class="big-art"><div class="rays"></div><div class="big-emoji">💍</div></div>
-    <h3>${g.name}: «Да!»</h3><p>Осталось выбрать свадьбу. Гости подарят конверты, а после — медовый месяц.</p>
-    <div class="list">${WEDDINGS.map((w) => card({ thumb: w.emoji, title: w.name, desc: `${w.desc}<br><b>+${w.mood} 😊 · 💒 медовый месяц ${w.honey} мин${w.gifts ? ` · подарки ~${Math.round(w.gifts * 100)}% цены` : ''}</b>`,
-      btn: priceBtn('wedding', w.id, w.price, S.money >= w.price) })).join('')}</div>`, { center: true, locked: true });
+  S.engaged = { gid: g.id, ring };
+  weddingChoice(g, true);
 }
+
+// Помолвка: «Да» уже получено, кольцо куплено. Свадьбу можно выбрать сейчас или позже,
+// а если не хватает денег — отменить предложение и сдать кольцо обратно по полной цене
+function weddingChoice(g, fresh) {
+  const e = S.engaged;
+  const any = WEDDINGS.some((w) => S.money >= w.price);
+  openModal(`<div class="big-art"><div class="rays"></div><div class="big-emoji">💍</div></div>
+    <h3>${fresh ? `${g.name}: «Да!»` : `Помолвка с ${g.name.split(' ').pop()}`}</h3><p>Осталось выбрать свадьбу. Гости подарят конверты, а после — медовый месяц.</p>
+    ${any ? '' : `<div class="info-card warn">На свадьбу пока не хватает денег. Закрой окно и накопи — кольцо уже у неё, второй раз платить не придётся. Или отмени предложение — кольцо вернут за ${fmt(e.ring)} ₽.</div>`}
+    <div class="list">${WEDDINGS.map((w) => card({ thumb: w.emoji, title: w.name, desc: `${w.desc}<br><b>+${w.mood} 😊 · 💒 медовый месяц ${w.honey} мин${w.gifts ? ` · подарки ~${Math.round(w.gifts * 100)}% цены` : ''}</b>`,
+      btn: priceBtn('wedding', w.id, w.price, S.money >= w.price) })).join('')}</div>
+    <div class="btns"><button class="btn wide" data-act="close">◀ Назад — выберу позже</button>
+      <button class="btn wide dark-path" data-act="engageCancel">💔 Отменить предложение · вернуть ${fmt(e.ring)} ₽</button></div>`, { center: true });
+}
+
+function cancelEngagement() {
+  const e = S.engaged;
+  if (!e || S.married) return;
+  S.engaged = null;
+  addMoney(e.ring);
+  const g = GIRLS.find((x) => x.id === e.gid);
+  if (g) girlState(g.id).rel = Math.min(girlState(g.id).rel, 85);
+  closeModal();
+  sfx('bad');
+  resultModal({ emoji: '💍', rays: 'bad', title: 'Предложение отменено', text: `Кольцо вернулось в ювелирный — тебе отдали все <b>${fmt(e.ring)} ₽</b>.${g ? ` ${g.name.split(' ').pop()} расстроилась, но не ушла (отношения ${Math.floor(girlState(g.id).rel)}/100).` : ''} Сделать предложение можно будет снова.`, btn: 'Понятно' });
+}
+
+// Девушка сменилась или ушла — помолвка сгорает
+HOOKS.tick.push(() => { if (S.engaged && (S.married || S.engaged.gid !== S.girlfriend)) S.engaged = null; });
 
 function startWedding(id) {
   const w = WEDDINGS.find((x) => x.id === id);
   if (S.money < w.price || S.married) return;
   S.money -= w.price;
-  runGame({ title: 'Первый танец', hint: 'Жми «Шаг», когда метка в зелёной зоне. Все смотрят!', duration: 0, scoreLabel: ' 💃',
-    setup: (mg) => gameTiming(mg, { btn: '💃 Шаг', item: '💃', attempts: 6 }),
-    finish: (score) => finishWedding(w, clamp(score / 9, 0, 1)) });
+  S.engaged = null;
+  runGame({ title: 'Первый танец', hint: 'Жми «Шаг», когда сердечко доезжает до линии. Все смотрят!', duration: 0, scoreLabel: ' 💃',
+    setup: (mg) => gameRhythm(mg, { btn: '💃 Шаг', items: ['💞', '💃', '🕺'], notes: 10, lyric: '🎻 Вальс молодожёнов', perfect: 'Как в кино! 💞', fail: 'Наступил на платье!' }),
+    finish: (score) => finishWedding(w, clamp(score / 15, 0, 1)) });
 }
 
 function finishWedding(w, perf) {
@@ -509,7 +538,8 @@ EXTRA_TABS.fun.dates = () => {
     const st = girlState(gf.id), ring = RINGS[girlIdx(gf.id)];
     family = `<div class="premium-hero wife-hero"><div class="e">💑</div><div><b>Твоя девушка: ${gf.name}</b>
         <p>+0.5 радости/мин · доверие ${Math.round(S.trust === undefined ? 70 : S.trust)}/100. ${st.rel >= 100 ? 'Отношения на максимуме — можно делать предложение!' : `Доведи отношения до 100, чтобы сделать предложение (${Math.floor(st.rel)}/100).`}</p></div></div>
-      ${st.rel >= 100 ? priceBtn('propose', '', ring, S.money >= ring, `💍 Предложение · кольцо ${fmt(ring)} ₽`).replace('class="btn', 'class="btn wide') : ''}`;
+      ${S.engaged && S.engaged.gid === gf.id ? '<button class="btn primary wide" data-act="propose">💒 Помолвлены — выбрать свадьбу</button>'
+        : st.rel >= 100 ? priceBtn('propose', '', ring, S.money >= ring, `💍 Предложение · кольцо ${fmt(ring)} ₽`).replace('class="btn', 'class="btn wide') : ''}`;
   }
   return `<div class="info-card">Каждое свидание — мини-игра: прогулка, разговор или танец. Чем лучше сыграешь, тем выше шанс. Шансы зависят и от одежды, жилья, образования, силы, радости и здоровья.
       ${cd > 0 ? `<br>⏳ Следующее свидание через <b><span data-until="${S.cd.date}"></span></b>` : ''}</div>
@@ -534,6 +564,7 @@ EXTRA_TABS.fun.dates = () => {
 Object.assign(ACTIONS, {
   propose: () => propose(),
   wedding: (id) => startWedding(id),
+  engageCancel: () => cancelEngagement(),
   divorceAsk: () => {
     const g = wife();
     if (!g) return;

@@ -79,7 +79,7 @@ HOOKS.tick.push(() => { if (S.girlfriend && S.loveFor !== S.girlfriend) { S.love
 
 propose = (function (orig) {
   return function () {
-    if (!S.married && ((S.love || 0) < LOVE_FOR_PROPOSAL || (S.gfDates || 0) < DATES_FOR_PROPOSAL)) {
+    if (!S.married && !(S.engaged && S.engaged.gid === S.girlfriend) && ((S.love || 0) < LOVE_FOR_PROPOSAL || (S.gfDates || 0) < DATES_FOR_PROPOSAL)) {
       toast(`Рано! Нужна любовь ${LOVE_FOR_PROPOSAL} (сейчас ${Math.floor(S.love || 0)}) и ${DATES_FOR_PROPOSAL} свиданий вместе (было ${S.gfDates || 0})`, 'bad');
       return;
     }

@@ -316,6 +316,7 @@ function gameMemory(mg, need) {
   let input = [], showing = true;
   const flash = (i) => { btns[i].classList.add('lit'); sfx('notify'); setTimeout(() => btns[i].classList.remove('lit'), 380); };
   const play = async () => {
+    if (!mgAlive(mg)) return;
     showing = true;
     $('memMsg').textContent = `Запомни: ${seq.length} шт.`;
     await wait(500);

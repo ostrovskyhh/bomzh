@@ -64,7 +64,7 @@ async function topLoad() {
 function topStatsHTML(s) {
   const tr = TRANSPORT[Math.round(s.transport || 0)] || TRANSPORT[0];
   const rows = [
-    ['⭐ Уровень', s.level], ['🌟 Престиж', s.prestige], ['🏠 Жильё', HOUSING[Math.round(s.housing || 0)].name], ['🎓 Образование', EDU[Math.round(s.edu || 0)].name],
+    ['📍 Город', esc(s.city_name || 'Засранск')], ['⭐ Уровень', s.level], ['🌟 Престиж', s.prestige], ['🏠 Жильё', esc(s.house_name || HOUSING[Math.round(s.housing || 0)].name)], ['🎓 Образование', EDU[Math.round(s.edu || 0)].name],
     ['💼 Должность', s.job_name || '—'], ['👊 Рейтинг драк', Math.round(s.rating || 0)], ['🏆 Побед в драках', s.wins], ['⚔️ Побед онлайн', s.online_wins],
     ['🏅 Достижения', s.ach], ['🚗 Транспорт', `${tr.emoji} ${tr.name}`], ['🏪 Бизнесы', s.biz], ['📖 Глав сюжета', s.quest],
     ['💰 Заработано', `${fmt(s.earned || 0)} ₽`], ['💍 Семья', s.married ? 'Женат' : '—'],
@@ -94,7 +94,7 @@ EXTRA_TABS.tasks.top = function topTab() {
       <div class="rank r${i + 1}">${i + 1}</div>
       <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}</div>
       <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
-        <div class="card-desc">Ур. ${p.stats.level} · ${esc(HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
+        <div class="card-desc"><span class="top-city">📍 ${esc(p.stats.city_name || 'Засранск')}</span> Ур. ${p.stats.level} · ${esc(p.stats.house_name || HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>${topStatsHTML(p.stats)}</details>`).join('');
   return head + `<div class="subhead">Лучшие игроки · нажми, чтобы сравнить</div>${rows || '<div class="info-card">Пока никого нет — будь первым!</div>'}`;
 };

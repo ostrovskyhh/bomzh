@@ -176,7 +176,7 @@ EXTRA_TABS.tasks.top = function topWithDuels() {
       <div class="rank r${i + 1}">${i + 1}</div>
       <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}${p.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
       <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
-        <div class="card-desc">${p.online && !p.me ? '<b class="online-txt">в игре</b> · ' : ''}Ур. ${p.stats.level} · ${esc(HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
+        <div class="card-desc">${p.online && !p.me ? '<b class="online-txt">в игре</b> · ' : ''}<span class="top-city">📍 ${esc(p.stats.city_name || 'Засранск')}</span> Ур. ${p.stats.level} · ${esc(p.stats.house_name || HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>
       ${!p.me && p.pid ? duelBtns(p.pid, p.name) : ''}${topStatsHTML(p.stats)}</details>`).join('');
   return head + onlineBox + `<div class="subhead">Лучшие игроки · нажми, чтобы сравнить или вызвать</div>${rows || '<div class="info-card">Пока никого нет — будь первым!</div>'}`;
