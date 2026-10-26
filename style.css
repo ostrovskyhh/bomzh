@@ -1368,3 +1368,18 @@ button:disabled { pointer-events: none; }
 .wall-bout.a span:first-child { color: #3CCB5A; font-weight: 800; } .wall-bout.b span:last-child { color: #FF5A5A; font-weight: 800; }
 .wall-result { font-size: 20px; font-weight: 900; padding: 10px; border-radius: 14px; opacity: 0; animation: lootIn .4s ease forwards; }
 .wall-result.win { background: rgba(60,203,90,.18); color: #3CCB5A; } .wall-result.lose { background: rgba(255,90,90,.15); color: #FF5A5A; }
+
+/* ---------- 2.5: фон аватарок, настройки, обратная связь ---------- */
+.ava-in { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.15em; }
+.chat-ava { position: relative; }
+.avatar.emoji-ava { color: #fff; }
+.set-tabs { flex-wrap: wrap; }
+.set-tabs button { min-width: 70px; }
+.set-sec { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.set-sec .set-list { margin: 0; }
+.fb-text { width: 100%; min-height: 110px; padding: 10px; border-radius: 12px; border: 0; background: var(--card); color: var(--text); font: inherit; font-size: 14px; resize: vertical; box-sizing: border-box; }
+.fb-note { display: block; color: var(--muted); font-size: 11px; margin: 6px 0; }
+.bc-pop { text-align: center; }
+.bc-e { font-size: 56px; line-height: 1.2; animation: dcPop .5s cubic-bezier(.3,1.6,.5,1); }
+.bc-check { flex-direction: row !important; align-items: center; gap: 8px !important; color: var(--text) !important; font-size: 13px !important; }
+.gift-form select { padding: 10px; border-radius: 10px; border: 0; background: var(--card); color: var(--text); font-size: 15px; }

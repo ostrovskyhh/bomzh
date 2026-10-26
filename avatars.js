@@ -27,7 +27,15 @@ function currentAvatar() { const a = avatarById(S.avatar); return a && a.face &&
 // Что показать в кружке: значок аватарки или первая буква имени
 function avaFace(name, avatarId) {
   const a = avatarId && avatarById(avatarId);
-  return a && a.face ? a.face : esc((name || '?')[0].toUpperCase());
+  return a && a.face ? `<span class="ava-in" style="background:${avaBg(a.id)}">${a.face}</span>` : esc((name || '?')[0].toUpperCase());
+}
+// У каждой аватарки свой фон: градиент по её id (одинаковый у всех игроков)
+const AVA_BG = { bottle: ['#1B5E20', '#3CCB5A'], trash: ['#3A3A3A', '#7A7A7A'], boxer: ['#5A1414', '#E0412E'], rich: ['#0E4D6A', '#7FDBFF'], vip: ['#4A2A8A', '#B06CFF'],
+  devil: ['#3A0A0A', '#B3122E'], saint: ['#8A7A2A', '#FFF3B0'], legend: ['#6A4A00', '#F2C744'], season: ['#3A1A6A', '#B06CFF'], champ: ['#7A5A10', '#F2C744'] };
+function avaBg(id) {
+  let c = AVA_BG[id];
+  if (!c) { let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 360; c = [`hsl(${h} 55% 28%)`, `hsl(${(h + 40) % 360} 70% 52%)`]; }
+  return `linear-gradient(135deg, ${c[0]}, ${c[1]})`;
 }
 
 HOOKS.hud.push(() => {
@@ -35,7 +43,10 @@ HOOKS.hud.push(() => {
   if (!el) return;
   const a = currentAvatar();
   const face = a ? a.face : playerName()[0].toUpperCase();
-  if (el.dataset.face !== face) { el.textContent = face; el.dataset.face = face; el.classList.toggle('emoji-ava', !!a); }
+  if (el.dataset.face !== face) { el.textContent = face; el.dataset.face = face; }
+  // Класс ставим каждый раз: рамку выставляют заново (progress.js) и иначе фон «слетал» обратно в золотой
+  el.classList.toggle('emoji-ava', !!a);
+  el.style.background = a ? avaBg(a.id) : '';
 });
 
 myStats = (function (orig) { return () => { const a = currentAvatar(); return { ...orig(), avatar: a ? a.id : '' }; }; })(myStats);
@@ -61,7 +72,7 @@ EXTRA_TABS.tasks.ach = () => {
       const ok = a.need();
       const on = a.face ? cur && cur.id === a.id : !cur;
       return `<button class="frame-pick ${on ? 'on' : ''}" data-act="pickAvatar" data-id="${a.id}" ${ok ? '' : `disabled data-why="Откроется: ${a.how}"`}>
-        <div class="avatar ${a.face ? 'emoji-ava' : ''} frame-${currentFrame()}">${a.face ? (ok ? a.face : '🔒') : esc(playerName()[0])}</div><small>${a.name}</small></button>`;
+        <div class="avatar ${a.face ? 'emoji-ava' : ''} frame-${currentFrame()}" ${a.face && ok ? `style="background:${avaBg(a.id)}"` : ''}>${a.face ? (ok ? a.face : '🔒') : esc(playerName()[0])}</div><small>${a.name}</small></button>`;
     }).join('')}</div>` + _achTabAva();
 };
 ACTIONS.pickAvatar = (id) => {

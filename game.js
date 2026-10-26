@@ -595,7 +595,8 @@ function maxFood() { return 100; }
 function maxHealth() { return 100 + Math.floor(S.form); }
 function maxMood() { return 100; }
 function regenPerMin() { return HOUSING[S.housing].regen * (1 + S.form / 200) * mods().regen; }
-function tapPower() { const m = mods(); return Math.max(1, Math.floor((1 + sumGear('tap') + m.tapAdd) * m.tap)); }
+// Бутылок за тап — дробное число: доли копятся между тапами, поэтому даже +1 от шапки при плохом настроении не теряется на округлении
+function tapPower() { const m = mods(); return Math.max(1, (1 + sumGear('tap') + m.tapAdd) * m.tap); }
 // Милостыня подают только оборванцу на улице: в приличной одежде не подают, во время сна/работы тоже.
 // Жильё и одежда её не увеличивают — так её нельзя раскачать в бесконечный доход
 const PITY_BASE = 30; // ₽ в час в лохмотьях
@@ -1045,7 +1046,9 @@ function onTap(e) {
     return;
   }
   const crit = Math.random() < critChance();
-  const gain = tapPower() * (crit ? 5 : 1);
+  const raw = tapPower() * (crit ? 5 : 1) + (S.tapRest || 0);
+  const gain = Math.floor(raw);
+  S.tapRest = raw - gain;
   S.energy -= 1;
   S.stats.taps++;
   taskProgress('taps');
