@@ -726,26 +726,56 @@ const CLOUD_CHUNK = 3900;
 const CLOUD_EVERY = 8000; // писать в облако не чаще раза в 8 секунд
 let cloudTimer = null, cloudLastAt = 0, cloudBusy = false, cloudSlot = 'a';
 
-function cloudWrite() {
-  if (!cloudOk() || cloudBusy) return;
+// final — игру закрывают: «оглавление» отправляем сразу, не дожидаясь ответа по кускам (страница может
+// не дожить до ответа). Если какой-то кусок не дойдёт, копия просто не прочитается и победят другие
+function cloudWrite(final) {
+  if (!cloudOk() || (cloudBusy && !final)) return;
   cloudBusy = true;
   cloudLastAt = Date.now();
   const json = JSON.stringify(S);
   const slot = cloudSlot === 'a' ? 'b' : 'a';
   const parts = Math.ceil(json.length / CLOUD_CHUNK);
+  const meta = JSON.stringify({ slot, n: parts, at: S.savedAt, rev: S.rev || 0 });
   let left = parts, failed = false;
   const done = () => {
     if (failed) { cloudBusy = false; return; }
-    tg.CloudStorage.setItem(`${SAVE_KEY}_meta`, JSON.stringify({ slot, n: parts, at: S.savedAt }), () => { cloudSlot = slot; cloudBusy = false; });
+    tg.CloudStorage.setItem(`${SAVE_KEY}_meta`, meta, () => { cloudSlot = slot; cloudBusy = false; });
   };
   try {
     for (let i = 0; i < parts; i++) {
       tg.CloudStorage.setItem(`${SAVE_KEY}_${slot}${i}`, json.slice(i * CLOUD_CHUNK, (i + 1) * CLOUD_CHUNK), (err) => {
         if (err) failed = true;
-        if (--left === 0) done();
+        if (--left === 0 && !final) done();
       });
     }
+    if (final) { tg.CloudStorage.setItem(`${SAVE_KEY}_meta`, meta, () => { cloudBusy = false; }); cloudSlot = slot; }
   } catch (e) { cloudBusy = false; }
+}
+
+// ---------- Хранилище на самом телефоне (Telegram 9.0+): переживает закрытие игры, даже если Telegram
+// чистит память браузера. Запись — сразу при каждом сохранении, это быстро и без сети ----------
+function deviceOk() { return tg && tg.DeviceStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('9.0'); }
+function deviceWrite() {
+  if (!deviceOk()) return;
+  try { tg.DeviceStorage.setItem(SAVE_KEY, JSON.stringify(S), () => {}); } catch (e) { /* старый клиент */ }
+}
+function deviceRead(cb) {
+  try { tg.DeviceStorage.getItem(SAVE_KEY, (err, value) => cb(err ? null : parseSave(value))); } catch (e) { cb(null); }
+}
+
+// Какая копия свежее. Раньше сравнивали время сохранения по часам телефона — а часы бывают сбиты:
+// копия «из будущего» побеждала все новые, и прогресс откатывался. Теперь главное — счётчик сохранений rev
+// (растёт на 1 при каждом сохранении и от часов не зависит); время — только при равенстве, и
+// подозрительно «будущее» время проигрывает нормальному.
+const FUTURE_SLACK = 5 * 60000;
+function saveRank(s) {
+  const at = s.savedAt || 0;
+  return [s.rev || 0, at > Date.now() + FUTURE_SLACK ? 0 : 1, at];
+}
+function newerSave(a, b) {
+  const x = saveRank(a), y = saveRank(b);
+  for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] > y[i];
+  return false;
 }
 
 // ---------- Сервер: главное хранилище профиля, одно на телефон и компьютер ----------
@@ -774,26 +804,42 @@ async function serverCall(path, extra) {
 }
 async function serverGet() {
   const j = await serverCall('get', {});
-  return j.data ? parseSave(j.data) : null;
+  const s = j.data ? parseSave(j.data) : null;
+  if (s && j.rev > (s.rev || 0)) s.rev = j.rev;
+  return s;
 }
+// serverBase — номер сохранения (rev), который этот экземпляр игры последним видел на сервере
+let srvAgain = false, REV_FLOOR = 0;
 async function serverWrite(force) {
-  if (!serverReady || srvBusy || SAVE_LOCK || !serverOk()) return;
+  if (!serverReady || SAVE_LOCK || !serverOk()) return;
+  if (srvBusy) { srvAgain = true; return; } // запишем сразу после текущего запроса, а не через 15 секунд
   srvBusy = true; srvLastAt = Date.now();
   try {
-    const j = await serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, base: serverBase, force: !!force });
+    const j = await serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, rev: S.rev || 0, base: serverBase, force: !!force });
     if (j.conflict) {
       // Пока это окно было открыто, играли на другом устройстве
       const remote = parseSave(j.data);
-      if (remote) adoptOrAsk(remote);
-    } else if (j.ok) serverBase = Math.max(serverBase, j.savedAt || 0);
+      if (remote) { if (j.rev > (remote.rev || 0)) remote.rev = j.rev; adoptOrAsk(remote); }
+    } else if (j.ok) serverBase = Math.max(serverBase, j.rev || 0);
   } catch (e) { /* сервер выключен — сохранимся в следующий раз */ }
   srvBusy = false;
+  if (srvAgain) { srvAgain = false; setTimeout(serverWrite, 300); }
+}
+// Игру закрывают: запрос с keepalive браузер доотправит, даже когда страница уже закрыта
+function serverFinal() {
+  if (!serverReady || SAVE_LOCK || !serverOk()) return;
+  const body = JSON.stringify({ initData: tg.initData, device: DEVICE_ID, data: JSON.stringify(S), savedAt: S.savedAt, rev: S.rev || 0, base: serverBase });
+  if (body.length > 63000) { serverWrite(); return; } // keepalive берёт не больше 64 КБ
+  try {
+    fetch(`${REF_API}/api/save/put`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body })
+      .then((r) => r.json()).then((j) => { if (j && j.ok) serverBase = Math.max(serverBase, j.rev || 0); }).catch(() => {});
+  } catch (e) { serverWrite(); }
 }
 // На сервере профиль новее: если здесь почти ничего не наиграно — молча берём его, иначе спрашиваем
 function adoptOrAsk(remote) {
-  const unsynced = (S.savedAt || 0) - serverBase;
-  const remoteBetter = (remote.savedAt || 0) > (S.savedAt || 0) && (remote.xp || 0) >= (S.xp || 0);
-  if (unsynced < 60000 || remoteBetter) { adoptSave(remote); return; }
+  const unsynced = (S.rev || 0) - serverBase; // сохранений, которых сервер не видел (одно ≈ раз в 5 секунд)
+  const remoteBetter = (remote.rev || 0) > (S.rev || 0) && (remote.xp || 0) >= (S.xp || 0);
+  if (unsynced < 12 || remoteBetter) { adoptSave(remote); return; }
   serverReady = false;
   ALT_SAVE = remote;
   if (typeof showSavePick === 'function') showSavePick();
@@ -801,41 +847,64 @@ function adoptOrAsk(remote) {
 function adoptSave(remote) {
   SAVE_LOCK = true;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(remote)); } catch (e) { /* нет доступа */ }
+  if (deviceOk()) try { tg.DeviceStorage.setItem(SAVE_KEY, JSON.stringify(remote), () => {}); } catch (e) { /* старый клиент */ }
   toast('☁️ Подгружаю прогресс с другого устройства…', 'good');
   setTimeout(() => location.reload(), 700);
 }
 // Проверка при возврате в игру и после неудачной загрузки
 function serverSync() {
   if (!serverOk() || srvBusy || SAVE_LOCK || ALT_SAVE) return;
-  serverGet().then((remote) => {
-    serverReady = true;
-    if (remote && (remote.savedAt || 0) > serverBase && (remote.savedAt || 0) !== (S.savedAt || 0)) {
-      if (serverBase === 0 && (remote.savedAt || 0) < (S.savedAt || 0) && (remote.xp || 0) <= (S.xp || 0) * 1.02 + 50) serverBase = remote.savedAt;
-      else { adoptOrAsk(remote); return; }
-    }
-    serverWrite();
-  }).catch(() => {});
+  serverGet().then((remote) => serverSeen(remote)).catch(() => {});
+}
+// Пришёл профиль с сервера, когда игра уже идёт (возврат в игру или сервер ответил позже загрузки)
+function serverSeen(remote) {
+  if (SAVE_LOCK || ALT_SAVE) return;
+  serverReady = true;
+  const rRev = remote ? remote.rev || 0 : 0;
+  if (remote && rRev > serverBase && newerSave(remote, S)) {
+    // Сервер ушёл вперёд: если здесь почти ничего не наиграно — берём его, иначе спрашиваем
+    if ((remote.xp || 0) <= (S.xp || 0) * 1.02 + 50 && serverBase === 0 && rRev <= (S.rev || 0)) serverBase = rRev;
+    else { adoptOrAsk(remote); return; }
+  } else if (remote) serverBase = Math.max(serverBase, rRev);
+  serverWrite();
 }
 
-function save(now) {
+// now — сохранить везде сразу (важное действие или игру сворачивают); final — игру закрывают
+function save(now, final) {
   if (SAVE_LOCK || !LOADED) return;
   S.lastSeen = Date.now();
   S.savedAt = Date.now();
+  // Счётчик не идёт назад, даже если S собрали заново (престиж, сброс, выбор другого сохранения)
+  S.rev = Math.max(S.rev || 0, REV_FLOOR, serverBase) + 1;
+  REV_FLOOR = S.rev;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* приватный режим */ }
+  deviceWrite();
   if (serverOk()) {
     clearTimeout(srvTimer);
-    srvTimer = setTimeout(serverWrite, now ? 0 : Math.max(0, SERVER_EVERY - (Date.now() - srvLastAt)));
+    if (final === true) serverFinal();
+    else srvTimer = setTimeout(serverWrite, now === true ? 0 : Math.max(0, SERVER_EVERY - (Date.now() - srvLastAt)));
   }
   if (!cloudOk()) return;
   clearTimeout(cloudTimer);
-  const wait = now ? 0 : Math.max(0, CLOUD_EVERY - (Date.now() - cloudLastAt));
+  if (final === true) { cloudWrite(true); return; }
+  const wait = now === true ? 0 : Math.max(0, CLOUD_EVERY - (Date.now() - cloudLastAt));
   cloudTimer = setTimeout(cloudWrite, wait);
 }
+// Важное действие (награда, покупка, глава) — на сервер и в облако через секунду, а не через 15
+function saveSoon() {
+  save();
+  if (serverOk()) { clearTimeout(srvTimer); srvTimer = setTimeout(serverWrite, Math.max(1000, 3000 - (Date.now() - srvLastAt))); }
+  if (cloudOk()) { clearTimeout(cloudTimer); cloudTimer = setTimeout(cloudWrite, Math.max(1000, 3000 - (Date.now() - cloudLastAt))); }
+}
+const saveFinal = () => { if (typeof S !== 'undefined' && S.storySeen) save(true, true); };
 document.addEventListener('visibilitychange', () => {
   if (typeof S === 'undefined' || !S.storySeen) return;
-  if (document.hidden) save(true);
+  if (document.hidden) saveFinal();
   else serverSync();
 });
+window.addEventListener('pagehide', saveFinal);
+window.addEventListener('beforeunload', saveFinal);
+if (tg && tg.onEvent) try { tg.onEvent('deactivated', saveFinal); } catch (e) { /* старый клиент */ }
 setInterval(() => { if (!serverReady && typeof S !== 'undefined' && S.storySeen) serverSync(); }, 60000);
 
 function parseSave(json) {
@@ -871,22 +940,28 @@ function cloudRead(cb) {
 function load(done) {
   let local = null;
   try { local = parseSave(localStorage.getItem(SAVE_KEY)); } catch (e) { /* нет доступа */ }
-  // Читаем сразу три копии: в браузере, в облаке Telegram и на сервере — берём самую свежую
-  let cloud = null, server = null, waiting = 0, finished = false;
+  // Читаем сразу четыре копии: в браузере, на телефоне (DeviceStorage), в облаке Telegram и на сервере —
+  // берём самую свежую по счётчику сохранений (см. saveRank)
+  let cloud = null, server = null, device = null, waiting = 0, finished = false;
   const finish = () => {
     if (finished) return;
     finished = true; clearTimeout(timer);
-    const all = [local, cloud, server].filter(Boolean).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+    const all = [local, device, cloud, server].filter(Boolean).sort((a, b) => (newerSave(a, b) ? -1 : newerSave(b, a) ? 1 : 0));
     if (all[0]) S = all[0];
+    REV_FLOOR = Math.max(0, ...all.map((s) => s.rev || 0));
     // Конфликт: новее оказалось сохранение с меньшим прогрессом (играл на двух устройствах раздельно)
     const alt = all.slice(1).sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
     if (alt && (alt.xp || 0) > (all[0].xp || 0) * 1.02 + 50) ALT_SAVE = alt;
     LOADED = true;
     done();
-    if (serverReady && !ALT_SAVE && (!server || (S.savedAt || 0) > serverBase)) setTimeout(() => serverWrite(), 1500);
+    if (serverReady && !ALT_SAVE && (!server || (S.rev || 0) > serverBase || newerSave(S, server))) setTimeout(() => serverWrite(), 1500);
   };
   const part = () => { if (--waiting <= 0) finish(); };
   const timer = setTimeout(finish, 6000);
+  if (deviceOk()) {
+    waiting++;
+    deviceRead((d) => { device = d; part(); });
+  }
   if (cloudOk()) {
     waiting++;
     try { cloudRead((c) => { cloud = c; part(); }); } catch (e) { part(); }
@@ -894,8 +969,9 @@ function load(done) {
   if (serverOk()) {
     waiting++;
     serverGet().then((s) => {
-      if (finished) return; // опоздал — проверим позже через serverSync
-      server = s; serverReady = true; serverBase = s ? (s.savedAt || 0) : 0;
+      // Сервер ответил позже, чем игра загрузилась: раньше запись на сервер тогда выключалась на минуту
+      if (finished) { serverSeen(s); return; }
+      server = s; serverReady = true; serverBase = s ? (s.rev || 0) : 0;
       part();
     }).catch(part);
   }
@@ -1901,7 +1977,7 @@ document.addEventListener('click', (e) => {
   clampStats();
   if (!modalOpen() || b.dataset.act === 'close') refresh();
   else updateHud();
-  save();
+  saveSoon(); // награды и покупки — на сервер через пару секунд, чтобы быстрый выход их не терял
 });
 
 // =====================================================================

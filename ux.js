@@ -17,8 +17,11 @@ function showSavePick() {
 }
 HOOKS.load.push(() => setTimeout(showSavePick, 1200));
 ACTIONS.pickSave = (id) => {
-  if (ALT_SAVE) serverBase = Math.max(serverBase, ALT_SAVE.savedAt || 0);
+  // Выбранная копия должна обогнать обе по счётчику сохранений, иначе при следующем входе победит другая
+  const top = Math.max(S.rev || 0, (ALT_SAVE && ALT_SAVE.rev) || 0, serverBase);
+  if (ALT_SAVE) serverBase = Math.max(serverBase, ALT_SAVE.rev || 0);
   if (id === 'alt' && ALT_SAVE) { S = ALT_SAVE; renderedLook = ''; }
+  S.rev = top;
   ALT_SAVE = null;
   if (serverOk()) serverReady = true;
   closeModal();
