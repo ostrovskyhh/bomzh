@@ -72,7 +72,7 @@ function starterHTML() {
   const left = starterLeft();
   if (!left) return '';
   return `<div class="starter-pack"><div class="sp-badge">−80%</div><div class="sp-e">🎁</div>
-      <b>Набор новичка</b><small>Только первые ${STARTER_DAYS} дня · осталось <span data-until="${Date.now() + left}"></span></small>
+      <b>Набор новичка</b><small>Только первые ${STARTER_DAYS} дня · осталось ${typeof leftText === 'function' ? leftText(left) : `<span data-until="${Date.now() + left}"></span>`}</small>
       <div class="sp-items"><span>🟡 100 крышек</span><span>👑 VIP 7 дней</span><span>💰 ${fmt(starterMoney())} ₽</span><span>🧢 Кепка новичка</span></div>
       <button class="btn primary wide" data-act="prem" data-id="starter"><i class="ic" data-ic="star"></i>${STARTER_STARS} — забрать</button></div>`;
 }

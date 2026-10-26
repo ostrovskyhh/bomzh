@@ -1383,3 +1383,45 @@ button:disabled { pointer-events: none; }
 .bc-e { font-size: 56px; line-height: 1.2; animation: dcPop .5s cubic-bezier(.3,1.6,.5,1); }
 .bc-check { flex-direction: row !important; align-items: center; gap: 8px !important; color: var(--text) !important; font-size: 13px !important; }
 .gift-form select { padding: 10px; border-radius: 10px; border: 0; background: var(--card); color: var(--text); font-size: 15px; }
+
+/* ---------- 2.5.1: премиальный донат ---------- */
+.donate { padding-bottom: 4px; }
+.dn-hero { position: relative; overflow: hidden; text-align: center; padding: 18px 12px 14px; margin: -4px 0 12px; border-radius: 20px;
+  background: radial-gradient(circle at 50% 0%, #FFE38A 0%, #F2C744 30%, #B8860B 70%, #6A4A00 100%); color: #2A1A06; box-shadow: 0 8px 28px rgba(242,199,68,.35), inset 0 0 0 1px rgba(255,255,255,.35); }
+.dn-hero small { display: block; font-weight: 900; letter-spacing: 2px; font-size: 11px; opacity: .75; }
+.dn-balance { font-size: 40px; font-weight: 900; line-height: 1.1; margin: 4px 0; text-shadow: 0 2px 0 rgba(255,255,255,.4); }
+.dn-balance span { font-size: 32px; margin-right: 6px; }
+.dn-hero .dn-sub { letter-spacing: 0; font-weight: 600; font-size: 12px; }
+.dn-shine { position: absolute; top: -50%; left: -60%; width: 40%; height: 200%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); transform: rotate(20deg); animation: dnShine 3.5s ease-in-out infinite; pointer-events: none; }
+@keyframes dnShine { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+.dn-banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; margin-bottom: 10px; border-radius: 14px; background: linear-gradient(135deg, #B3122E, #FF6A00); color: #fff; animation: dcPulse 1.8s ease-in-out infinite; }
+.dn-banner > span { font-size: 28px; } .dn-banner small { display: block; opacity: .9; font-size: 11px; }
+.dn-card { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 12px; margin-bottom: 10px; border-radius: 18px; color: #fff; }
+.dn-card.vip { background: linear-gradient(135deg, #2A0F4A, #6A2BB0 55%, #B06CFF); box-shadow: 0 6px 22px rgba(176,108,255,.4), inset 0 0 0 1px rgba(255,216,107,.45); }
+.dn-card.vip.on { box-shadow: 0 0 0 2px #F2C744, 0 6px 22px rgba(176,108,255,.5); }
+.dn-card.pass { background: linear-gradient(135deg, #3A1A6A, #7A3AB0 60%, #F2C744); box-shadow: 0 6px 20px rgba(122,58,176,.35); }
+.dn-card-e { font-size: 38px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+.dn-card-b { flex: 1; min-width: 0; } .dn-card-b b { display: block; font-size: 15px; } .dn-card-b small { display: block; font-size: 11px; opacity: .85; margin-top: 2px; }
+.dn-buy { border: 0; padding: 0; background: none; flex: none; }
+.star-price { display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 999px; font-weight: 900; font-size: 17px; color: #2A1A06; white-space: nowrap;
+  background: linear-gradient(180deg, #FFE38A, #F2C744 55%, #D99A1A); box-shadow: 0 3px 0 #9A6A10, 0 6px 14px rgba(242,199,68,.45); }
+.star-price .star-e { font-size: 20px; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.star-price s { font-size: 12px; opacity: .6; margin-right: 2px; font-weight: 700; }
+.btn .star-price { padding: 0; background: none; box-shadow: none; font-size: inherit; color: inherit; }
+.btn.primary:has(.star-price), .btn:has(.star-e) { background: linear-gradient(180deg, #FFE38A, #F2C744 55%, #D99A1A); color: #2A1A06; box-shadow: 0 3px 0 #9A6A10; }
+.dn-buy:active .star-price, .dn-pack:active .star-price { transform: translateY(2px); box-shadow: 0 1px 0 #9A6A10; }
+.dn-title { margin: 14px 2px 8px; font-weight: 900; font-size: 15px; letter-spacing: .5px; }
+.dn-packs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.dn-pack { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 8px 12px; border: 0; border-radius: 18px; color: var(--text); overflow: hidden;
+  background: linear-gradient(170deg, rgba(242,199,68,.16), var(--card) 60%); box-shadow: inset 0 0 0 1px rgba(242,199,68,.28); }
+.dn-pack.best { background: linear-gradient(170deg, rgba(242,199,68,.4), rgba(122,58,176,.35)); box-shadow: inset 0 0 0 2px #F2C744, 0 0 18px rgba(242,199,68,.35); }
+.dn-pack-e { font-size: 40px; line-height: 1.1; }
+.dn-caps { font-size: 24px; font-weight: 900; } .dn-caps small { font-size: 16px; margin-left: 2px; }
+.dn-pack-n { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.dn-ribbon { position: absolute; top: 8px; left: -26px; transform: rotate(-35deg); width: 96px; text-align: center; padding: 2px 0; font-size: 10px; font-weight: 900; background: #B3122E; color: #fff; }
+.dn-promo { position: absolute; top: 6px; right: 6px; padding: 2px 6px; border-radius: 999px; background: #FF6A00; color: #fff; font-size: 10px; font-weight: 900; }
+.dn-card .dn-promo { position: static; display: inline-block; margin-top: 4px; }
+.dn-more { margin: 10px 0; border-radius: 14px; background: var(--card); padding: 4px 10px; }
+.dn-more summary { padding: 10px 0; font-weight: 800; cursor: pointer; }
+.dn-legal { text-align: center; font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+.donate .starter-pack .btn, .donate .cosm .btn { font-size: 14px; }
