@@ -241,6 +241,13 @@
     const ctWin = fleaInv()[fleaInv().length - 1];
     check('контракт: с подписью — 3 вещи ушли, пришла 1 «Ходовое»', fleaInv().length === invBefore - 2 && ctWin.contract && ['uncommon', 'rare'].includes(ctWin.rar), `${fleaInv().length - invBefore} ${ctWin.rar}`);
     await sl(5600); closeModal();
+    // Админ-панель: все вкладки открываются без ошибок
+    S.admin = true; let admOk = true;
+    for (const [id] of ADM4_TABS) { try { ADM_TAB = id; ADMP.card = null; openAdmin(); if (!document.querySelector(`.adm4[data-tab="${id}"]`)) admOk = false; } catch (e) { admOk = false; } }
+    ADMP.card = { uid: 1, name: 'Тест', seen: 0, stats: { level: 5 }, save: { money: 1, caps: 2, city: 'zas' }, bans: {} }; ADM_TAB = 'players';
+    try { openAdmin(); if (!document.querySelector('.adm4-card-sec')) admOk = false; } catch (e) { admOk = false; }
+    ADMP.card = null; closeModal();
+    check('админ-панель: все вкладки и карточка игрока', admOk);
     // 4.4: кейсы ×3 и ×5
     S.money = Math.max(S.money, 1e6); const mm0 = S.money, fl0 = fleaInv().length;
     caseOpenMulti('box', 5);
