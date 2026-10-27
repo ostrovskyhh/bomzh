@@ -61,7 +61,7 @@ ACTIONS.feedback = (kind) => {
   openModal(`<h3>${bug ? '🐞 Сообщить о проблеме' : '💡 Предложить изменение'}</h3>
     <p>${bug ? 'Что случилось и где? Например: «В “Вокзале” после конца игры окно не закрывается».' : 'Что добавить или изменить в игре? Лучшие идеи попадут в обновления.'}</p>
     <textarea id="fbText" class="fb-text" maxlength="1000" placeholder="${bug ? 'Опиши проблему…' : 'Твоя идея…'}"></textarea>
-    <small class="fb-note">Вместе с сообщением отправятся версия игры, уровень и тип устройства — это поможет быстрее разобраться.</small>
+    <small class="fb-note">Вместе с сообщением отправятся версия игры, уровень, экран и последние действия за 5 минут — это поможет быстрее разобраться.</small>
     <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="feedbackSend" data-id="${kind}">Отправить</button>
     <button class="btn wide" data-act="settings">Назад</button></div>`, { center: true });
   setTimeout(() => { const t = $('fbText'); if (t) t.focus(); }, 100);
@@ -70,8 +70,13 @@ ACTIONS.feedbackSend = async (kind) => {
   const text = (($('fbText') || {}).value || '').trim();
   if (text.length < 5) { toast('Опиши чуть подробнее', 'bad'); return; }
   if (!onlineOn()) { toast('Отправка работает в игре внутри Telegram', 'bad'); return; }
+  const since = Date.now() - 5 * 60000; // последние 5 минут действий из журнала
+  const log = (S.log || []).filter((x) => x.t >= since).slice(0, 25).map((x) => ({
+    t: new Date(x.t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    text: String(x.text || '').slice(0, 160), kind: x.kind || '',
+  }));
   const ctx = { version: typeof CURRENT_VERSION !== 'undefined' ? CURRENT_VERSION : '', level: level(), screen: `${currentScreen}/${TABS[currentScreen] || ''}`,
-    device: (tg && tg.platform) || navigator.platform || '', size: `${window.innerWidth}×${window.innerHeight}`, money: Math.floor(S.money) };
+    device: (tg && tg.platform) || navigator.platform || '', size: `${window.innerWidth}×${window.innerHeight}`, money: Math.floor(S.money), city: typeof cityName === 'function' ? cityName() : '', log };
   try {
     const r = await apiPost('feedback', { kind, text, ctx });
     if (r.error) { toast(r.error, 'bad'); return; }

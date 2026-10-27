@@ -4,6 +4,24 @@
 // баланс и сейф. Работы, отдых, учёба, зал, свидания, дети, дела с ней, тюрьма и криминал в Мексике — на этих играх.
 
 // ---------- Общее ----------
+// Мексика говорит по-русски: игровые подсказки и отклики — русские с мексиканским колоритом.
+// Словарь «как в Мехико, только понятно»: отклики в играх, не названия мест и не реплики героев.
+const MX_RU = {
+  '¡Perfecto!': 'Идеально!', '¡Delicioso! +2': 'Вкусно! +2', '¡Centro!': 'В десятку!', '¡Bien!': 'Отлично!',
+  '¡Atrapado!': 'Поймал!', '¡Olé!': 'Оле!', '¡Listo! +2': 'Готово! +2', '¡Corre y se va!': 'Быстрее!',
+  '¡Lotería!': 'Лотерея!', '¡No!': 'Не то!', '¡Pescado!': 'Есть рыба!', '¡La Plancha! +2': 'Планка! +2',
+  '¡Alto! Услышали!': 'Стой! Услышали!', '¡Libre! +2': 'Свободен! +2', '¡Muy caro! Ушёл': 'Дорого! Ушёл',
+  '¡Trato hecho! +3': 'Сговорились! +3', '¡No, señor!': 'Не то, сеньор!', '¡Izquierda!': 'Влево!',
+  '¡Recto!': 'Прямо!', '¡Derecha!': 'Вправо!', 'Recalculando…': 'Считаю…', '¡Entregado!': 'Доставлено!',
+  '¡Correcto!': 'Правильно!', '¡Sí!': 'Да!', '¡Así!': 'Вот так!', '¡Abierto! +2': 'Открыто! +2',
+  '¡Clic!': 'Клик!', '¡Ringer!': 'Попал!', '¡Salvado!': 'Спас!', '¡Piña!': 'Ананас!', '¡Gracias!': 'Спасибо!',
+  '¡Ladrón!': 'Вор!', '¡Oye! Кто там?': 'Эй! Кто там?', '¡Qué bonito!': 'Красиво!', '¡Mayoría!': 'Большинство!',
+  '¡Rico! +2': 'Богато! +2', '¡Oye! Кто там?': 'Эй! Кто там?', '¡Qué rico!': 'Как вкусно!', '¡Claro que sí!': 'Конечно!',
+  '¡Tacos!': 'Тако!', '¡Margaritas!': 'Маргариты!', '¡Mariachi!': 'Мариачи!', '¡Libre!': 'Свободен!',
+};
+// Перевести по словарю, если есть совпадение — иначе оставить как есть
+function mxRu(s) { return MX_RU[s] || s; }
+
 function mxA(html, cls = '') { const a = $('mgArena'); a.className = `mg-arena mx-arena ${cls}`; a.innerHTML = html; return a; }
 function mxCap(el, e) { try { el.setPointerCapture(e.pointerId); } catch (err) { /* синтетическое касание */ } }
 function mxBtn(el, fn) { if (el) el.onpointerdown = (e) => { e.preventDefault(); fn(e); }; }
@@ -11,9 +29,9 @@ function mxMiss(mg, el, text, pts = 0) {
   mg.mistakes = (mg.mistakes || 0) + 1;
   if (pts) mgScore(-pts);
   sfx('error'); haptic('error'); shakeArena();
-  if (el && text) floatAt(el, text, 'bad');
+  if (el && text) floatAt(el, mxRu(text), 'bad');
 }
-function mxHit(el, text, n = 1) { mgScore(n); sfx('coin'); haptic('light'); if (el && text) floatAt(el, text, 'good'); }
+function mxHit(el, text, n = 1) { mgScore(n); sfx('coin'); haptic('light'); if (el && text) floatAt(el, mxRu(text), 'good'); }
 // Свой таймер — для игр, которые запускаются без полоски времени (зал, свидания «до конца»)
 function mxEnd(mg, sec) {
   if (!sec) return;
@@ -47,8 +65,8 @@ function mxComal(mg, cfg) {
       if (s.side === 0) {
         s.side = 1; s.p = 0; sfx('chip');
         b.querySelector('span').animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(180deg)' }, { transform: 'rotateY(360deg)' }], { duration: 300 });
-        if (perfect) floatAt(b, '¡Perfecto!', 'good');
-      } else { mxHit(b, perfect ? cfg.perfect || '¡Delicioso! +2' : '+1', perfect ? 2 : 1); put(i, 0.5); }
+        if (perfect) floatAt(b, 'Идеально!', 'good');
+      } else { mxHit(b, perfect ? cfg.perfect || 'Вкусно! +2' : '+1', perfect ? 2 : 1); put(i, 0.5); }
     });
   });
   mgLoop(mg, (dt) => {
@@ -90,7 +108,7 @@ function mxPinata(mg, cfg) {
     const e = $('pinE');
     if (pts) {
       mgScore(cfg.unit ? Math.ceil(pts / 25) : pts); sfx(pts === 50 ? 'crit' : 'tap'); haptic('medium');
-      floatAt(e, pts === 50 ? '¡Centro!' : pts === 25 ? '¡Bien!' : 'Задел', 'good');
+      floatAt(e, pts === 50 ? 'В десятку!' : pts === 25 ? 'Отлично!' : 'Задел', 'good');
       e.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.3) rotate(15deg)' }, { transform: 'scale(1)' }], { duration: 250 });
       if (--hp <= 0) {
         mgScore(cfg.unit ? 2 : cfg.bonus || 20); sfx('jackpot'); confetti(30);
@@ -134,7 +152,7 @@ function mxLasso(mg, cfg) {
     const dx = (u.left + u.width / 2) - (g.left + g.width / 2), dy = (u.top + u.height / 2) - (g.top + g.height / 2);
     ring.animate([{ transform: 'translate(-50%,-50%) scale(1.25)' }, { transform: 'translate(-50%,-50%) scale(1)' }], { duration: 250 });
     if (Math.hypot(dx, dy) <= r + 6 && a.width) {
-      if (cur.good) mxHit(run, cfg.hitText || '¡Atrapado!');
+      if (cur.good) mxHit(run, cfg.hitText || 'Поймал!');
       else mxMiss(mg, run, cfg.badText || 'Не того!', 1);
       spawn();
     } else { sfx('whoosh'); floatAt(ring, 'Мимо', 'bad'); }
@@ -186,7 +204,7 @@ function mxDance(mg, cfg) {
       const perfect = bd < 0.04;
       mgScore(perfect || combo % 8 === 0 ? 2 : 1); sfx(perfect ? 'crit' : 'tap'); haptic('light');
       $('dnD').animate([{ transform: 'translateX(-50%) translateY(0)' }, { transform: `translateX(-50%) translateY(-10px) rotate(${lane % 2 ? 12 : -12}deg)` }, { transform: 'translateX(-50%) translateY(0)' }], { duration: 220 });
-      if (perfect) floatAt(b, '¡Olé!', 'good');
+      if (perfect) floatAt(b, 'Оле!', 'good');
     } else { combo = 0; setCombo(); sfx('error'); }
   }));
   mxEnd(mg, cfg.time);
@@ -304,7 +322,7 @@ function mxBuild(mg, cfg) {
     const at = items[Math.floor((center + off) / W)];
     if (at === order[idx]) {
       idx++; mgScore(1); sfx('chip'); haptic('light');
-      if (idx >= order.length) { mxHit($('bdOrder'), cfg.doneText || '¡Listo! +2', 2); speed = Math.min(170, speed * 1.07); newOrder(); }
+      if (idx >= order.length) { mxHit($('bdOrder'), cfg.doneText || 'Готово! +2', 2); speed = Math.min(170, speed * 1.07); newOrder(); }
       else $('bdOrder').innerHTML = order.map((e, i) => `<i class="${i < idx ? 'ok' : i === idx ? 'cur' : ''}">${e}</i>`).join('');
     } else mxMiss(mg, $('bdBtn'), cfg.badText || 'Не то!', 1);
   });
@@ -319,7 +337,7 @@ function mxLoteria(mg, cfg) {
   const size = cfg.size || 4;
   const board = shuffle(LOTERIA.slice()).slice(0, size * size);
   const marked = board.map(() => false);
-  mxA(`<div class="mx-caller"><span id="ltE"></span><b id="ltN">¡Corre y se va!</b><i id="ltC"></i></div>
+  mxA(`<div class="mx-caller"><span id="ltE"></span><b id="ltN">Быстрее!</b><i id="ltC"></i></div>
     <div class="mx-lot s${size}">${board.map(([e, nm], i) => `<button class="mx-lc" data-i="${i}"><span>${e}</span>${cfg.words ? '' : `<small>${nm}</small>`}</button>`).join('')}</div>`, 'mx-loteria');
   const btns = [...document.querySelectorAll('.mx-lc')];
   let called = [], calls = cfg.calls || 0, wait = 0.8, lines = 0;
@@ -354,12 +372,12 @@ function mxLoteria(mg, cfg) {
       L.forEach((line, k) => {
         if (!done.has(k) && line.every((x) => marked[x])) {
           done.add(k); lines++;
-          if (cfg.score !== 'marks') { mgScore(1); sfx('jackpot'); confetti(25); floatAt(b, '¡Lotería!', 'good'); }
+          if (cfg.score !== 'marks') { mgScore(1); sfx('jackpot'); confetti(25); floatAt(b, 'Лотерея!', 'good'); }
           line.forEach((x) => btns[x].classList.add('line'));
         }
       });
       if (cfg.score !== 'marks' && cfg.lines && lines >= cfg.lines) setTimeout(mgEnd, 700);
-    } else mxMiss(mg, b, '¡No!', cfg.score === 'marks' ? 1 : 0);
+    } else mxMiss(mg, b, 'Не то!', cfg.score === 'marks' ? 1 : 0);
   }));
   mxEnd(mg, cfg.time);
 }
@@ -397,7 +415,7 @@ function mxDive(mg, cfg) {
       f.el.style.left = f.x * 100 + '%'; f.el.style.top = f.y * 100 + '%';
       if (back <= 0 && Math.abs(f.x - 0.5) < 0.06 && Math.abs(f.y - (0.12 + d)) < 0.07) {
         f.el.remove(); fish.splice(i, 1);
-        if (f.good) mxHit(hook, cfg.hitText || '¡Pescado!');
+        if (f.good) mxHit(hook, cfg.hitText || 'Есть рыба!');
         else { mxMiss(mg, hook, cfg.badText || 'Обжёгся!', 1); back = 0.8; }
         continue;
       }
@@ -431,7 +449,7 @@ function mxLucha(mg, cfg) {
     if (b.dataset.m === cur[2]) {
       combo++;
       const fin = combo % 3 === 0;
-      mxHit($('lcF'), fin ? cfg.finText || '¡La Plancha! +2' : '¡Bien!', fin ? 2 : 1);
+      mxHit($('lcF'), fin ? cfg.finText || 'Планка! +2' : 'Отлично!', fin ? 2 : 1);
       $('lcF').animate([{ transform: 'translateX(-50%) rotate(0)' }, { transform: `translateX(-50%) rotate(${fin ? 180 : 20}deg) scale(.9)` }, { transform: 'translateX(-50%) rotate(0)' }], { duration: 350 });
       win = Math.max(0.42, win * 0.96);
     } else { combo = 0; mxMiss(mg, $('lcF'), 'Не тот приём!', 1); if (cfg.maxMiss && mxOut(mg, cfg.maxMiss)) return; }
@@ -469,10 +487,10 @@ function mxTunnel(mg, cfg) {
     alarm = Math.max(0, alarm - dt * (hold && near ? 0 : 0.35));
     if (alarm >= 1) {
       alarm = 0; prog = Math.max(seg / segs, prog - 0.2); cool = 0.8; hold = false;
-      mxMiss(mg, $('tnD'), cfg.caughtText || '¡Alto! Услышали!');
+      mxMiss(mg, $('tnD'), cfg.caughtText || 'Стой! Услышали!');
       if (mxOut(mg, cfg.maxMiss || 3)) return;
     }
-    while (prog >= (seg + 1) / segs - 1e-6 && seg < segs) { seg++; mxHit($('tnD'), seg >= segs ? cfg.doneText || '¡Libre! +2' : '+1', seg >= segs ? 2 : 1); }
+    while (prog >= (seg + 1) / segs - 1e-6 && seg < segs) { seg++; mxHit($('tnD'), seg >= segs ? cfg.doneText || 'Свободен! +2' : '+1', seg >= segs ? 2 : 1); }
     if (seg >= segs) { prog = 0; seg = 0; }
     $('tnT').style.width = (0.06 + prog * 0.86) * 100 + '%';
     $('tnD').style.left = dx * 100 + '%';
@@ -501,14 +519,14 @@ function mxHaggle(mg, cfg) {
     $('hgM').textContent = k < 0.7 ? '😀' : k < 0.9 ? '🙂' : k <= 1 ? '😐' : '😠';
     $('hgP').textContent = `$${Math.round(p * (cfg.base || 40))}`;
     $('hgA').style.width = Math.min(1, anger) * 100 + '%';
-    if (anger >= 1) { hold = false; mxMiss(mg, $('hgB'), cfg.leaveText || '¡Muy caro! Ушёл'); next(); }
+    if (anger >= 1) { hold = false; mxMiss(mg, $('hgB'), cfg.leaveText || 'Дорого! Ушёл'); next(); }
   });
   mxBtn($('hgSell'), () => {
     if (!mgAlive(mg)) return;
     hold = false;
     const k = p / cur.max;
-    if (k <= 1) { const pts = k > 0.92 ? 3 : k > 0.75 ? 2 : 1; mxHit($('hgB'), pts === 3 ? '¡Trato hecho! +3' : `+${pts}`, pts); next(); }
-    else { anger += 0.3; floatAt($('hgB'), '¡No, señor!', 'bad'); sfx('error'); }
+    if (k <= 1) { const pts = k > 0.92 ? 3 : k > 0.75 ? 2 : 1; mxHit($('hgB'), pts === 3 ? 'Сговорились! +3' : `+${pts}`, pts); next(); }
+    else { anger += 0.3; floatAt($('hgB'), 'Не то, сеньор!', 'bad'); sfx('error'); }
   });
   mxEnd(mg, cfg.time);
 }
@@ -544,8 +562,8 @@ function mxJudge(mg, cfg) {
   mxEnd(mg, cfg.time);
 }
 
-// ---------- 14. Маршрут: поворот по команде на испанском ----------
-const MX_TURNS = [['⬅️', '¡Izquierda!', 'L'], ['⬆️', '¡Recto!', 'S'], ['➡️', '¡Derecha!', 'R']];
+// ---------- 14. Маршрут: поворот по команде штурмана ----------
+const MX_TURNS = [['⬅️', 'Влево!', 'L'], ['⬆️', 'Прямо!', 'S'], ['➡️', 'Вправо!', 'R']];
 function mxRoute(mg, cfg) {
   mxA(`<div class="mx-road"><div class="mx-stripes"></div><div class="mx-sign" id="rtS"></div><div class="mx-car" id="rtC">${cfg.player || '🚕'}</div></div>
     <div class="mx-pads three">${MX_TURNS.map(([e, , v]) => `<button class="mx-pad" data-v="${v}">${e}</button>`).join('')}</div>`, cfg.bg || 'mx-city');
@@ -553,24 +571,25 @@ function mxRoute(mg, cfg) {
   const sign = $('rtS');
   const next = () => {
     cur = pick(MX_TURNS); t = 0;
-    const hard = mg.score >= (cfg.hardAt || 6);
-    sign.innerHTML = `${hard ? '' : `<span>${cur[0]}</span>`}<b>${cur[1]}</b>${cfg.place ? `<small>${pick(cfg.place)}</small>` : ''}`;
+    // Знак всегда показывает и стрелку, и направление — без эмодзи игрок не понимал, куда жать
+    sign.innerHTML = `<span>${cur[0]}</span><b>${cur[1]}</b>${cfg.place ? `<small>${pick(cfg.place)}</small>` : ''}`;
+    dur *= cfg.speedUp || 0.97; // каждый следующий знак — чуть быстрее
   };
   next();
   mgLoop(mg, (dt) => {
     t += dt / dur;
     sign.style.transform = `translate(-50%,-50%) scale(${0.35 + t * 0.9})`;
     sign.style.top = 18 + t * 30 + '%';
-    if (t >= 1) { mxMiss(mg, sign, cfg.lateText || 'Recalculando…', 1); dur = Math.min(2.6, dur * 1.05); next(); }
+    if (t >= 1) { mxMiss(mg, sign, cfg.lateText || 'Считаю…', 1); dur = Math.min(2.6, dur * 1.05); next(); }
   });
   document.querySelectorAll('.mx-road ~ .mx-pads .mx-pad').forEach((b) => mxBtn(b, () => {
     if (!mgAlive(mg)) return;
     const car = $('rtC');
     if (b.dataset.v === cur[2]) {
-      mxHit(sign, cfg.okText || '¡Bien!');
+      mxHit(sign, cfg.okText || 'Отлично!');
       car.animate([{ transform: 'translateX(-50%)' }, { transform: `translateX(${cur[2] === 'L' ? -140 : cur[2] === 'R' ? 40 : -50}%) rotate(${cur[2] === 'L' ? -20 : cur[2] === 'R' ? 20 : 0}deg)` }, { transform: 'translateX(-50%)' }], { duration: 300 });
       dur = Math.max(1.1, dur * 0.95);
-    } else mxMiss(mg, sign, cfg.badText || 'Recalculando…', 1);
+    } else mxMiss(mg, sign, cfg.badText || 'Считаю…', 1);
     next();
   }));
   mxEnd(mg, cfg.time);
@@ -591,7 +610,7 @@ function mxCalle(mg, cfg) {
   const tap = (b) => {
     if (!mgAlive(mg)) return;
     if (+b.dataset.n === want) {
-      mxHit(b, cfg.okText || '¡Entregado!'); b.classList.add('ok');
+      mxHit(b, cfg.okText || 'Доставлено!'); b.classList.add('ok');
       if (++done % 3 === 0) layout();
       ask();
     } else mxMiss(mg, b, `Это ${ES_NUM[+b.dataset.n]}`, 1);
@@ -618,7 +637,7 @@ function mxWords(mg, cfg) {
     $('wdO').innerHTML = shuffle([a, ...wrong]).map((o) => `<button class="mx-pad word">${o}</button>`).join('');
     document.querySelectorAll('#wdO .mx-pad').forEach((b) => mxBtn(b, () => {
       if (!mgAlive(mg)) return;
-      if (b.textContent === cur.a) { mxHit($('wdW'), '¡Correcto!'); fall = Math.max(2.4, fall * 0.95); }
+      if (b.textContent === cur.a) { mxHit($('wdW'), 'Правильно!'); fall = Math.max(2.4, fall * 0.95); }
       else mxMiss(mg, $('wdW'), cur.a, 1);
       next();
     }));
@@ -640,7 +659,7 @@ function mxQuiz(mg, cfg) {
   const answer = (o) => {
     if (!mgAlive(mg) || !cur) return;
     const ok = o === cur.a;
-    if (ok) mxHit(card, cfg.okText || '¡Sí!'); else mxMiss(mg, card, cfg.penalty === false ? '' : cur.a, cfg.penalty === false ? 0 : 1);
+    if (ok) mxHit(card, cfg.okText || 'Да!'); else mxMiss(mg, card, cfg.penalty === false ? '' : cur.a, cfg.penalty === false ? 0 : 1);
     card.animate([{ transform: `translateX(${dx}px)` }, { transform: `translateX(${(cur.opts.indexOf(o) ? 1 : -1) * 300}px) rotate(${(cur.opts.indexOf(o) ? 1 : -1) * 20}deg)`, opacity: 0 }], { duration: 200 });
     setTimeout(next, 200);
     cur = null;
@@ -690,7 +709,7 @@ function mxBalance(mg, cfg) {
     $('blB').style.transform = `translateX(-50%) rotate(${a * 35}deg)`;
     $('blG').style.left = (50 + a * 50) + '%';
     $('blG').className = ok ? 'ok' : '';
-    $('blS').textContent = ok ? cfg.okWord || '¡Así!' : a > 0 ? '⬅️' : '➡️';
+    $('blS').textContent = ok ? cfg.okWord || 'Вот так!' : a > 0 ? '⬅️' : '➡️';
   });
   mxEnd(mg, cfg.time);
 }
@@ -726,8 +745,8 @@ function mxSafe(mg, cfg) {
     const d = Math.min(Math.abs(Math.round(val) - target), 100 - Math.abs(Math.round(val) - target));
     if (d <= 2) {
       opened++; showLocks(); newTarget();
-      if (opened >= locks) { mxHit($('sfD'), cfg.doneText || '¡Abierto! +2', 2); opened = 0; setTimeout(showLocks, 400); }
-      else mxHit($('sfD'), '¡Clic!');
+      if (opened >= locks) { mxHit($('sfD'), cfg.doneText || 'Открыто! +2', 2); opened = 0; setTimeout(showLocks, 400); }
+      else mxHit($('sfD'), 'Клик!');
     } else { mxMiss(mg, $('sfD'), cfg.badText || 'Тишина…'); if (cfg.maxMiss && mxOut(mg, cfg.maxMiss)) return; }
     draw();
   });
@@ -743,16 +762,16 @@ function mxSafe(mg, cfg) {
 const MX_TOURIST = [['🧑‍🦰', '🌮'], ['👩‍🦳', '🍹'], ['🧔‍♂️', '🎺'], ['👱‍♀️', '🌮'], ['👨‍🦲', '🍹'], ['👩', '🎺']];
 Object.assign(MEX_JOB_GAMES, {
   flyers: { engine: mxJudge, title: 'Зазывай гринго', hint: 'Над туристом — чего он хочет. Крикни нужное, пока не ушёл!', walk: true, limit: 2600, target: 14,
-    buttons: [['🌮<small>¡Tacos!</small>', 'f'], ['🍹<small>¡Margaritas!</small>', 'd'], ['🎺<small>¡Mariachi!</small>', 'm']], ruleText: '🗣️ Кричи то, чего хочет турист',
+    buttons: [['🌮<small>Тако!</small>', 'f'], ['🍹<small>Маргариту!</small>', 'd'], ['🎺<small>Мариачи!</small>', 'm']], ruleText: '🗣️ Кричи то, чего хочет турист',
     next: () => { const [w, want] = pick(MX_TOURIST); return { html: `<div class="mx-tourist"><span class="bub">${want}</span><span>${w}</span></div>`, ok: { '🌮': 'f', '🍹': 'd', '🎺': 'm' }[want] }; } },
-  loader: { engine: mxAgave, title: 'Урожай агавы', hint: 'Режь только синие созревшие 🌵. Зелёные 🌿 — рано, гнилые 🥀 уже не нужны', young: '🌿', ripe: '🌵', rot: '🥀', empty: '🟫', ripeText: '¡Piña!', earlyText: 'Рано!', earlyPenalty: true, target: 16 },
+  loader: { engine: mxAgave, title: 'Урожай агавы', hint: 'Режь только синие созревшие 🌵. Зелёные 🌿 — рано, гнилые 🥀 уже не нужны', young: '🌿', ripe: '🌵', rot: '🥀', empty: '🟫', ripeText: 'Ананас!', earlyText: 'Рано!', earlyPenalty: true, target: 16 },
   courier: { engine: mxSurf, title: 'Осёл на горной тропе', hint: 'Держи — Педро карабкается вверх, отпусти — спускается. Собирай посылки, обходи кактусы и змей', player: '🫏', good: ['📦', '📦', '✉️'], bad: ['🌵', '🐍', '🪨'], bg: 'mx-canyon', target: 16 },
-  guard: { engine: mxLasso, title: 'Спасатель Канкуна', hint: 'Бросай круг 🛟, когда тонущий внутри кольца. Акулу 🦈 не спасай — она сама', btn: '🛟 Бросить круг', ringIcon: '', good: ['🏊', '🙋', '🏊‍♀️'], bad: ['🦈', '🐬'], badRate: 0.2, bg: 'mx-ocean', hitText: '¡Salvado!', badText: 'Это акула!', target: 12 },
-  taxi: { engine: mxRoute, title: 'Такси по Канкуну', hint: 'Пассажир кричит по-испански, куда повернуть. Жми стрелку до перекрёстка! Потом стрелки пропадут', player: '🚕', place: ['Hotel Zone', 'Playa Delfines', 'Mercado 28', 'El Centro', 'Aeropuerto'], target: 14 },
+  guard: { engine: mxLasso, title: 'Спасатель Канкуна', hint: 'Бросай круг 🛟, когда тонущий внутри кольца. Акулу 🦈 не спасай — она сама', btn: '🛟 Бросить круг', ringIcon: '', good: ['🏊', '🙋', '🏊‍♀️'], bad: ['🦈', '🐬'], badRate: 0.2, bg: 'mx-ocean', hitText: 'Спас!', badText: 'Это акула!', target: 12 },
+  taxi: { engine: mxRoute, title: 'Такси по Канкуну', hint: 'Пассажир кричит, куда повернуть. Жми стрелку до перекрёстка!', player: '🚕', place: ['Hotel Zone', 'Playa Delfines', 'Mercado 28', 'El Centro', 'Aeropuerto'], target: 14 },
   seller: { engine: mxHaggle, title: 'Торг за сомбреро', hint: 'Держи «Цену выше» и смотри на лицо гринго. Продай подороже, но пока он не взбесился', item: '👒', base: 60, target: 14 },
   manager: { engine: mxBuild, title: 'Завтрак в номер', hint: 'Собери поднос по заказу: жми «Взять», когда нужное в рамке', pool: ['🥚', '🥓', '☕', '🍊', '🥐', '🍳', '🥑', '🌮'], size: [3, 4], btn: '🛎️ На поднос', orderName: 'Номер 404', target: 14 },
-  director: { engine: mxJudge, title: 'Утро директора курорта', hint: 'Правило сверху меняется! Одобряй то, что подходит, остальное — «No»', limit: 3200, target: 16,
-    buttons: [['✅<small>Sí</small>', 'y'], ['❌<small>No</small>', 'n']],
+  director: { engine: mxJudge, title: 'Утро директора курорта', hint: 'Правило сверху меняется! Одобряй то, что подходит, остальное — «Нет»', limit: 3200, target: 16,
+    buttons: [['✅<small>Да</small>', 'y'], ['❌<small>Нет</small>', 'n']],
     rules: [{ text: 'Одобряй всё, где есть 💰', f: (x) => x.includes('💰') }, { text: 'Одобряй всё для пляжа 🏖️', f: (x) => x.includes('🏖️') }, { text: 'Ничего с 🦈 и 🔥!', f: (x) => !x.includes('🦈') && !x.includes('🔥') }],
     next: (st) => { const set = shuffle(['💰', '🏖️', '🦈', '🔥', '🍹', '🎺', '🐢', '🌪️']).slice(0, 2); return { html: `<div class="mx-doc"><small>Идея</small><span>${set.join(' ')}</span></div>`, ok: st.rule.f(set) ? 'y' : 'n' }; } },
   dvornik: { engine: mxAgave, title: 'Пляж до прилива', hint: 'Убирай мусор, пока волна не унесла его в океан. Черепашек 🐢 не трогай!', ripe: ['🥤', '🍾', '🛍️', '🩴', '🥫'], empty: '', bad: ['🐢', '🦀'], badRate: 0.18, rotPenalty: true, rotText: '🌊 Унесло!', ripeT: [1.3, 2.1], bg: 'mx-beach', target: 20 },
@@ -760,12 +779,12 @@ Object.assign(MEX_JOB_GAMES, {
   cook: { engine: mxComal, title: 'Тортильи на комале', hint: 'Переворачивай, когда кольцо золотое, и снимай со второй стороны. Передержал — сгорит', items: ['🫓', '🫓', '🌮'], target: 14 },
   police: { engine: mxLucha, title: 'Задержание на рынке', hint: 'Воришка — бывший лучадор! Смотри, какой приём он готовит, и отвечай: удар — блок, подсечка — прыжок, захват — уклон', foe: '🥷', me: '👮', target: 14 },
   teacher: { engine: mxWords, title: 'Русский для гринго', hint: 'Слово падает — выбери перевод на русский, пока не упало', target: 14 },
-  clerk: { engine: mxJudge, title: 'Печати муниципалитета', hint: 'Правило сверху меняется! «Aprobado» — если документ по правилу, иначе «Rechazado»', limit: 3000, target: 16,
-    buttons: [['✅<small>Aprobado</small>', 'y'], ['❌<small>Rechazado</small>', 'n']],
+  clerk: { engine: mxJudge, title: 'Печати муниципалитета', hint: 'Правило сверху меняется! «Одобрено» — если документ по правилу, иначе «Отказано»', limit: 3000, target: 16,
+    buttons: [['✅<small>Одобрено</small>', 'y'], ['❌<small>Отказано</small>', 'n']],
     rules: [{ text: 'Нужна печать 🌵', f: (x) => x.seal }, { text: 'Нужны фото 📸 и подпись 🖊️', f: (x) => x.photo && x.sign }, { text: 'Без просрочки ⌛', f: (x) => !x.old }],
     next: (st) => { const x = { seal: Math.random() < 0.6, photo: Math.random() < 0.6, sign: Math.random() < 0.6, old: Math.random() < 0.35 };
-      return { html: `<div class="mx-doc"><small>Solicitud</small><span>📄 ${x.seal ? '🌵' : ''}${x.photo ? '📸' : ''}${x.sign ? '🖊️' : ''}${x.old ? '⌛' : ''}</span></div>`, ok: st.rule.f(x) ? 'y' : 'n' }; } },
-  deputy: { engine: mxBalance, title: 'Коалиция в конгрессе', hint: 'Партии тянут в разные стороны. Держи весы в зелёной зоне — каждая секунда это голос', icon: '⚖️', base: '🏛️', okWord: '¡Mayoría!', target: 16 },
+      return { html: `<div class="mx-doc"><small>Заявление</small><span>📄 ${x.seal ? '🌵' : ''}${x.photo ? '📸' : ''}${x.sign ? '🖊️' : ''}${x.old ? '⌛' : ''}</span></div>`, ok: st.rule.f(x) ? 'y' : 'n' }; } },
+  deputy: { engine: mxBalance, title: 'Коалиция в конгрессе', hint: 'Партии тянут в разные стороны. Держи весы в зелёной зоне — каждая секунда это голос', icon: '⚖️', base: '🏛️', okWord: 'Большинство!', target: 16 },
 });
 
 // ---------- Отдых ----------
@@ -777,12 +796,12 @@ const MX_LEISURE = {
   darts: { title: 'Пиньята', hint: 'Бей, когда пиньята над палкой. Центр — 50 очков. 8 ударов, разбей — бонус. 150 — приз!', duration: 0, target: 150,
     run: (mg) => mxPinata(mg, { items: ['🪅', '🫏', '⭐'], swings: 8 }) },
   shashlik: { title: 'Барбакоа', hint: 'Мясо и кукуруза на углях: переворачивай по золотому кольцу и снимай со второй стороны', duration: 25, target: 14,
-    run: (mg) => mxComal(mg, { items: ['🥩', '🌽', '🍗', '🌶️'], cook: [2.2, 3.4], burnt: 'Угли!', perfect: '¡Rico! +2' }) },
+    run: (mg) => mxComal(mg, { items: ['🥩', '🌽', '🍗', '🌶️'], cook: [2.2, 3.4], burnt: 'Угли!', perfect: 'Богато! +2' }) },
 };
 
 // ---------- Учёба (испанский) ----------
 const MX_TF = [['«Mañana» значит «завтра»', 1], ['Сомбреро — это закуска', 0], ['Текилу делают из голубой агавы', 1], ['«Gracias» значит «пожалуйста»', 0],
-  ['Аксолотль умеет отращивать лапы', 1], ['Столица Мексики — Канкун', 0], ['Пиньяту разбивают палкой', 1], ['Тако едят палочками', 0], ['«¡Ándale!» — это «давай быстрее»', 1],
+  ['Аксолотль умеет отращивать лапы', 1], ['Столица Мексики — Канкун', 0], ['Пиньяту разбивают палкой', 1], ['Тако едят палочками', 0], ['«Давай быстрее!» — это «¡Ándale!»', 1],
   ['Мариачи играют на балалайке', 0], ['Фрида Кало — мексиканская художница', 1], ['День мёртвых — грустный праздник без музыки', 0], ['«Perro» — это собака', 1],
   ['В Мексике говорят на португальском', 0], ['Пирамиды есть в Теотиуакане', 1], ['Гуакамоле делают из авокадо', 1], ['«Calle» значит «кошка»', 0]];
 startLessonGame = (function (orig) {
@@ -810,10 +829,10 @@ const MX_GYM = {
 Object.values(MX_GYM).forEach((g) => { g.max = GYM_REPS * 2; });
 
 // ---------- Свидания ----------
-const MX_TALK = [['Она: «¿Bailamos?» Что ответить?', ['¡Claro que sí!', 'Нет, я устал', 'Что?']], ['«Me encanta el mar». Она любит…', ['Море', 'Мороженое', 'Маму']],
+const MX_TALK = [['Она: «Потанцуем?» Что ответить?', ['Конечно!', 'Нет, я устал', 'Что?']], ['«Me encanta el mar». Она любит…', ['Море', 'Мороженое', 'Маму']],
   ['Комплимент по-испански:', ['Eres preciosa', 'Eres un taco', 'Eres policía']], ['«¿De dónde eres?» — она спрашивает…', ['Откуда ты', 'Где деньги', 'Сколько время']],
   ['Её любимый художник?', ['Фрида Кало', 'Шишкин', 'Шнырь']], ['Как сказать «Я тебя люблю»?', ['Te quiero', 'Te pago', 'Te llamo']],
-  ['Она угощает тамалес. Ты…', ['¡Qué rico! Спасибо', 'А шаверма есть?', 'Я на диете']], ['На ужин с её мамой надо принести…', ['Цветы и пан дульсе', 'Пиво', 'Ничего']]];
+  ['Она угощает тамалес. Ты…', ['Как вкусно! Спасибо', 'А шаверма есть?', 'Я на диете']], ['На ужин с её мамой надо принести…', ['Цветы и пан дульсе', 'Пиво', 'Ничего']]];
 const MX_NOVELA = [['Дон Альфонсо оказался…', ['Её отцом', 'Котом', 'Пиццей']], ['Близнец героини…', ['Был злым всё это время', 'Улетел на Марс', 'Стал тако']],
   ['После амнезии Мария вспомнила…', ['Свою настоящую любовь', 'Рецепт борща', 'Пароль от вай-фая']], ['Свадьбу сорвал…', ['Бывший муж из тюрьмы', 'Голубь', 'Курс доллара']],
   ['В завещании дедушки…', ['Всё получила служанка', 'Только рецепт', 'Карта сокровищ Шныря']], ['Злодейка в маске — это…', ['Сестра героя', 'Михалыч', 'Почтальон']]];
@@ -827,9 +846,9 @@ const MX_DATES = {
   picnic: { title: 'Пикник: прогони чаек', hint: 'Чайка 🐦 села на еду — прогони её тапом! Её руку 🤚 не трогай', duration: 20, max: 14, setup: (mg) => mxAgave(mg, { ripe: ['🐦', '🐦‍⬛'], empty: '', bad: ['🤚', '🌮'], badRate: 0.2, rotPenalty: true, rotText: 'Утащила тако!', ripeT: [1.1, 1.8], ripeText: 'Кыш!', bg: 'mx-beach' }) },
   museum: { title: 'Музей: лотерия Фриды', hint: 'Экскурсовод называет картины — найди их на стене', duration: 25, max: 8, setup: (mg) => mxLoteria(mg, { score: 'marks', size: 3, every: 2.4, hit: 0.85 }) },
   karaoke: { title: 'Серенада с мариачи', hint: 'Играй вместе с мариачи: гитара, скрипка, труба — жми, когда нота на линии', duration: 0, max: 18, setup: (mg) => mxDance(mg, { lanes: ['🎸', '🎻', '🎺'], dancer: '🎤', time: 22, every: 0.8 }) },
-  bowling: { title: 'Подкова на колышек', hint: 'Бросай, когда колышек в кольце. 10 бросков — кто больше?', duration: 0, max: 8, setup: (mg) => mxLasso(mg, { btn: '🧲 Бросить подкову', good: ['🪵'], bad: ['🐓'], badRate: 0.15, throws: 10, hitText: '¡Ringer!', bg: 'mx-ranch' }) },
+  bowling: { title: 'Подкова на колышек', hint: 'Бросай, когда колышек в кольце. 10 бросков — кто больше?', duration: 0, max: 8, setup: (mg) => mxLasso(mg, { btn: '🧲 Бросить подкову', good: ['🪵'], bad: ['🐓'], badRate: 0.15, throws: 10, hitText: 'Попал!', bg: 'mx-ranch' }) },
   rest: { title: 'Кулинарный класс: тортильи', hint: 'Готовите вместе: переворачивай по золотому кольцу', duration: 25, max: 12, setup: (mg) => mxComal(mg, { items: ['🫓', '🌮', '🫔'], slots: 3 }) },
-  yacht: { title: 'Снорклинг на рифе', hint: 'Держи — ныряешь, отпусти — всплываешь. Собирай красоту для неё, медуз обходи', duration: 0, max: 12, setup: (mg) => mxDive(mg, { good: ['🐠', '🐚', '⭐', '🐢'], bad: ['🪼'], hook: '🤿', boat: '⛵', btn: '⬇️ Нырнуть', hitText: '¡Qué bonito!', time: 22 }) },
+  yacht: { title: 'Снорклинг на рифе', hint: 'Держи — ныряешь, отпусти — всплываешь. Собирай красоту для неё, медуз обходи', duration: 0, max: 12, setup: (mg) => mxDive(mg, { good: ['🐠', '🐚', '⭐', '🐢'], bad: ['🪼'], hook: '🤿', boat: '⛵', btn: '⬇️ Нырнуть', hitText: 'Красиво!', time: 22 }) },
 };
 
 // ---------- Дети ----------
@@ -855,14 +874,14 @@ const MX_JAIL = {
   pushups: { name: 'Бои во дворе', emoji: '🤼', desc: 'Сила растёт даже здесь',
     game: { title: 'Тюремная лучa', hint: 'Сокамерник-лучадор готовит приём — отвечай правильно', duration: 15, max: 8, setup: (mg) => mxLucha(mg, { foe: '🧟', bg: 'mx-cell-bg' }) } },
   escape: { name: 'Подкоп ложкой', emoji: '🥄', desc: 'Удачно — свобода, но розыск ⭐⭐⭐⭐⭐. Провал — срок +10 мин',
-    game: { title: 'Подкоп под стеной', hint: 'Копай, пока охранник далеко. Он над тобой — замри!', duration: 25, max: 6, setup: (mg) => mxTunnel(mg, { patrol: '💂', digger: '🥄', goal: '🌵', segs: 3, speed: 0.13, caughtText: '¡Oye! Кто там?' }) } },
+    game: { title: 'Подкоп под стеной', hint: 'Копай, пока охранник далеко. Он над тобой — замри!', duration: 25, max: 6, setup: (mg) => mxTunnel(mg, { patrol: '💂', digger: '🥄', goal: '🌵', segs: 3, speed: 0.13, caughtText: 'Эй! Кто там?' }) } },
 };
 
 // ---------- Криминал Мексики ----------
 const MX_CRIMES = [
   { id: 'x_pick', name: 'Карманник на фиесте', emoji: '👛', level: 3, energy: 15, wanted: 1, risk: 0.08, cd: 120, desc: 'Турист фотографирует мариачи — бумажник торчит. Смотрит на тебя — замри',
     game: { title: 'Фиеста', hint: 'Тапай туриста, когда торчит 👛. Смотрит 👀 — не трогай! Три раза попался — конец', duration: 18, max: 9,
-      setup: (mg) => mxAgave(mg, { ripe: ['👛', '💳', '⌚'], empty: ['🕺', '💃', '📸'], bad: ['👀', '👮'], badRate: 0.28, ripeT: [0.9, 1.4], maxMiss: 3, ripeText: '¡Gracias!', badText: '¡Ladrón!', bg: 'mx-fiesta' }) },
+      setup: (mg) => mxAgave(mg, { ripe: ['👛', '💳', '⌚'], empty: ['🕺', '💃', '📸'], bad: ['👀', '👮'], badRate: 0.28, ripeT: [0.9, 1.4], maxMiss: 3, ripeText: 'Спасибо!', badText: 'Вор!', bg: 'mx-fiesta' }) },
     reward: (perf) => Math.round((900 + level() * 240) * perf) },
   { id: 'x_horse', name: 'Угон лошадей с ранчо', emoji: '🐎', level: 6, energy: 25, wanted: 2, risk: 0.14, cd: 300, desc: 'Ночью, лассо, ранчо дона Мендосы. Быка не лови!',
     game: { title: 'Ранчо ночью', hint: 'Бросай лассо, когда конь в петле. Быка 🐂 не лови — поднимет всех', duration: 20, max: 8, setup: (mg) => mxLasso(mg, { good: ['🐎', '🐴'], bad: ['🐂'], badRate: 0.25, bg: 'mx-ranch night' }) },
@@ -875,10 +894,10 @@ const MX_CRIMES = [
       setup: (mg) => mxSurf(mg, { player: '🚤', good: ['📦', '📦', '💰'], bad: ['🚨', '🔦', '🛳️'], goodRate: 0.55, maxMiss: 3, bg: 'mx-ocean night' }) },
     reward: (perf) => Math.round((30000 + level() * 2500) * perf) },
   { id: 'x_casino', name: 'Сейф казино в Тихуане', emoji: '🎰', level: 15, energy: 35, wanted: 3, risk: 0.2, cd: 1200, desc: 'Стетоскоп, тишина и три замка. Казино «Эль Дорадо» платит картелю — пусть заплатит тебе',
-    game: { title: 'Сейф «Эль Дорадо»', hint: 'Крути диск пальцем или ⟲ ⟳. Громче 🔊 — ближе. Жми «Щелчок» на нужном числе. Три ошибки — сигнализация', duration: 30, max: 6, setup: (mg) => mxSafe(mg, { maxMiss: 3 }) },
+    game: { title: 'Сейф «Эль Дорадо»', hint: 'Крути диск пальцем или ⟲ ⟳. Громче 🔊 — ближе. Жми «Щелчок» на нужном числе. Три ошибки — сигнализация', duration: 30, max: 6, setup: (mg) => mxSafe(mg, { maxMiss: 3, doneText: 'Открыто! +2' }) },
     reward: (perf) => Math.round((60000 + level() * 4000) * perf) },
   { id: 'x_convoy', name: 'Угон фуры картеля', emoji: '🚛', level: 18, energy: 40, wanted: 4, risk: 0.22, cd: 1800, desc: 'Фура Скорпионов с «грузом». Сбей погоню с хвоста — по указке штурмана',
-    game: { title: 'Погоня по трассе 15', hint: 'Штурман кричит по-испански, куда сворачивать. Ошибка — погоня ближе', duration: 25, max: 12, setup: (mg) => mxRoute(mg, { player: '🚛', place: ['Culiacán', 'Mazatlán', 'Sierra Madre', 'Los Mochis'], dur: 2, hardAt: 4 }) },
+    game: { title: 'Погоня по трассе 15', hint: 'Штурман кричит, куда сворачивать. Ошибка — погоня ближе', duration: 25, max: 12, setup: (mg) => mxRoute(mg, { player: '🚛', place: ['Culiacán', 'Mazatlán', 'Sierra Madre', 'Los Mochis'], dur: 2 }) },
     reward: (perf) => Math.round((120000 + level() * 6000) * perf) },
 ];
 

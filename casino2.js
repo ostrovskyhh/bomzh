@@ -353,7 +353,7 @@ function openFlea() {
         desc: `${it.q ? qualityName(it) + ' · ' : ''}<b>${fmt(p)} ₽</b>`, btn: `<button class="btn primary small" data-act="fleaSell" data-id="${i}">Продать</button>` }); }).join('')}</div>
       <div class="btns">${cheap.length ? `<button class="btn wide" data-act="fleaSellCheap">Продать ширпотреб и ходовое (${cheap.length})</button>` : ''}<button class="btn primary wide" data-act="fleaSellAll">Продать всё за ${fmt(total)} ₽</button></div>`
       : '<div class="info-card">Тут пока пусто. Открой кейс в казино — выпавшие вещи появятся здесь.</div>'}
-    <div class="btns"><button class="btn wide" data-act="cases">📦 К кейсам</button><button class="btn wide" data-act="close">Закрыть</button></div>`, { center: true });
+    <div class="btns">${inv.length >= 5 ? '<button class="btn wide" data-act="contracts">📝 Контракты</button>' : ''}<button class="btn wide" data-act="cases">📦 К кейсам</button><button class="btn wide" data-act="close">Закрыть</button></div>`, { center: true });
 }
 
 function fleaSell(indexes) {
@@ -384,4 +384,106 @@ Object.assign(ACTIONS, {
 ACHS.push(
   { id: 'cases', name: 'Кейсовод', emoji: '📦', key: 'caseOpen', goals: [5, 50, 250, 1000], unit: 'кейсов открыто' },
   { id: 'legend_drop', name: 'Легендарная удача', emoji: '👑', key: 'caseLegend', goals: [1, 5, 20], unit: 'легенд из кейсов' },
+  { id: 'contracts', name: 'Подрядчик', emoji: '📝', key: 'contractSign', goals: [1, 10, 50, 200], unit: 'контрактов подписано' },
 );
+
+// =====================================================================
+// КОНТРАКТЫ: собираем 5 вещей одного качества/редкости и крафтим 1 лучше
+// =====================================================================
+
+function openContracts() {
+  const inv = fleaInv();
+  if (inv.length < 5) { toast('Для контракта нужны минимум 5 вещей', 'info'); openFlea(); return; }
+  if (!S.contractPicked) S.contractPicked = [];
+  const picked = S.contractPicked;
+  const refresh = () => {
+    const left = 5 - picked.length;
+    const ok = left === 0;
+    $('ctItems').innerHTML = inv.map((it, i) => {
+      const sel = picked.includes(i);
+      const rar = RARITY.find((r) => r.id === it.rar);
+      return `<label class="contract-item${sel ? ' sel' : ''}" data-idx="${i}"><input type="checkbox" ${sel ? 'checked' : ''} ${ok && !sel ? 'disabled' : ''}><div class="case-it" style="--c:${rar.color}"><span>${it.e}</span><small>${it.name}</small></div></label>`;
+    }).join('');
+    $('ctBtn').innerHTML = ok ? '<button class="btn primary wide" data-act="contractSign">📝 Подписать контракт</button>' : `<div style="color:var(--text-dim)">Выбери 5 вещей: осталось ${left}</div>`;
+    document.querySelectorAll('.contract-item input').forEach((cb) => cb.addEventListener('change', (e) => {
+      const idx = +e.target.closest('.contract-item').dataset.idx;
+      if (e.target.checked) { if (picked.length < 5) picked.push(idx); } else picked.splice(picked.indexOf(idx), 1);
+      refresh();
+    }));
+  };
+  openModal(`<h3>📝 Контракты</h3><p>Выбери 5 вещей и обменяй на одну новую. Может выпасть лучше, та же или хуже — зависит от редкости и качества.</p>
+    <div class="contract-grid" id="ctItems"></div><div class="btns" id="ctBtn"></div>
+    <div class="btns"><button class="btn wide" data-act="flea">⬅️ К барахолке</button></div>`, { center: true });
+  refresh();
+}
+
+function contractSign() {
+  const inv = fleaInv();
+  const picked = [...new Set(S.contractPicked || [])].filter((i) => inv[i]).slice(0, 5);
+  if (picked.length < 5) { toast('Нужно выбрать 5 вещей', 'info'); return; }
+  const items = picked.map((i) => inv[i]);
+  // Шансы: берём среднее качество и редкость → распределяем шансы
+  const avgQual = items.reduce((a, it) => a + QUALITY.findIndex((q) => q.id === it.q), 0) / 5;
+  const avgRar = items.reduce((a, it) => a + RARITY.findIndex((r) => r.id === it.rar), 0) / 5;
+  const qualChances = QUALITY.map((q, i) => {
+    const dist = Math.abs(i - avgQual);
+    return { id: q.id, name: q.name, chance: Math.max(0, 40 - dist * 15) };
+  }).filter((x) => x.chance > 0);
+  const rarChances = RARITY.map((r, i) => {
+    const dist = Math.abs(i - avgRar);
+    return { id: r.id, name: r.name, color: r.color, chance: Math.max(0, 35 - dist * 12) };
+  }).filter((x) => x.chance > 0);
+  const totalQ = qualChances.reduce((a, x) => a + x.chance, 0);
+  const totalR = rarChances.reduce((a, x) => a + x.chance, 0);
+  qualChances.forEach((x) => x.chance = Math.round((x.chance / totalQ) * 100));
+  rarChances.forEach((x) => x.chance = Math.round((x.chance / totalR) * 100));
+
+  openModal(`<h3>📝 Подписать контракт</h3><p>Обмениваешь 5 вещей на 1 новую. Шансы:</p>
+    <div class="contract-chances"><div><b>Качество:</b> ${qualChances.map((x) => `${x.name} ${x.chance}%`).join(' · ')}</div>
+    <div><b>Редкость:</b> ${rarChances.map((x) => `<span style="color:${x.color}">${x.name} ${x.chance}%</span>`).join(' · ')}</div></div>
+    <div class="btns"><button class="btn primary wide" data-act="contractRoll">✍️ Подписать и открыть</button>
+      <button class="btn wide" data-act="contracts">⬅️ Назад</button></div>`, { center: true });
+}
+
+function contractRoll() {
+  const inv = fleaInv();
+  const picked = [...new Set(S.contractPicked || [])].filter((i) => inv[i]).slice(0, 5).sort((a, b) => b - a);
+  if (picked.length < 5) return;
+  const items = picked.map((i) => inv[i]);
+  const avgQual = items.reduce((a, it) => a + QUALITY.findIndex((q) => q.id === it.q), 0) / 5;
+  const avgRar = items.reduce((a, it) => a + RARITY.findIndex((r) => r.id === it.rar), 0) / 5;
+  const qualIdx = Math.round(avgQual + (Math.random() < 0.4 ? 0 : Math.random() < 0.5 ? -1 : 1));
+  const rarIdx = Math.round(avgRar + (Math.random() < 0.35 ? 0 : Math.random() < 0.5 ? -1 : 1));
+  const newQ = QUALITY[Math.max(0, Math.min(QUALITY.length - 1, qualIdx))];
+  const newR = RARITY[Math.max(0, Math.min(RARITY.length - 1, rarIdx))];
+  const casePool = CASES.filter((c) => c.loot[newR.id] && c.loot[newR.id].length);
+  const c = casePool.length ? pick(casePool) : CASES[0];
+  const [e, name, f] = pick(c.loot[newR.id] || c.loot.common);
+  const raw = caseItemBase(c, newR, f) * newQ.mult * rand(0.96, 1.04);
+  const value = Math.max(10, raw >= 1000 ? Math.round(raw / 10) * 10 : Math.round(raw));
+  const win = { key: `${c.id}:${name}:${newQ.id}`, e, name, rar: newR.id, q: newQ.id, value, from: 'contract' };
+
+  picked.forEach((i) => inv.splice(i, 1));
+  fleaInv().push(win);
+  track('contractSign');
+  save();
+  S.contractPicked = [];
+
+  openModal(`<h3>📝 Контракт подписан</h3><div class="contract-anim" id="ctAn"></div>`, { center: true, locked: true });
+  const an = $('ctAn');
+  an.innerHTML = '<div class="contract-spinner">⚙️</div>';
+  sfx('whoosh');
+  setTimeout(() => {
+    an.innerHTML = `<div class="case-win" style="--c:${newR.color}"><span>${win.e}</span><div><b>${win.name}</b><small>${newR.name} · ${newQ.name} · стоит ${fmt(value)} ₽</small></div></div>
+      <div class="btns"><button class="btn primary wide" data-act="fleaSellLast">💰 Продать за ${fmt(value)} ₽</button>
+        <button class="btn wide" data-act="contracts">📝 Ещё контракт</button>
+        <button class="btn wide" data-act="flea">🛍️ На барахолку</button></div>`;
+    sfx(newR.id === 'legend' || newR.id === 'epic' ? 'jackpot' : 'coin');
+    if (newR.id === 'legend') confetti(100);
+    haptic('success');
+  }, 3000);
+}
+
+CASINO_GAMES.splice(2, 0, { act: 'contracts', cls: 'contracts', emoji: '📝', name: 'Контракты', desc: 'Обменяй 5 вещей из барахолки на 1 новую. Шанс на улучшение' });
+Object.assign(ACTIONS, { contracts: () => openContracts(), contractSign: () => contractSign(), contractRoll: () => contractRoll() });
+

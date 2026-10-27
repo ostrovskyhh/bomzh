@@ -653,9 +653,20 @@ function fmtShort(n) {
   for (const [u, v] of [['B', 1e9], ['M', 1e6], ['K', 1e3]]) if (a >= v) return (n / v).toFixed(a / v < 100 ? 1 : 0).replace('.0', '') + u;
   return String(n);
 }
+// Человеческий формат: 45 сек / 12 мин / 2 ч 30 мин / 3 дн 4 ч. Никаких «700:00».
 function fmtTime(sec) {
   sec = Math.max(0, Math.ceil(sec));
-  const m = Math.floor(sec / 60), s = sec % 60;
+  if (sec < 60) return `${sec} сек`;
+  if (sec < 3600) { const m = Math.floor(sec / 60), s = sec % 60; return s ? `${m} мин ${s} сек` : `${m} мин`; }
+  if (sec < 86400) { const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60); return m ? `${h} ч ${m} мин` : `${h} ч`; }
+  const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600);
+  return h ? `${d} дн ${h} ч` : `${d} дн`;
+}
+// Короткий формат для компактных мест (кнопки, лейблы) — без слов: 0:45 / 12:30 / 2:15:00
+function fmtTimeShort(sec) {
+  sec = Math.max(0, Math.ceil(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  if (h) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 

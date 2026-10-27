@@ -1834,6 +1834,17 @@ button:disabled { pointer-events: none; }
 .case-marker { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--gold); z-index: 2; box-shadow: 0 0 10px var(--gold); }
 .case-win { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); text-align: left; animation: popIn .35s; }
 .case-win span { font-size: 46px; } .case-win b { display: block; font-size: 17px; } .case-win small { color: var(--c); font-weight: 700; }
+.contract-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; margin: 10px 0; }
+.contract-item { position: relative; cursor: pointer; }
+.contract-item input { position: absolute; opacity: 0; pointer-events: none; }
+.contract-item .case-it { opacity: .6; transition: opacity .2s, transform .2s; }
+.contract-item.sel .case-it { opacity: 1; transform: scale(1.05); box-shadow: 0 0 0 3px var(--gold); }
+.contract-chances { margin: 10px 0; padding: 12px; border-radius: 12px; background: rgba(242,199,68,.08); border: 1px solid rgba(242,199,68,.3); text-align: left; font-size: 12.5px; }
+.contract-chances > div { margin-bottom: 6px; } .contract-chances > div:last-child { margin-bottom: 0; }
+.contract-anim { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; }
+.contract-spinner { font-size: 60px; animation: spin 1.5s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.casino-hero.contracts { background: linear-gradient(135deg, #6A3A2A, #B05A3E); }
 
 /* ---------- 3.0: ринг и админ-меню ---------- */
 .ring-ladder { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0; }

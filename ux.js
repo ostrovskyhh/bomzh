@@ -7,15 +7,33 @@ function saveSummary(s) {
 }
 function showSavePick() {
   if (!ALT_SAVE) return;
-  const alt = ALT_SAVE;
-  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">☁️</div></div>
-    <h3>Найдено два сохранения</h3>
-    <p>Похоже, ты играл на разных устройствах. Выбери, какой прогресс оставить — он станет общим для всех устройств, второй будет удалён.</p>
+  // Конфликт устройств: игра уже открыта на другом устройстве
+  openModal(`<div class="big-art" style="height:90px"><div class="big-emoji" style="line-height:90px">⚠️</div></div>
+    <h3>Игра уже запущена на другом устройстве</h3>
+    <p>Одновременно играть можно только на одном устройстве. Продолжишь здесь — игра на другом устройстве остановится.</p>
     <div class="btns" style="flex-direction:column;gap:8px">
-      <button class="btn primary wide" data-act="pickSave" data-id="alt">📈 ${saveSummary(alt)}</button>
-      <button class="btn wide" data-act="pickSave" data-id="cur">📱 ${saveSummary(S)}</button></div>`, { center: true, locked: true });
+      <button class="btn primary wide" data-act="deviceTakeover">✅ Продолжить здесь</button>
+      <button class="btn wide" data-act="devicePause">⏸️ Пауза</button></div>`, { center: true, locked: true });
 }
 HOOKS.load.push(() => setTimeout(showSavePick, 1200));
+ACTIONS.deviceTakeover = () => {
+  // Продолжить здесь: берём локальный профиль, обгоняем счётчик сервера и пишем насильно
+  const top = Math.max(S.rev || 0, (ALT_SAVE && ALT_SAVE.rev) || 0, serverBase);
+  S.rev = top + 1; // обгоняем
+  ALT_SAVE = null;
+  SAVE_LOCK = false;
+  if (serverOk()) serverReady = true;
+  closeModal();
+  save(true);
+  serverWrite(true); // force
+  toast('Игра продолжена на этом устройстве', 'good');
+};
+ACTIONS.devicePause = () => {
+  // Пауза: оставляем SAVE_LOCK = true, игра стоит
+  closeModal();
+  toast('Игра приостановлена. Закрой вкладку или продолжи здесь позже', 'info');
+};
+// Старая логика выбора копий — оставляем на случай ручной команды /resolve-conflict
 ACTIONS.pickSave = (id) => {
   // Выбранная копия должна обогнать обе по счётчику сохранений, иначе при следующем входе победит другая
   const top = Math.max(S.rev || 0, (ALT_SAVE && ALT_SAVE.rev) || 0, serverBase);

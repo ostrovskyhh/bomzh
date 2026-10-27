@@ -32,8 +32,13 @@ function playFmt(ms) {
   const m = Math.floor(ms / 60000);
   if (m < 60) return `${m} мин`;
   const h = Math.floor(m / 60);
-  return h < 48 ? `${h} ч ${m % 60} мин` : `${Math.floor(h / 24)} д ${h % 24} ч`;
+  if (h < 48) { const mm = m % 60; return mm ? `${h} ч ${mm} мин` : `${h} ч`; }
+  const d = Math.floor(h / 24);
+  const restH = h % 24;
+  return restH ? `${d} дн ${restH} ч` : `${d} дн`;
 }
+// В городах (при появлении мексики в списке городов) — поле mex тоже покажем
+HOOKS.load.push(() => { const p = playState(); if (p.cityMs.mex === undefined) p.cityMs.mex = p.cityMs.mex || 0; });
 function playHTML() {
   const p = playState();
   const avg = p.sessions ? p.ms / p.sessions : 0;
@@ -44,6 +49,7 @@ function playHTML() {
       <div>Сессий<b>${fmt(p.sessions)}</b></div><div>Средняя сессия<b>${playFmt(avg)}</b></div>
       <div>Самая долгая<b>${playFmt(p.longest || 0)}</b></div><div>В среднем в день<b>${playFmt(p.ms / days)}</b></div>
       <div>🏚️ В Засранске<b>${playFmt(p.cityMs.zas || 0)}</b></div><div>🏙️ В Москвабаде<b>${playFmt(p.cityMs.msk || 0)}</b></div>
+      ${p.cityMs.mex ? `<div>🌵 В Мексике<b>${playFmt(p.cityMs.mex)}</b></div>` : ''}
     </div>`;
 }
 openProfile = (function (orig) {
