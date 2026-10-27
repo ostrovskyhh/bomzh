@@ -484,6 +484,6 @@ function contractRoll() {
   }, 3000);
 }
 
-CASINO_GAMES.splice(2, 0, { act: 'contracts', cls: 'contracts', emoji: '📝', name: 'Контракты', desc: 'Обменяй 5 вещей из барахолки на 1 новую. Шанс на улучшение' });
+CASINO_GAMES.push({ act: 'contracts', cls: 'contracts', emoji: '📝', name: 'Контракты', desc: 'Обменяй 5 вещей из барахолки на 1 новую. Шанс на улучшение' });
 Object.assign(ACTIONS, { contracts: () => openContracts(), contractSign: () => contractSign(), contractRoll: () => contractRoll() });
 
