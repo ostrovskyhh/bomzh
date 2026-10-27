@@ -248,6 +248,14 @@
     try { openAdmin(); if (!document.querySelector('.adm4-card-sec')) admOk = false; } catch (e) { admOk = false; }
     ADMP.card = null; closeModal();
     check('админ-панель: все вкладки и карточка игрока', admOk);
+    // 4.5: «Что внутри» у наборов, VIP, пропуска и набора новичка; редактор рассылки
+    let dniOk = true;
+    for (const id of [...BUNDLES.map((b) => b.id), 'vip', 'pass', 'starter']) { try { ACTIONS.dnInfo(id); if (!document.querySelector('.dni-row')) dniOk = false; } catch (e) { dniOk = false; } }
+    closeModal(); DN_TAB = 'sets'; openDonate();
+    check('донат: наборы и VIP открываются «Что внутри»', dniOk && document.querySelectorAll('#donateBox [data-act="dnInfo"]').length >= BUNDLES.length + 1);
+    closeModal(); S.admin = true; ACTIONS.bcOpen(); ACTIONS.bcTpl(1); ACTIONS.bcAud('city');
+    check('рассылка: редактор с получателями, кнопкой и предпросмотром', !!$('bcPrev') && $('bcPrev').innerText.includes('Открыть донат') && !!document.querySelector('[data-act="bcCity"]'));
+    closeModal();
     // 4.4: кейсы ×3 и ×5
     S.money = Math.max(S.money, 1e6); const mm0 = S.money, fl0 = fleaInv().length;
     caseOpenMulti('box', 5);
