@@ -78,22 +78,20 @@
       check(`кейс ${c.id}: разброс цены ≤5%`, worst <= 0.05, `±${(worst * 100).toFixed(1)}%`);
       check(`кейс ${c.id}: выгода 80–92%`, ev >= 0.8 && ev <= 0.92, ev.toFixed(2));
     }
-    // Ночь казино 2.0: выигрыши без надбавки; утром кешбэк 10% от ночного проигрыша
+    // Ночь казино 4.2: +15% к чистому выигрышу, бонус за ночь ограничен
     closeModal(); S.admNightUntil = Date.now() + 60000; S.admin = true; showScreen('fun', 'casino');
-    (0, eval)('BJ = { bet: 1000 }');
+    (0, eval)('BJ = { bet: 1000 }'); NIGHT_LAST_BET = 1000; nightBook().bonus = 0;
     let m0 = S.money; addMoney(3000); const win = S.money - m0;
-    (0, eval)('BJ = null');
-    check('ночь казино: выигрыш без надбавки', win === 3000, win);
-    pendingLevelUp = null; closeModal(); S.nightPending = { key: 'old', bet: 10000, won: 2000, paid: false }; POPUP_CLOSED = 0;
-    const realNight0 = casinoNight; casinoNight = () => false;
-    m0 = S.money; for (let i = 0; i < 20 && S.nightPending; i++) await sl(200);
-    check('ночь казино: утром кешбэк 10% проигрыша', S.money - m0 === Math.min(nightCashbackCap(), 800), S.money - m0);
-    casinoNight = realNight0; closeModal();
+    check('ночь казино: +15% к чистому выигрышу', win === 3300, win);
+    nightBook().bonus = nightBonusCap() - 50;
+    m0 = S.money; addMoney(3000);
+    check('ночь казино: бонус за ночь ограничен', S.money - m0 === 3050, S.money - m0);
+    (0, eval)('BJ = null'); closeModal();
     // Лото: моментальные билеты возвращают меньше 80%, русское лото — банк 75%
     const tw = TICKET_PRIZES.reduce((a, p) => a + p[1], 0), tev = TICKET_PRIZES.reduce((a, p) => a + p[0] * p[1], 0) / tw;
     check('лото: билеты возвращают меньше 80%', tev < 0.8, tev.toFixed(3));
     check('лото: в русском лото банк 75%', LOTO_RAKE === 0.75, LOTO_RAKE);
-    S.admNightUntil = Date.now() + 60000; showScreen('fun', 'lotto'); m0 = S.money; addMoney(1000);
+    S.admNightUntil = Date.now() + 60000; showScreen('fun', 'lotto'); nightBook().won = 0; m0 = S.money; addMoney(1000);
     check('лото: ночь казино на лото не действует', S.money - m0 === 1000 && !(S.nightBook && S.nightBook.won > 3000), S.money - m0);    S.admNightUntil = 0;
     const realNight = casinoNight; casinoNight = () => false; // ракету проверяем без ночного бонуса
     // Автовывод одиночной ракеты: 1.95 при взрыве на 1.95 и на 1.96 — выигрыш ровно по 1.95
@@ -225,6 +223,39 @@
     ACTIONS.inspect(fleaInv().length - 1);
     check('кейсы: осмотр в 3D открывается', !!$('inspObj') && typeof fleaInv()[fleaInv().length - 1].fl === 'number');
     closeModal(); fleaInv().pop();
+    // 4.2: настройки по разделам
+    closeModal(); ACTIONS.settings(); await sl(100);
+    check('настройки: меню разделов', document.querySelectorAll('#modalRoot .set2-tile').length >= 7, document.querySelectorAll('#modalRoot .set2-tile').length);
+    ACTIONS.setGo('sound');
+    check('настройки: раздел «Звук» с переключателями', !!document.querySelector('#modalRoot [data-page="sound"]:not(.hidden) [data-act="toggleSet"][data-id="sfx"]'));
+    closeModal();
+    // 4.2: админ-команды развития
+    const adm = [];
+    adminApply({ type: 'set', field: 'strength', n: 77 }, adm); adminApply({ type: 'set', field: 'house', n: 3 }, adm); adminApply({ type: 'give', text: 'cosm:av_lion', n: 1 }, adm);
+    check('админ: сила, жильё и выдача косметики', S.strength === 77 && S.ownedHousing === 3 && ownsCosm('av_lion') && adm.length === 3, adm.join(' | '));
+    // 4.2: криминал — свои дела и ранги в каждом городе
+    S.quest.path = 'dark';
+    const crimeIds = {};
+    for (const cId of ['zas', 'msk', 'mex']) { S.city = cId; applyCity(cId); crimeIds[cId] = CRIMES.map((c) => c.id).join(','); }
+    S.city = 'zas'; applyCity('zas');
+    check('криминал: в каждом городе свои дела', new Set(Object.values(crimeIds)).size === 3 && crimeIds.zas.includes('atm') && crimeIds.msk.includes('m_crypto'), JSON.stringify(crimeIds));
+    S.crimeXp = { zas: 0 }; CRIME_CUR = CRIMES[0];
+    for (let i = 0; i < 12; i++) track('crimeOk');
+    check('криминал: удачные дела поднимают ранг города', crimeRank('zas') >= 1 && crimeRank('msk') === 0, `${crimeXp('zas')} → ранг ${crimeRank('zas')}`);
+    check('криминал: дело выше ранга закрыто', crimeCan(CRIMES.find((c) => c.id === 'atm')).length > 0);
+    closeModal(); pendingLevelUp = null;
+    // 4.2: одежда в каждом городе нарисована по-своему
+    const hatZ = HATS.ushanka; S.city = 'mex'; applyCity('mex'); const hatX = HATS.ushanka; const bodyX = BODIES.rvan.jacket; S.city = 'msk'; applyCity('msk'); const hatM = HATS.ushanka;
+    S.city = 'zas'; applyCity('zas');
+    check('одежда: в каждом городе свой рисунок', hatZ !== hatX && hatZ !== hatM && hatX !== hatM && HATS.ushanka === hatZ && bodyX !== BODIES.rvan.jacket);
+    // 4.2: «Стартап» — понятные цели, мультик Мексики — 16 кадров
+    const bq = QUESTS.find((q) => q.id === 'm_biz');
+    check('стартап: цели с подсказками, где купить', bq.goals.length === 4 && bq.goals.every((g) => /Магазин|уровня/.test(g.text)), bq.goals.map((g) => g.text).join(' / '));
+    const mc = mexCut({ partner: null, club: null });
+    check('мультик Мексики: 16 кадров с картой и обменом', mc.length === 16 && mc.some((f) => f.bg === 'map') && mc.some((f) => f.info && f.info.includes('data-count')));
+    CUTS.test41 = mc; playCutscene('test41', null); for (let i = 0; i < 16; i++) { if (CUT) CUT.full && CUT.typing && CUT.full(); cutNext(); await sl(30); }
+    check('мультик Мексики: прокручивается до конца без ошибок', !CUT, CUT && CUT.i);
+    closeModal();
   }
 
   async function run() {
@@ -240,7 +271,9 @@
       closeModal(); S.city = 'msk'; applyCity('msk'); S.quest.idx = questList().findIndex((q) => q.id === 'm_scam'); S.money = 3000000; S.girlfriend = null; S.married = false;
       check('мексика: финальная глава Москвабада — побег', !!(currentQuest() && currentQuest().mexMove), currentQuest() && currentQuest().id);
       doMoveMex({ partner: null, club: null }); closeModal();
-      check('мексика: 3 млн руб. по 300 → $10 000', S.city === 'mex' && S.money === 10000 * USD_RATE, `${S.city} ${S.money}`);
+      check('мексика: 3 млн руб. по 300 → $10 000, на руках только стартовые', S.city === 'mex' && S.money === NEW_CITY_CASH.mex && S.frozen && S.frozen.total === 10000 * USD_RATE - NEW_CITY_CASH.mex, `${S.city} ${S.money} ${S.frozen && S.frozen.total}`);
+      const fz0 = S.frozen.left, mz0 = S.money; track('questDone');
+      check('мексика: глава размораживает 7%', S.money - mz0 === Math.round(S.frozen.total * FROZEN_STEP) && S.frozen.left < fz0, S.money - mz0);
       check('мексика: суммы на экране в долларах', rubToUsdText('Цена 1 000 ₽, банк 12.5 K ₽') === 'Цена $12,5, банк $156', rubToUsdText('Цена 1 000 ₽, банк 12.5 K ₽'));
       showScreen('shop', 'housing'); await sl(80);
       check('мексика: в магазине нет рублей', !$('shopList').innerText.includes('₽') && $('shopList').innerText.includes('$'), $('shopList').innerText.replace(/\s+/g, ' ').slice(0, 80));
