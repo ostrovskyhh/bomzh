@@ -165,7 +165,7 @@ HOOKS.mods.push((m) => {
 HOOKS.tick.push(() => {
   const now = Date.now();
   // Рождение
-  if (S.pregnant && now >= S.pregnant && !modalOpen()) {
+  if (S.pregnant && now >= S.pregnant && popupTurn(2)) {
     S.pregnant = 0;
     const sex = Math.random() < 0.5 ? 'boy' : 'girl';
     confetti(100); sfx('levelup');
@@ -180,7 +180,7 @@ HOOKS.tick.push(() => {
   if (h > 0.05) { S.kids.forEach((k) => { k.joy = Math.max(0, k.joy - 10 * h); }); S.kidsAt = now; }
   // Раз в игровой месяц: расходы на маленьких и помощь от взрослых
   if (!S.kidsDue) S.kidsDue = now + MONTH_MS;
-  if (now >= S.kidsDue && !modalOpen()) {
+  if (now >= S.kidsDue && popupTurn(2)) {
     S.kidsDue = now + MONTH_MS;
     const cost = S.kids.reduce((a, k) => a + kidCost(k), 0);
     const help = S.kids.filter((k) => kidStage(k) === 'adult').reduce((a, k) => a + Math.round(2000 * (1 + (k.smart || 0) * 0.4) * (1 + level() * 0.1)), 0);

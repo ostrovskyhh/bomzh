@@ -29,7 +29,7 @@ async function frClaim() {
     track('friendGiftGot', r.gifts.length);
     save();
     const show = () => { sfx('coin'); resultModal({ emoji: '🎁', title: 'Подарки от друзей!', text: lines.join('<br>'), btn: 'Спасибо!' }); };
-    if (modalOpen()) setTimeout(() => { if (!modalOpen()) show(); else toast(`🎁 Подарки от друзей: ${lines.length}`, 'good'); }, 3000); else show();
+    queuePopup('fgift' + Date.now(), 2, show);
   } catch (e) { /* сервер выключен */ }
 }
 HOOKS.load.push(() => setTimeout(frClaim, 5000));
@@ -56,7 +56,7 @@ EXTRA_TABS.fun.friends = () => {
       <button class="btn small" data-act="frVisit" data-id="${f.pid}">🏠 В гости</button>
       <button class="btn small" data-act="duelFight" data-id="${f.pid}">🥊</button>
       <button class="btn small" data-act="duelRpsMenu" data-id="${f.pid}" data-name="${esc(f.name)}">✊</button></div>` })).join('');
-  const out = d.outgoing.length ? `<div class="subhead">Ждут ответа</div>${d.outgoing.map((f) => `<div class="fr-out">${avaFace(f.name, f.avatar)} ${esc(f.name)}</div>`).join('')}` : '';
+  const out = d.outgoing.length ? `<div class="subhead">Ждут ответа</div>${d.outgoing.map((f) => `<div class="fr-out">${frAva(f)}<span>${esc(f.name)}</span></div>`).join('')}` : '';
   const giftsLeft = d.friends.filter((f) => !f.sent).length;
   return head + (inc ? `<div class="subhead">Заявки в друзья</div>${inc}` : '')
     + `<div class="subhead">Мои друзья${giftsLeft ? ` · подарков можно отправить: ${giftsLeft}` : ''}</div>`

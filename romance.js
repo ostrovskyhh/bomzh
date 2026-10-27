@@ -29,7 +29,7 @@ function approachCandidates() {
 }
 
 HOOKS.tick.push(() => {
-  if (!S.storySeen || !LOADED || modalOpen() || S.busy || (S.tut && !S.tut.done) || level() < 3) return;
+  if (!S.storySeen || !LOADED || !popupTurn(2) || S.busy || (S.tut && !S.tut.done) || level() < 3) return;
   const now = Date.now();
   if (!S.romanceAt) { S.romanceAt = now; return; }
   if (!S.approachAt) S.approachAt = now + approachGap();

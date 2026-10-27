@@ -181,7 +181,7 @@ HOOKS.load.push(() => setTimeout(async () => {
     if (r.name) { S.name = r.name; updateHud(); return; }
   } catch (e) { return; }
   if (S.namePromptAt && Date.now() - S.namePromptAt < 86400000) return;
-  const ask = () => { if (modalOpen() || MG || (S.tut && !S.tut.done)) { setTimeout(ask, 5000); return; } nameModal(true); };
+  const ask = () => { if (!popupTurn(2) || (S.tut && !S.tut.done)) { setTimeout(ask, 5000); return; } nameModal(true); };
   ask();
 }, 6000));
 

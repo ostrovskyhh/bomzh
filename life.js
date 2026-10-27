@@ -403,7 +403,7 @@ HOOKS.tick.push(() => {
   if (!g) return;
   const now = Date.now();
   if (S.food < maxFood() && Math.random() < 0.02) feed(0.5); // жена подкармливает
-  if (now < S.wifeDue || modalOpen()) return;
+  if (now < S.wifeDue || !popupTurn(2)) return;
   S.wifeDue = now + MONTH_MS;
   const st = girlState(g.id);
   const sum = ALLOWANCE[girlIdx(g.id)];

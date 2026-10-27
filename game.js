@@ -792,15 +792,42 @@ const DEVICE_ID = (() => {
 let serverReady = false, serverBase = 0, srvTimer = null, srvLastAt = 0, srvBusy = false, SAVE_LOCK = false;
 let LOADED = false; // до загрузки в S лежит пустой профиль — его нельзя сохранять
 
+// Запрос к серверу игры с тихими повторами (3.3). Свернул игру посреди запроса или пропала сеть — ждём, пока
+// игру снова откроют, и повторяем до 3 раз (0.6 / 1.5 / 3 с). У запроса свой номер rid: если первый дошёл,
+// а ответ потерялся, сервер на повтор отдаст тот же ответ, а не выполнит действие ещё раз.
+const NET_DELAYS = [600, 1500, 3000];
+function netVisible() {
+  if (!document.hidden) return Promise.resolve();
+  return new Promise((ok) => {
+    const done = () => { document.removeEventListener('visibilitychange', on); clearTimeout(t); ok(); };
+    const on = () => { if (!document.hidden) done(); };
+    const t = setTimeout(done, 60000);
+    document.addEventListener('visibilitychange', on);
+  });
+}
+async function netPost(url, body) {
+  const payload = JSON.stringify({ rid: Math.random().toString(36).slice(2) + Date.now().toString(36), ...body });
+  let last;
+  for (let i = 0; i <= NET_DELAYS.length; i++) {
+    if (i) { await wait(NET_DELAYS[i - 1]); await netVisible(); }
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctl && setTimeout(() => ctl.abort(), 15000);
+    try {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: payload, signal: ctl && ctl.signal });
+      if (r.ok) return await r.json();
+      last = new Error('http ' + r.status);
+      if (r.status < 500 && r.status !== 429) throw last; // ошибка запроса — повтор не поможет
+    } catch (e) {
+      last = e;
+      if (String(e.message || '').startsWith('http 4')) throw e;
+    } finally { if (timer) clearTimeout(timer); }
+  }
+  throw last || new Error('net');
+}
+
 function serverOk() { return typeof REF_API !== 'undefined' && REF_API && tg && tg.initData; }
 async function serverCall(path, extra) {
-  const r = await fetch(`${REF_API}/api/save/${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
-    body: JSON.stringify({ initData: tg.initData, device: DEVICE_ID, ...extra }),
-  });
-  if (!r.ok) throw new Error('http ' + r.status);
-  return r.json();
+  return netPost(`${REF_API}/api/save/${path}`, { initData: tg.initData, device: DEVICE_ID, ...extra });
 }
 async function serverGet() {
   const j = await serverCall('get', {});
@@ -1201,7 +1228,8 @@ function startSleep() {
 function finishSleep(progress) {
   const b = S.busy;
   S.busy = null;
-  S.energy = b.from + (maxEnergy() - b.from) * progress;
+  // Сон добавляет энергию к текущей: если во сне выпил кофе или поел, это не пропадёт (раньше считали от уровня при засыпании)
+  S.energy = clamp(S.energy + (maxEnergy() - b.from) * progress, 0, maxEnergy());
   const lines = [`Энергия: ${Math.floor(S.energy)}/${maxEnergy()}`];
   if (S.housing === 0) { hurt(2); lines.push('Замёрз на лавке: −2 ❤️'); } else if (S.housing >= 3) { heal(3); addMood(3); lines.push('Хорошо выспался: +3 ❤️ +3 😊'); }
   let robbed = false;
@@ -1315,7 +1343,7 @@ let nextEventAt = Date.now() + rand(70, 110) * 1000;
 let nextMiniAt = Date.now() + rand(25, 45) * 1000;
 
 function maybeEvent() {
-  if (!S.storySeen || modalOpen()) return;
+  if (!S.storySeen || !popupTurn(2)) return;
   const now = Date.now();
   if (now >= nextMiniAt && !(S.busy && S.busy.type === 'sleep')) {
     nextMiniAt = now + rand(35, 70) * 1000;
@@ -2802,7 +2830,7 @@ function updateHud() {
         <div class="progress"><div id="actBar"></div></div>${t === 'sleep' ? '<button class="btn" data-act="wake">Проснуться</button>' : ''}`;
     }
     act.classList.remove('hidden');
-    $('actLeft').textContent = t === 'sleep' ? `Энергия ${Math.floor(S.busy.from + (maxEnergy() - S.busy.from) * clamp(1 - left / total, 0, 1))}/${maxEnergy()} · ${fmtTime(left / 1000)}` : `Осталось ${fmtTime(left / 1000)}`;
+    $('actLeft').textContent = t === 'sleep' ? `Энергия ${Math.floor(Math.min(maxEnergy(), S.energy + (maxEnergy() - S.busy.from) * clamp(1 - left / total, 0, 1)))}/${maxEnergy()} · ${fmtTime(left / 1000)}` : `Осталось ${fmtTime(left / 1000)}`;
     $('actBar').style.width = clamp(1 - left / total, 0, 1) * 100 + '%';
   } else {
     act.classList.add('hidden');
@@ -2864,7 +2892,7 @@ function tick() {
     setTimeout(() => z.remove(), 2400);
   }
   HOOKS.tick.forEach((f) => f(dt));
-  if (pendingLevelUp && !modalOpen()) showLevelUp();
+  if (pendingLevelUp && !popupBusy()) showLevelUp();
   maybeEvent();
 }
 
@@ -2882,7 +2910,7 @@ function initTelegram() {
     if (tg.isVersionAtLeast('7.10')) tg.setBottomBarColor('#2A241F');
     if (tg.isVersionAtLeast('6.2')) tg.enableClosingConfirmation();
   } catch (e) { /* старый клиент */ }
-  if (tg.BackButton) tg.BackButton.onClick(() => { if (modalOpen()) closeModal(); else showScreen('game'); });
+  if (tg.BackButton) tg.BackButton.onClick(() => { if (modalOpen()) closeModal(); else if (typeof navBack === 'function') navBack(); else showScreen('game'); });
   const setH = () => document.documentElement.style.setProperty('--tg-viewport-stable-height', tg.viewportStableHeight + 'px');
   tg.onEvent('viewportChanged', setH);
   setH();

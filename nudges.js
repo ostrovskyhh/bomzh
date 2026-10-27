@@ -9,7 +9,7 @@ const TIP_ASK_EVERY = 3 * 3600000;
 HOOKS.load.push(() => { if (!S.tipAskAt) S.tipAskAt = Date.now() + TIP_ASK_EVERY; });
 HOOKS.tick.push(() => {
   if (S.tipAskOff || !S.storySeen || Date.now() < (S.tipAskAt || 0)) return;
-  if (!onlineOn() || currentScreen !== 'game' || modalOpen() || (S.tut && !S.tut.done) || MG) return;
+  if (!onlineOn() || currentScreen !== 'game' || !popupTurn(6) || (S.tut && !S.tut.done)) return;
   S.tipAskAt = Date.now() + TIP_ASK_EVERY;
   openModal(`<div class="tip-ask"><div class="big-art" style="height:96px"><div class="rays"></div><div class="big-emoji" style="line-height:96px">💛</div></div>
     <h3>Поддержишь проект?</h3>
@@ -64,7 +64,7 @@ function vipRefCardHTML() {
 }
 HOOKS.tick.push(() => {
   const t = S.vipTrial;
-  if (!t || t.offered || !vipRefOfferOn() || currentScreen !== 'game' || modalOpen() || MG) return;
+  if (!t || t.offered || !vipRefOfferOn() || currentScreen !== 'game' || !popupTurn(5)) return;
   t.offered = true;
   save();
   openModal(`<div class="big-art"><div class="rays"></div><div class="big-emoji">👑</div></div>

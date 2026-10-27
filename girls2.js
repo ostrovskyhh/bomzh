@@ -105,7 +105,7 @@ HOOKS.tick.push(() => {
     toast(`😤 ${girlShort(g)} обиделась: ты так и не исполнил её просьбу. 💗 −10`, 'bad');
     return;
   }
-  if (S.gfWish || modalOpen() || S.busy || MG) return;
+  if (S.gfWish || !popupTurn(2) || S.busy || MG) return;
   if (!S.gfWishNext) { S.gfWishNext = now + 3 * GAME_DAY; return; }
   if (now < S.gfWishNext) return;
   const g = GIRLS.find((x) => x.id === S.girlfriend), t = girlTier(g.id);

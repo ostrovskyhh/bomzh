@@ -196,6 +196,12 @@ Object.assign(ACTIONS, {
   betaTab: (id) => { const [s, t] = id.split(':'); showScreen(s, t); },
 });
 
+// Кнопка «Назад» Telegram: в бете из раздела — к плиткам его группы, с плиток — домой (без беты — сразу домой)
+function navBack() {
+  if (beta() && currentScreen !== 'game' && currentScreen !== 'hub' && BNAV.hub && BNAV.hub !== 'home') { ACTIONS.betaHub(BNAV.hub); return; }
+  showScreen('game');
+}
+
 // ---------- 2. Живой Валера и питомец ----------
 const LV = { next: 0, sayAt: 0, petAt: 0, petX: 6 };
 const LV_SAY = {

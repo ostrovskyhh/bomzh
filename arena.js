@@ -12,10 +12,11 @@ const HARD_BOTS = [
   { id: 'term', name: 'Терминатор с рынка', style: 'brawler', boost: 1.6, eq: { hat: 'cilinder', body: 'malinovy', shoes: 'boots' }, emoji: '🤖' },
 ];
 
+// Сила сложных ботов постоянная (3.2): подкачаешься в зале — перерастёшь их
+const HARD_STATS = { gena: { level: 15, form: 45, strength: 45, tier: 3 }, champ: { level: 25, form: 65, strength: 65, tier: 4 }, term: { level: 40, form: 90, strength: 90, tier: 6 } };
 function hardRival(b) {
-  const me = myFighter();
-  return { id: b.id, name: b.name, style: b.style, eq: b.eq, level: me.level + Math.round((b.boost - 1) * 10),
-    form: Math.min(100, me.form * b.boost + 10), strength: Math.min(100, me.strength * b.boost + 10), tier: Math.min(6, me.tier + 2), rating: fightState().rating + 200 };
+  const s = HARD_STATS[b.id] || HARD_STATS.gena;
+  return { id: b.id, name: b.name, style: b.style, eq: b.eq, ...s, rating: fightState().rating + 200 };
 }
 
 function fightCan() {
@@ -60,21 +61,7 @@ ACTIONS.hardFight = (id) => {
 
 let TOUR = { data: null, at: 0, loading: false };
 
-async function tourLoad(force) {
-  if (!onlineOn() || TOUR.loading || (!force && Date.now() - TOUR.at < 20000)) return;
-  TOUR.loading = true;
-  try { TOUR.data = await apiPost('tour/state'); TOUR.error = ''; } catch (e) { TOUR.error = 'Сервер турнира недоступен'; }
-  TOUR.loading = false;
-  TOUR.at = Date.now();
-  if (currentScreen === 'fun' && TABS.fun === 'fights') renderCurrent(false);
-}
 HOOKS.init.push(() => setTimeout(() => tourLoad(true), 5000));
-
-function tourRules(t) {
-  const lucky = Math.round((t.luckyShare || 0.25) * 100);
-  return `Взнос ${fmt(t.fee)} ₽, ${t.fights} боёв: победа — 3 очка и рейтинг ×2. Спонсор добавляет в банк ${fmt(t.sponsor || 10000)} ₽.
-    Больше всех очков к ${t.endHour || 21}:00 — <b>${100 - lucky}% банка</b>, а ещё один <b>случайный участник — ${lucky}%</b>. Нет живых соперников — дерёшься с турнирными бойцами`;
-}
 
 // Плашка турнира на главном экране: во вторник — обратный отсчёт до конца, за 6 часов до начала — «скоро турнир»
 HOOKS.hud.push(() => {
@@ -101,28 +88,6 @@ HOOKS.hud.push(() => {
 ACTIONS.tourOpen = () => showScreen('fun', 'fights');
 setInterval(() => { if (typeof S !== 'undefined' && S.storySeen) tourLoad(); }, 5 * 60000);
 
-function tourHTML() {
-  if (!onlineOn()) return '';
-  setTimeout(() => tourLoad(), 0);
-  const t = TOUR.data;
-  const head = `<b>🏆 Турнир района · каждый вторник с ${(t && t.startHour) || 9}:00 до ${(t && t.endHour) || 21}:00 (МСК)</b>`;
-  if (!t) return `<div class="tour-box">${head}<small>${TOUR.error || 'Загружаем…'}</small></div>`;
-  const prize = t.prize ? `<button class="btn primary wide" data-act="tourClaim">🏆 Забрать · ${fmt(t.prize)} ₽</button>` : '';
-  if (t.phase !== 'open') {
-    return `<div class="tour-box">${head}<small>${tourRules(t)}</small>
-      <small>⏳ Следующий турнир через <b>${leftText(t.opensIn * 1000)}</b>${t.last ? ` · прошлый выиграл <b>${esc(t.last.name)}</b> (банк ${fmt(t.last.pool)} ₽)${t.lucky ? `, 🍀 счастливчик — ${esc(t.lucky.name)}` : ''}` : ''}</small>${prize}</div>`;
-  }
-  const me = t.me;
-  const table = t.table.length ? `<div class="tour-table">${t.table.map((r, i) => `<div class="${r.me ? 'me' : ''}"><span>${i + 1}. ${esc(r.name)}</span><b>${r.points} очк.</b><i>${r.fights}/${t.fights}</i></div>`).join('')}</div>` : '';
-  return `<div class="tour-box open">${head}
-    <small>Банк: <b>${fmt(Math.max(t.pool, t.sponsor || 0))} ₽</b> · участников ${t.count} · до конца <b>${leftText(t.endsIn * 1000)}</b></small>
-    <small>${tourRules(t)}</small>
-    ${me ? `<small>Твои очки: <b>${me.points}</b> · боёв ${me.fights}/${t.fights}</small>
-      ${me.fights < t.fights ? `<button class="btn primary wide" data-act="tourFight">🥊 Турнирный бой</button>` : `<small>Все бои проведены — ждём итогов в ${t.endHour || 21}:00</small>`}`
-    : priceBtn('tourJoin', '', t.fee, S.money >= t.fee, `Записаться · взнос ${fmt(t.fee)} ₽`).replace('class="btn', 'class="btn wide')}
-    ${table}${prize}</div>`;
-}
-
 // Блок турнира и сложных ботов — во вкладке «Драки», под онлайн-боем
 const _fightsTabArena = EXTRA_TABS.fun.fights;
 EXTRA_TABS.fun.fights = () => {
@@ -138,71 +103,3 @@ EXTRA_TABS.fun.fights = () => {
   const i = base.indexOf('<div class="subhead">Соперники');
   return (i > 0 ? base.slice(0, i) + tour + base.slice(i) : base + tour) + hard;
 };
-
-Object.assign(ACTIONS, {
-  tourJoin: async () => {
-    if (S.money < TOUR.data.fee) return;
-    try {
-      const f = myFighter();
-      const r = await apiPost('tour/join', { fighter: { level: f.level, form: f.form, strength: f.strength, tier: f.tier, eq: S.eq } });
-      if (r.error) { toast(r.error, 'bad'); return; }
-      S.money -= TOUR.data.fee;
-      TOUR.data = r;
-      track('tourJoin');
-      sfx('bell');
-      toast(`🏆 Ты в турнире! Проведи бои до ${(TOUR.data && TOUR.data.endHour) || 21}:00`, 'good');
-      save();
-      renderCurrent(false);
-    } catch (e) { toast(refErrorText(e), 'bad'); }
-  },
-  tourFight: async () => {
-    const why = fightCan();
-    if (why) { toast(why, 'bad'); return; }
-    try {
-      const r = await apiPost('tour/opponent');
-      if (r.error) { toast(r.error, 'bad'); return; }
-      const o = r.opponent;
-      const op = { name: o.bot ? o.name : `${o.name} (турнир)`, style: pick(Object.keys(STYLES)), eq: o.eq && o.eq.body ? o.eq : { hat: 'none', body: 'base', shoes: 'base' },
-        level: o.level || 5, form: o.form || 20, strength: o.strength || 20, tier: o.tier || 2, rating: fightState().rating };
-      S.energy -= FIGHT_COST.energy;
-      feed(-FIGHT_COST.food);
-      startFight(op, { intro: '🏆 Турнирный бой! Победа — 3 очка и двойной рейтинг', onEnd: async (won) => {
-        const st = fightState();
-        let text;
-        if (won) {
-          const dr = Math.max(2, eloDelta(op, true) * 2);
-          st.rating += dr; st.wins++;
-          addXp(20); addMood(10);
-          track('fightWin'); track('tourWin');
-          text = `+3 очка турнира, рейтинг +${dr} (×2)`;
-          confetti(50); sfx('win');
-        } else {
-          const dr = eloDelta(op, false);
-          st.rating = Math.max(0, st.rating + dr);
-          addMood(-6);
-          text = `0 очков, рейтинг ${dr}`;
-          sfx('lose');
-        }
-        track('fight');
-        try { TOUR.data = await apiPost('tour/result', { won }); } catch (e) { /* запишем позже нельзя — бой засчитан локально */ }
-        resultModal({ emoji: won ? '🏆' : '🤕', rays: won ? '' : 'bad', title: won ? 'Турнирная победа!' : 'Турнирное поражение', text, btn: 'Ок' });
-        save();
-      } });
-    } catch (e) { toast(refErrorText(e), 'bad'); }
-  },
-  tourClaim: async () => {
-    try {
-      const r = await apiPost('tour/claim');
-      const amount = r.amount || 0;
-      if (amount > 0) {
-        addMoney(amount); save();
-        // Старый сервер не делил приз по видам — тогда считаем всё победой
-        const win = r.win ?? amount, lucky = r.lucky || 0, refund = r.refund || 0;
-        const lines = [win ? `🏆 Победа в турнире: +${fmt(win)} ₽` : '', lucky ? `🍀 Приз счастливчику: +${fmt(lucky)} ₽` : '', refund ? `↩️ Возврат взноса за сброшенный турнир: +${fmt(refund)} ₽` : ''].filter(Boolean);
-        if (win) { track('tourPrize'); confetti(120); sfx('jackpot'); } else sfx('coin');
-        resultModal({ emoji: win ? '🏆' : lucky ? '🍀' : '↩️', title: win ? 'Ты чемпион района!' : lucky ? 'Тебе повезло!' : 'Взнос вернули', text: lines.join('<br>'), btn: win ? 'Ура!' : 'Отлично' });
-      }
-      tourLoad(true);
-    } catch (e) { toast(refErrorText(e), 'bad'); }
-  },
-});

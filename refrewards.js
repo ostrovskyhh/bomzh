@@ -30,10 +30,10 @@ refSync = (function (orig) {
         S.refCapsFor = S.refInvited;
         addCaps(REF_CAPS * fresh);
         save(true);
-        setTimeout(() => {
+        queuePopup('ref', 1, () => {
           confetti(60); sfx('jackpot');
           resultModal({ emoji: '🟡', title: `+${REF_CAPS * fresh} золотых крышек!`, text: `За ${fresh === 1 ? 'приглашённого друга' : `${fresh} приглашённых друзей`} — по ${REF_CAPS} крышек.<br>Всего приглашено: <b>${S.refInvited}</b>${refNextGoal() ? `<br>Следующая награда — рамка или аватарка за ${refNextGoal()}` : ''}`, btn: 'Класс!' });
-        }, modalOpen() ? 2500 : 300);
+        });
       }
     }
     return r;

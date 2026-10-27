@@ -107,7 +107,7 @@ HOOKS.tick.push(() => {
   if (S.trust === undefined) S.trust = TRUST_START;
   const now = Date.now();
   if (!S.partnerAt) S.partnerAt = now + rand(...PARTNER_EVERY) * 60000;
-  if (now < S.partnerAt || modalOpen() || S.busy || MG || FIGHT || !S.storySeen) return;
+  if (now < S.partnerAt || !popupTurn(2) || S.busy || MG || FIGHT || !S.storySeen) return;
   S.partnerAt = now + rand(...PARTNER_EVERY) * 60000;
   partnerEvent();
 });

@@ -75,7 +75,7 @@ EXTRA_TABS.shop.premium = function premiumWithPromo() {
 // Акция началась — один раз показываем объявление
 HOOKS.tick.push(() => {
   const p = promoAt();
-  if (!p || S.promoSeen === p.slot || !S.storySeen || (S.tut && !S.tut.done) || modalOpen() || S.busy) return;
+  if (!p || S.promoSeen === p.slot || !S.storySeen || (S.tut && !S.tut.done) || !popupTurn(5) || S.busy) return;
   if (Math.random() > 0.2) return;
   S.promoSeen = p.slot;
   sfx('notify');

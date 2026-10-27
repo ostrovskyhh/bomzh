@@ -392,7 +392,7 @@ addMoney = (function (orig) {
   };
 })(addMoney);
 HOOKS.tick.push(() => {
-  if (S.alimony && !alimonyOn() && !S.alimony.done && !modalOpen()) {
+  if (S.alimony && !alimonyOn() && !S.alimony.done && popupTurn(2)) {
     S.alimony.done = true;
     resultModal({ emoji: '👶', title: 'Алименты выплачены', text: `Семь игровых дней прошли. Всего ушло детям: <b>${fmt(S.alimony.paid)} ₽</b>. Теперь весь доход — твой.`, btn: 'Ок' });
   }

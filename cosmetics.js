@@ -78,7 +78,7 @@ function starterHTML() {
 }
 // Один раз предлагаем после обучения
 HOOKS.tick.push(() => {
-  if (S.starterOffered || !starterLeft() || !S.storySeen || !LOADED || (S.tut && !S.tut.done) || level() < 2 || modalOpen() || S.busy) return;
+  if (S.starterOffered || !starterLeft() || !S.storySeen || !LOADED || (S.tut && !S.tut.done) || level() < 2 || !popupTurn(5) || S.busy) return;
   S.starterOffered = true;
   openModal(`<div class="sp-pop">${starterHTML()}<div class="btns"><button class="btn wide" data-act="close">Позже</button></div></div>`, { center: true });
   fillIcons();

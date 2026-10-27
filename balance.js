@@ -17,30 +17,6 @@ const RIVAL_TIERS = [
   { id: 'hard', name: 'Сильный', emoji: '🔴', power: 1.2, reward: 1.7, rating: 110, adapt: 0.3 },
 ];
 
-genRival = function (i) {
-  const t = RIVAL_TIERS[i] || RIVAL_TIERS[1];
-  const me = myFighter();
-  const used = (fightState().rivals || []).map((r) => r.name);
-  const lvl = Math.max(1, me.level + [-1, 0, 1][i] + Math.floor(rand(-1, 2)));
-  const myTier = me.tier;
-  const eq = randomEq(clamp(Math.round(myTier / 2) + (i === 2 ? 1 : 0), 0, 3));
-  const op = {
-    id: Date.now() + i, name: pick(RIVAL_NAMES.filter((n) => !used.includes(n))) || pick(RIVAL_NAMES), level: lvl,
-    style: pick(Object.keys(STYLES)), eq, diff: t.id, adapt: t.adapt, rewardK: t.reward,
-    form: clamp(me.form + rand(-8, 8), 0, 100), strength: clamp(me.strength + rand(-8, 8), 0, 100),
-    tier: CLOTHES.body.find((x) => x.id === eq.body).tier + CLOTHES.shoes.find((x) => x.id === eq.shoes).tier,
-    rating: Math.max(800, Math.round(fightState().rating + t.rating + rand(-40, 40))), hpMult: 1,
-  };
-  // Подгоняем силу соперника к нужной доле твоей: сначала здоровьем, потом атакой через силу
-  const target = fighterPower({ ...me, hpMult: 1 }) * t.power * rand(0.96, 1.04);
-  for (let k = 0; k < 24; k++) {
-    const ratio = fighterPower(op) / target;
-    if (Math.abs(ratio - 1) < 0.02) break;
-    op.hpMult = clamp(op.hpMult / Math.sqrt(ratio), 0.55, 1.8);
-    if (op.hpMult === 0.55 || op.hpMult === 1.8) op.strength = clamp(op.strength / ratio, 0, 100);
-  }
-  return op;
-};
 // Список соперников всегда в порядке «лёгкий → сильный»; старые соперники без сложности пересоздаются
 const _ensureRivalsBal = ensureRivals;
 ensureRivals = (force) => {
@@ -52,36 +28,6 @@ ensureRivals = (force) => {
 const _fightRewardBal = fightReward;
 fightReward = (op) => Math.round(_fightRewardBal(op) * (op.rewardK || 1));
 
-// Бот запоминает три твоих последних приёма и отвечает на любимый
-aiMove = function (en) {
-  const w = { ...STYLES[en.style || 'tactic'].w };
-  const hist = (FIGHT && FIGHT.hist) || [];
-  const adapt = en.adapt === undefined ? 0.15 : en.adapt;
-  if (adapt && hist.length >= 2) {
-    const last = hist.slice(-3);
-    const fav = ['hit', 'heavy', 'block', 'dodge'].find((m) => last.filter((x) => x === m).length >= 2);
-    if (fav === 'block') w.heavy += adapt * 2;   // ты в блоке — пробивает мощным
-    if (fav === 'heavy') w.dodge += adapt * 2;   // ты бьёшь мощным — уклоняется
-    if (fav === 'hit') w.block += adapt * 1.5;   // ты бьёшь обычным — ставит блок
-    if (fav === 'dodge') w.hit += adapt * 1.5;   // ты уклоняешься — бьёт быстрыми
-  }
-  // Добивает, если у тебя мало здоровья, и бережёт выносливость
-  if (FIGHT && FIGHT.me.hp < FIGHT.me.max * 0.25) w.heavy += 0.15;
-  if (en.st < 25) w.heavy = 0;
-  if (en.st < 10) { w.hit = 0; w.dodge = 0; }
-  if (en.hp < en.max * 0.3) { w.block += 0.12; w.dodge += 0.08; }
-  const total = Object.values(w).reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  return Object.keys(w).find((k) => (r -= w[k]) < 0) || 'block';
-};
-const _fightMoveBal = fightMove;
-fightMove = (move) => {
-  const f = FIGHT;
-  const ok = f && !f.busy && (MOVES[move].st <= 0 || f.me.st >= MOVES[move].st);
-  const p = _fightMoveBal(move); // бот выбирает ход синхронно в начале — твой текущий ход он ещё не видит
-  if (ok) f.hist = [...(f.hist || []), move];
-  return p;
-};
 
 // Метка сложности у соперника в списке
 const _fightsTabBal = EXTRA_TABS.fun.fights;
@@ -256,7 +202,7 @@ EVENTS.push(
 );
 
 maybeEvent = function () {
-  if (!S.storySeen || modalOpen()) return;
+  if (!S.storySeen || !popupTurn(2)) return;
   const now = Date.now();
   if (now >= nextMiniAt && !(S.busy && S.busy.type === 'sleep')) {
     nextMiniAt = now + rand(40, 75) * 1000;

@@ -92,7 +92,7 @@ async function broadcastCheck() {
       S.bcSeen = Math.max(S.bcSeen || 0, b.id);
       const show = () => { sfx('notify'); openModal(`<div class="bc-pop"><div class="bc-e">${esc(b.emoji || '📢')}</div><h3>${esc(b.title)}</h3><p>${esc(b.text).replace(/\n/g, '<br>')}</p>
         <small class="fb-note">Сообщение от администрации · ${timeStr(b.ts * 1000)}</small><div class="btns"><button class="btn primary wide" data-act="close">Понятно</button></div></div>`, { center: true }); };
-      if (modalOpen()) MODAL_QUEUE.push({ html: '', opts: null, fn: show }); else show();
+      queuePopup('bc' + b.id, 2, show);
     });
     if (r.items && r.items.length) save();
   } catch (e) { /* сервер выключен */ }

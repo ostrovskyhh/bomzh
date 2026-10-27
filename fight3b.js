@@ -6,7 +6,7 @@
 
 // ---------- Соперники по рейтингу ----------
 function rivalBase(rating = fightState().rating) { return clamp((rating - 760) / 9, 4, 100); } // 1000 → 27, 1300 → 60, 1600 → 93
-genRival = function (i) {
+function genRival(i) {
   const t = RIVAL_TIERS[i] || RIVAL_TIERS[1];
   const used = (fightState().rivals || []).map((r) => r.name);
   const base = rivalBase() + [-10, 0, 12][i];
@@ -18,16 +18,10 @@ genRival = function (i) {
     tier: CLOTHES.body.find((x) => x.id === eq.body).tier + CLOTHES.shoes.find((x) => x.id === eq.shoes).tier,
     rating: Math.max(800, Math.round(fightState().rating + t.rating + rand(-40, 40))),
   };
-};
+}
 // Старые соперники (подогнанные под тебя) пересоздаём один раз
 HOOKS.load.push(() => { const st = fightState(); if (!st.rivalsV3) { st.rivals = []; st.rivalsV3 = true; } });
 
-// Сложные боты — с фиксированной силой, а не «ты × 1.4»
-const HARD_STATS = { gena: { level: 15, form: 45, strength: 45, tier: 3 }, champ: { level: 25, form: 65, strength: 65, tier: 4 }, term: { level: 40, form: 90, strength: 90, tier: 6 } };
-hardRival = function (b) {
-  const s = HARD_STATS[b.id] || HARD_STATS.gena;
-  return { id: b.id, name: b.name, style: b.style, eq: b.eq, ...s, rating: fightState().rating + 200 };
-};
 
 // ---------- Карточка «Твой боец» во вкладке «Драки» ----------
 function myScore() { return fighterScore(myFighter()); }
@@ -64,7 +58,7 @@ EXTRA_TABS.life.gym = () => {
 };
 
 // ---------- Турнир 2.0 ----------
-tourLoad = async function (force) {
+async function tourLoad(force) {
   if (!onlineOn() || TOUR.loading || (!force && Date.now() - TOUR.at < 20000)) return;
   TOUR.loading = true;
   try {
@@ -77,7 +71,7 @@ tourLoad = async function (force) {
   TOUR.loading = false;
   TOUR.at = Date.now();
   if (currentScreen === 'fun' && TABS.fun === 'fights') renderCurrent(false);
-};
+}
 
 function tourPrizeLine(d) {
   const ico = ['🍀', '🥇', '🥈', '🥉'];
@@ -94,7 +88,7 @@ function tourRules2(t) {
     <p>• Нет живых соперников в лиге — выходит турнирный боец силы этой лиги.</p></details>`;
 }
 
-tourHTML = function () {
+function tourHTML() {
   if (!onlineOn()) return '';
   setTimeout(() => tourLoad(), 0);
   const t = TOUR.data;
@@ -126,7 +120,7 @@ tourHTML = function () {
     <div class="tour-me"><b>${d.emoji} ${d.name}</b><span>место <b>${me.place || '—'}</b> из ${me.of} · ${me.points} очк. · побед ${me.wins} · боёв ${me.fights}/${t.fights}</span></div>
     <small>Банк лиги <b>${fmt(d.pool)} ₽</b>: ${tourPrizeLine(d)} · до конца <b>${leftText(t.endsIn * 1000)}</b></small>
     ${btn}${table}${tourRules2(t)}${prize}</div>`;
-};
+}
 
 Object.assign(ACTIONS, {
   tourJoin: async () => {

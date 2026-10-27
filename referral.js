@@ -16,13 +16,7 @@ function refInitData() { return (tg && tg.initData) || ''; }
 async function refCall(path, extra = {}) {
   if (!REF_API) throw new Error('off');
   if (!refInitData()) throw new Error('notg');
-  const r = await fetch(`${REF_API}/api/ref/${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
-    body: JSON.stringify({ initData: refInitData(), ...extra }),
-  });
-  if (!r.ok) throw new Error('http ' + r.status);
-  return r.json();
+  return netPost(`${REF_API}/api/ref/${path}`, { initData: refInitData(), ...extra });
 }
 
 function refErrorText(e) {

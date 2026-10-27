@@ -17,14 +17,14 @@ const F3_MOVES = {
 const F3_STYLE = { brawler: { block: 0.15, heavy: 0.4, feint: 0 }, tactic: { block: 0.3, heavy: 0.25, feint: 0.22 }, coward: { block: 0.45, heavy: 0.12, feint: 0.12 } };
 let F3_LAST = null; // итог последнего боя: { ko, perfect, dodges } — нужен турниру
 
-fighterStats = function (f) {
+function fighterStats(f) {
   const lvl = f.level || 1, form = f.form || 0, str = f.strength || 0, tier = f.tier || 0;
   return {
     hp: Math.round((70 + form * 0.9 + lvl * 1.5) * (f.hpMult || 1)),
     atk: 6 + str * 0.28 + lvl * 0.3 + tier * 1.5,
     def: 2 + form * 0.06 + tier,
   };
-};
+}
 // Мощь бойца — одно число для сравнения и лиг турнира (та же формула на сервере, bot/tour.py)
 function fighterScore(f) { return Math.round((f.strength || 0) * 2 + (f.form || 0) * 1.5 + (f.level || 0) * 3 + (f.tier || 0) * 10); }
 // Что зал даёт в бою — для подсказок
@@ -33,7 +33,7 @@ function f3Window(me, en, heavy) { return clamp((heavy ? 820 : 1050) + (me.form 
 function f3DodgeWin(me) { return 230 + (me.form || 0) * 2; }
 function f3Regen(x) { return 8 + (x.form || 0) * 0.12; }
 
-startFight = function (op, opts = {}) {
+function startFight(op, opts = {}) {
   const meF = opts.me || myFighter();
   const me = { ...meF, ...fighterStats(meF), st: 100 };
   const en = { ...op, ...fighterStats(op), st: 100 };
@@ -57,9 +57,12 @@ startFight = function (op, opts = {}) {
   sfx('bell');
   f3Bars();
   f3Round(FIGHT.id);
-};
+}
 
-function f3Alive(id) { return FIGHT && FIGHT.id === id && $('f3Stage'); }
+function f3Alive(id) {
+  if (FIGHT && FIGHT.id === id && !$('f3Stage')) FIGHT = null; // окно боя закрыли — бой окончен, иначе он «висит» невидимым
+  return FIGHT && FIGHT.id === id && $('f3Stage');
+}
 function f3Auto() { return !!S.fightAuto; }
 function f3Bars() {
   const f = FIGHT;
@@ -200,7 +203,8 @@ function f3Defend(id) {
   const ring = $('f3Ring');
   const anim = ring.animate([{ transform: 'scale(2.6)', opacity: 0.4 }, { transform: 'scale(1)', opacity: 1 }], { duration: feint ? T * 0.6 : T, easing: 'linear', fill: 'forwards' });
   if (feint) {
-    anim.onfinish = () => {
+    // Таймер, а не конец анимации: свернул игру или телефон тормозит — анимация может не доиграть, и бой бы застрял
+    setTimeout(() => {
       if (done || !f3Alive(id)) return;
       ring.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' });
       $('f3Tel').innerHTML = '🦊 <b>Финт!</b>';
@@ -212,7 +216,7 @@ function f3Defend(id) {
         f.feinted = true;
         f3Defend(id); // настоящий удар сразу следом и быстрее
       }, 380);
-    };
+    }, T * 0.6);
   }
   const press = (kind) => {
     if (done || act) return;

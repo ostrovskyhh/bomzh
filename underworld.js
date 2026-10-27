@@ -42,7 +42,7 @@ HOOKS.tick.push(() => {
   const u = uw();
   if (u.step >= UW_STEPS.length) return;
   if (!u.next) { u.next = now + UW_GAP; return; }
-  if (now < u.next || modalOpen() || S.busy || MG || (S.tut && !S.tut.done)) return;
+  if (now < u.next || !popupTurn(2) || S.busy || MG || (S.tut && !S.tut.done)) return;
   // Первый шаг — только в трудную минуту; дальше Шнырь сам находит
   if (u.step === 0 && !uwHardTime()) return;
   uwOffer(u.step);

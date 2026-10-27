@@ -363,7 +363,7 @@ function stealCar(where) {
 finishSleep = (function (orig) {
   return function (progress) {
     orig(progress);
-    if (progress > 0.5 && needsGarage() && !inGarage() && Math.random() < THEFT_CHANCE) setTimeout(() => stealCar('Пока ты спал,'), 600);
+    if (progress > 0.5 && needsGarage() && !inGarage() && Math.random() < THEFT_CHANCE) queuePopup('steal' + Date.now(), 2, () => stealCar('Пока ты спал,'));
   };
 })(finishSleep);
 

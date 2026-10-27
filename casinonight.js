@@ -67,7 +67,7 @@ ACTIONS.nightGift = () => {
 
 // Ночь началась, пока игра открыта, — один раз объявляем
 HOOKS.tick.push(() => {
-  if (!S.storySeen || level() < CASINO_LEVEL || !casinoNight() || S.nightSeen === nightKey() || modalOpen() || S.busy) return;
+  if (!S.storySeen || level() < CASINO_LEVEL || !casinoNight() || S.nightSeen === nightKey() || !popupTurn(4) || S.busy) return;
   S.nightSeen = nightKey();
   sfx('notify');
   openModal(`<div class="night-pop"><div class="nb-moon big">🌙</div><h3>Ночь казино началась!</h3>

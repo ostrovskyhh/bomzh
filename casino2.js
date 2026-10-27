@@ -38,7 +38,7 @@ const CRASH_AUTO_DEFAULT = 2;
 function crashOnline() { return onlineOn(); }
 openCrash = (function (orig) {
   return function () {
-    if (!crashOnline()) { orig(); return; }
+    if (!crashOnline()) { orig(); crashAutoUI(); return; }
     if (S.crashAuto === undefined) S.crashAuto = 0;
     openModal(`<h3>🚀 Ракета · общая</h3>
       <div class="crash-box" id="crashBox">
@@ -50,12 +50,11 @@ openCrash = (function (orig) {
       <div class="crash-hist" id="crashHist"></div>
       ${betPicker()}
       <div class="crash-auto"><label><input type="checkbox" id="crashAutoOn" ${S.crashAuto ? 'checked' : ''}> Автовывод на</label>
-        <input id="crashAutoX" type="number" step="0.1" min="1.05" max="100" value="${S.crashAuto || CRASH_AUTO_DEFAULT}"><span>x</span></div>
+        <input id="crashAutoX" type="number" step="0.01" min="1.05" max="100" value="${S.crashAuto || CRASH_AUTO_DEFAULT}"><span>x</span></div>
       <div class="btns"><button class="btn primary wide" data-act="crash2Btn" id="crashBtn">…</button></div>
       <div class="crash-players" id="crashPlayers"></div>
       <small class="crash-note">Одна ракета на всех игроков. Ставка — только пока идёт приём (15 секунд). Автовывод заберёт деньги сам, даже если закроешь окно</small>`, { center: true });
-    const saveAuto = () => { const on = $('crashAutoOn').checked; const x = Math.max(1.05, Math.min(100, +$('crashAutoX').value || CRASH_AUTO_DEFAULT)); S.crashAuto = on ? x : 0; };
-    $('crashAutoOn').onchange = saveAuto; $('crashAutoX').onchange = saveAuto;
+    crashAutoBind();
     CR2 = { view: null, dt: 0, lastId: 0, busy: false };
     crash2Poll();
     CR2.timer = setInterval(crash2Poll, 800);
@@ -63,6 +62,24 @@ openCrash = (function (orig) {
     CR2.raf = requestAnimationFrame(frame);
   };
 })(openCrash);
+
+// Автовывод: поле и галочка; значение — до сотых (1.95), читаем в момент ставки
+function crashAutoRead() {
+  const on = $('crashAutoOn'), x = $('crashAutoX');
+  if (!on || !x) return S.crashAuto || 0;
+  const v = Math.round(Math.max(1.05, Math.min(100, +String(x.value).replace(',', '.') || CRASH_AUTO_DEFAULT)) * 100) / 100;
+  S.crashAuto = on.checked ? v : 0;
+  return S.crashAuto;
+}
+function crashAutoBind() { ['crashAutoOn', 'crashAutoX'].forEach((id) => { const el = $(id); if (el) { el.onchange = crashAutoRead; el.oninput = crashAutoRead; } }); }
+// В одиночной ракете — то же поле автовывода
+function crashAutoUI() {
+  const bets = document.querySelector('#modalRoot .bets');
+  if (!bets || $('crashAutoOn')) return;
+  bets.insertAdjacentHTML('afterend', `<div class="crash-auto"><label><input type="checkbox" id="crashAutoOn" ${S.crashAuto ? 'checked' : ''}> Автовывод на</label>
+    <input id="crashAutoX" type="number" step="0.01" min="1.05" max="100" value="${S.crashAuto || CRASH_AUTO_DEFAULT}"><span>x</span></div>`);
+  crashAutoBind();
+}
 
 function crash2Stop() { if (!CR2) return; clearInterval(CR2.timer); cancelAnimationFrame(CR2.raf); CR2 = null; }
 
@@ -159,6 +176,7 @@ ACTIONS.crash2Btn = async () => {
     if (v.phase === 'betting' && !v.me) {
       const amount = S.bet;
       if (S.money < amount) { toast('Не хватает денег на ставку', 'bad'); return; }
+      crashAutoRead(); // поле могли не успеть «покинуть» — читаем прямо сейчас
       const r = await apiPost('crash/bet', { amount, auto: S.crashAuto || 0 });
       if (r.error) { toast(r.error, 'bad'); return; }
       S.money -= amount; track('casino'); sfx('chip'); saveSoon();
@@ -173,16 +191,7 @@ ACTIONS.crash2Btn = async () => {
 // Автовывод мог сработать, пока окно было закрыто: забираем при запуске игры
 HOOKS.init.push(() => setTimeout(() => { if (crashOnline()) apiPost('crash/claim').then((r) => { if (r.amount > 0) { addMoney(r.amount); toast(`🚀 Автовывод ракеты: +${fmt(r.amount)} ₽`, 'good'); saveSoon(); } }).catch(() => {}); }, 7000));
 
-// Одиночная ракета (без сервера) тоже получила автовывод
-crashGo = (function (orig) {
-  return function (btn) {
-    orig(btn);
-    if (!CR || !CR.running || !S.crashAuto || CR.autoHook) return;
-    CR.autoHook = true;
-    const check = () => { if (!CR || !CR.running) return; if (!CR.cashed && CR.m >= S.crashAuto) { orig(btn); return; } requestAnimationFrame(check); };
-    requestAnimationFrame(check);
-  };
-})(crashGo);
+// Одиночная ракета: автовывод встроен в её цикл (casino.js → crashCash)
 
 // =====================================================================
 // 3. Кейсы и Барахолка

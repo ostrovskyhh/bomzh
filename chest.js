@@ -68,7 +68,7 @@ function chestGame(mg) {
 
 ACTIONS.chestOpen = () => {
   const c = S.chest;
-  if (!c || modalOpen()) return;
+  if (!c || !popupTurn(2)) return;
   const t = chestTier(c.h);
   runGame({ title: `${t.emoji} Взлом сундука`, hint: `Тапай по сундуку, чтобы сбить ${CHEST_TAPS / 4 | 0} замка! Быстро — бонус ×1.5`, duration: 6, setup: chestGame,
     finish: (score, mg) => {

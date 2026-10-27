@@ -137,6 +137,7 @@ function roulSpin() {
     $('roulBtn').disabled = false;
     // Ставки остаются на столе — можно сразу крутить ещё раз тем же набором
     document.querySelector('.bets').outerHTML = betPicker();
+  if (typeof crashAutoUI === 'function') crashAutoUI();
     roulRefresh();
     updateHud(); save();
   }, 5100);
@@ -191,6 +192,7 @@ async function diceRoll() {
   if (won) { addMoney(Math.round(bet * bt.x)); addMood(6); sfx('win'); if (bt.x > 3) confetti(40); } else { addMood(-3); sfx('lose'); }
   $('diceBtn').disabled = false;
   document.querySelector('.bets').outerHTML = betPicker();
+  if (typeof crashAutoUI === 'function') crashAutoUI();
   updateHud(); save();
 }
 
@@ -219,19 +221,23 @@ function openCrash() {
     <div class="btns"><button class="btn primary wide" data-act="crashGo" id="crashBtn">Запуск</button></div>`, { center: true });
 }
 
+// Забрать выигрыш на иксе m (кнопкой — текущий, автовыводом — ровно выбранный)
+function crashCash(btn, m) {
+  if (!CR || CR.cashed) return;
+  CR.cashed = true;
+  const win = Math.floor(CR.bet * m);
+  addMoney(win);
+  addMood(Math.min(15, Math.round(m * 3)));
+  sfx('cashout');
+  floatAt($('crashMult'), `+${fmt(win)} ₽`, 'good');
+  if (btn) { btn.textContent = `Забрал ${m.toFixed(2)}x`; btn.disabled = true; }
+  updateHud();
+}
+
 function crashGo(btn) {
   if (CR && CR.running) {
     // Забрать деньги
-    if (CR.cashed) return;
-    CR.cashed = true;
-    const win = Math.floor(CR.bet * CR.m);
-    addMoney(win);
-    addMood(Math.min(15, Math.round(CR.m * 3)));
-    sfx('cashout');
-    floatAt($('crashMult'), `+${fmt(win)} ₽`, 'good');
-    btn.textContent = `Забрал ${CR.m.toFixed(2)}x`;
-    btn.disabled = true;
-    updateHud();
+    crashCash(btn, CR.m);
     return;
   }
   const bet = S.bet;
@@ -247,6 +253,10 @@ function crashGo(btn) {
     if (!CR || !CR.running || !$('crashMult')) { if (CR) CR.running = false; return; }
     const t = (now - CR.start) / 1000;
     CR.m = Math.exp(0.12 * t);
+    // Автовывод — в том же цикле, что и взрыв: за один кадр ракета могла перескочить и автовывод, и точку взрыва.
+    // Платим ровно по выбранному иксу, если ракета до него долетела (взрыв на том же иксе — тоже выигрыш)
+    const auto = S.crashAuto || 0;
+    if (auto && !CR.cashed && Math.round(auto * 100) <= Math.round(CR.crash * 100) && CR.m >= auto) crashCash($('crashBtn'), auto);
     if (CR.m >= CR.crash) return crashBoom();
     $('crashMult').textContent = CR.m.toFixed(2) + 'x';
     const x = Math.min(290, t * 22), y = Math.max(10, 155 - Math.log(CR.m) * 60);
@@ -276,6 +286,7 @@ function crashBoom() {
   btn.disabled = false;
   btn.classList.remove('green');
   document.querySelector('.bets').outerHTML = betPicker();
+  if (typeof crashAutoUI === 'function') crashAutoUI();
   CR = null;
   updateHud(); save();
 }
