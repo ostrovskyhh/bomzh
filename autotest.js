@@ -223,6 +223,29 @@
     ACTIONS.inspect(fleaInv().length - 1);
     check('кейсы: осмотр в 3D открывается', !!$('inspObj') && typeof fleaInv()[fleaInv().length - 1].fl === 'number');
     closeModal(); fleaInv().pop();
+    // 4.4: контракты — 3–5 вещей одной редкости → 1 вещь следующей редкости; шансы честные; нужна подпись
+    S.flea = [];
+    const cbox = CASES.find((c) => c.id === 'box');
+    for (let i = 0; i < 400 && fleaInv().filter((x) => x.rar === 'common').length < 5; i++) fleaInv().push(caseRollItem(cbox));
+    fleaInv().push(caseRollItem(cbox));
+    CT = { rar: 'common', picked: fleaInv().map((x, i) => (x.rar === 'common' ? i : -1)).filter((i) => i >= 0).slice(0, 3) };
+    const pSum = ctOutcomes().reduce((a, o) => a + o.p, 0);
+    check('контракт: шансы в сумме 100%, все исходы — следующая редкость', Math.abs(pSum - 1) < 1e-9 && ctOutcomes().every((o) => o.rar.id === 'uncommon'), pSum.toFixed(4));
+    let evSum = 0, stSum = 0;
+    for (let k = 0; k < 40; k++) { const its = Array.from({ length: 3 }, () => { let x; do x = caseRollItem(cbox); while (x.rar !== 'common'); return x; }); evSum += ctEV(its); stSum += ctStake(its); }
+    check('контракт из 3 вещей: средняя отдача 75–100%', evSum / stSum > 0.75 && evSum / stSum < 1, (evSum / stSum).toFixed(2));
+    contractSign(); CT_INK = 0;
+    const invBefore = fleaInv().length; contractRoll();
+    check('контракт: без подписи не подписывается', fleaInv().length === invBefore && !!$('ctGo') && $('ctGo').disabled);
+    CT_INK = 999; contractRoll(); await sl(200);
+    const ctWin = fleaInv()[fleaInv().length - 1];
+    check('контракт: с подписью — 3 вещи ушли, пришла 1 «Ходовое»', fleaInv().length === invBefore - 2 && ctWin.contract && ['uncommon', 'rare'].includes(ctWin.rar), `${fleaInv().length - invBefore} ${ctWin.rar}`);
+    await sl(5600); closeModal();
+    // 4.4: кейсы ×3 и ×5
+    S.money = Math.max(S.money, 1e6); const mm0 = S.money, fl0 = fleaInv().length;
+    caseOpenMulti('box', 5);
+    check('кейсы ×5: списано 5 цен, 5 вещей на барахолке', mm0 - S.money === cbox.price * 5 && fleaInv().length - fl0 === 5 && document.querySelectorAll('.cm-card').length === 5, `${mm0 - S.money} ${fleaInv().length - fl0}`);
+    closeModal(); S.flea = [];
     // 4.2: настройки по разделам
     closeModal(); ACTIONS.settings(); await sl(100);
     check('настройки: меню разделов', document.querySelectorAll('#modalRoot .set2-tile').length >= 7, document.querySelectorAll('#modalRoot .set2-tile').length);
