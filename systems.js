@@ -527,6 +527,21 @@ HOOKS.mods.push((m) => {
 
 HOOKS.track.push((k) => { if (k === 'house') { S.ownedHousing = Math.max(S.ownedHousing, S.housing); S.missed = 0; } });
 
+// Счета идут только пока ты в игре (3.4). Раньше квитанция приходила каждые 3 часа реального времени даже
+// при закрытой игре: за ночь набегало 2–3 счёта, отключали свет, а с аренды выселяли. Теперь, пока игра
+// закрыта или свёрнута, срок оплаты и поломки «стоят на паузе» — сдвигаются на время отсутствия.
+// Стоит первым в списке, чтобы автоплатёж и начисление долга видели уже сдвинутый срок.
+const BILL_PAUSE_GAP = 60000;
+HOOKS.tick.unshift(() => {
+  const now = Date.now();
+  const gap = S.billSeen ? now - S.billSeen : 0;
+  S.billSeen = now;
+  if (gap < BILL_PAUSE_GAP) return;
+  if (S.billDue) S.billDue += gap;
+  if (S.nextBreakAt) S.nextBreakAt += gap;
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && typeof S !== 'undefined' && S) S.billSeen = Date.now(); });
+
 HOOKS.tick.push(() => {
   const now = Date.now();
   if (S.housing < 3) return;
@@ -588,7 +603,7 @@ EXTRA_TABS.shop.housing = () => {
     if (here) btn = `<button class="btn" disabled>${S.housingMode === 'rent' ? 'Снимаю' : 'Живу тут'}</button>`;
     else if (owned) btn = `<button class="btn green" data-act="moveHouse" data-id="${i}">Переехать</button>`;
     else if (!lvlOk) btn = lockBtn;
-    else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)}`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, `Снять ${fmt(h.rent)}/мес`) : ''}</div>`;
+    else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)} ₽`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, `Снять ${fmt(h.rent)}/мес`) : ''}</div>`;
     return card({ thumb: sceneThumbSVG(i), title: h.name, btn, cls: `${here ? 'current' : ''} ${!owned && !lvlOk ? 'locked' : ''}`,
       desc: `${h.desc}<br>Энергия <b>${h.energy}</b> (+${h.regen}/мин) · здоровье ${h.hpm > 0 ? '+' : ''}${h.hpm}/мин${h.util ? `<br>Коммуналка ${fmt(h.util)} ₽/мес${h.rent ? ` · аренда ${fmt(h.rent)} ₽/мес` : ''}` : ''}`,
       extra: !owned && !lvlOk ? reqHTML({ level: h.level }) : '' });

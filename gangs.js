@@ -59,7 +59,7 @@ EXTRA_TABS.fun.clan = () => {
         ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE && S.caps >= CLAN_CAPS, `Основать · ${fmtShort(CLAN_PRICE)} ₽ + ${CLAN_CAPS} 🟡`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 Основать можно с ${CLAN_LEVEL_REQ} уровня</button>`}</div>`;
   }
   const bonus = Math.round(clanBonus() * 100);
-  const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>
+  const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>${g && g.motto ? `<i class="g-motto">«${esc(g.motto)}»</i>` : ''}
       <p>${g ? modeTag(g.mode) + ' · ' : ''}Общак <b>${fmt(c.treasury)} ₽</b>${bonus ? ` · +${bonus}% к доходу` : ''}<br>${g ? `⚔️ Неделя: <b>${g.place} место</b>, ${fmt(g.week)} очков` : ''}</p></div></div>
     <div class="seg-mini gang-tabs">${[['main', '🏠 Банда'], ['games', '🎲 Игры'], ['crew', `👥 Бойцы ${c.members.length}`]].map(([id, t]) => `<button class="${GANG.tab === id ? 'on' : ''}" data-act="gangTab" data-id="${id}">${t}</button>`).join('')}</div>`;
   if (!g) return head + '<div class="info-card">⏳ Загружаем…</div>';
@@ -70,9 +70,9 @@ function gangMainHTML(c, g) {
   return `<div class="online-box gang-invite"><b>📨 Пригласить в банду</b>
       <small>Отправь ссылку другу: бот откроет игру сразу на вступлении${g.mode === 'invite' ? ' — это единственный способ попасть в вашу банду' : ''}.</small>
       ${g.link ? `<div class="btn-row"><button class="btn primary" data-act="gangShare">📨 Отправить ссылку</button><button class="btn" data-act="gangCopy">📋 Копировать</button></div>` : '<small>Ссылка появится, когда бот на связи</small>'}
-      ${g.isOwner ? `<div class="seg-mini"><button class="${g.mode === 'open' ? 'on' : ''}" data-act="gangMode" data-id="open">🔓 Кто угодно</button><button class="${g.mode === 'invite' ? 'on' : ''}" data-act="gangMode" data-id="invite">🔒 По приглашению</button></div>
-        <button class="btn small" data-act="gangResetLink">🔄 Новая ссылка (старая перестанет работать)</button>` : ''}</div>
-    <div class="btn-row"><button class="btn wide" data-act="chatRoom" data-id="clan">💬 Чат банды</button></div>
+      ${g.isOwner ? `<div class="seg-mini"><button class="${g.mode === 'open' ? 'on' : ''}" data-act="gangMode" data-id="open">🔓 Кто угодно</button><button class="${g.mode === 'invite' ? 'on' : ''}" data-act="gangMode" data-id="invite">🔒 По приглашению</button></div>` : ''}
+        ${g.canManage ? '<button class="btn small" data-act="gangResetLink">🔄 Новая ссылка (старая перестанет работать)</button>' : ''}</div>
+    <div class="btn-row"><button class="btn wide" data-act="chatRoom" data-id="clan">💬 Чат банды</button>${g.myRole === 'boss' ? '<button class="btn" data-act="gangEdit">✏️ Банда</button>' : ''}</div>
     <div class="subhead">Скинуться в общак · +1 очко войны за 10 000 ₽</div>
     <div class="btn-row">${[1000, 10000, 100000, 1000000].map((v) => priceBtn('clanDonate', v, v, S.money >= v, `+${fmtShort(v)}`).replace('class="btn', 'class="btn small')).join('')}</div>
     ${c.nextCost ? `<div class="info-card">Уровень ${c.level + 1}: бонус +${CLAN_BONUS * 100 * c.level}% ко всем доходам банды. Стоит <b>${fmt(c.nextCost)} ₽</b> из общака.
@@ -94,19 +94,71 @@ function gangGamesHTML(c, g) {
     <div class="gang-game war"><div class="gg-head"><span>⚔️</span><div><b>Война банд · ${g.place} место</b><small>Неделя кончится через ${leftText((GANG.top ? GANG.top.warEnds : 0) * 1000 - Date.now())}. Призы в общак: ${(GANG.top ? GANG.top.prizes : []).map((v, i) => `${['🥇', '🥈', '🥉'][i]} ${fmtShort(v)}`).join(' ')}</small></div></div>
       <small>${GANG_POINTS_HELP}</small><button class="btn wide" data-act="gangTop">🏆 Топ банд</button></div>
     <div class="subhead">🧱 Стенка на стенку · 5 лучших бойцов против 5, раз в 3 часа</div>
-    <div class="info-card">Победитель забирает 5% меньшего общака, каждый боец победителей — +10 очков войны.${g.wallLeft ? `<br>⏳ Бойцы отдыхают ещё ${leftText(g.wallLeft * 1000)}` : ''}${g.isOwner ? '' : '<br>Выводит банду на стенку главарь.'}</div>
+    <div class="info-card">Победитель забирает 5% меньшего общака, каждый боец победителей — +10 очков войны.${g.wallLeft ? `<br>⏳ Бойцы отдыхают ещё ${leftText(g.wallLeft * 1000)}` : ''}${g.canManage ? '' : '<br>Выводит банду на стенку главарь или его зам.'}</div>
     ${others.slice(0, 15).map((x) => card({ thumb: x.emoji, title: esc(x.name), desc: `ур. ${x.level} · ${x.members} бойцов · сила ${fmt(x.power)}${x.shield ? ' · 🛡️' : ''}`,
-      btn: g.isOwner ? `<div class="btn-col"><button class="btn small ${g.wallLeft ? '' : 'primary'}" data-act="gangWall" data-id="${x.id}" ${g.wallLeft ? 'disabled data-why="Бойцы отдыхают после стенки"' : ''}>🧱 Стенка</button>
+      btn: g.canManage ? `<div class="btn-col"><button class="btn small ${g.wallLeft ? '' : 'primary'}" data-act="gangWall" data-id="${x.id}" ${g.wallLeft ? 'disabled data-why="Бойцы отдыхают после стенки"' : ''}>🧱 Стенка</button>
         <button class="btn small" data-act="clanRaid" data-id="${x.id}" ${c.raidLeft || x.shield ? `disabled data-why="${x.shield ? 'Банда под защитой после набега' : 'Набег — раз в 12 часов'}"` : ''}>⚔️ Набег</button></div>` : '' })).join('') || '<div class="info-card">Других банд пока нет.</div>'}`;
 }
 
+function gangAgo(ts) { if (!ts) return 'давно'; const s = Date.now() / 1000 - ts; return s < 120 ? 'в игре' : s < 3600 ? `${Math.round(s / 60)} мин назад` : s < 86400 ? `${Math.round(s / 3600)} ч назад` : `${Math.round(s / 86400)} дн. назад`; }
+const GANG_ROLE = { boss: '👑 Главарь', deputy: '⭐ Зам', member: '' };
+// Боец банды (3.5): роль, когда заходил, сколько в банде и скинул в общак. Кнопки управления — главарю и замам,
+// у каждого бойца, даже если он пришёл по ссылке и ни разу не заходил в онлайн-бои
 function gangCrewHTML(c, g) {
-  return `<div class="info-card">Спарринг внутри банды: вызывай своих на бой или КНБ — победы приносят банде очки войны.</div>`
-    + g.members.map((m) => card({ thumb: `<div class="top-ava frame-${esc(m.frame || 'none')}">${avaFace(m.name, m.avatar)}${m.online ? '<i class="online-dot on-ava"></i>' : ''}</div>`,
-      title: `${m.role === 'boss' ? '👑 ' : ''}${esc(m.name)}${m.me ? ' (ты)' : ''} <small>ур. ${m.level}</small>`,
-      desc: `⚔️ ${m.week} очков за неделю${m.online ? ' · <b class="online-txt">в игре</b>' : ''}`,
-      extra: !m.me && m.pid ? `<div class="duel-btns"><button class="btn small primary" data-act="duelFight" data-id="${esc(m.pid)}">🥊 Спарринг</button><button class="btn small" data-act="duelRpsMenu" data-id="${esc(m.pid)}" data-name="${esc(m.name)}">✊ КНБ</button>${g.isOwner ? `<button class="btn small" data-act="clanKick" data-id="${m.uid}">Выгнать</button>` : ''}</div>` : '' })).join('');
+  const boss = g.myRole === 'boss';
+  const deps = g.members.filter((m) => m.role === 'deputy').length;
+  return `<div class="info-card">Спарринг внутри банды: вызывай своих на бой или КНБ — победы приносят банде очки войны.${g.canManage ? `<br>${boss ? '👑 Ты главарь: можешь выгнать любого, назначить до ' + g.maxDeputies + ' замов и передать главарство.' : '⭐ Ты зам: можешь выгонять рядовых бойцов, выводить банду на стенку и в набег.'}` : ''}</div>`
+    + g.members.map((m) => {
+      const days = m.joined ? Math.max(0, Math.floor((Date.now() / 1000 - m.joined) / 86400)) : 0;
+      const duel = !m.me && m.pid ? `<button class="btn small primary" data-act="duelFight" data-id="${esc(m.pid)}">🥊 Спарринг</button><button class="btn small" data-act="duelRpsMenu" data-id="${esc(m.pid)}" data-name="${esc(m.name)}">✊ КНБ</button>` : '';
+      const canKick = !m.me && g.canManage && m.role !== 'boss' && (boss || m.role === 'member');
+      const manage = [
+        canKick ? `<button class="btn small danger" data-act="gangKick" data-id="${m.uid}" data-name="${esc(m.name)}">🚪 Выгнать</button>` : '',
+        boss && !m.me ? (m.role === 'deputy' ? `<button class="btn small" data-act="gangRole" data-id="${m.uid}:member">⬇️ Снять зама</button>` : `<button class="btn small" data-act="gangRole" data-id="${m.uid}:deputy" ${deps >= g.maxDeputies ? `disabled data-why="Замов уже ${g.maxDeputies}"` : ''}>⭐ В замы</button>`) : '',
+        boss && !m.me ? `<button class="btn small" data-act="gangTransfer" data-id="${m.uid}" data-name="${esc(m.name)}">👑 Передать</button>` : '',
+      ].join('');
+      return card({ thumb: `<div class="top-ava frame-${esc(m.frame || 'none')}">${avaFace(m.name, m.avatar)}${m.online ? '<i class="online-dot on-ava"></i>' : ''}</div>`,
+        title: `${GANG_ROLE[m.role] ? `<span class="g-role ${m.role}">${GANG_ROLE[m.role]}</span> ` : ''}${esc(m.name)}${m.me ? ' (ты)' : ''} <small>ур. ${m.level}</small>`,
+        desc: `⚔️ ${m.week} очков за неделю · ${m.online ? '<b class="online-txt">в игре</b>' : `был ${gangAgo(m.seen)}`}<br><small>в банде ${days} дн.${m.donated ? ` · в общак ${fmtShort(m.donated)} ₽` : ''}</small>`,
+        extra: duel || manage ? `<div class="duel-btns">${duel}${manage}</div>` : '' });
+    }).join('');
 }
+
+function gangEditModal() {
+  const c = CLAN.data, g = GANG.state;
+  if (!c || !g) return;
+  const emojis = ['🏴', '💀', '🐺', '🦅', '🐍', '👊', '🔥', '⚡', '🐻', '🦈', '🃏', '🍾', '👑', '🌵', '🐉', '🚬'];
+  openModal(`<h3>✏️ Банда</h3>
+    <label class="g-edit">Название<input id="geName" maxlength="20" value="${esc(c.name)}"></label>
+    <div class="g-emoji">${emojis.map((e) => `<button class="${e === c.emoji ? 'on' : ''}" data-act="gangEditEmoji" data-id="${e}">${e}</button>`).join('')}</div>
+    <label class="g-edit">Девиз (видят все бойцы)<input id="geMotto" maxlength="80" value="${esc(g.motto || '')}" placeholder="Своих не бросаем"></label>
+    <div class="btns"><button class="btn primary wide" data-act="gangEditSave">💾 Сохранить</button><button class="btn wide" data-act="close">Отмена</button></div>`, { center: true });
+  GANG.editEmoji = c.emoji;
+}
+
+function gangConfirm(text, fn) { if (tg && tg.showConfirm) tg.showConfirm(text, (ok) => ok && fn()); else if (confirm(text)) fn(); }
+async function gangCall(path, body, okText) {
+  try {
+    const r = await apiPost(path, body);
+    if (r.error) { toast(r.error, 'bad'); return null; }
+    if (okText) toast(okText, 'good');
+    await gangLoad(true);
+    if (typeof clanLoad === 'function') clanLoad(true);
+    renderCurrent(false);
+    return r;
+  } catch (e) { toast(refErrorText(e), 'bad'); return null; }
+}
+Object.assign(ACTIONS, {
+  gangKick: (uid, btn) => { const name = btn && btn.dataset.name; gangConfirm(`Выгнать ${name || 'бойца'} из банды? Вернуться по ссылке он сможет только через сутки`, () => gangCall('gang/kick', { uid: +uid }, `🚪 ${name || 'Боец'} выгнан`)); },
+  gangRole: (arg) => { const [uid, role] = arg.split(':'); gangCall('gang/role', { uid: +uid, role }, role === 'deputy' ? '⭐ Назначен замом' : 'Больше не зам'); },
+  gangTransfer: (uid, btn) => { const name = btn && btn.dataset.name; gangConfirm(`Передать главарство ${name || 'бойцу'}? Ты станешь замом`, () => gangCall('gang/transfer', { uid: +uid }, `👑 Теперь главарь — ${name}`)); },
+  gangEdit: () => gangEditModal(),
+  gangEditEmoji: (e, btn) => { GANG.editEmoji = e; document.querySelectorAll('.g-emoji button').forEach((b) => b.classList.toggle('on', b === btn)); },
+  gangEditSave: async () => {
+    const r = await gangCall('gang/edit', { name: ($('geName') || {}).value || '', emoji: GANG.editEmoji, motto: ($('geMotto') || {}).value || '' }, '✏️ Банда обновлена');
+    if (r) closeModal();
+  },
+});
 
 // ---------- Топ: переключатель «Игроки / Банды» ----------
 const _topTabGang = EXTRA_TABS.tasks.top;

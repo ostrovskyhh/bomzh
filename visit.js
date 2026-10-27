@@ -11,7 +11,7 @@ myStats = (function (orig) {
 // Сцена жилья друга — из его города, а не из нашего
 function friendScene(cityId, housing) {
   const i = Math.max(0, Math.min(6, Math.round(housing || 0)));
-  const draw = cityId === 1 && typeof MSK_SCENES !== 'undefined' ? MSK_SCENES[i] : SCENES[i];
+  const draw = cityId === 2 && typeof MEX_SCENES !== 'undefined' ? MEX_SCENES[i] : cityId === 1 && typeof MSK_SCENES !== 'undefined' ? MSK_SCENES[i] : SCENES[i];
   return `<svg viewBox="0 0 360 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">${draw()}</svg>`;
 }
 

@@ -138,6 +138,8 @@ EXTRA_TABS.fun.dates = () => {
     html = html.replace('<div class="premium-hero wife-hero">', bar + '<div class="premium-hero wife-hero">');
   }
   if (S.married) html = html.replace('<button class="btn wide" data-act="divorceAsk">', kidsHTML() + '<button class="btn wide" data-act="divorceAsk">');
+  // После развода дети остаются с Валерой — раньше их просто переставало быть видно (но расходы на них шли)
+  else if ((S.kids || []).length) html += kidsHTML();
   return html;
 };
 
@@ -168,6 +170,12 @@ HOOKS.tick.push(() => {
   if (S.pregnant && now >= S.pregnant && popupTurn(2)) {
     S.pregnant = 0;
     const sex = Math.random() < 0.5 ? 'boy' : 'girl';
+    // Сразу в семью — с именем по умолчанию. Раньше ребёнка добавляли только после выбора имени,
+    // и если в этот момент закрыть игру, он пропадал навсегда
+    if (!S.kids) S.kids = [];
+    S.kids.push({ name: KID_NAMES[sex][0], sex, born: now, joy: 80, smart: 0, unnamed: true });
+    track('kidBorn');
+    save();
     confetti(100); sfx('levelup');
     openModal(`<div class="big-art"><div class="rays"></div><div class="big-emoji">${sex === 'boy' ? '👶🏻' : '👶🏼'}</div></div>
       <h3>У вас родился${sex === 'boy' ? ' сын' : 'а дочь'}!</h3><p>Как назовёшь?</p>
@@ -192,7 +200,7 @@ HOOKS.tick.push(() => {
 
 function kidsHTML() {
   const kids = S.kids || [];
-  const canMore = kids.length + (S.pregnant ? 1 : 0) < KIDS_MAX;
+  const canMore = S.married && kids.length + (S.pregnant ? 1 : 0) < KIDS_MAX;
   return `<div class="subhead">👶 Дети · ${kids.length}/${KIDS_MAX}</div>
     ${S.pregnant ? `<div class="info-card">🤰 Ждёте пополнения! Малыш родится через <b><span data-until="${S.pregnant}"></span></b></div>` : ''}
     ${kids.map((k, i) => {
@@ -229,8 +237,8 @@ Object.assign(ACTIONS, {
   kidName: (arg) => {
     const [sex, name] = arg.split(':');
     if (!S.kids) S.kids = [];
-    S.kids.push({ name, sex, born: Date.now(), joy: 80, smart: 0 });
-    track('kidBorn');
+    const k = S.kids.find((x) => x.unnamed) || (S.kids.push({ sex, born: Date.now(), joy: 80, smart: 0 }), S.kids[S.kids.length - 1]);
+    k.name = name; delete k.unnamed;
     closeModal();
     toast(`👶 Добро пожаловать, ${name}!`, 'good');
     save();

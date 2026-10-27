@@ -3,8 +3,8 @@
 
 // ---------- Лотерейные билеты ----------
 
-// Выигрыш в разах от цены билета и его вес. Возврат игроку ~82%: лотерея всегда в плюсе
-const TICKET_PRIZES = [[0, 74], [1, 15], [2, 6], [4, 3.2], [10, 1.2], [50, 0.4], [500, 0.02]];
+// Выигрыш в разах от цены билета и его вес. Возврат игроку ~76% (3.5, было 82%): проиграть легче, чем выйти в ноль
+const TICKET_PRIZES = [[0, 78], [1, 12], [2, 5], [4, 3], [10, 1.5], [50, 0.45], [500, 0.01]];
 const TICKETS = [
   { id: 'luck', name: 'Моментальная «Удача»', emoji: '🎫', price: 50, level: 1, color: '#2E7D32' },
   { id: 'sport', name: '«Спортлото»', emoji: '🎟️', price: 300, level: 3, color: '#1565C0' },
@@ -92,7 +92,7 @@ function tkFinish() {
 // ---------- Русское лото ----------
 
 const LOTO_BETS = [{ bet: 100, level: 3 }, { bet: 500, level: 5 }, { bet: 2000, level: 8 }];
-const LOTO_RAKE = 0.9; // победитель получает 90% банка
+const LOTO_RAKE = 0.75; // победитель получает 75% банка (3.5, было 90%): заведение всегда в плюсе
 const LOTO_STEP = 1700; // мс между бочонками
 const LOTO_RIVALS = [{ name: 'Михалыч', emoji: '🧔' }, { name: 'Баба Зина', emoji: '👵' }];
 const LOTO_NAMES = {
@@ -162,7 +162,7 @@ function lotoDraw() {
       r.marked.add(n);
       $(`lotoR${i}`).textContent = `${lotoRowBest(r.card, r.marked)}/5`;
       if (lotoRowBest(r.card, r.marked) >= 5) lotoEnd(r);
-    }, rand(300, 1400));
+    }, rand(150, 700)); // соперники опытные: отмечают быстро (было до 1.4 с — игрок почти всегда успевал первым)
   });
 }
 
@@ -218,7 +218,7 @@ EXTRA_TABS.fun.lotto = () => `<div class="premium-hero lotto-hero"><div class="e
       btn: ok ? priceBtn('buyTicket', t.id, t.price, S.money >= t.price) : lockBtn });
   }).join('')}
   <div class="subhead">Русское лото</div>
-  <div class="info-card">Ты, Михалыч и баба Зина. Каждый ставит одинаково, бочонки тянут по очереди. Тапай по своим числам, когда их называют. Первый закрыл ряд из 5 чисел — забирает банк (90%).</div>
+  <div class="info-card">Ты, Михалыч и баба Зина. Каждый ставит одинаково, бочонки тянут по очереди. Тапай по своим числам, когда их называют. Первый закрыл ряд из 5 чисел — забирает банк (75%, остальное — заведению). Михалыч и баба Зина играют быстро — не зевай!</div>
   ${LOTO_BETS.map((b) => {
     const ok = level() >= b.level;
     return card({ thumb: '🎲', title: `Ставка ${fmt(b.bet)} ₽`, cls: ok ? '' : 'locked', desc: `Банк ${fmt(b.bet * 3)} ₽ · выигрыш ${fmt(Math.round(b.bet * 3 * LOTO_RAKE))} ₽`,

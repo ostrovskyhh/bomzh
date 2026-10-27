@@ -78,14 +78,13 @@ function tourPrizeLine(d) {
   return (d.prizes || []).map((p) => `${ico[p.place]} ${fmt(p.amount)} ₽`).join(' · ');
 }
 function tourRules2(t) {
-  const p = t.points || { win: 3, close: 1, loss: 0 };
   return `<details class="tour-rules"><summary>📜 Правила турнира</summary>
-    <p>• Каждый вторник с ${t.startHour || 9}:00 до ${t.endHour || 21}:00 по Москве, ${t.fights} боёв.</p>
+    <p>• Каждый вторник с ${t.startHour || 9}:00 до ${t.endHour || 21}:00 по Москве. Побеждает <b>самый сильный</b>, а не тот, кто раньше пришёл.</p>
     <p>• Лигу подбирают по <b>мощи бойца</b> (сила×2 + форма×1.5 + уровень×3 + одежда×10) — дерёшься только с равными.</p>
-    <p>• Соперник — из твоей лиги с ближайшим числом очков. Перевыбрать нельзя: пока не проведёшь бой, будет тот же.</p>
-    <p>• Очки: победа — ${p.win}, поражение по очкам — ${p.close}, нокаут — ${p.loss}. При равенстве выше тот, у кого больше побед, потом — кто раньше закончил.</p>
-    <p>• Банк лиги = взносы + спонсор. 🥇 50% · 🥈 25% · 🥉 15% · 🍀 10% случайному участнику, который провёл все бои.</p>
-    <p>• Нет живых соперников в лиге — выходит турнирный боец силы этой лиги.</p></details>`;
+    <p>• У всех стартовый <b>рейтинг ${t.ratingStart || 1000}</b>. Победа над сильным даёт много, над слабым — мало, поражение отнимает. Выстоял до конца — потеряешь меньше, чем от нокаута.</p>
+    <p>• Бои открываются <b>по одному в час</b> — всего ${t.fights}, последний в ${(t.endHour || 21) - 1}:00. Зашёл вечером — накопленные бои ждут тебя: у всех поровну.</p>
+    <p>• Соперник — из лиги с самым близким рейтингом. Когда нападают на тебя, твой рейтинг тоже немного меняется — лидерство надо держать до последней минуты.</p>
+    <p>• В призах — те, кто провёл не меньше <b>${t.minFights || 6} боёв</b>. Банк лиги = взносы + спонсор: 🥇 50% · 🥈 25% · 🥉 15% · 🍀 10% случайному участнику из зачёта.</p></details>`;
 }
 
 function tourHTML() {
@@ -107,17 +106,20 @@ function tourHTML() {
       <b>${d.emoji} ${d.name}</b><small>мощь от ${d.min} · взнос ${fmt(d.fee)} ₽</small><small>👥 ${d.count} · банк <b>${fmt(d.count ? d.pool : d.sponsor)} ₽</b></small></div>`).join('')}</div>`;
   if (!me) {
     return `<div class="tour-box open">${head}
-      <small>До конца <b>${leftText(t.endsIn * 1000)}</b>. Твоя мощь <b>${score}</b> → лига ${myDiv.emoji} <b>${myDiv.name}</b></small>
+      <small>До конца <b>${leftText(t.endsIn * 1000)}</b>. Открыто боёв: <b>${t.unlocked}/${t.fights}</b> — записывайся в любой момент, пропущенные бои не сгорают. Твоя мощь <b>${score}</b> → лига ${myDiv.emoji} <b>${myDiv.name}</b></small>
       ${divs}${tourRules2(t)}
       ${priceBtn('tourJoin', '', myDiv.fee, S.money >= myDiv.fee, `Записаться в ${myDiv.emoji} ${myDiv.name} · ${fmt(myDiv.fee)} ₽`).replace('class="btn', 'class="btn wide')}${prize}</div>`;
   }
   const d = t.divisions.find((x) => x.id === me.division) || t.divisions[0];
-  const table = t.table.length ? `<div class="tour-table">${t.table.map((r) => `<div class="${r.me ? 'me' : ''}"><span>${r.place}. ${esc(r.name)}</span><b>${r.points} очк.</b><i>${r.wins}п · ${r.fights}/${t.fights}</i></div>`).join('')}</div>` : '';
-  const btn = me.fights < t.fights
-    ? `<button class="btn primary wide" data-act="tourFight">🥊 ${me.pending ? `Бой с ${esc(me.pending.name)} (уже назначен)` : `Турнирный бой ${me.fights + 1}/${t.fights}`}</button>`
-    : `<small>✅ Все бои проведены — итоги в ${t.endHour || 21}:00</small>`;
+  const min = t.minFights || 6;
+  const table = t.table.length ? `<div class="tour-table">${t.table.map((r) => `<div class="${r.me ? 'me' : ''} ${r.ok ? '' : 'nq'}"><span>${r.place}. ${esc(r.name)}</span><b>${r.rating}</b><i>${r.wins}п · ${r.fights}/${t.fights}${r.ok ? '' : ' · не в зачёте'}</i></div>`).join('')}</div>` : '';
+  let btn;
+  if (me.pending) btn = `<button class="btn primary wide" data-act="tourFight">🥊 Бой с ${esc(me.pending.name)} (уже назначен)</button>`;
+  else if (me.left > 0) btn = `<button class="btn primary wide" data-act="tourFight">🥊 Турнирный бой · доступно ${me.left}</button>`;
+  else if (me.fights < t.fights) btn = `<small>⏳ Следующий бой откроется через <b>${leftText((me.nextIn || 0) * 1000)}</b> — бои открываются по одному в час, у всех поровну</small>`;
+  else btn = `<small>✅ Все ${t.fights} боёв проведены — итоги в ${t.endHour || 21}:00. Тебя ещё могут вызвать: держи место!</small>`;
   return `<div class="tour-box open">${head}
-    <div class="tour-me"><b>${d.emoji} ${d.name}</b><span>место <b>${me.place || '—'}</b> из ${me.of} · ${me.points} очк. · побед ${me.wins} · боёв ${me.fights}/${t.fights}</span></div>
+    <div class="tour-me"><b>${d.emoji} ${d.name} · рейтинг ${me.rating}</b><span>место <b>${me.place || '—'}</b> из ${me.of} · побед ${me.wins} · боёв ${me.fights}/${t.fights}${me.fights < min ? ` · <b>до зачёта ещё ${min - me.fights}</b>` : ' · в зачёте ✅'}</span></div>
     <small>Банк лиги <b>${fmt(d.pool)} ₽</b>: ${tourPrizeLine(d)} · до конца <b>${leftText(t.endsIn * 1000)}</b></small>
     ${btn}${table}${tourRules2(t)}${prize}</div>`;
 }
@@ -136,7 +138,7 @@ Object.assign(ACTIONS, {
       TOUR.data = r; TOUR.at = Date.now();
       const d = r.divisions.find((x) => x.id === r.me.division);
       track('tourJoin'); sfx('bell');
-      toast(`🏆 Ты в лиге ${d.emoji} ${d.name}! ${r.fights} боёв до ${r.endHour}:00`, 'good');
+      toast(`🏆 Ты в лиге ${d.emoji} ${d.name}! Рейтинг ${r.ratingStart}, доступно боёв: ${r.me.left}`, 'good');
       save(); renderCurrent(false);
     } catch (e) { toast(refErrorText(e), 'bad'); }
   },
@@ -151,7 +153,7 @@ Object.assign(ACTIONS, {
         level: o.level || 5, form: o.form || 20, strength: o.strength || 20, tier: o.tier || 2, rating: fightState().rating };
       S.energy -= FIGHT_COST.energy;
       feed(-FIGHT_COST.food);
-      startFight(op, { intro: `🏆 Турнирный бой${o.bot ? '' : ` · у соперника ${o.points || 0} очк.`}. Победа — 3 очка, выстоять до конца — 1`, onEnd: async (won) => {
+      startFight(op, { intro: `🏆 Турнирный бой · рейтинг соперника ${o.rating || 1000}. Победа поднимает рейтинг, выстоять до конца — меньше потерь`, onEnd: async (won) => {
         const outcome = won ? 'win' : F3_LAST && !F3_LAST.ko ? 'close' : 'loss';
         const st = fightState();
         if (won) { const dr = Math.max(2, eloDelta(op, true) * 2); st.rating += dr; st.wins++; addXp(20); addMood(10); track('fightWin'); track('tourWin'); confetti(50); sfx('win'); }
@@ -159,11 +161,11 @@ Object.assign(ACTIONS, {
         track('fight');
         let res = null;
         try { res = await apiPost('tour/result', { token, outcome }); if (res && res.divisions) { TOUR.data = res; TOUR.at = Date.now(); } } catch (e) { /* сервер недоступен — бой останется назначенным, итог можно будет отправить позже нельзя */ }
-        const got = res && res.got !== undefined ? res.got : { win: 3, close: 1, loss: 0 }[outcome];
+        const got = res && res.got !== undefined ? res.got : 0;
         const me = res && res.me;
         resultModal({ emoji: won ? '🏆' : outcome === 'close' ? '🥊' : '🤕', rays: won ? '' : 'bad',
           title: won ? 'Турнирная победа!' : outcome === 'close' ? 'Выстоял до конца' : 'Нокаут',
-          text: `+${got} очк.${me ? `<br>Ты на <b>${me.place}</b> месте из ${me.of} · ${me.points} очк. · боёв ${me.fights}/${res.fights}` : ''}`, btn: 'Ок' });
+          text: `Рейтинг <b>${got >= 0 ? '+' : ''}${got}</b>${me ? ` → ${me.rating}<br>Ты на <b>${me.place}</b> месте из ${me.of} · боёв ${me.fights}/${res.fights}` : ''}`, btn: 'Ок' });
         save();
       } });
     } catch (e) { toast(refErrorText(e), 'bad'); }

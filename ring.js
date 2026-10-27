@@ -4,7 +4,7 @@
 
 const RING_FIGHTERS = [
   { name: 'Костолом Гена', emoji: '🦴', style: 'brawler', eq: { hat: 'none', body: 'telnyashka', shoes: 'kedy' }, lvl: 0, form: 30, strength: 40, tier: 2, odds: 1.6, intro: '«Новенький? Сейчас посмотрим, из чего ты сделан»' },
-  { name: 'Мясник с бойни', emoji: '🔪', style: 'tank', eq: { hat: 'kepka', body: 'pukhovik', shoes: 'boots' }, lvl: 1, form: 40, strength: 52, tier: 3, odds: 2.0, intro: '«Я разделываю таких, как ты, по утрам»' },
+  { name: 'Мясник с бойни', emoji: '🔪', style: 'brawler', eq: { hat: 'kepka', body: 'pukhovik', shoes: 'boots' }, lvl: 1, form: 40, strength: 52, tier: 3, odds: 2.0, intro: '«Я разделываю таких, как ты, по утрам»' },
   { name: 'Чемпион ринга «Молот»', emoji: '🔨', style: 'tactic', eq: { hat: 'boxhelm', body: 'malinovy', shoes: 'boots' }, lvl: 2, form: 55, strength: 62, tier: 4, odds: 2.6, intro: '«Пояс чемпиона не отдают. Его забирают»' },
 ];
 const RING_TACTICS = [
@@ -58,10 +58,15 @@ function ringFight() {
   const stake = Math.floor(S.money * RING_PICK.bet), odds = f.odds * t.bonus;
   S.money -= stake;
   closeModal();
+  // Бой оборвался (окно закрыли, игру перезапустили) — ставка на себя возвращается при следующем заходе
+  S.ringStake = stake;
   const op = { ...f, level: level() + f.lvl, form: f.form * (t.mod.form || 1), strength: f.strength * (t.mod.strength || 1) };
   op.rating = 1500 + op.level * 20;
   S.energy -= FIGHT_COST.energy; feed(-FIGHT_COST.food);
+  const ringId = Date.now();
+  RING_LIVE = ringId;
   startFight(op, { intro: `${t.emoji} ${t.name}${stake ? ` · ставка ${fmt(stake)} ₽` : ''}. ${f.intro}`, onEnd: (won) => {
+    S.ringStake = 0; RING_LIVE = 0;
     if (!S.ring) S.ring = { wins: 0 };
     if (won) {
       S.ring.wins++;
@@ -79,6 +84,11 @@ function ringFight() {
     save();
   } });
 }
+
+let RING_LIVE = 0;
+// Ставка «зависла» в оборванном бою (игру закрыли посреди боя) — вернуть
+HOOKS.load.push(() => { if (S.ringStake > 0) { const s = S.ringStake; S.ringStake = 0; addMoney(s); setTimeout(() => toast(`🥊 Бой на ринге прервался — ставка ${fmt(s)} ₽ вернулась`, 'good'), 3000); } });
+HOOKS.tick.push(() => { if (RING_LIVE && !FIGHT && S.ringStake > 0) { const s = S.ringStake; S.ringStake = 0; RING_LIVE = 0; addMoney(s); toast(`🥊 Бой на ринге прервался — ставка ${fmt(s)} ₽ вернулась`, 'good'); } });
 
 Object.assign(ACTIONS, {
   ringPrep: () => ringPrep(),

@@ -146,9 +146,7 @@ notifyPlan = (function (orig) {
   return function () {
     const plan = orig();
     if (S.housing >= 3 && !autopayOn() && S.billDue) {
-      if (S.billDue - 15 * 60000 > Date.now()) plan.push({ key: 'rent_soon', at: S.billDue - 15 * 60000, sum: billAmount() });
-      if (S.debt > 0) plan.push({ key: 'rent_due', at: S.billDue - MONTH_MS, sum: S.debt });
-      else plan.push({ key: 'rent_due', at: S.billDue, sum: billAmount() });
+      // Счета на паузе, пока игра закрыта (systems.js) — напоминать о сроке оплаты не о чем
     }
     return plan;
   };

@@ -60,6 +60,8 @@ const Sound = (() => {
     if (bus === sfxBus && theme() === 'retro') { type = 'square'; vol *= 0.45; rv = 0; filter = filter || { f: 4000 }; }
     if (bus === sfxBus && theme() === 'soft') { type = type === 'square' || type === 'sawtooth' ? 'triangle' : type; vol *= 0.55; rv = Math.max(rv, 0.3); }
     // «Стекло» (Москвабад): звонкие чистые синусы чуть выше и с хвостом — как интерфейс дорогого смартфона
+    // Маракасы (Мексика): мягкий треугольник и шорох сверху
+    if (bus === sfxBus && theme() === 'maracas') { type = 'triangle'; vol *= 0.7; if (!tone.shaking) { tone.shaking = true; try { noise({ t, dur: 0.06, vol: vol * 0.5, type: 'highpass', f: 5200 }); } finally { tone.shaking = false; } } }
     if (bus === sfxBus && theme() === 'glass') { type = 'sine'; f *= 1.26; if (slide) slide *= 1.26; vol *= 0.6; rv = Math.max(rv, 0.25); dur = Math.min(dur, 0.35); }
     const now = ctx.currentTime + t;
     const o = ctx.createOscillator();
@@ -298,6 +300,35 @@ const Sound = (() => {
     if (e === 0 && Math.random() < 0.7) tone({ ...m, t: at, f: N(pickN(NEON.lead)), type: 'sawtooth', dur: eighth * 5, vol: 0.022, attack: 0.08, vibrato: 4, rv: 0.6, filter: { f: 2200 } });
   }
 
+  // ---------- Мексика (4.0): мариачи — вальсовый «умпа-па», гитаррон, перебор гитары и труба ----------
+  const MARIACHI = { bpm: 150, chords: [[60, 64, 67], [55, 59, 62], [55, 59, 62], [60, 64, 67], [53, 57, 60], [60, 64, 67], [55, 59, 62], [60, 64, 67]],
+    roots: [36, 31, 31, 36, 29, 36, 31, 36], tune: [76, 79, 77, 76, 74, 72, 74, 76, 79, 81, 79, 77, 76, 74, 72, 71] };
+  function scheduleMariachi(t, s) {
+    const beat = 60 / MARIACHI.bpm;
+    const bar = Math.floor(s / 3) % 8, e = s % 3;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    const ch = MARIACHI.chords[bar];
+    if (e === 0) tone({ ...m, t: at, f: N(MARIACHI.roots[bar]), type: 'triangle', dur: beat * 0.9, vol: 0.16, filter: { f: 600 } });
+    else ch.forEach((n, i) => tone({ ...m, t: at + i * 0.012, f: N(n), type: 'triangle', dur: beat * 0.45, vol: 0.03, filter: { f: 2800 } }));
+    // Труба: фраза на сильные доли, с вибрато
+    if (e === 0 && bar % 2 === 0) { const n = MARIACHI.tune[(s / 3 + bar) % 16 | 0]; tone({ ...m, t: at, f: N(n), type: 'sawtooth', dur: beat * 1.6, vol: 0.03, attack: 0.03, vibrato: 6, rv: 0.25, filter: { f: 2400 } }); }
+    if (e === 2 && Math.random() < 0.3) noise({ ...m, t: at, dur: 0.05, vol: 0.04, type: 'highpass', f: 6000 });
+  }
+  // ---------- Мексика: кумбия — гуиро «шкряб-шкряб», качающийся бас и аккордеон ----------
+  const CUMBIA = { bpm: 96, prog: [[57, 60, 64], [52, 56, 59], [57, 60, 64], [52, 56, 59]], roots: [45, 40, 45, 40], acc: [69, 72, 71, 69, 68, 69, 72, 76] };
+  function scheduleCumbia(t, s) {
+    const eighth = 60 / CUMBIA.bpm / 2;
+    const bar = Math.floor(s / 8) % 4, e = s % 8;
+    const at = t - ctx.currentTime;
+    const m = { bus: musicBus };
+    noise({ ...m, t: at, dur: e % 2 ? 0.05 : 0.12, vol: 0.035, type: 'bandpass', f: 4200, q: 2 }); // гуиро
+    if (e === 0 || e === 3 || e === 4) tone({ ...m, t: at, f: N(CUMBIA.roots[bar] + (e === 3 ? 7 : 0)), type: 'triangle', dur: eighth * 1.4, vol: 0.14, filter: { f: 500 } });
+    if (e === 2 || e === 6) tone({ ...m, t: at, f: 180, slide: 120, type: 'sine', dur: 0.12, vol: 0.12 });
+    if (e % 2 === 1) CUMBIA.prog[bar].forEach((n) => tone({ ...m, t: at, f: N(n + 12), type: 'square', dur: eighth * 0.6, vol: 0.008, filter: { f: 2000 } }));
+    if (Math.random() < 0.35) tone({ ...m, t: at, f: N(CUMBIA.acc[(s + bar) % 8]), type: 'sawtooth', dur: eighth * 1.6, vol: 0.016, vibrato: 5, rv: 0.2, filter: { f: 2200 } });
+  }
+
   const pickN = (arr) => arr[Math.floor(Math.random() * arr.length)];
   // Каждой мелодии — свой «шаг» сетки и планировщик
   const TRACKS = {
@@ -307,6 +338,8 @@ const Sound = (() => {
     chip: { step: () => 60 / CHIP.bpm / 2, play: scheduleChip },
     metro: { step: () => 60 / METRO.bpm / 4, play: scheduleMetro },
     neon: { step: () => 60 / NEON.bpm / 2, play: scheduleNeon },
+    mariachi: { step: () => 60 / MARIACHI.bpm, play: scheduleMariachi },
+    cumbia: { step: () => 60 / CUMBIA.bpm / 2, play: scheduleCumbia },
   };
 
   function scheduler() {

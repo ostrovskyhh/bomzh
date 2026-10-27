@@ -163,7 +163,7 @@ EXTRA_TABS.life.business = () => {
   html += `<div class="subhead">🪩 Персонал клуба · доход ×${clubMult().toFixed(2)}, зарплаты −${fmt(clubSalary())} ₽/ч</div>
     ${STAFF.map((s) => { const l = staffLvl(s.id), cost = s.price * (l + 1); return card({ thumb: s.emoji, title: `${s.name} ${l ? `<span class="rarity rare">${l}/${STAFF_MAX}</span>` : ''}`,
       desc: `${s.desc}<br>+${Math.round(s.boost * 100)}% к доходу · зарплата ${fmt(s.salary)} ₽/ч за уровень`,
-      btn: l >= STAFF_MAX ? '<button class="btn" disabled>MAX</button>' : priceBtn('hireStaff', s.id, cost, S.money >= cost, `${l ? '⬆️' : 'Нанять'} ${fmt(cost)}`) }); }).join('')}
+      btn: l >= STAFF_MAX ? '<button class="btn" disabled>MAX</button>' : priceBtn('hireStaff', s.id, cost, S.money >= cost, `${l ? '⬆️' : 'Нанять'} ${fmt(cost)} ₽`) }); }).join('')}
     ${card({ thumb: '🎉', title: 'VIP-вечеринка', desc: `Раз в 6 часов: сразу в кассу ~${fmt(party)} ₽. Нужен диджей`,
       btn: cdP > 0 ? timerBtn(S.cd.clubParty) : `<button class="btn ${staffLvl('dj') ? 'primary' : ''}" data-act="clubParty" ${staffLvl('dj') ? '' : 'disabled data-why="Сначала найми диджея"'}>Устроить</button>` })}`;
   return html;

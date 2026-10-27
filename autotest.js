@@ -52,9 +52,9 @@
 
   async function allGames(cityId) {
     S.city = cityId; applyCity();
-    const tag = cityId === 'msk' ? 'МСК' : 'ЗАС';
+    const tag = { msk: 'МСК', mex: 'МЕКС' }[cityId] || 'ЗАС';
     for (const j of JOBS) await play(`${tag} работа: ${j.name}`, (fin) => startShiftGame(j, fin), 50);
-    for (const st of [1, 2, 3, 4, 5]) if (LESSON_GAMES[st] || cityId === 'msk') await play(`${tag} урок ${st}`, () => startLessonGame(st), 60);
+    for (const st of [1, 2, 3, 4, 5]) if (LESSON_GAMES[st] || cityId !== 'zas') await play(`${tag} урок ${st}`, () => startLessonGame(st), 60);
     if (cityId !== 'zas') return;
     for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), (g.duration || 40) + 15);
     for (const [id, g] of Object.entries(DATE_GAMES)) await play(`свидание: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
@@ -77,15 +77,23 @@
       check(`кейс ${c.id}: разброс цены ≤5%`, worst <= 0.05, `±${(worst * 100).toFixed(1)}%`);
       check(`кейс ${c.id}: выгода 80–92%`, ev >= 0.8 && ev <= 0.92, ev.toFixed(2));
     }
-    // Ночь казино: +20% только к чистому выигрышу
+    // Ночь казино 2.0: выигрыши без надбавки; утром кешбэк 10% от ночного проигрыша
     closeModal(); S.admNightUntil = Date.now() + 60000; S.admin = true; showScreen('fun', 'casino');
     (0, eval)('BJ = { bet: 1000 }');
     let m0 = S.money; addMoney(3000); const win = S.money - m0;
-    m0 = S.money; addMoney(1000); const push = S.money - m0;
     (0, eval)('BJ = null');
-    check('ночь казино: выигрыш 3000 при ставке 1000 → +3400', win === 3400, win);
-    check('ночь казино: ничья без бонуса', push === 1000, push);
-    S.admNightUntil = 0;
+    check('ночь казино: выигрыш без надбавки', win === 3000, win);
+    pendingLevelUp = null; closeModal(); S.nightPending = { key: 'old', bet: 10000, won: 2000, paid: false }; POPUP_CLOSED = 0;
+    const realNight0 = casinoNight; casinoNight = () => false;
+    m0 = S.money; for (let i = 0; i < 20 && S.nightPending; i++) await sl(200);
+    check('ночь казино: утром кешбэк 10% проигрыша', S.money - m0 === Math.min(nightCashbackCap(), 800), S.money - m0);
+    casinoNight = realNight0; closeModal();
+    // Лото: моментальные билеты возвращают меньше 80%, русское лото — банк 75%
+    const tw = TICKET_PRIZES.reduce((a, p) => a + p[1], 0), tev = TICKET_PRIZES.reduce((a, p) => a + p[0] * p[1], 0) / tw;
+    check('лото: билеты возвращают меньше 80%', tev < 0.8, tev.toFixed(3));
+    check('лото: в русском лото банк 75%', LOTO_RAKE === 0.75, LOTO_RAKE);
+    S.admNightUntil = Date.now() + 60000; showScreen('fun', 'lotto'); m0 = S.money; addMoney(1000);
+    check('лото: ночь казино на лото не действует', S.money - m0 === 1000 && !(S.nightBook && S.nightBook.won > 3000), S.money - m0);    S.admNightUntil = 0;
     const realNight = casinoNight; casinoNight = () => false; // ракету проверяем без ночного бонуса
     // Автовывод одиночной ракеты: 1.95 при взрыве на 1.95 и на 1.96 — выигрыш ровно по 1.95
     for (const crash of [1.95, 1.96, 1.94]) {
@@ -115,6 +123,52 @@
     for (let i = 0; i < 240 && fightEnded === null; i++) await sl(250);
     check('бой 2.0: авто-бой заканчивается', fightEnded !== null, fightEnded !== null ? fightEnded : JSON.stringify({ fight: !!FIGHT, round: FIGHT && FIGHT.round, busy: FIGHT && FIGHT.busy, me: FIGHT && Math.round(FIGHT.me.hp), en: FIGHT && Math.round(FIGHT.en.hp), auto: S.fightAuto, stage: ($('f3Stage') || {}).textContent, modal: ($('modalRoot').textContent || '').slice(0, 80) }));
     closeModal();
+    // Подпольный ринг: три боя (авто) проходятся, ставка на себя не теряется
+    closeModal(); S.city = 'zas'; applyCity(); S.quest.path = 'dark'; S.quest.idx = questList().findIndex((q) => q.id === 'd_ring'); S.ring = { wins: 0 }; S.fightAuto = true;
+    for (let n = 0; n < 6 && S.ring.wins < 3; n++) {
+      S.cd = {}; S.energy = maxEnergy(); S.food = maxFood(); S.health = maxHealth(); S.form = 100; S.strength = 100;
+      ringPrep(); ringFight();
+      for (let i = 0; i < 240 && FIGHT; i++) await sl(250);
+      await sl(1200); closeModal();
+    }
+    check('ринг: три бойца побеждены (авто-бой, сила 100)', S.ring.wins >= 3, S.ring.wins);
+    check('ринг: незавершённой ставки нет', !S.ringStake, S.ringStake);
+    // Поручения: на честном пути нет криминальных; замена — раз в час бесплатно, потом за 30 крышек
+    S.quest.path = 'honest'; S.side = { active: {}, done: {} };
+    let crimeSeen = false;
+    for (let i = 0; i < 30; i++) { sideState().offers = []; if (sideOffers().some((q) => q.crime)) crimeSeen = true; }
+    check('поручения: на честном пути нет криминальных', !crimeSeen);
+    S.quest.path = 'dark'; let crimeDark = false;
+    for (let i = 0; i < 60 && !crimeDark; i++) { sideState().offers = []; if (sideOffers().some((q) => q.crime)) crimeDark = true; }
+    check('поручения: на тёмном пути криминальные бывают', crimeDark);
+    S.quest.path = 'honest'; sideState().offers = []; sideState().rerollAt = 0; S.caps = 100;
+    const o = sideOffers();
+    ACTIONS.sideReroll(o[0].id); const caps1 = S.caps;
+    ACTIONS.sideReroll(sideOffers()[0].id); const caps2 = S.caps;
+    check('поручения: первая замена бесплатно, вторая за 30 крышек', caps1 === 100 && caps2 === 70, `${caps1} → ${caps2}`);
+    check('поручения: после замены снова 3 предложения', sideOffers().length === Math.min(3, SIDE.filter((q) => sideAvailable(q) && (!q.req || q.req())).length), sideOffers().length);
+    // Дети: ребёнок появляется в момент рождения, а не после выбора имени; после развода дети видны
+    closeModal(); S.kids = []; S.married = true; S.pregnant = Date.now() - 1; POPUP_CLOSED = 0;
+    for (let i = 0; i < 40 && S.pregnant; i++) await sl(100);
+    check('дети: ребёнок в семье сразу при рождении', S.kids.length === 1, S.kids.length);
+    closeModal();
+    S.married = false; S.girlfriend = null;
+    check('дети: после развода видны в «Свиданиях»', EXTRA_TABS.fun.dates().includes(S.kids[0].name), S.kids[0] && S.kids[0].name);
+    // Счета: пока игра закрыта, срок оплаты стоит на паузе — за ночь долг не копится
+    S.housing = Math.max(S.housing, 4); S.housingMode = 'rent'; S.debt = 0; S.missed = 0; S.autopayUntil = 0;
+    S.billDue = Date.now() + 10 * 60000; S.billSeen = Date.now() - 8 * 3600000; // «проспал» 8 часов
+    await sl(600);
+    check('счета: 8 часов с закрытой игрой — без долга', S.debt === 0 && S.billDue > Date.now() + 8 * 3600000 - 60000, `долг ${S.debt}, до оплаты ${Math.round((S.billDue - Date.now()) / 60000)} мин`);
+    // Турнир 3.0: экран показывает рейтинг, открытые бои и зачёт
+    (0, eval)('onlineOn = () => true');
+    TOUR.data = { phase: 'open', startHour: 9, endHour: 21, fights: 12, minFights: 6, ratingStart: 1000, unlocked: 4, endsIn: 3600, prize: 0, pool: 1, sponsor: 1,
+      divisions: [{ id: 'rookie', name: 'Новички', emoji: '🥉', min: 0, fee: 1000, sponsor: 10000, count: 2, pool: 12000, prizes: [{ place: 1, amount: 6000 }] }],
+      me: { division: 'rookie', power: 50, rating: 1036, fights: 3, wins: 2, place: 1, of: 2, pending: null, left: 1, nextIn: 900 },
+      table: [{ place: 1, name: 'Валера', rating: 1036, fights: 3, wins: 2, me: true, ok: false }, { place: 2, name: 'Петя', rating: 980, fights: 6, wins: 3, ok: true }] };
+    TOUR.at = Date.now();
+    const th = tourHTML();
+    check('турнир: экран с рейтингом, боями и зачётом', th.includes('рейтинг 1036') && th.includes('доступно 1') && th.includes('до зачёта ещё 3'), th.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 120));
+    (0, eval)("onlineOn = () => false");
     // Очередь окон: пока открыто окно, три новых ждут; потом идут по одному и по важности (1 → 3 → 5)
     pendingLevelUp = null;
     openModal('<p>занято</p>');
@@ -135,6 +189,18 @@
     S.xp = 200000; S.money = 1e7; S.nightSeen = typeof nightKey === 'function' ? nightKey() : '';
     try { await economy(); } catch (e) { check('экономика: ошибка теста', false, e.message); }
     try { await allGames('zas'); await allGames('msk'); } catch (e) { check('мини-игры: ошибка теста', false, e.message); }
+    // Мексика: побег с обменом 300 ₽ за $1, всё на экране в долларах
+    try {
+      closeModal(); S.city = 'msk'; applyCity('msk'); S.quest.idx = questList().findIndex((q) => q.id === 'm_scam'); S.money = 3000000; S.girlfriend = null; S.married = false;
+      check('мексика: финальная глава Москвабада — побег', !!(currentQuest() && currentQuest().mexMove), currentQuest() && currentQuest().id);
+      doMoveMex({ partner: null, club: null }); closeModal();
+      check('мексика: 3 млн руб. по 300 → $10 000', S.city === 'mex' && S.money === 10000 * USD_RATE, `${S.city} ${S.money}`);
+      check('мексика: суммы на экране в долларах', rubToUsdText('Цена 1 000 ₽, банк 12.5 K ₽') === 'Цена $12,5, банк $156', rubToUsdText('Цена 1 000 ₽, банк 12.5 K ₽'));
+      showScreen('shop', 'housing'); await sl(80);
+      check('мексика: в магазине нет рублей', !$('shopList').innerText.includes('₽') && $('shopList').innerText.includes('$'), $('shopList').innerText.replace(/\s+/g, ' ').slice(0, 80));
+      check('мексика: свои работы, жильё и сюжет', JOBS.find((j) => j.id === 'cook').name === 'Тако-мастер' && HOUSING[6].name.includes('Гасиенда') && questList()[0].id === 'x_arrive', JOBS.find((j) => j.id === 'cook').name);
+      await allGames('mex');
+    } catch (e) { check('мексика: ошибка теста', false, e.message); }
     const pre = document.createElement('pre');
     pre.id = 'autotest-result';
     pre.textContent = JSON.stringify(RES);
