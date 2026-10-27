@@ -55,14 +55,15 @@
     const tag = { msk: 'МСК', mex: 'МЕКС' }[cityId] || 'ЗАС';
     for (const j of JOBS) await play(`${tag} работа: ${j.name}`, (fin) => startShiftGame(j, fin), 50);
     for (const st of [1, 2, 3, 4, 5]) if (LESSON_GAMES[st] || cityId !== 'zas') await play(`${tag} урок ${st}`, () => startLessonGame(st), 60);
-    if (cityId !== 'zas') return;
-    for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), (g.duration || 40) + 15);
-    for (const [id, g] of Object.entries(DATE_GAMES)) await play(`свидание: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
-    for (const [id, g] of Object.entries(KID_GAMES)) await play(`дети: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
-    for (const c of CRIMES) if (c.game) await play(`криминал: ${c.id}`, () => runGame({ title: c.game.title, hint: c.game.hint, duration: c.game.duration, setup: c.game.setup, finish: () => {} }), (c.game.duration || 40) + 15);
-    for (const a of JAIL_ACTS) if (a.game) await play(`тюрьма: ${a.id}`, () => runGame({ title: a.game.title, hint: a.game.hint, duration: a.game.duration, setup: a.game.setup, finish: () => {} }), (a.game.duration || 40) + 15);
-    for (const [id, g] of Object.entries(GYM_GAMES)) await play(`зал: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: 0, setup: (mg) => gameReps(mg, g), finish: () => {} }), 130); // без таймера: если не доиграть, сторож завершает за 2 мин
-    for (const p of PARTNER_GAMES) { const g = p.gm || p; if (g && g.setup) await play(`партнёр: ${g.title}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15); }
+    if (cityId === 'msk') return;
+    const pre = cityId === 'mex' ? 'МЕКС ' : '';
+    for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`${pre}досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), (g.duration || 40) + 15);
+    for (const [id, g] of Object.entries(DATE_GAMES)) await play(`${pre}свидание: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
+    for (const [id, g] of Object.entries(KID_GAMES)) await play(`${pre}дети: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
+    for (const c of CRIMES) if (c.game) await play(`${pre}криминал: ${c.id}`, () => runGame({ title: c.game.title, hint: c.game.hint, duration: c.game.duration, setup: c.game.setup, finish: () => {} }), (c.game.duration || 40) + 15);
+    for (const a of JAIL_ACTS) if (a.game) await play(`${pre}тюрьма: ${a.id}`, () => runGame({ title: a.game.title, hint: a.game.hint, duration: a.game.duration, setup: a.game.setup, finish: () => {} }), (a.game.duration || 40) + 15);
+    for (const [id, g] of Object.entries(GYM_GAMES)) await play(`${pre}зал: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: 0, setup: (mg) => gameReps(mg, g), finish: () => {} }), 130); // без таймера: если не доиграть, сторож завершает за 2 мин
+    for (const p of PARTNER_GAMES) { const g = p.gm || p; if (g && g.setup) await play(`${pre}партнёр: ${g.title}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15); }
   }
 
   async function economy() {
@@ -180,13 +181,58 @@
     let maxOpen = 1;
     for (let i = 0; i < 3; i++) { POPUP_CLOSED = 0; flushPopups(); maxOpen = Math.max(maxOpen, $('modalRoot').children.length); closeModal(); }
     check('очередь окон: пауза после закрытия', busyRightAfterClose);
-    check('очередь окон: по одному, по важности', maxOpen === 1 && shown.join() === '1,3,5', shown.join());  }
+    check('очередь окон: по одному, по важности', maxOpen === 1 && shown.join() === '1,3,5', shown.join());
+    // 4.1 Донат: один курс крышки, витрина, кейсы
+    closeModal();
+    check('донат: 1 крышка = 2 ⭐ во всех наборах', PREMIUM.every((p) => p.stars === p.caps * CAP_STARS), PREMIUM.map((p) => `${p.caps}:${p.stars}`).join(' '));
+    const shares = {};
+    for (const cId of ['zas', 'msk', 'mex']) { S.city = cId; applyCity(cId); shares[cId] = capRate() / capShift(); }
+    S.city = 'zas'; applyCity('zas');
+    check('донат: крышка ≈30% лучшей смены в любом городе', Object.values(shares).every((x) => x > 0.25 && x < 0.36), Object.entries(shares).map(([k, v]) => `${k} ${v.toFixed(2)}`).join(', '));
+    for (const c of DCASES) {
+      let sum = 0;
+      for (let i = 0; i < 20000; i++) { const x = dcRoll(c); sum += x.t === 'caps' || x.t === 'money' ? x.n : x.t === 'vip' ? x.n * 5 : x.t === 'boost' ? 3 : POOL_CAPS[x.pool]; }
+      const ev = sum / 20000 / c.caps;
+      check(`донат-кейс ${c.id}: отдача 70–90%`, ev >= 0.7 && ev <= 0.9, ev.toFixed(2));
+    }
+    const deal = dealOfDay();
+    check('донат: скидка дня — настоящий товар', [...PREMIUM, ...BUNDLES].some((x) => x.id === deal.product) || deal.product === 'vip', deal.product);
+    for (const tab of DN_TABS.map((x) => x[0])) { DN_TAB = tab; let ok = true; try { ok = donateHTML().includes('dn-body'); } catch (e) { ok = false; } check(`донат: вкладка «${tab}»`, ok); }
+    DN_TAB = 'caps';
+    S.caps = 100; S.cosm = [];
+    const avPrice = cosmPrice(cosmById('av_wolf'));
+    ACTIONS.cosmBuy('av_wolf'); closeModal();
+    check('донат: аватарка за крышки куплена и надета', ownsCosm('av_wolf') && S.caps === 100 - avPrice && S.avatar === 'avwolf', `${S.caps} ${S.avatar}`);
+    S.caps = 100;
+    const dr = dcOpen('dc1');
+    check('донат-кейс: открывается за крышки и что-то даёт', !!dr && !!dr.text, dr && dr.text);
+    closeModal();
+    // Ракета: поле автовывода только в ракете; закрыл окно в полёте — автовывод всё равно сработал
+    openDice(); crashAutoUI();
+    check('ракета: в костях нет поля автовывода', !$('crashAutoOn'));
+    closeModal(); await sl(400);
+    const realNight2 = casinoNight; casinoNight = () => false;
+    openCrash(); S.crashAuto = 2; S.bet = 1000; const rb0 = S.money;
+    const rp = crashPoint; crashPoint = () => 5;
+    crashGo($('crashBtn')); crashPoint = rp;
+    await sl(100); closeModal();
+    for (let i = 0; i < 400 && CR; i++) await sl(25);
+    casinoNight = realNight2;
+    check('ракета: окно закрыто — автовывод 2x засчитан', S.money - rb0 === 1000, S.money - rb0);
+    // Кейсы 4.1: больше ширпотреба, осмотр вещи в 3D
+    check('кейсы: в каждом кейсе 10+ вещей ширпотреба', CASES.every((c) => c.loot.common.length >= 10), CASES.map((c) => c.loot.common.length).join(','));
+    fleaInv().push(caseRollItem(CASES[0]));
+    ACTIONS.inspect(fleaInv().length - 1);
+    check('кейсы: осмотр в 3D открывается', !!$('inspObj') && typeof fleaInv()[fleaInv().length - 1].fl === 'number');
+    closeModal(); fleaInv().pop();
+  }
 
   async function run() {
     for (let i = 0; i < 200 && !(typeof LOADED !== 'undefined' && LOADED); i++) await sl(100);
     SAVE_LOCK = true; // автотест не трогает сохранения
     S.storySeen = true; S.tut = { done: true, step: 99 }; S.seenVersion = CURRENT_VERSION; S.starterOffered = true; S.tipAskOff = true;
-    S.xp = 200000; S.money = 1e7; S.nightSeen = typeof nightKey === 'function' ? nightKey() : '';
+    S.xp = 200000; S.money = 1e7; S.promoSeen = (promoAt() || {}).slot; // акция по расписанию не должна всплыть посреди проверок
+    S.nightSeen = typeof nightKey === 'function' ? nightKey() : '';
     try { await economy(); } catch (e) { check('экономика: ошибка теста', false, e.message); }
     try { await allGames('zas'); await allGames('msk'); } catch (e) { check('мини-игры: ошибка теста', false, e.message); }
     // Мексика: побег с обменом 300 ₽ за $1, всё на экране в долларах
@@ -200,6 +246,11 @@
       check('мексика: в магазине нет рублей', !$('shopList').innerText.includes('₽') && $('shopList').innerText.includes('$'), $('shopList').innerText.replace(/\s+/g, ' ').slice(0, 80));
       check('мексика: свои работы, жильё и сюжет', JOBS.find((j) => j.id === 'cook').name === 'Тако-мастер' && HOUSING[6].name.includes('Гасиенда') && questList()[0].id === 'x_arrive', JOBS.find((j) => j.id === 'cook').name);
       await allGames('mex');
+      check('мексика: 6 своих криминальных дел', CRIMES.length === 6 && CRIMES.every((c) => c.id.startsWith('x_')), CRIMES.map((c) => c.id).join());
+      check('мексика: сюжет про картель и бандитов', ['x_bandits', 'x_scorpions', 'x_kidnap', 'x_plaza', 'x_jefe'].every((id) => questList().some((q) => q.id === id)), questList().length);
+      check('мексика: свои игры свиданий и зала', DATE_GAMES.walk.title === 'Callejón del Beso' && GYM_GAMES.power.title === 'Камень ацтеков');
+      S.city = 'zas'; applyCity('zas');
+      check('мексика: в Засранске свои игры вернулись', CRIMES[0].id === 'pocket' && DATE_GAMES.walk.title !== 'Callejón del Beso' && GYM_GAMES.power.title !== 'Камень ацтеков', `${CRIMES[0].id} ${DATE_GAMES.walk.title}`);
     } catch (e) { check('мексика: ошибка теста', false, e.message); }
     const pre = document.createElement('pre');
     pre.id = 'autotest-result';

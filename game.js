@@ -262,7 +262,7 @@ const SLOT_SYMS = [['🍾', 32, 2], ['🥖', 26, 3], ['🐀', 20, 5], ['🍒', 1
 const SLOT_PAIR = 1.4;
 const BETS = [10, 50, 200, 1000, 5000, 25000];
 
-const DAILY = [{ money: 30 }, { money: 60 }, { money: 100 }, { money: 150 }, { caps: 1 }, { money: 400 }, { caps: 3 }];
+const DAILY = [{ money: 30 }, { money: 60 }, { money: 100 }, { money: 150 }, { caps: 1 }, { money: 400 }, { caps: 2 }];
 
 const TASKS = [
   { id: 'taps', name: 'Натапай 300 раз', goal: 300, reward: { money: 60 } },
@@ -522,7 +522,7 @@ function addXp(v) {
 }
 
 // Крышки — донатная валюта: за уровни дают только на каждом пятом
-function levelCaps(l) { return l % 5 === 0 ? 2 : 0; }
+function levelCaps(l) { return l % 5 === 0 ? 1 : 0; }
 
 function unlocksAt(l) {
   const out = [];

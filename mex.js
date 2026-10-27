@@ -411,21 +411,21 @@ const MEX_Q = [
   { id: 'x_luchador', who: '🤼', name: 'Эль Торо', title: 'Лучадор', text: 'Гринго, ты в моём районе. Здесь уважают только тех, кто выходит на ринг в маске. ¡Vamos!',
     goals: [qc('fightWin', 4, 'Выиграй 4 драки'), qv(() => Math.floor(S.form), 30, 'Форма 30+')],
     boss: { name: 'Эль Торо', style: 'brawler', eq: { hat: 'bandana', body: 'malinovy', shoes: 'boots' }, lvl: 0, form: 50, strength: 55, tier: 3, intro: '«¡Prepárate, gringo!»' },
-    reward: { money: usd(300), caps: 2, xp: 800 } },
+    reward: { money: usd(300), caps: 1, xp: 800 } },
   { id: 'x_h_resort', path: 'honest', who: '🏨', name: 'Дон Мигель', title: 'Работа мечты', text: 'Сеньор Валера, курорту нужен человек, который не сдаётся. Диплом, опыт — и место ваше.',
-    goals: [qv(() => S.edu, 2, 'Окончи колледж туризма'), qc('shift', 15, 'Отработай 15 смен'), qc('promotion', 1, 'Получи повышение')], reward: { money: usd(600), caps: 2, xp: 1000 } },
+    goals: [qv(() => S.edu, 2, 'Окончи колледж туризма'), qc('shift', 15, 'Отработай 15 смен'), qc('promotion', 1, 'Получи повышение')], reward: { money: usd(600), caps: 1, xp: 1000 } },
   { id: 'x_d_tio', path: 'dark', who: '🥸', name: 'Тио Чуй', title: 'Тёмные делишки', text: 'Русо, ты мне нравишься. Покажи, что умеешь торговаться и держать удар — и Тио Чуй тебя не забудет.',
-    goals: [qc('marketSold', 15, 'Продай 15 вещей на рынке'), qc('fightWin', 8, 'Выиграй 8 драк')], reward: { money: usd(600), caps: 2, xp: 1000 } },
+    goals: [qc('marketSold', 15, 'Продай 15 вещей на рынке'), qc('fightWin', 8, 'Выиграй 8 драк')], reward: { money: usd(600), caps: 1, xp: 1000 } },
   { id: 'x_fiesta', who: '💃', name: 'Лупита', title: 'Фиеста', text: 'Валера, в субботу фиеста! Танцы, пиньята, мариачи. Не приходи один — это грустно.',
     goals: [qc('date', 4, 'Сходи на 4 свидания'), qv(() => (S.girlfriend ? 1 : 0), 1, 'Будь в отношениях'), qc('leisureGame', 2, 'Сыграй 2 игры в «Отдыхе»')], reward: { money: usd(500), caps: 1, xp: 900, buff: ['inlove', 20] } },
   { id: 'x_business', who: '🤵🏽', name: 'Дон Карлос', title: 'Своё дело', text: 'В Мексике уважают тех, у кого своё дело. Тележка тако — тоже дело, сеньор. Начните — и покажите, что вы надолго.',
-    goals: [qv(() => Object.keys(S.biz).length, 1, 'Открой бизнес'), qv(() => S.transport, 1, 'Купи транспорт'), qv(() => S.ownedHousing || 0, 4, 'Купи каситу с патио')], reward: { money: usd(2000), caps: 2, xp: 1500 } },
+    goals: [qv(() => Object.keys(S.biz).length, 1, 'Открой бизнес'), qv(() => S.transport, 1, 'Купи транспорт'), qv(() => S.ownedHousing || 0, 4, 'Купи каситу с патио')], reward: { money: usd(2000), caps: 1, xp: 1500 } },
   { id: 'x_callcenter', who: '📞', name: 'Голос из трубки', title: 'Привет из колл-центра', text: 'Тот же голос: «Валерий, это служба безопасности…» Мошенники добрались и сюда. Пора разобраться с ними раз и навсегда — и вернуть бабушке её деньги.',
     goals: [qv(() => level(), 30, 'Достигни 30 уровня'), qv(() => S.ownedHousing || 0, 5, 'Купи виллу в Канкуне')],
     boss: { name: 'Главарь колл-центра', style: 'tactic', eq: { hat: 'cilinder', body: 'kostum', shoes: 'boots' }, lvl: 2, form: 75, strength: 72, tier: 6, intro: '«Вам звонят из службы безопасности…»' },
-    reward: { money: usd(5000), caps: 4, xp: 3000 } },
+    reward: { money: usd(5000), caps: 2, xp: 3000 } },
   { id: 'x_final', who: '🌵', name: 'Вся Мексика', title: '¡Viva Valera!', text: 'Колл-центр закрыт, бабушка получила свои деньги и открытку из Канкуна. Осталось стать в Мексике своим по-настоящему.',
-    goals: [qv(() => S.ownedHousing || 0, 6, 'Купи гасиенду'), qc('promotion', 3, 'Получи ещё 3 повышения'), qv(() => S.onlineWins || 0, 5, 'Победи 5 живых игроков онлайн')], reward: { money: usd(15000), caps: 8, xp: 7000 } },
+    goals: [qv(() => S.ownedHousing || 0, 6, 'Купи гасиенду'), qc('promotion', 3, 'Получи ещё 3 повышения'), qv(() => S.onlineWins || 0, 5, 'Победи 5 живых игроков онлайн')], reward: { money: usd(15000), caps: 3, xp: 7000 } },
 ];
 MEX_Q.forEach((q) => { q.city = 'mex'; QUESTS.push(q); });
 
@@ -601,7 +601,7 @@ HOOKS.tick.push(() => {
   S.chapterIntro = null;
   openModal(`<div class="chapter-card mex"><div class="cc-sky">${sceneSVG(0)}</div><div class="cc-num">ГЛАВА III</div><div class="cc-title">Мексика</div>
     <p>¡Hola, amigo! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Друзья и банда — с тобой.</p>
-    <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 новых работ и мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span></div>
+    <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 работ и 40 своих мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span><span>🦂 Картель и бандиты</span></div>
     <button class="btn primary wide" data-act="close">¡Vamos!</button></div>`, { center: true });
   sfx('levelup');
 });

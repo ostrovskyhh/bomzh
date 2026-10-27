@@ -75,7 +75,8 @@ function crashAutoBind() { ['crashAutoOn', 'crashAutoX'].forEach((id) => { const
 // В одиночной ракете — то же поле автовывода
 function crashAutoUI() {
   const bets = document.querySelector('#modalRoot .bets');
-  if (!bets || $('crashAutoOn')) return;
+  // Только в «Ракете»: раньше после броска поле «Автовывод» появлялось и в рулетке с костями, где оно ничего не делает
+  if (!bets || $('crashAutoOn') || !$('crashBox')) return;
   bets.insertAdjacentHTML('afterend', `<div class="crash-auto"><label><input type="checkbox" id="crashAutoOn" ${S.crashAuto ? 'checked' : ''}> Автовывод на</label>
     <input id="crashAutoX" type="number" step="0.01" min="1.05" max="100" value="${S.crashAuto || CRASH_AUTO_DEFAULT}"><span>x</span></div>`);
   crashAutoBind();
@@ -191,6 +192,27 @@ ACTIONS.crash2Btn = async () => {
 // Автовывод мог сработать, пока окно было закрыто: забираем при запуске игры
 HOOKS.init.push(() => setTimeout(() => { if (crashOnline()) apiPost('crash/claim').then((r) => { if (r.amount > 0) { addMoney(r.amount); toast(`🚀 Автовывод ракеты: +${fmt(r.amount)} ₽`, 'good'); saveSoon(); } }).catch(() => {}); }, 7000));
 
+// 4.1: автовывод засчитывается сразу, даже если окно ракеты закрыто — пока раунд со ставкой не закончился,
+// игра в фоне спрашивает сервер и забирает выигрыш (раньше деньги приходили только при открытой ракете или при перезапуске)
+let CRASH_BG = 0;
+HOOKS.tick.push(() => {
+  if (!S.crashBet || CR2 || !crashOnline() || Date.now() - CRASH_BG < 3000) return;
+  if (Date.now() - S.crashBet.at > 15 * 60000) { S.crashBet = null; return; }
+  CRASH_BG = Date.now();
+  apiPost('crash/state').then((v) => {
+    if (!S.crashBet || !v || v.error) return;
+    if (v.unclaimed > 0) crash2Claim();
+    else if (v.id !== S.crashBet.id || v.phase === 'crashed') S.crashBet = null; // раунд закончился, забирать нечего
+  }).catch(() => {});
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.crashBet) CRASH_BG = 0; });
+crash2Apply = (function (orig) {
+  return function (v) {
+    if (v && v.me && v.phase !== 'crashed') S.crashBet = { id: v.id, at: S.crashBet && S.crashBet.id === v.id ? S.crashBet.at : Date.now() };
+    return orig(v);
+  };
+})(crash2Apply);
+
 // Одиночная ракета: автовывод встроен в её цикл (casino.js → crashCash)
 
 // =====================================================================
@@ -277,7 +299,7 @@ function openCases() {
     <div class="list">${CASES.map((c) => {
       const ok = level() >= c.level, can = c.caps ? S.caps >= c.caps : S.money >= c.price;
       return card({ thumb: c.emoji, title: c.name, cls: ok ? '' : 'locked',
-        desc: `${c.theme}. Вещи от ${fmt(Math.round(caseValue(c) * 0.15))} до ${fmt(Math.round(caseValue(c) * 21))} ₽${c.caps ? '<br><b style="color:var(--gold)">Премиум-кейс за крышки</b>' : ''}`,
+        desc: `${c.theme}. Вещи от ${fmt(Math.round(caseValue(c) * 0.1))} до ${fmt(Math.round(caseValue(c) * 21))} ₽${c.caps ? '<br><b style="color:var(--gold)">Премиум-кейс за крышки</b>' : ''}`,
         btn: !ok ? `<button class="btn" disabled data-why="Нужен ${c.level} уровень">🔒 ${c.level} ур.</button>`
           : `<button class="btn ${can ? 'primary' : ''}" data-act="caseOpen" data-id="${c.id}" ${can ? '' : `disabled data-why="Не хватает ${c.caps ? 'крышек' : 'денег'}"`}>${c.caps ? `🟡 ${c.caps}` : `${fmt(c.price)} ₽`}</button>` });
     }).join('')}</div>

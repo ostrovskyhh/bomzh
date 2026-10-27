@@ -74,9 +74,9 @@ HOOKS.track.push((key, n) => {
 const WEEKLY = [
   { key: 'fightWin', goal: 10, text: 'Выиграй 10 драк', reward: { money: 3000 } },
   { key: 'shift', goal: 15, text: 'Отработай 15 смен', reward: { money: 6000 } },
-  { key: 'gymGame', goal: 10, text: 'Сделай 10 тренировок-мини-игр', reward: { caps: 2 } },
+  { key: 'gymGame', goal: 10, text: 'Сделай 10 тренировок-мини-игр', reward: { caps: 1 } },
   { key: 'earned', goal: 200000, text: 'Заработай 200 000 ₽', reward: { money: 20000 } },
-  { key: 'boss', goal: 3, text: 'Победи 3 сложных бота или живых игроков', reward: { caps: 6, hat: 'weekcap' } },
+  { key: 'boss', goal: 3, text: 'Победи 3 сложных бота или живых игроков', reward: { caps: 2, hat: 'weekcap' } },
 ];
 function weeklyValue(k) { return k === 'earned' ? S.stats.earned : k === 'boss' ? counter('hardWin') + counter('onlineWin') : counter(k); }
 function weeklyState() {

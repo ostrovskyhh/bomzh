@@ -62,18 +62,18 @@ HATS.starterhat = `
   <circle cx="82" cy="38" r="5" fill="#F2C744"/>`;
 PREM_GIVE.starter = () => {
   S.starterBought = true;
-  addCaps(100);
+  addCaps(40);
   S.vipUntil = Math.max(Date.now(), S.vipUntil || 0) + 7 * 86400000;
   addMoney(starterMoney());
   if (!S.owned.hat.includes('starterhat')) S.owned.hat.push('starterhat');
-  return `🎁 Набор новичка: 100 🟡, VIP на 7 дней, ${fmt(starterMoney())} ₽ и Кепка новичка`;
+  return `🎁 Набор новичка: 40 🟡, VIP на 7 дней, ${fmt(starterMoney())} ₽ и Кепка новичка`;
 };
 function starterHTML() {
   const left = starterLeft();
   if (!left) return '';
-  return `<div class="starter-pack"><div class="sp-badge">−80%</div><div class="sp-e">🎁</div>
+  return `<div class="starter-pack"><div class="sp-badge">−70%</div><div class="sp-e">🎁</div>
       <b>Набор новичка</b><small>Только первые ${STARTER_DAYS} дня · осталось ${typeof leftText === 'function' ? leftText(left) : `<span data-until="${Date.now() + left}"></span>`}</small>
-      <div class="sp-items"><span>🟡 100 крышек</span><span>👑 VIP 7 дней</span><span>💰 ${fmt(starterMoney())} ₽</span><span>🧢 Кепка новичка</span></div>
+      <div class="sp-items"><span>🟡 40 крышек</span><span>👑 VIP 7 дней</span><span>💰 ${fmt(starterMoney())} ₽</span><span>🧢 Кепка новичка</span></div>
       <button class="btn primary wide" data-act="prem" data-id="starter"><i class="ic" data-ic="star"></i>${STARTER_STARS} — забрать</button></div>`;
 }
 // Один раз предлагаем после обучения

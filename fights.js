@@ -70,18 +70,18 @@ const PVP_HATS = [
 ];
 PVP_HATS.forEach((h) => CLOTHES.hat.push({ price: 0, season: true, pvp: true, ...h }));
 // Разовая награда за первый выход в лигу (индекс как в LEAGUES)
-const LEAGUE_PRIZES = [null, { caps: 3, money: 3000, hat: 'bandana' }, { caps: 8, money: 15000, hat: 'boxhelm' }, { caps: 15, money: 60000, hat: 'crown' }];
+const LEAGUE_PRIZES = [null, { caps: 2, money: 3000, hat: 'bandana' }, { caps: 3, money: 15000, hat: 'boxhelm' }, { caps: 6, money: 60000, hat: 'crown' }];
 // Сундуки за серию: money — во сколько наград за бой, items — сколько вещей, tries — насколько редкие
 const CHESTS = {
   3: { name: 'Пакет с района', emoji: '🛍️', caps: 0, money: 2, items: 1, tries: 1 },
   5: { name: 'Спортивная сумка', emoji: '🎒', caps: 1, money: 4, items: 2, tries: 2, spirit: 15 },
-  10: { name: 'Кейс чемпиона', emoji: '💼', caps: 4, money: 8, items: 3, tries: 4, spirit: 30 },
+  10: { name: 'Кейс чемпиона', emoji: '💼', caps: 2, money: 8, items: 3, tries: 4, spirit: 30 },
 };
 function chestFor(streak) { return streak >= 10 && streak % 10 === 0 ? CHESTS[10] : CHESTS[streak]; }
 function nextChest(streak) { for (let n = streak + 1; ; n++) if (chestFor(n)) return [n, chestFor(n)]; }
 // Недельный сезон: в понедельник награда по лучшей лиге недели и мягкий сброс рейтинга
 const WEEK_MIN_FIGHTS = 5;
-const WEEK_PRIZES = [{ caps: 1, money: 1000 }, { caps: 4, money: 5000 }, { caps: 12, money: 20000 }, { caps: 30, money: 80000 }];
+const WEEK_PRIZES = [{ caps: 1, money: 1000 }, { caps: 2, money: 5000 }, { caps: 5, money: 20000 }, { caps: 12, money: 80000 }];
 
 function leagueIdx(r) { return LEAGUES.indexOf(league(r)); }
 function weekId(t = Date.now()) { return Math.floor(((t - new Date(t).getTimezoneOffset() * 60000) / 86400000 + 3) / 7); }

@@ -754,7 +754,7 @@ Object.assign(ACTIONS, {
 // Достижения — многоуровневые и долгие
 // =====================================================================
 
-const ACH_REWARDS = [1, 2, 4, 8, 15];
+const ACH_REWARDS = [1, 1, 2, 3, 6];
 const ACH_TIERS = ['I', 'II', 'III', 'IV', 'V'];
 const ACHS = [
   { id: 'taps', name: 'Тапер', emoji: '👆', key: 'taps', goals: [1000, 10000, 50000, 200000, 1000000], unit: 'тапов' },

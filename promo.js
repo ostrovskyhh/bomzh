@@ -5,12 +5,12 @@ const PROMO_SLOT = 6 * 3600000;  // в каждом 6-часовом окне…
 const PROMO_LEN = 2 * 3600000;   // …с шансом 45% бывает акция на 2 часа
 const PROMO_CHANCE = 45;
 const PROMOS = [
-  { id: 'bonus60', emoji: '💰', title: 'Мешок крышек +50%', desc: '+30 крышек к «Мешку крышек»', product: 'caps60', bonus: 30 },
-  { id: 'double10', emoji: '🟡', title: 'Горсть крышек ×2', desc: 'Вдвое больше крышек в «Горсти»', product: 'caps10', bonus: 10 },
-  { id: 'chest', emoji: '🧰', title: 'Сундук Михалыча +100', desc: '+100 крышек к «Сундуку Михалыча»', product: 'caps200', bonus: 100 },
-  { id: 'vip', emoji: '👑', title: 'VIP +15 дней', desc: '45 дней «Авторитета» по цене 30', product: 'vip', days: 15 },
-  { id: 'sale', emoji: '🔥', title: 'Скидка 30% на крышки', desc: 'Все наборы крышек дешевле на треть', products: ['caps10', 'caps60', 'caps200'], discount: 0.3 },
-  { id: 'sale60', emoji: '💥', title: 'Мешок крышек −40%', desc: '«Мешок крышек» почти за полцены', product: 'caps60', discount: 0.4 },
+  { id: 'bonus60', emoji: '💰', title: 'Мешок крышек +20', desc: '+20 крышек к «Мешку крышек»', product: 'caps60', bonus: 20 },
+  { id: 'chest', emoji: '🧰', title: 'Сундук Михалыча +60', desc: '+60 крышек к «Сундуку Михалыча»', product: 'caps200', bonus: 60 },
+  { id: 'vip', emoji: '👑', title: 'VIP +10 дней', desc: '40 дней «Авторитета» по цене 30', product: 'vip', days: 10 },
+  { id: 'sale', emoji: '🔥', title: 'Скидка 20% на крышки', desc: 'Все наборы крышек дешевле на пятую часть', products: ['caps10', 'caps60', 'caps200', 'caps500'], discount: 0.2 },
+  { id: 'bundles', emoji: '🎁', title: 'Наборы −25%', desc: 'Все выгодные наборы ещё на четверть дешевле', products: ['b_week', 'b_style', 'b_cases', 'b_mex', 'b_boss'], discount: 0.25 },
+  { id: 'sale500', emoji: '🏭', title: 'Склад Шныря −30%', desc: '500 крышек почти за треть дешевле', product: 'caps500', discount: 0.3 },
 ];
 
 function promoHash(n) {

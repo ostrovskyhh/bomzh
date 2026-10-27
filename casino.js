@@ -250,7 +250,8 @@ function crashGo(btn) {
   $('crashBox').classList.remove('boom');
   sfx('rocket');
   const loop = (now) => {
-    if (!CR || !CR.running || !$('crashMult')) { if (CR) CR.running = false; return; }
+    if (CR && CR.running && !$('crashMult')) return crashAway();
+    if (!CR || !CR.running) return;
     const t = (now - CR.start) / 1000;
     CR.m = Math.exp(0.12 * t);
     // Автовывод — в том же цикле, что и взрыв: за один кадр ракета могла перескочить и автовывод, и точку взрыва.
@@ -269,6 +270,21 @@ function crashGo(btn) {
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
+}
+
+// Окно закрыли посреди полёта: автовывод всё равно срабатывает, если ракета до него долетела бы
+function crashAway() {
+  const c = CR;
+  CR = null;
+  if (!c || c.cashed) return;
+  const auto = S.crashAuto || 0;
+  if (auto && Math.round(auto * 100) <= Math.round(c.crash * 100)) {
+    const win = Math.floor(c.bet * auto);
+    addMoney(win);
+    toast(`🚀 Автовывод на ${auto.toFixed(2)}x: +${fmt(win)} ₽`, 'good');
+  } else toast(`🚀 Ракета взорвалась на ${c.crash.toFixed(2)}x — ставка сгорела`, 'bad');
+  S.crashHist = [c.crash, ...(S.crashHist || [])].slice(0, 8);
+  updateHud(); save();
 }
 
 function crashBoom() {

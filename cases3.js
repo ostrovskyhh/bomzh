@@ -1,0 +1,246 @@
+// Кейсы 4.1: в каждом кейсе втрое больше ширпотреба в разных ценовых сегментах (от копеечного до «почти ходового»),
+// шесть новых кейсов от 300 ₽ до 3 млн, у каждой вещи тип (одежда, техника, еда…) и износ, как float в CS.
+// Осмотр: любую вещь можно покрутить пальцем в 3D и рассмотреть потёртости.
+
+// [эмодзи, название, множитель цены]. Средний множитель держим около 1 — отдача кейсов не меняется
+const CASE_MORE = {
+  box: {
+    common: [['🥄', 'Ложка из столовой', 0.5], ['🧽', 'Губка «почти новая»', 0.55], ['🧷', 'Коробка булавок', 0.6], ['🕯️', 'Огарок свечи', 0.65], ['🪣', 'Ведро без дна', 0.7],
+      ['👞', 'Ботинок (левый)', 0.75], ['📚', 'Подшивка «Огонька»', 1.4], ['🧯', 'Огнетушитель-1993', 1.5], ['🎩', 'Цилиндр фокусника', 1.6]],
+    uncommon: [['🧸', 'Мишка без глаза', 0.8], ['🪆', 'Матрёшка-неполный комплект', 1.2]],
+    rare: [['🎞️', 'Диафильмы «Ну, погоди!»', 1]],
+  },
+  fish: {
+    common: [['🦐', 'Мотыль в коробке', 0.5], ['🍞', 'Прикормка из батона', 0.55], ['🦟', 'Средство от комаров', 0.6], ['🧢', 'Кепка «Клюёт!»', 0.7],
+      ['🪢', 'Подсачек', 1.2], ['🫙', 'Банка солёных огурцов', 0.65], ['🍵', 'Термос с чаем', 1.3], ['🪣', 'Ведро с уловом', 1.4], ['🎒', 'Рюкзак рыбака', 1.5]],
+    uncommon: [['🧭', 'Компас дедушки', 1.1], ['⛺', 'Палатка «Турист»', 1.15]],
+    rare: [['🦞', 'Рак-чемпион', 1.05]],
+  },
+  suit: {
+    common: [['🧮', 'Калькулятор «Электроника»', 0.5], ['🧢', 'Кепка «Абибас»', 0.55], ['🕹️', 'Тетрис «Брик Гейм»', 0.6], ['🩳', 'Треники с лампасами', 0.7],
+      ['🕶️', 'Очки «Полицейский»', 0.75], ['🎙️', 'Караоке-микрофон', 1.3], ['🔭', 'Бинокль', 1.4], ['📺', 'Телевизор «Рубин»', 1.6]],
+    uncommon: [['🎤', 'Магнитофон «Весна»', 1.1], ['🧥', 'Дублёнка «Анталья»', 1.2]],
+    rare: [['🎰', 'Игровой автомат «Однорукий»', 1]],
+  },
+  msk: {
+    common: [['🥐', 'Круассан с миндалём', 0.5], ['🧋', 'Бабл-ти', 0.55], ['🥗', 'Боул с киноа', 0.6], ['🛍️', 'Шоппер «Москвабад»', 0.7],
+      ['🧦', 'Носки с авокадо', 0.65], ['🎧', 'Беспроводные «капельки»', 1.3], ['🪪', 'Пропуск в коворкинг', 1.4], ['🧘', 'Абонемент на йогу', 1.5]],
+    uncommon: [['🛴', 'Электросамокат', 1.15], ['🎨', 'Курс «Акварель за 3 дня»', 0.85]],
+    rare: [['🏙️', 'Макет Сити из Лего', 1.05]],
+  },
+  safe: {
+    common: [['💳', 'Чёрная карта (заблок.)', 0.5], ['📜', 'Расписка депутата', 0.55], ['🥂', 'Бокал из «Пушкина»', 0.6], ['🍫', 'Трюфели в золоте', 0.7],
+      ['🎩', 'Шляпа «Борсалино»', 1.3], ['🧯', 'Огнетушитель в стразах', 1.4], ['🧳', 'Чемодан «Вуиттон» (пустой)', 1.6]],
+    uncommon: [['🐎', 'Фигурка коня из малахита', 1.1], ['🎱', 'Бильярдный кий из эбена', 0.9]],
+    rare: [['🛸', 'Игрушечный дрон с золотом', 1]],
+  },
+  gold: {
+    common: [['🧈', 'Брусок «золотого» масла', 0.5], ['💫', 'Золотые блёстки', 0.55], ['🔔', 'Позолоченный колокольчик', 0.6], ['🛎️', 'Звонок портье', 0.7],
+      ['🪞', 'Зеркало в золотой раме', 1.4], ['🪔', 'Лампа Аладдина', 1.6]],
+    uncommon: [['⚱️', 'Золотая урна (пустая!)', 1]],
+  },
+};
+Object.entries(CASE_MORE).forEach(([id, add]) => {
+  const c = CASES.find((x) => x.id === id);
+  if (c) Object.entries(add).forEach(([r, list]) => { c.loot[r].push(...list); CASE_LOOT[r].push(...list); });
+});
+
+// Новые кейсы: от копеечного пакета до сейфа картеля
+const CASES_NEW = [
+  { id: 'bag', name: 'Пакет из «Копейки»', emoji: '🛍️', price: 300, level: 3, theme: 'Что забыли на кассе', loot: {
+    common: [['🥚', 'Яйца С2 (одно треснуло)', 0.5], ['🍞', 'Батон вчерашний', 0.55], ['🧅', 'Лук в сеточке', 0.6], ['🥛', 'Кефир 3,2%', 0.7], ['🍬', 'Карамель «Взлётная»', 0.65],
+      ['🧻', 'Туалетная бумага', 0.8], ['🍪', 'Печенье «Юбилейное»', 0.9], ['🥫', 'Тушёнка «Барс»', 1.2], ['🧀', 'Сыр «Российский»', 1.3], ['🍗', 'Курица-гриль', 1.5], ['🍫', 'Шоколад «Алёнка»', 1.1], ['☕', 'Растворимый кофе', 1.4]],
+    uncommon: [['🍯', 'Мёд с пасеки', 1], ['🥩', 'Вырезка по акции', 1.2], ['🧃', 'Сок «Добрый» 2 л', 0.8], ['🍉', 'Арбуз астраханский', 1]],
+    rare: [['🍾', 'Шампанское «Советское»', 1], ['🎂', 'Торт «Наполеон»', 1.1], ['🦀', 'Крабовые палочки (настоящие)', 0.9]],
+    epic: [['🎟️', 'Выигрышный лотерейный билет', 1], ['🛒', 'Тележка из «Копейки»', 1]],
+    legend: [['💳', 'Карта лояльности на 99 999 баллов', 1], ['🏪', 'Ключ от склада «Копейки»', 1]] } },
+  { id: 'sport', name: 'Спортивная сумка', emoji: '🎒', price: 3000, level: 6, theme: 'Забыта в раздевалке качалки', loot: {
+    common: [['🧦', 'Носки после тренировки', 0.5], ['🧴', 'Гель для душа «Морской»', 0.55], ['🍌', 'Банан для энергии', 0.6], ['🩹', 'Пластырь', 0.5], ['🧢', 'Бейсболка «Найк» с рынка', 0.75],
+      ['🩳', 'Шорты для бега', 0.8], ['🥤', 'Шейкер с протеином', 1], ['🪢', 'Скакалка', 0.9], ['🧤', 'Перчатки для турника', 1.1], ['🎽', 'Майка «Спартак»', 1.3], ['👟', 'Кеды «Два мяча»', 1.5]],
+    uncommon: [['🥊', 'Боксёрские перчатки', 1.1], ['🏐', 'Мяч с автографом', 0.9], ['⏱️', 'Секундомер тренера', 0.95], ['🛹', 'Скейт', 1.05]],
+    rare: [['🏋️', 'Гантели «Хром»', 1], ['🚴', 'Велотренажёр складной', 1.1], ['🥋', 'Кимоно с чёрным поясом', 0.9]],
+    epic: [['🏅', 'Медаль чемпиона области', 1], ['💪', 'Абонемент «Безлимит навсегда»', 1]],
+    legend: [['🏆', 'Кубок Засранска по армрестлингу', 1], ['🥇', 'Олимпийское «золото» (почти)', 1]] } },
+  { id: 'garage', name: 'Гаражный ящик', emoji: '🧰', price: 30000, level: 10, theme: 'Сокровища гаражного кооператива «Мотор»', loot: {
+    common: [['🔩', 'Банка болтов', 0.5], ['🪛', 'Отвёртка с изолентой', 0.55], ['🧤', 'Рабочие перчатки', 0.6], ['🛢️', 'Канистра масла', 1.3], ['🔧', 'Ключ на 17', 0.7],
+      ['🪫', 'Аккумулятор «Тюмень»', 1.2], ['🧯', 'Автоогнетушитель', 0.9], ['🪜', 'Стремянка', 1.4], ['🗜️', 'Тиски', 1.1], ['🛞', 'Колесо «Жигулей»', 1.5], ['🔦', 'Переноска', 0.8]],
+    uncommon: [['⚙️', 'Карбюратор «Солекс»', 1.1], ['🪚', 'Бензопила «Дружба»', 1.2], ['📻', 'Автомагнитола с флешкой', 0.85], ['🚨', 'Мигалка (лучше не спрашивать)', 0.85]],
+    rare: [['🏍️', 'Мотоцикл «Урал» по частям', 1.1], ['🔥', 'Сварочный аппарат', 0.9], ['🧪', 'Самогонный аппарат', 1]],
+    epic: [['🚗', 'Кузов «Волги» ГАЗ-21', 1.05], ['🗝️', 'Ключи от трёх гаражей', 0.95]],
+    legend: [['🏎️', 'Гоночный болид из «Запорожца»', 1], ['📜', 'Устав кооператива «Мотор»', 1]] } },
+  { id: 'tech', name: 'Коробка с Горбушки', emoji: '📦', price: 60000, level: 13, theme: 'Электроника «новая, только коробку открыли»', loot: {
+    common: [['🔌', 'Зарядка «оригинал»', 0.5], ['🖱️', 'Мышка с подсветкой', 0.6], ['💾', 'Дискета с «Героями III»', 0.55], ['🔋', 'Пауэрбанк на 50 000 мАч', 0.8], ['🎧', 'Наушники «Эйрподс» (реплика)', 0.9],
+      ['⌨️', 'Механическая клавиатура', 1.2], ['🕹️', 'Геймпад', 1], ['📀', 'Диск «Windows XP» (лицензия?)', 0.65], ['🖨️', 'Принтер без картриджа', 1.3], ['📷', 'Вебкамера', 0.75], ['🖥️', 'Монитор с битым пикселем', 1.5]],
+    uncommon: [['📱', 'Смартфон «Сяоми»', 1], ['⌚', 'Смарт-часы', 0.9], ['🎮', 'Приставка «Плейстейшен-2»', 1.15], ['🔊', 'Колонка «Джей-Би-Эль»', 0.95]],
+    rare: [['💻', 'Игровой ноутбук', 1.1], ['🚁', 'Квадрокоптер', 0.95], ['🥽', 'VR-шлем', 0.95]],
+    epic: [['🧠', 'Видеокарта «4090»', 1.1], ['🤖', 'Робот-пылесос с характером', 0.9]],
+    legend: [['🛰️', 'Спутниковая тарелка с Марсом', 1], ['🧬', 'Прототип айфона-2077', 1]] } },
+  { id: 'mexc', name: 'Кейс Тихуаны', emoji: '🪅', price: 150000, level: 14, theme: 'Сувениры с мексиканской границы', loot: {
+    common: [['🌶️', 'Связка халапеньо', 0.5], ['🌮', 'Тако «Пастор»', 0.55], ['🥑', 'Миска гуакамоле', 0.6], ['🧉', 'Тыква-калебас', 0.7], ['🪇', 'Маракасы', 0.8],
+      ['🌵', 'Кактус в горшке', 0.65], ['🧣', 'Сарапе (полосатый плед)', 1.1], ['👒', 'Сомбреро', 1.3], ['🍹', 'Маргарита в ведёрке', 0.9], ['🎸', 'Гитаррон мариачи', 1.5], ['🕯️', 'Свеча Санта-Муэрте', 1.2]],
+    uncommon: [['💀', 'Сахарный череп «Калавера»', 1], ['🪅', 'Пиньята-осёл', 0.9], ['🤼', 'Маска лучадора', 1.15], ['🌯', 'Буррито-гигант', 0.95]],
+    rare: [['🐎', 'Седло ранчеро', 1], ['🏺', 'Ваза майя (точно не подделка)', 1.05], ['🚙', 'Лоурайдер-модель', 0.95]],
+    epic: [['🗿', 'Голова ольмеков', 1.05], ['🦅', 'Золотой орёл ацтеков', 0.95]],
+    legend: [['🌞', 'Солнечный камень ацтеков', 1], ['👑', 'Корона Монтесумы', 1]] } },
+  { id: 'cartel', name: 'Сейф картеля', emoji: '🗃️', price: 3000000, level: 20, theme: 'Нашли в подвале виллы в Синалоа. Лучше не спрашивать', loot: {
+    common: [['💵', 'Пачка песо', 0.5], ['🧾', 'Накладная на «текилу»', 0.55], ['📼', 'Кассета с наркокорридо', 0.6], ['🔫', 'Водяной пистолет в позолоте', 0.8], ['🎲', 'Кости из слоновой кости', 0.9],
+      ['🕶️', 'Очки «Авиатор» дона', 1.2], ['🧥', 'Рубашка с леопардом', 1.1], ['📟', 'Пейджер для «звонков»', 0.7], ['🥃', 'Текила «Аньехо» 30 лет', 1.4], ['🚬', 'Сигары из Гаваны', 1.3], ['🎴', 'Колода с золотым тузом', 1.5]],
+    uncommon: [['🐆', 'Ошейник гепарда', 1.1], ['🔐', 'Сейфовый замок', 0.9], ['🗺️', 'Карта туннелей под границей', 1], ['🛥️', 'Ключи от катера', 1]],
+    rare: [['🦁', 'Чучело льва из зоопарка дона', 1.05], ['🏍️', 'Хромированный «Харлей»', 1], ['💼', 'Кейс «на хранение»', 0.95]],
+    epic: [['🏝️', 'Документы на остров', 1.05], ['🚁', 'Вертолёт на крыше', 0.95]],
+    legend: [['👑', 'Золотой «Кольт» Эль-Хефе', 1], ['🏛️', 'Гасиенда с подземным ходом', 1]] } },
+];
+CASES_NEW.forEach((c) => {
+  CASES.push(c);
+  Object.entries(c.loot).forEach(([r, list]) => CASE_LOOT[r].push(...list));
+});
+CASES.sort((a, b) => (a.caps ? 1 : 0) - (b.caps ? 1 : 0) || caseValue(a) - caseValue(b));
+
+// ---------- Тип вещи ----------
+const ITEM_TYPES = [
+  ['👕 Одежда', '🧦🧥🧢🩳👒🥾👟🧣🧤👞🎩🕶️🎽🥋'],
+  ['📱 Техника', '📱💻📻📷📸🎧🎮📟📺📡🔋🕹️🎙️🔦🧮🖱️💾⌨️🖨️🖥️⌚🔊🚁🥽🧠🤖🛰️🧬🔌🪫📀🎤🎞️'],
+  ['🍔 Еда и напитки', '🥫🐟🥑☕🧃🧋🥐🥗🍫🍷🍾🥂🧈🍞🥚🧅🥛🍬🍪🧀🍗🍯🥩🍉🎂🦀🍌🥤🌶️🌮🍹🌯🥃🫙🍵🦐🍮'],
+  ['💍 Драгоценности', '💍💎📿🪙👑🫅🥇🎖️🏅🏆🟡💫🔔'],
+  ['🖼️ Искусство и редкости', '🖼️🗿🏺🗽🐉🥚🦚🌲🪆⚱️🐎🎨💀🌞🦅🐆🦁🐋🐠🦞'],
+  ['🚗 Транспорт', '🛶🛵🚲🛴🛥️🚘🛩️🅿️🏍️🚗🏎️🚙🛹🛞'],
+  ['📜 Документы', '📜🪪🧾📰🎫🎟️💳🗺️🗝️🔑🔐'],
+  ['🔧 Инструменты', '🔩🪛🛢️🔧🧯🪜🗜️⚙️🪚🔥🧪🧰🪢🪝🪣🧭🔭🧷'],
+  ['🎸 Музыка и досуг', '🎸🎻🪇🎲🎴🎱🎰🃏🪅🏐🏋️🚴⏱️🏓'],
+];
+function itemType(e) { const t = ITEM_TYPES.find(([, list]) => list.includes(e)); return t ? t[0] : '📦 Барахло'; }
+
+// ---------- Износ (float) ----------
+const WEAR = { fn: [0, 0.07], mw: [0.07, 0.15], ft: [0.15, 0.38], bs: [0.45, 1] };
+function itemWear(it) {
+  if (typeof it.fl === 'number') return it.fl;
+  const [a, b] = WEAR[it.q] || WEAR.mw;
+  let h = 0; for (const ch of String(it.key) + it.value) h = (Math.imul(h, 31) + ch.charCodeAt(0)) >>> 0;
+  return a + (h % 10000) / 10000 * (b - a);
+}
+caseRollItem = (function (orig) {
+  return function (c) {
+    const it = orig(c);
+    const [a, b] = WEAR[it.q] || WEAR.mw;
+    it.fl = Math.round(rand(a, b) * 10000) / 10000;
+    it.pat = Math.floor(Math.random() * 1000);
+    return it;
+  };
+})(caseRollItem);
+
+// ---------- Осмотр в 3D ----------
+let INSP = null;
+function inspectItem(it, opts = {}) {
+  if (!it) return;
+  const rar = RARITY.find((r) => r.id === it.rar) || RARITY[0];
+  const fl = itemWear(it);
+  const from = CASES.find((c) => c.id === it.from);
+  const layers = 14;
+  const stack = Array.from({ length: layers }, (_, i) => {
+    const z = (i - layers + 1) * 1.4;
+    const front = i === layers - 1;
+    return `<span class="${front ? 'front' : ''}" style="transform:translateZ(${z}px);${front ? '' : `filter:brightness(${(0.25 + i * 0.03).toFixed(2)}) saturate(.6)`}">${it.e}</span>`;
+  }).join('');
+  const scratches = Math.round(fl * 9);
+  const marks = Array.from({ length: scratches }, (_, i) => {
+    const h = (it.pat || 7) * 37 + i * 101;
+    return `<i style="left:${(h * 13) % 80 + 10}%;top:${(h * 7) % 70 + 15}%;width:${8 + (h % 22)}%;transform:rotate(${(h * 17) % 180}deg)"></i>`;
+  }).join('');
+  openModal(`<div class="insp" style="--c:${rar.color}">
+    <h3>🔍 ${esc(it.name)}</h3>
+    <div class="insp-stage" id="inspStage"><div class="insp-glow"></div>
+      <div class="insp-obj" id="inspObj" style="--wear:${fl.toFixed(3)}">${stack}<div class="insp-marks">${marks}</div></div>
+      <div class="insp-floor"></div><small class="insp-hint">Крути пальцем · колесо — зум</small></div>
+    <div class="insp-tags"><span style="color:${rar.color}">${rar.name}</span><span>${qualityName(it) || '—'}</span><span>${itemType(it.e)}</span></div>
+    <div class="insp-wear"><div class="insp-bar"><b style="left:${(fl * 100).toFixed(1)}%"></b></div>
+      <div class="insp-row"><small>Износ</small><b>${fl.toFixed(4)}</b></div>
+      ${it.pat !== undefined ? `<div class="insp-row"><small>Узор</small><b>#${it.pat}</b></div>` : ''}
+      <div class="insp-row"><small>Из кейса</small><b>${from ? `${from.emoji} ${from.name}` : '—'}</b></div>
+      <div class="insp-row"><small>Цена на барахолке</small><b style="color:var(--gold)">${fmt(fleaPrice(it))} ₽</b></div></div>
+    <div class="btns" style="flex-direction:column;gap:8px">
+      ${opts.sell !== undefined ? `<button class="btn primary wide" data-act="fleaSell" data-id="${opts.sell}">💰 Продать за ${fmt(fleaPrice(it))} ₽</button>` : ''}
+      <button class="btn wide" data-act="${opts.back || 'flea'}">← Назад</button></div></div>`, { center: true });
+  inspBind();
+}
+function inspBind() {
+  const stage = $('inspStage'), obj = $('inspObj');
+  if (!stage || !obj) return;
+  INSP = { rx: -12, ry: 25, vx: 0, vy: 0.35, zoom: 1, drag: null, raf: 0 };
+  const draw = () => { obj.style.transform = `scale(${INSP.zoom}) rotateX(${INSP.rx}deg) rotateY(${INSP.ry}deg)`; };
+  const loop = () => {
+    if (!INSP || !$('inspObj')) { INSP = null; return; }
+    if (!INSP.drag) {
+      INSP.ry += INSP.vy; INSP.rx += INSP.vx;
+      INSP.vy += (0.35 - INSP.vy) * 0.02; INSP.vx *= 0.94; INSP.rx += (-12 - INSP.rx) * 0.02;
+    }
+    draw();
+    INSP.raf = requestAnimationFrame(loop);
+  };
+  stage.addEventListener('pointerdown', (e) => { INSP.drag = { x: e.clientX, y: e.clientY, t: performance.now() }; try { stage.setPointerCapture(e.pointerId); } catch (err) { /* синтетическое касание */ } });
+  stage.addEventListener('pointermove', (e) => {
+    if (!INSP || !INSP.drag) return;
+    const dx = e.clientX - INSP.drag.x, dy = e.clientY - INSP.drag.y;
+    INSP.ry += dx * 0.6; INSP.rx = clamp(INSP.rx - dy * 0.5, -70, 70);
+    INSP.vy = dx * 0.25; INSP.vx = -dy * 0.15;
+    INSP.drag.x = e.clientX; INSP.drag.y = e.clientY;
+  });
+  const up = () => { if (INSP) INSP.drag = null; };
+  stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+  stage.addEventListener('wheel', (e) => { e.preventDefault(); INSP.zoom = clamp(INSP.zoom - e.deltaY * 0.001, 0.6, 1.8); }, { passive: false });
+  // Двумя пальцами — зум
+  let pinch = 0;
+  stage.addEventListener('touchstart', (e) => { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }, { passive: true });
+  stage.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 2 || !pinch) return;
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    INSP.zoom = clamp(INSP.zoom * d / pinch, 0.6, 1.8); pinch = d;
+  }, { passive: true });
+  cancelAnimationFrame(INSP.raf);
+  loop();
+}
+
+ACTIONS.inspect = (i) => { const it = fleaInv()[+i]; inspectItem(it, { sell: +i }); };
+ACTIONS.inspectLast = () => { const inv = fleaInv(); inspectItem(inv[inv.length - 1], { sell: inv.length - 1, back: 'cases' }); };
+
+// Кнопка «Осмотреть» на барахолке и после открытия кейса
+openFlea = (function (orig) {
+  return function () {
+    orig();
+    document.querySelectorAll('#modalRoot [data-act="fleaSell"]').forEach((b) => {
+      b.insertAdjacentHTML('beforebegin', `<button class="btn small" data-act="inspect" data-id="${b.dataset.id}" data-silent="1">🔍</button>`);
+      b.parentElement.classList.add('insp-btns');
+    });
+  };
+})(openFlea);
+caseOpen = (function (orig) {
+  return function (id) {
+    const n = fleaInv().length;
+    orig(id);
+    const t = setInterval(() => {
+      const box = $('caseResult');
+      if (!box) { clearInterval(t); return; }
+      if (fleaInv().length > n && box.querySelector('.btns') && !box.querySelector('[data-act="inspectLast"]')) {
+        clearInterval(t);
+        const it = fleaInv()[fleaInv().length - 1];
+        const small = box.querySelector('.case-win small');
+        if (small && it) small.insertAdjacentHTML('beforeend', `<br>${itemType(it.e)} · износ ${itemWear(it).toFixed(4)}`);
+        box.querySelector('.btns').insertAdjacentHTML('afterbegin', '<button class="btn wide" data-act="inspectLast">🔍 Осмотреть в 3D</button>');
+      }
+    }, 150);
+  };
+})(caseOpen);
+
+// Окно кейсов: группы по цене, чтобы список из 12 кейсов не превращался в простыню
+openCases = (function (orig) {
+  return function () {
+    orig();
+    const list = document.querySelector('#modalRoot .list');
+    if (!list) return;
+    const cards = [...list.children];
+    const groups = [['🪙 Дешёвые', (c) => !c.caps && c.price < 20000], ['💵 Средние', (c) => !c.caps && c.price >= 20000 && c.price < 500000], ['💰 Дорогие', (c) => !c.caps && c.price >= 500000], ['🟡 За крышки', (c) => c.caps]];
+    list.innerHTML = groups.map(([title, f]) => {
+      const html = CASES.map((c, i) => (f(c) && cards[i] ? cards[i].outerHTML : '')).join('');
+      return html ? `<div class="subhead">${title}</div>${html}` : '';
+    }).join('');
+  };
+})(openCases);
