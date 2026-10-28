@@ -132,7 +132,7 @@ function gameLineup(mg) {
         const ok = order[+b.dataset.i] === want;
         b.classList.add(ok ? 'right' : 'wrong');
         if (ok) { mgScore(1); sfx('coin'); } else { mgScore(-1); mg.mistakes = (mg.mistakes || 0) + 1; sfx('error'); shakeArena(); }
-        setTimeout(round, ok ? 300 : 650);
+        mgDelay(mg, round, ok ? 300 : 650);
       };
     });
   };
@@ -234,7 +234,7 @@ function gamePhoto(mg, cfg) {
     $('phFilm').textContent += good.length ? good[0].el.textContent : inFrame.length ? '🙈' : '🌫️';
     floatAt($('phFrame'), pts > 0 ? `+${pts} ${pts >= 3 ? 'Шедевр!' : 'Красиво'}` : pts < 0 ? 'Испорчен кадр' : 'Пустой кадр', pts > 0 ? 'good' : 'bad');
     if (pts > 0) sfx('coin'); else sfx('error');
-    if (!shots) setTimeout(mgEnd, 500);
+    if (!shots) mgDelay(mg, mgEnd, 500);
   };
 }
 
@@ -296,7 +296,7 @@ function gameStack(mg, cfg) {
     e.preventDefault();
     if (!mgAlive(mg) || !cur) return;
     const a = Math.max(x, left), b = Math.min(x + width, left + width);
-    if (b - a <= 0.02) { cur.classList.add('fall'); sfx('error'); haptic('error'); shakeArena(); floatAt(tower, cfg.fail, 'bad'); cur = null; setTimeout(mgEnd, 600); return; }
+    if (b - a <= 0.02) { cur.classList.add('fall'); sfx('error'); haptic('error'); shakeArena(); floatAt(tower, cfg.fail, 'bad'); cur = null; mgDelay(mg, mgEnd, 600); return; }
     const perfect = Math.abs(x - left) < 0.025;
     if (!perfect) { width = b - a; left = a; } else x = left;
     cur.style.left = left * 100 + '%'; cur.style.width = width * 100 + '%';
@@ -304,7 +304,7 @@ function gameStack(mg, cfg) {
     if (perfect) floatAt(cur, 'Ровно!', 'good');
     level++;
     speed *= 1.08;
-    if (level > 9) { cur = null; setTimeout(mgEnd, 400); return; }
+    if (level > 9) { cur = null; mgDelay(mg, mgEnd, 400); return; }
     tower.style.transform = `translateY(${Math.max(0, level - 6) * H}px)`;
     spawn();
   };
@@ -325,7 +325,7 @@ function gameSpot(mg, cfg) {
       b.onpointerdown = (e) => {
         e.preventDefault();
         if (!mgAlive(mg)) return;
-        if (+b.dataset.i === at) { mgScore(1); sfx('coin'); haptic('light'); round++; b.classList.add('found'); setTimeout(deal, 250); }
+        if (+b.dataset.i === at) { mgScore(1); sfx('coin'); haptic('light'); round++; b.classList.add('found'); mgDelay(mg, deal, 250); }
         else { mg.mistakes = (mg.mistakes || 0) + 1; sfx('error'); b.classList.add('nope'); }
       };
     });
@@ -398,7 +398,7 @@ function gameBowling(mg) {
       floatAt($('bwPins'), pins === 10 ? 'СТРАЙК! 🎉' : `${pins} кеглей`, pins >= 5 ? 'good' : 'bad');
       $('bwFrames').innerHTML += `<span>${pins === 10 ? 'X' : pins}</span>`;
       throws++;
-      if (throws >= 3) { setTimeout(mgEnd, 700); return; }
+      if (throws >= 3) { mgDelay(mg, mgEnd, 700); return; }
       mg.timers.push(setTimeout(() => {
         if (!mgAlive(mg)) return;
         [...$('bwPins').children].forEach((s) => s.classList.remove('down'));
@@ -481,7 +481,7 @@ function gameShooting(mg, cfg) {
     if (!mgAlive(mg) || ammo <= 0) return false;
     ammo--; ammoDraw(); sfx('punch');
     if (!hit) floatAt($('shAmmo'), 'Мимо', 'bad');
-    if (!ammo) setTimeout(mgEnd, 500);
+    if (!ammo) mgDelay(mg, mgEnd, 500);
     return true;
   };
   arena.onpointerdown = (e) => { e.preventDefault(); shoot(false); };
@@ -542,7 +542,7 @@ function gameSneak(mg) {
     if (hold && state === 'look' && Date.now() - caughtAt > 1200) {
       caughtAt = Date.now(); mg.mistakes = (mg.mistakes || 0) + 1; prog = 0; hold = false;
       sfx('error'); haptic('error'); shakeArena(); floatAt($('snMan'), 'Эй! Держи вора!', 'bad');
-      if (mg.mistakes >= 3) { setTimeout(mgEnd, 500); return; }
+      if (mg.mistakes >= 3) { mgDelay(mg, mgEnd, 500); return; }
     }
     if (hold && state !== 'look') prog += dt * 0.65;
     if (prog >= 1) { prog = 0; mgScore(1); sfx('coin'); haptic('light'); $('snLoot').textContent += pick(['👛', '💳', '⌚', '📱']); floatAt($('snMan'), 'Есть!', 'good'); setState('away'); timer = rand(0.8, 1.8); }
@@ -630,7 +630,7 @@ function gymReps(mg, cfg, onRep) {
     $('gyCombo').textContent = combo >= 2 ? `🔥 серия ${combo}` : '';
     $('gyIcon').animate([{ transform: 'scale(1)' }, { transform: `scale(${res === 'perfect' ? 1.3 : res === 'good' ? 1.1 : 0.9})` }, { transform: 'scale(1)' }], { duration: 260 });
     reps++;
-    if (reps >= GYM_REPS) setTimeout(mgEnd, 450);
+    if (reps >= GYM_REPS) mgDelay(mg, mgEnd, 450);
     else if (onRep) onRep(reps);
   };
 }

@@ -62,7 +62,7 @@ function chestGame(mg) {
     btn.animate([{ transform: 'rotate(0) scale(1)' }, { transform: `rotate(${MG.score % 2 ? 8 : -8}deg) scale(1.08)` }, { transform: 'rotate(0) scale(1)' }], { duration: 140 });
     $('cgBar').style.width = Math.min(100, (MG.score / CHEST_TAPS) * 100) + '%';
     $('cgLocks').textContent = '🔓'.repeat(Math.min(3, Math.floor(MG.score / 4))) + '🔒'.repeat(Math.max(0, 3 - Math.floor(MG.score / 4)));
-    if (MG.score >= CHEST_TAPS) { MG.fast = Date.now() - MG.start < 3500; setTimeout(mgEnd, 150); }
+    if (MG.score >= CHEST_TAPS) { MG.fast = Date.now() - MG.start < 3500; mgDelay(mg, mgEnd, 150); }
   };
 }
 

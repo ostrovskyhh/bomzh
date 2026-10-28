@@ -15,7 +15,7 @@ function gameRhythm(mg, cfg = {}) {
   let spawned = 0, done = 0, last = performance.now(), nextAt = 0;
   const speed = cfg.speed || 0.42; // доля дорожки в секунду
   const HIT = 0.12;                // центр зоны попадания
-  const finishNote = (n, cls) => { n.dead = true; done++; n.el.classList.add(cls); setTimeout(() => n.el.remove(), 250); $('mgTime').style.width = (1 - done / total) * 100 + '%'; if (done >= total) setTimeout(mgEnd, 350); };
+  const finishNote = (n, cls) => { n.dead = true; done++; n.el.classList.add(cls); setTimeout(() => n.el.remove(), 250); $('mgTime').style.width = (1 - done / total) * 100 + '%'; if (done >= total) mgDelay(mg, mgEnd, 350); };
   $('mgTime').style.width = '100%';
   const loop = (now) => {
     if (!mgAlive(mg)) return;

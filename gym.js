@@ -55,7 +55,7 @@ function gameReps(mg, cfg) {
     $('gyCombo').textContent = combo >= 2 ? `🔥 серия ${combo}` : '';
     $('gyIcon').animate([{ transform: 'translateY(0) scale(1)' }, { transform: `translateY(${res === 'miss' ? 4 : -14}px) scale(${res === 'perfect' ? 1.25 : 1.05})` }, { transform: 'translateY(0) scale(1)' }], { duration: 260 });
     reps++;
-    if (reps >= GYM_REPS) { lock = true; setTimeout(mgEnd, 450); return; }
+    if (reps >= GYM_REPS) { lock = true; mgDelay(mg, mgEnd, 450); return; }
     speed += cfg.speed * cfg.grow; // каждый повтор чуть быстрее
     if (cfg.move) { zone = rand(0.05, 0.95 - cfg.zone); place(); }
     lock = true; setTimeout(() => { lock = false; }, 160); // защита от двойного нажатия

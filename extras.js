@@ -53,7 +53,7 @@ function gameThimbles(mg) {
   let round = 0;
   const play = () => {
     if (!mgAlive(mg)) return;
-    if (round >= 3) { setTimeout(mgEnd, 500); return; }
+    if (round >= 3) { mgDelay(mg, mgEnd, 500); return; }
     round++;
     arena.innerHTML = `<div class="th-row">${[0, 1, 2].map((i) => `<button class="th-cup" data-i="${i}" style="left:${i * 33.3 + 4}%">🥤<i>${i === 1 ? '⚪' : ''}</i></button>`).join('')}</div><p class="mg-hint">Раунд ${round}/3: следи за шариком ⚪</p>`;
     const cups = [...arena.querySelectorAll('.th-cup')];
@@ -80,7 +80,7 @@ function gameThimbles(mg) {
         if (c.disabled || !mgAlive(mg)) return;
         cups.forEach((x) => { x.disabled = true; x.classList.add('show'); });
         if (i === ball) { mgScore(1); sfx('win'); floatAt(c, 'Угадал!', 'good'); } else { sfx('lose'); floatAt(c, 'Мимо', 'bad'); }
-        mg.timers.push(setTimeout(play, 1100));
+        mg.timers.push(mgDelay(mg, play, 1100));
       };
     });
   };
@@ -116,7 +116,7 @@ function gameDarts(mg) {
     sfx(pts >= 25 ? 'crit' : pts ? 'tap' : 'error');
     left--;
     $('dtBtn').textContent = `🎯 Бросок (осталось ${left})`;
-    if (!left) setTimeout(mgEnd, 600);
+    if (!left) mgDelay(mg, mgEnd, 600);
   };
 }
 

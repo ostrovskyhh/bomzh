@@ -52,12 +52,12 @@ function gameLockpick(mg) {
       $('lpPin' + cur).classList.add('set');
       mgScore(1); sfx('chip'); haptic('light');
       cur++;
-      if (cur >= pins) { $('lpCar').textContent = '🚗💨'; sfx('rocket'); setTimeout(mgEnd, 500); }
+      if (cur >= pins) { $('lpCar').textContent = '🚗💨'; sfx('rocket'); mgDelay(mg, mgEnd, 500); }
     } else {
       mg.mistakes = (mg.mistakes || 0) + 1;
       sfx('error'); shakeArena(); haptic('error');
       floatAt($('lpBtn'), mg.mistakes >= 3 ? '🚨 Сигнализация!' : 'Сорвалось!', 'bad');
-      if (mg.mistakes >= 3) setTimeout(mgEnd, 400);
+      if (mg.mistakes >= 3) mgDelay(mg, mgEnd, 400);
     }
   };
 }

@@ -7,8 +7,11 @@ function cst() {
   return S.casinoStats;
 }
 // Какая игра сейчас открыта — по её элементам в окне
+let CASINO_TRACK_EVENT=null;
 function casinoKind() {
+  if(CASINO_TRACK_EVENT)return CASINO_TRACK_EVENT.kind;
   if ($('reels')) return 'slots';
+  if ($('bjOnline')) return 'bj';
   if ($('bjChip') || (typeof BJ !== 'undefined' && BJ)) return 'bj';
   if ($('roulRes')) return 'roul';
   if ($('dicePair')) return 'dice';
@@ -21,7 +24,7 @@ HOOKS.track.push((key) => {
   if (!kind) return;
   const st = cst();
   st.games[kind] = (st.games[kind] || 0) + 1;
-  const bet = kind === 'bj' && typeof BJ !== 'undefined' && BJ ? BJ.bet : kind === 'roul' && typeof roulTotal === 'function' ? roulTotal() : S.bet;
+  const bet = CASINO_TRACK_EVENT ? CASINO_TRACK_EVENT.bet : kind === 'bj' && typeof BJ !== 'undefined' && BJ ? BJ.bet : kind === 'roul' && typeof roulTotal === 'function' ? roulTotal() : S.bet;
   st.bet += Math.max(0, +bet || 0);
 });
 // Выигрыши: всё, что пришло в кошелёк, пока открыто казино (с учётом ночной надбавки)

@@ -719,7 +719,7 @@ EXTRA_TABS.tasks.prestige = () => `
 // Только прогресс текущего круга сбрасывается. Эти данные принадлежат профилю.
 function prestigeProfile() {
   const keys = [
-    'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial',
+    'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial', 'xpCapsUntil', 'xpStarsUntil', 'helpVerified', 'bjWalletRev', 'bjInRound', 'bjTable', 'bjSeenRounds',
     'cosm', 'bottleSkin', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
     'pass', 'passFrame', 'frame', 'avatar', 'aura', 'tapFx', 'avatarsSeen',
     'ach', 'achNotified', 'achProgress', 'coll', 'counters', 'stats', 'casinoStats',

@@ -34,7 +34,7 @@
       await sl(120);
       const arena = $('mgArena');
       if (!arena) continue;
-      const btns = [...document.querySelectorAll('#modalRoot .mg button:not([disabled]), #mgArena [data-i], #mgArena .mg-t, #mgArena span, #mgArena i, #mgArena div')].filter((b) => b.offsetParent !== null || b.getClientRects().length);
+      const btns = [...document.querySelectorAll('#modalRoot .mg button:not([disabled]):not([data-act="cancelMiniGame"]), #mgArena [data-i], #mgArena .mg-t, #mgArena span, #mgArena i, #mgArena div')].filter((b) => b.offsetParent !== null || b.getClientRects().length);
       if (!btns.length) continue;
       const b = btns[Math.floor(Math.random() * btns.length)];
       const r = b.getBoundingClientRect();

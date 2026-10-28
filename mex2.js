@@ -52,7 +52,7 @@ function mxEnd(mg, sec) {
   }, 100);
   mg.timers.push(t);
 }
-function mxOut(mg, max) { if ((mg.mistakes || 0) >= max) { setTimeout(mgEnd, 500); return true; } return false; }
+function mxOut(mg, max) { if ((mg.mistakes || 0) >= max) { mgDelay(mg, mgEnd, 500); return true; } return false; }
 
 // ---------- 1. Комаль: переворачивай вовремя ----------
 function mxComal(mg, cfg) {
@@ -124,7 +124,7 @@ function mxPinata(mg, cfg) {
       }
     } else { sfx('whoosh'); floatAt($('pinBtn'), 'Мимо!', 'bad'); }
     show();
-    if (!cfg.time && left <= 0) setTimeout(mgEnd, 600);
+    if (!cfg.time && left <= 0) mgDelay(mg, mgEnd, 600);
   });
   mxEnd(mg, cfg.time);
 }
@@ -163,7 +163,7 @@ function mxLasso(mg, cfg) {
       else mxMiss(mg, run, cfg.badText || 'Не того!', 1);
       spawn();
     } else { sfx('whoosh'); floatAt(ring, 'Мимо', 'bad'); }
-    if (cfg.throws && --throws <= 0) setTimeout(mgEnd, 500);
+    if (cfg.throws && --throws <= 0) mgDelay(mg, mgEnd, 500);
   });
   mxEnd(mg, cfg.time);
 }
@@ -365,7 +365,7 @@ function mxLoteria(mg, cfg) {
   mgLoop(mg, (dt) => {
     wait -= dt;
     if (wait > 0) return;
-    if (cfg.calls && calls <= 0) { setTimeout(mgEnd, 400); wait = 99; return; }
+    if (cfg.calls && calls <= 0) { mgDelay(mg, mgEnd, 400); wait = 99; return; }
     if (cfg.calls) calls--;
     call();
     wait = Math.max(1.3, (cfg.every || 2.4) - mg.score * 0.04);
@@ -383,7 +383,7 @@ function mxLoteria(mg, cfg) {
           line.forEach((x) => btns[x].classList.add('line'));
         }
       });
-      if (cfg.score !== 'marks' && cfg.lines && lines >= cfg.lines) setTimeout(mgEnd, 700);
+      if (cfg.score !== 'marks' && cfg.lines && lines >= cfg.lines) mgDelay(mg, mgEnd, 700);
     } else mxMiss(mg, b, 'Не то!', cfg.score === 'marks' ? 1 : 0);
   }));
   mxEnd(mg, cfg.time);
@@ -643,7 +643,7 @@ function mxQuiz(mg, cfg) {
     const ok = o === cur.a;
     if (ok) mxHit(card, cfg.okText || 'Да!'); else mxMiss(mg, card, cfg.penalty === false ? '' : cur.a, cfg.penalty === false ? 0 : 1);
     card.animate([{ transform: `translateX(${dx}px)` }, { transform: `translateX(${(cur.opts.indexOf(o) ? 1 : -1) * 300}px) rotate(${(cur.opts.indexOf(o) ? 1 : -1) * 20}deg)`, opacity: 0 }], { duration: 200 });
-    setTimeout(next, 200);
+    mgDelay(mg, next, 200);
     cur = null;
   };
   const next = () => {
@@ -663,7 +663,7 @@ function mxQuiz(mg, cfg) {
     if (!cur) return;
     t -= dt;
     $('qzB').style.width = Math.max(0, t / limit) * 100 + '%';
-    if (t <= 0) { mxMiss(mg, card, cfg.lateText || 'Время!'); cur = null; setTimeout(next, 150); }
+    if (t <= 0) { mxMiss(mg, card, cfg.lateText || 'Время!'); cur = null; mgDelay(mg, next, 150); }
   });
   mxEnd(mg, cfg.time);
 }
@@ -727,7 +727,7 @@ function mxSafe(mg, cfg) {
     const d = Math.min(Math.abs(Math.round(val) - target), 100 - Math.abs(Math.round(val) - target));
     if (d <= 2) {
       opened++; showLocks(); newTarget();
-      if (opened >= locks) { mxHit($('sfD'), cfg.doneText || 'Открыто! +2', 2); opened = 0; setTimeout(showLocks, 400); }
+      if (opened >= locks) { mxHit($('sfD'), cfg.doneText || 'Открыто! +2', 2); opened = 0; mgDelay(mg, showLocks, 400); }
       else mxHit($('sfD'), 'Клик!');
     } else { mxMiss(mg, $('sfD'), cfg.badText || 'Тишина…'); if (cfg.maxMiss && mxOut(mg, cfg.maxMiss)) return; }
     draw();

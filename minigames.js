@@ -53,9 +53,10 @@ const MEMORY_TOOLS = ['🔧', '🔨', '🪛', '⚙️'];
 // =====================================================================
 
 let MG = null;
+let MG_SEQUENCE = 0;
 
 function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
-  const id = Date.now();
+  const id = ++MG_SEQUENCE;
   MG = { id, title, score: 0, over: false, timers: [], raf: null, finish };
   if (typeof BugReport !== 'undefined') BugReport.record('minigame-start', { id, title, duration });
   openModal(`<div class="mg">
@@ -89,9 +90,12 @@ function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
       MG.timers.push(t);
     }
   }, 700);
+  MG.timers.push(cd);
 }
 
 function mgAlive(mg) { return MG === mg && !mg.over && $('mgArena'); }
+
+function mgDelay(mg,fn,ms) { const t=setTimeout(()=>{if(mgAlive(mg))fn();},ms);mg.timers.push(t);return t; }
 
 function mgScore(d) {
   if (!MG) return;
@@ -190,7 +194,7 @@ function gameTiming(mg, cfg) {
     speed *= 1.09;
     left--;
     $('mgTime').style.width = (left / cfg.attempts) * 100 + '%';
-    if (left <= 0) setTimeout(mgEnd, 400); else newZone();
+    if (left <= 0) mgDelay(mg, mgEnd, 400); else newZone();
   };
 }
 
@@ -307,7 +311,7 @@ function lessonChoice(mg, nextQuestion) {
         const ok = String(b.dataset.v) === String(qn.a);
         b.classList.add(ok ? 'right' : 'wrong');
         if (ok) { mgScore(1); sfx('good'); } else { if (qn.penalty) mgScore(-1); sfx('error'); shakeArena(); }
-        setTimeout(show, ok ? 250 : 550);
+        mgDelay(mg, show, ok ? 250 : 550);
       };
     });
   };
@@ -338,12 +342,12 @@ function gameMemory(mg, need) {
       const i = +b.dataset.i;
       flash(i);
       input.push(i);
-      if (seq[input.length - 1] !== i) { sfx('error'); shakeArena(); $('memMsg').textContent = 'Ошибка!'; setTimeout(mgEnd, 600); return; }
+      if (seq[input.length - 1] !== i) { sfx('error'); shakeArena(); $('memMsg').textContent = 'Ошибка!'; mgDelay(mg, mgEnd, 600); return; }
       if (input.length === seq.length) {
         mgScore(1);
-        if (seq.length >= need + 1) { setTimeout(mgEnd, 500); return; }
+        if (seq.length >= need + 1) { mgDelay(mg, mgEnd, 500); return; }
         seq.push(Math.floor(Math.random() * 4));
-        setTimeout(play, 600);
+        mgDelay(mg, play, 600);
       }
     };
   });

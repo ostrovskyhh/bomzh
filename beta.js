@@ -333,12 +333,7 @@ openCases = (function (orig) {
         <b>${c.name}</b><small>${c.theme}</small>${loot(c)}${btn(c)}</div>`).join('')}</div>
       <div class="pc-feed hidden" id="pcFeed"></div>
       <div class="btns"><button class="btn wide" data-act="flea">🛍️ Барахолка (${fleaInv().length})</button><button class="btn wide" data-act="close">Закрыть</button></div></div>`);
-    if (onlineOn()) apiPost('cases/feed').then((r) => {
-      const el = $('pcFeed');
-      if (!el || !r.feed || !r.feed.length) return;
-      el.innerHTML = '<div class="pc-sub">Только что выбили</div>' + r.feed.map((d) => `<div>${esc(d.e)} <b>${esc(d.name)}</b> · ${esc(d.item)}<i style="color:${rarColor(d.rar)}">${fmt(d.value)} ₽</i></div>`).join('');
-      el.classList.remove('hidden');
-    }).catch(() => {});
+
   };
 })(openCases);
 
@@ -373,7 +368,7 @@ caseOpen = (function (orig) {
       save();
       const cell = document.querySelector('.pd-it.win-cell');
       if (cell) cell.classList.add('win');
-      if (onlineOn() && ['rare', 'epic', 'legend'].includes(rar.id)) apiPost('cases/drop', { e: win.e, item: win.name, rar: rar.id, value: fleaPrice(win), name: playerName() }).catch(() => {});
+      if (onlineOn()) apiPost('cases/drop', { e: win.e, item: win.name, rar: rar.id, value: fleaPrice(win), name: playerName() }).catch(() => {});
       $('caseResult').innerHTML = `<div class="pd-reveal r-${rar.id}" style="--r:${rar.color}"><div class="pd-rays"></div>
         <span class="pd-rar">${big ? '★ ' : ''}${rar.name.toUpperCase()}${big ? ' ★' : ''}</span><div class="pd-item">${win.e}</div><b>${win.name}</b>
         <small>${qualityName(win)} · шанс ${Math.round(rar.chance * 1000) / 10}%</small><div class="pd-val">${fmt(fleaPrice(win))} ₽</div>

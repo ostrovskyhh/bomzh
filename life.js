@@ -157,7 +157,7 @@ function talkGame(mg, bank, count) {
   let i = 0;
   const show = () => {
     if (!mgAlive(mg)) return;
-    if (i >= qs.length) { setTimeout(mgEnd, 300); return; }
+    if (i >= qs.length) { mgDelay(mg, mgEnd, 300); return; }
     const [q, answers] = qs[i++];
     const opts = shuffle(answers);
     arena.innerHTML = `<div class="ls-q talk-q">«${q}»</div><div class="ls-opts talk-opts">${opts.map(([t, v]) => `<button class="btn" data-v="${v}">${t}</button>`).join('')}</div>`;
@@ -172,7 +172,7 @@ function talkGame(mg, bank, count) {
         mgScore(v);
         sfx(v === 2 ? 'good' : v === 1 ? 'tap' : 'error');
         if (v < 0) shakeArena();
-        setTimeout(show, 550);
+        mgDelay(mg, show, 550);
       };
     });
   };
