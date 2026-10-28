@@ -32,7 +32,7 @@ function yardArt(buildings){
   </svg>`;
 }
 function yardEpisode(e,y){
-  if(e.state==='completed')return `<article class="yard-episode"><h3>${esc(e.emoji)} ${esc(e.name)}</h3><p>${esc(e.ending)}</p><small>Следующая история — через ${leftText((e.completed+86400)*1000-Date.now())}. Заработанные подарки сохраняются даже после выхода из банды.</small></article>`;
+  if(e.state==='completed')return `<article class="yard-episode"><h3>${esc(e.emoji)} ${esc(e.name)}</h3><p>${esc(e.ending)}</p><small>${e.kind==='story'?`Следующая история — через ${leftText((e.completed+86400)*1000-Date.now())}.`:'Двор полностью обустроен! Совместные истории продолжаются по своему расписанию.'} Заработанные подарки сохраняются даже после выхода из банды.</small></article>`;
   const voting=e.state==='planning'||e.state==='decision';
   const title=e.state==='planning'?'Выбираем следующую постройку':e.name;
   return `<article class="yard-episode"><div class="yard-label">${e.kind==='build'?'ОБЩАЯ СТРОЙКА':'СОВМЕСТНАЯ ИСТОРИЯ'}</div><h3>${esc(e.emoji||'🗳️')} ${esc(title)}</h3>
