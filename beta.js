@@ -69,7 +69,7 @@ const BETA_STATUS = {
   'life:health': () => `здоровье ${Math.round(S.health)} · форма ${Math.round(S.form || 0)}`,
   'life:skills': () => 'временные бонусы',
   'life:work': () => (S.busy && S.busy.type !== 'sleep' ? 'ты занят' : 'можно на смену'),
-  'life:business': () => { const n = Object.keys(S.biz || {}).length; return n ? `${n} шт. · касса ждёт` : 'пока нет'; },
+  'life:business': () => { const n = Object.keys(S.biz || {}).length; return n ? `${n} шт. · ${incomeMoney(businessTotals().cash)} в кассах` : 'пока нет'; },
   'life:study': () => (S.study ? `занятий ${S.study.done}/${S.study.need}` : 'выбери курс'),
   'fun:market': () => { const n = Object.values(S.inv || {}).reduce((a, b) => a + (b > 0 ? b : 0), 0); return n ? `${n} вещей на продажу` : 'скупка и перекуп'; },
   'act:flea': () => { const n = typeof fleaInv === 'function' ? fleaInv().length : 0; return n ? `${n} вещей из кейсов` : 'вещи из кейсов'; },

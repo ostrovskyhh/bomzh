@@ -314,108 +314,20 @@ Object.assign(ACTIONS, {
 });
 
 // =====================================================================
-// Бизнесы — пассивный доход с долгой окупаемостью (60–100+ часов)
+// Бизнесы: общие каталоги всех городов. Расчёты и управление — passive-business.js.
 // =====================================================================
-
 const BUSINESSES = [
-  { id: 'stall', name: 'Точка приёма стеклотары', emoji: '🍾', price: 8000, level: 6, income: 110 },
-  { id: 'shawarma', name: 'Ларёк с шаурмой', emoji: '🌯', price: 40000, level: 9, income: 480 },
-  { id: 'carwash', name: 'Автомойка', emoji: '🚿', price: 150000, level: 12, income: 1500 },
-  { id: 'cafe', name: 'Кафе «У Михалыча»', emoji: '☕', price: 600000, level: 15, income: 5200 },
-  { id: 'shops', name: 'Сеть магазинов «Валерыч»', emoji: '🏬', price: 3000000, level: 20, income: 22000 },
+  { id: 'stall', name: 'Точка приёма стеклотары', emoji: '🍾', price: 8000, level: 6, income: 600 },
+  { id: 'shawarma', name: 'Ларёк с шаурмой', emoji: '🌯', price: 40000, level: 9, income: 2800 },
+  { id: 'carwash', name: 'Автомойка', emoji: '🚿', price: 150000, level: 12, income: 10000 },
+  { id: 'cafe', name: 'Кафе «У Михалыча»', emoji: '☕', price: 600000, level: 15, income: 40000 },
+  { id: 'shops', name: 'Сеть магазинов «Валерыч»', emoji: '🏬', price: 3000000, level: 20, income: 200000 },
 ];
-const BIZ_MAX_LVL = 5;
-const BIZ_TAX = 0.1;
-const BIZ_CAP_HOURS = 6;
-
-function bizIncome(b, st) { return b.income * (1 + 0.35 * (st.lvl - 1)) * (st.broken ? 0.5 : 1) * prestigeMult() * (isVip() ? 2 : 1); }
+const BIZ_MAX_LVL = 5, BIZ_TAX = 0.1, BIZ_CAP_HOURS = 24;
+function bizIncome(b, st) { return businessRates(b, st).operating; }
 function bizCap(b, st) { return bizIncome(b, st) * BIZ_CAP_HOURS * (isVip() ? 2 : 1); }
-function bizUpgradeCost(b, st) { return Math.round(b.price * 0.6 * st.lvl); }
-
-HOOKS.tick.push(() => {
-  const now = Date.now();
-  for (const b of BUSINESSES) {
-    const st = S.biz[b.id];
-    if (!st) continue;
-    const hours = (now - st.last) / 3600000;
-    st.last = now;
-    st.cash = Math.max(st.cash, Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * hours));
-    // Раз в 20–40 минут у бизнеса что-то случается
-    if (now >= (st.eventAt || 0)) {
-      st.eventAt = now + rand(20, 40) * 60000;
-      if (!st.started || now - st.started < 60000) continue;
-      const r = Math.random();
-      if (r < 0.2) { const lost = Math.floor(st.cash * 0.15); st.cash -= lost; toast(`${b.emoji} Налоговая проверка в «${b.name}»: −${fmt(lost)} ₽ из кассы`, 'bad'); }
-      else if (r < 0.35) { st.cash = Math.max(st.cash, Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * 0.5)); toast(`${b.emoji} Наплыв клиентов в «${b.name}»! Касса пополнилась`, 'good'); }
-      else if (r < 0.45 && !st.broken) { st.broken = true; toast(`${b.emoji} В «${b.name}» сломалось оборудование: доход −50%, нужен ремонт`, 'bad'); sfx('break'); }
-    }
-  }
-});
-
-EXTRA_TABS.life.business = () => {
-  const totalH = BUSINESSES.reduce((a, b) => a + (S.biz[b.id] ? bizIncome(b, S.biz[b.id]) : 0), 0);
-  return `<div class="info-card">Бизнес приносит деньги, даже когда ты не играешь. Деньги копятся в кассе (максимум ${BIZ_CAP_HOURS} ч дохода${isVip() ? ', с VIP — вдвое больше' : ''}), налог ${BIZ_TAX * 100}%. Заходи забирать!
-      <br>Сейчас: <b>${fmt(totalH * (1 - BIZ_TAX))} ₽/ч</b> чистыми</div>
-    ${BUSINESSES.map((b) => {
-      const st = S.biz[b.id];
-      if (!st) {
-        const ok = level() >= b.level;
-        return card({ thumb: b.emoji, title: b.name, cls: ok ? '' : 'locked',
-          desc: `Доход: <b>${fmt(b.income)} ₽/ч</b> · окупаемость ~${Math.round(b.price / (b.income * (1 - BIZ_TAX)))} ч`,
-          extra: ok ? '' : reqHTML({ level: b.level }), btn: ok ? priceBtn('bizBuy', b.id, b.price, S.money >= b.price) : lockBtn });
-      }
-      const pct = st.cash / bizCap(b, st);
-      return `<div class="card card-col biz">
-        <div class="biz-head"><div class="thumb">${b.emoji}</div><div class="card-body"><div class="card-title">${b.name} <span class="rarity rare">ур. ${st.lvl}</span></div>
-          <div class="card-desc">${fmt(bizIncome(b, st))} ₽/ч${st.broken ? ' · <span style="color:var(--red)">🔧 сломано, доход −50%</span>' : ''}</div></div></div>
-        <div class="progress"><div style="width:${pct * 100}%;${pct >= 1 ? 'background:var(--red)' : ''}"></div></div>
-        <div class="card-desc">Касса: <b>${fmt(st.cash)} ₽</b>${pct >= 1 ? ' — <span style="color:var(--red)">полная, доход стоит!</span>' : ''}</div>
-        <div class="row-btns">
-          <button class="btn primary" data-act="bizCollect" data-id="${b.id}" ${st.cash >= 1 ? '' : 'disabled'}>Забрать</button>
-          ${st.lvl < BIZ_MAX_LVL ? priceBtn('bizUp', b.id, bizUpgradeCost(b, st), S.money >= bizUpgradeCost(b, st), `⬆️ ${fmt(bizUpgradeCost(b, st))}`) : '<button class="btn" disabled>MAX</button>'}
-          ${st.broken ? priceBtn('bizFix', b.id, b.price * 0.05, S.money >= b.price * 0.05, `🔧 ${fmt(b.price * 0.05)}`) : '<button class="btn" disabled>✓ Исправен</button>'}
-        </div></div>`;
-    }).join('')}`;
-};
-
-Object.assign(ACTIONS, {
-  bizBuy: (id) => {
-    const b = BUSINESSES.find((x) => x.id === id);
-    if (S.biz[id] || S.money < b.price || level() < b.level) return;
-    S.money -= b.price;
-    S.biz[id] = { lvl: 1, cash: 0, last: Date.now(), started: Date.now(), eventAt: Date.now() + 20 * 60000 };
-    track('bizBuy');
-    sfx('buy'); confetti(40);
-    toast(`${b.emoji} Ты владелец: ${b.name}!`, 'good');
-  },
-  bizCollect: (id, btn) => {
-    const st = S.biz[id];
-    const m = Math.floor(st.cash * (1 - BIZ_TAX));
-    if (m < 1) return;
-    st.cash = 0;
-    addMoney(m);
-    flyCoins(btn, $('resMoney'), 8);
-    toast(`Забрал из кассы ${fmt(m)} ₽ (после налога)`, 'good');
-  },
-  bizUp: (id) => {
-    const b = BUSINESSES.find((x) => x.id === id), st = S.biz[id];
-    const cost = bizUpgradeCost(b, st);
-    if (S.money < cost || st.lvl >= BIZ_MAX_LVL) return;
-    S.money -= cost;
-    st.lvl++;
-    sfx('buy');
-    toast(`${b.emoji} ${b.name}: уровень ${st.lvl}`, 'good');
-  },
-  bizFix: (id) => {
-    const b = BUSINESSES.find((x) => x.id === id), st = S.biz[id];
-    const cost = Math.round(b.price * 0.05);
-    if (S.money < cost) return;
-    S.money -= cost;
-    st.broken = false;
-    sfx('buy');
-    toast('🔧 Отремонтировали!', 'good');
-  },
-});
+function bizUpgradeCost(b, st) { return Math.round(b.price * (.3 + .15 * (st.lvl - 1))); }
+HOOKS.tick.push(() => businessTick());
 
 // =====================================================================
 // Транспорт
@@ -677,7 +589,7 @@ Object.assign(ACTIONS, {
 
 const PERKS = [
   { id: 'hustle', name: 'Хватка', emoji: '✊', desc: '+5% к тапам за уровень', max: 5 },
-  { id: 'boss', name: 'Деловая жилка', emoji: '💼', desc: '+5% к оплате работы за уровень', max: 5 },
+  { id: 'boss', name: 'Деловая жилка', emoji: '💼', desc: '+5% к оплате работы и доходу бизнесов за уровень', max: 5 },
   { id: 'lucky', name: 'Фартовый', emoji: '🍀', desc: '+1% к шансу крит-тапа за уровень', max: 5 },
   { id: 'tough', name: 'Закалка', emoji: '🛡️', desc: '+0.1 здоровья в минуту за уровень', max: 5 },
   { id: 'cheer', name: 'Оптимист', emoji: '😄', desc: '+0.2 радости в минуту за уровень', max: 5 },
@@ -702,7 +614,7 @@ HOOKS.mods.push((m) => {
 
 EXTRA_TABS.tasks.prestige = () => `
   <div class="premium-hero prestige"><div class="e">⭐</div><div><b>Престиж ${S.prestige || 0}</b>
-    <p>Каждый круг навсегда добавляет +20% к тапам и оплате работы, +10% к опыту. Бонусы складываются между кругами. Очки престижа — на постоянные перки.</p></div></div>
+    <p>Каждый круг навсегда добавляет +20% к тапам, оплате работы и доходу бизнесов, +10% к опыту. Бонусы складываются между кругами. Очки престижа — на постоянные перки.</p></div></div>
   <div class="info-card">Чтобы начать новый круг: <b>уровень ${PRESTIGE_REQ.level}</b> и <b>свой особняк</b>.
     Сбросятся игровые деньги, уровень, жильё, обычная одежда, образование, бизнесы, транспорт и сюжет. Сохранятся крышки, VIP и оплаченные бонусы, косметика, ключи кейсов, батл-пасс, достижения и их прогресс, коллекции, питомцы, наградные шапки, статистика и настройки.
     ${reqHTML({ level: PRESTIGE_REQ.level, housing: 6 })}
@@ -776,7 +688,7 @@ function performPrestige() {
       save();
       confetti(120);
       sfx('jackpot');
-      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Ты снова в Засранске. Постоянные бонусы: тапы и работа +${S.prestige * 20}%, опыт +${S.prestige * 10}%. Стартовый капитал ${fmt(S.money)} ₽. Очков для постоянных перков: ${S.pp}`, btn: 'Погнали!' });
+      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Ты снова в Засранске. Постоянные бонусы: тапы, работа и бизнес +${S.prestige * 20}%, опыт +${S.prestige * 10}%. Стартовый капитал ${fmt(S.money)} ₽. Очков для постоянных перков: ${S.pp}`, btn: 'Погнали!' });
 }
 function prestigeFlowValid() {
   return PRESTIGE_FLOW && $('prestigeWizard') && canPrestige() && PRESTIGE_FLOW.prestige === (S.prestige || 0);

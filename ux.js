@@ -195,7 +195,7 @@ const GO_TEXT = [
   [/одежд|обувь/i, ['shop', 'clothes', '#shopList .card:not(.locked)', 'Купи одежду']],
   [/форм|сила/i, ['life', 'gym', '#lifeList .card:not(.locked)', 'Качайся в зале']],
   [/рейтинг драк|серия|живых игрок/i, ['fun', 'fights', '#funList .card, #funList .online-box', 'Дерись']],
-  [/бизнес/i, ['life', 'business', '#lifeList .card:not(.locked)', 'Открой бизнес']],
+  [/бизнес|предприяти|ночной клуб/i, ['life', 'business', '#lifeList .business-card:not(.locked)', 'Открой или развивай предприятие']],
   [/транспорт|машин/i, ['shop', 'transport', '#shopList .card:not(.locked):not(.current)', 'Купи транспорт']],
   [/девушк|свадьб/i, ['fun', 'dates', '#funList .card:not(.locked), #funList .premium-hero', 'Свидания и семья']],
   [/повышени/i, ['life', 'work', '#lifeList .promo-row, #lifeList .card:not(.locked)', 'Сдай аттестацию на работе']],

@@ -288,7 +288,7 @@
     check('одежда: в каждом городе свой рисунок', hatZ !== hatX && hatZ !== hatM && hatX !== hatM && HATS.ushanka === hatZ && bodyX !== BODIES.rvan.jacket);
     // 4.2: «Стартап» — понятные цели, мультик Мексики — 16 кадров
     const bq = QUESTS.find((q) => q.id === 'm_biz');
-    check('стартап: цели с подсказками, где купить', bq.goals.length === 4 && bq.goals.every((g) => /Магазин|уровня/.test(g.text)), bq.goals.map((g) => g.text).join(' / '));
+    check('стартап: цели с подсказками, где купить', bq.goals.length === 4 && bq.goals.every((g) => /Магазин|Жизнь|уровня/.test(g.text)) && bq.goals[0].text.includes('Жизнь → Бизнес'), bq.goals.map((g) => g.text).join(' / '));
     const mc = mexCut({ partner: null, club: null });
     check('мультик Мексики: 16 кадров с картой и обменом', mc.length === 16 && mc.some((f) => f.bg === 'map') && mc.some((f) => f.info && f.info.includes('data-count')));
     CUTS.test41 = mc; playCutscene('test41', null); for (let i = 0; i < 16; i++) { if (CUT) CUT.full && CUT.typing && CUT.full(); cutNext(); await sl(30); }

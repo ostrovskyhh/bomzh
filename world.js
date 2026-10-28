@@ -135,9 +135,9 @@ EXTRA_TABS.tasks.coll = () => {
 // Ночной клуб: самый дорогой бизнес, доход растёт от нанятого персонала
 // =====================================================================
 
-BUSINESSES.push({ id: 'club', name: 'Ночной клуб «Золотая крышка»', emoji: '🪩', price: 12000000, level: 24, income: 70000 });
+BUSINESSES.push({ id: 'club', name: 'Ночной клуб «Золотая крышка»', emoji: '🪩', price: 12000000, level: 24, income: 800000 });
 const STAFF = [
-  { id: 'guard', name: 'Охрана', emoji: '🕴️', price: 300000, salary: 2500, boost: 0.12, desc: 'Меньше драк — реже поломки' },
+  { id: 'guard', name: 'Охрана', emoji: '🕴️', price: 300000, salary: 2500, boost: 0.12, desc: 'Спокойный вход и безопасность гостей' },
   { id: 'bar', name: 'Бармен', emoji: '🍸', price: 400000, salary: 3000, boost: 0.18, desc: 'Коктейли продаются лучше' },
   { id: 'dj', name: 'Диджей', emoji: '🎧', price: 800000, salary: 6000, boost: 0.25, desc: 'Танцпол забит до утра' },
   { id: 'dancers', name: 'Танцоры', emoji: '💃', price: 600000, salary: 4500, boost: 0.2, desc: 'VIP-гости остаются дольше' },
@@ -146,50 +146,7 @@ const STAFF = [
 const STAFF_MAX = 3;
 const PARTY_CD = 6 * 3600;
 
-function staffLvl(id) { return (S.clubStaff && S.clubStaff[id]) || 0; }
+function staffLvl(id) { return Math.max(0,Math.min(STAFF_MAX,Math.floor(Number(S.clubStaff?.[id])||0)));  }
 function clubMult() { return 1 + STAFF.reduce((a, s) => a + s.boost * staffLvl(s.id), 0); }
-function clubSalary() { return STAFF.reduce((a, s) => a + s.salary * staffLvl(s.id), 0); }
+function clubSalary() { const scale=(BUSINESSES.find(b=>b.id==='club')?.price||12000000)/12000000; return STAFF.reduce((a, s) => a + s.salary * staffLvl(s.id), 0)*scale; }
 
-bizIncome = (function (orig) {
-  return (b, st) => (b.id === 'club' ? Math.max(0, orig(b, st) * clubMult() - clubSalary()) : orig(b, st));
-})(bizIncome);
-
-const _bizTab = EXTRA_TABS.life.business;
-EXTRA_TABS.life.business = () => {
-  let html = _bizTab();
-  if (!S.biz.club) return html;
-  const cdP = cdLeft('clubParty');
-  const party = incomePartyGain();
-  html += `<div class="subhead">🪩 Персонал клуба · доход ×${clubMult().toFixed(2)}, зарплаты −${fmt(clubSalary())} ₽/ч</div>
-    ${STAFF.map((s) => { const l = staffLvl(s.id), cost = s.price * (l + 1); return card({ thumb: s.emoji, title: `${s.name} ${l ? `<span class="rarity rare">${l}/${STAFF_MAX}</span>` : ''}`,
-      desc: `${s.desc}<br>+${Math.round(s.boost * 100)}% к доходу · зарплата ${fmt(s.salary)} ₽/ч за уровень`,
-      btn: l >= STAFF_MAX ? '<button class="btn" disabled>MAX</button>' : priceBtn('hireStaff', s.id, cost, S.money >= cost, `${l ? '⬆️' : 'Нанять'} ${fmt(cost)} ₽`) }); }).join('')}
-    ${card({ thumb: '🎉', title: 'VIP-вечеринка', desc: `Раз в 6 часов: сейчас в кассу ${incomeHTML('biz-party','club')} (до налога). Нужен диджей`,
-      btn: cdP > 0 ? timerBtn(S.cd.clubParty) : `<button data-income-party="1" class="btn ${staffLvl('dj')&&party>0 ? 'primary' : ''}" data-act="clubParty" ${staffLvl('dj')&&party>0 ? '' : 'disabled data-why="Нужны диджей и свободное место в кассе"'}>Устроить</button>` })}`;
-  return html;
-};
-
-Object.assign(ACTIONS, {
-  hireStaff: (id) => {
-    const s = STAFF.find((x) => x.id === id);
-    const l = staffLvl(id), cost = s.price * (l + 1);
-    if (!S.biz.club || l >= STAFF_MAX || S.money < cost) return;
-    S.money -= cost;
-    if (!S.clubStaff) S.clubStaff = {};
-    S.clubStaff[id] = l + 1;
-    track('staff');
-    sfx('buy');
-    toast(`${s.emoji} ${s.name}: ${l ? `уровень ${l + 1}` : 'нанят'}! Доход клуба ×${clubMult().toFixed(2)}`, 'good');
-  },
-  clubParty: () => {
-    const st = S.biz.club;
-    if (!st || cdLeft('clubParty') > 0 || !staffLvl('dj')) return;
-    const m = incomePartyGain();
-    if(m<=0){toast('Сначала забери деньги из кассы клуба','bad');return;}
-    setCd('clubParty', PARTY_CD);
-    st.cash += m;
-    track('clubParty');
-    confetti(80); sfx('jackpot');
-    resultModal({ emoji: '🪩', title: 'VIP-вечеринка удалась!', text: `Звёзды района до утра на танцполе. В кассу +${fmt(m)} ₽`, btn: 'Огонь' });
-  },
-});

@@ -458,7 +458,7 @@ function divorcePeace() {
 // Имущество, которое можно отдать при разводе
 function divorceAssets() {
   const out = [];
-  BUSINESSES.forEach((b) => { if (S.biz[b.id]) out.push({ id: `biz:${b.id}`, emoji: b.emoji, name: b.name, value: b.price }); });
+  BUSINESSES.forEach((b) => { if (S.biz[b.id]) out.push({ id: `biz:${b.id}`, emoji: b.emoji, name: b.name, value: businessInvestment(b,S.biz[b.id])+businessPayout(S.biz[b.id]).net }); });
   if (S.transport > 0) { const t = TRANSPORT[S.transport]; out.push({ id: 'car', emoji: t.emoji, name: t.name, value: t.price }); }
   if (S.ownedHousing >= 3) { const h = HOUSING[S.ownedHousing]; out.push({ id: 'house', emoji: '🏠', name: h.name, value: h.price }); }
   S.pets.filter((id) => !S.shelter.includes(id)).forEach((id) => { const p = PETS.find((x) => x.id === id); out.push({ id: `pet:${id}`, emoji: '🐾', name: p.name, value: p.price || 1000 }); });
@@ -492,7 +492,7 @@ function divorceGive(id) {
   if (!g) return;
   const [kind, a, b] = id.split(':');
   let name = '';
-  if (kind === 'biz') { name = BUSINESSES.find((x) => x.id === a).name; delete S.biz[a]; }
+  if (kind === 'biz') { name = BUSINESSES.find((x) => x.id === a).name; delete S.biz[a]; if(a==='club')S.clubStaff={}; }
   if (kind === 'car') { name = TRANSPORT[S.transport].name; S.transport = 0; S.transportBroken = false; }
   if (kind === 'house') {
     name = HOUSING[S.ownedHousing].name;

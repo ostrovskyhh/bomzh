@@ -268,7 +268,7 @@ EXTRA_TABS.tasks.story = () => {
 // Что поедет: только уникальные, сезонные и купленные за звёзды вещи (у них в игре флаг season) и премиум-питомцы
 const CLUB_SELL_SHARE = 0.2;
 function moveKeepsItem(slot, id) { const it = CLOTHES[slot].find((x) => x.id === id); return !!(it && it.season); }
-function clubSellPrice() { const b = BUSINESSES.find((x) => x.id === 'club'); return b && S.biz && S.biz.club ? Math.round(b.price * CLUB_SELL_SHARE) : 0; }
+function clubSellPrice() { const b = BUSINESSES.find((x) => x.id === 'club'); return b && S.biz && S.biz.club ? Math.round(businessInvestment(b,S.biz.club) * CLUB_SELL_SHARE) : 0; }
 function partnerOf() { return S.girlfriend ? GIRLS.find((g) => g.id === S.girlfriend) : null; }
 let MOVE_PICK = { partner: null, club: null };
 
@@ -291,7 +291,7 @@ function moveStartModal() {
     ${p ? `<div class="move-box fam"><b>${married ? '👰' : '💑'} ${p.name}${kids ? ` и дети (${kids})` : ''}</b>
       ${married ? `Взять семью с собой или развестись${kids ? `. При разводе ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% любого дохода уйдёт на алименты` : ''}.` : 'Позвать её с собой в новый город или расстаться.'}
       <div class="move-opts">${opt('partner', 'take', married ? '👨‍👩‍👧 Едем вместе' : '💑 Едем вместе')}${opt('partner', 'leave', married ? `💔 Развод${kids ? ' и алименты' : ''}` : '💔 Расстаться', 'dark-path')}</div></div>` : ''}
-    ${club ? `<div class="move-box fam"><b>🪩 Ночной клуб «Золотая крышка»</b>Бизнесы с собой не увезёшь. Клуб можно успеть продать перекупщику за 20% цены — <b>${fmt(club)} ₽</b> поедут с тобой целиком.
+    ${club ? `<div class="move-box fam"><b>🪩 Ночной клуб «Золотая крышка»</b>Бизнесы с собой не увезёшь. Клуб можно успеть продать перекупщику за 20% стоимости с улучшениями и персоналом — <b>${fmt(club)} ₽</b> поедут с тобой целиком.
       <div class="move-opts">${opt('club', 'sell', `💰 Продать за ${fmt(club)} ₽`)}${opt('club', 'leave', '🏚️ Бросить', 'dark-path')}</div></div>` : ''}
     <div class="btns"><button class="btn primary wide" data-act="moveGo" ${ready ? '' : 'disabled data-why="Сначала реши, что делать с семьёй и клубом"'}>🧳 Бежать в Москвабад</button>
       <button class="btn wide" data-act="close">Подожду ещё</button></div>`, { center: true });

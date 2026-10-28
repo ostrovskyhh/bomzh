@@ -107,41 +107,7 @@ EXTRA_TABS.shop.clothes = () => {
 // 4. Бизнес простыми словами
 // =====================================================================
 function hoursText(h) { return h >= 48 ? `${Math.round(h / 24)} дн` : `${Math.round(h)} ч`; }
-const _bizTabSimple = EXTRA_TABS.life.business;
-EXTRA_TABS.life.business = () => {
-  const full = _bizTabSimple();
-  const clubPart = full.includes('<div class="subhead">🪩 Персонал клуба') ? full.slice(full.indexOf('<div class="subhead">🪩 Персонал клуба')) : '';
-  const net = (v) => v * (1 - BIZ_TAX);
-  const totalH = BUSINESSES.reduce((a, b) => a + (S.biz[b.id] ? net(bizIncome(b, S.biz[b.id])) : 0), 0);
-  const rows = BUSINESSES.map((b) => {
-    const st = S.biz[b.id];
-    if (!st) {
-      const ok = level() >= b.level;
-      const inc = net(bizIncome(b,{lvl:1,broken:false}));
-      return card({ thumb: b.emoji, title: b.name, cls: ok ? '' : 'locked',
-        desc: `💰 Приносит <b>${incomeHTML('biz-rate',b.id)}/ч</b> чистыми<br>⏱️ Срок окупаемости: <b>${incomeHTML('biz-payback',b.id)}</b>`,
-        extra: ok ? '' : reqHTML({ level: b.level }), btn: ok ? priceBtn('bizBuy', b.id, b.price, S.money >= b.price) : lockBtn });
-    }
-    const rate = bizIncome(b,st), cap = bizCap(b, st), pct = cap>0?Math.min(1,st.cash/cap):0;
-    const fillH = rate>0?Math.max(0,(cap-st.cash)/rate):Infinity;
-    const upCost = bizUpgradeCost(b, st);
-    const upGain = incomeUpgradeGain(b);
-    return `<div class="card card-col biz">
-      <div class="biz-head"><div class="thumb">${b.emoji}</div><div class="card-body"><div class="card-title">${b.name} <span class="rarity rare">ур. ${st.lvl}/${BIZ_MAX_LVL}</span></div>
-        <div class="card-desc">💰 Приносит <b>${incomeHTML('biz-rate',b.id)}/ч</b>${st.broken ? ' · <span style="color:var(--red)">🔧 сломано: доход вдвое меньше</span>' : ''}</div></div></div>
-      <div class="progress"><div data-income-progress="${b.id}" style="width:${pct * 100}%;${pct >= 1 ? 'background:var(--red)' : ''}"></div></div>
-      <div class="card-desc">🗃️ В кассе <b>${incomeHTML('biz-cash',b.id)}</b> — ${incomeHTML('biz-fill',b.id)}</div>
-      ${st.lvl < BIZ_MAX_LVL ? `<div class="card-desc">⬆️ Улучшение: <b>+${incomeHTML('biz-upgain',b.id)}/ч</b> за ${fmt(upCost)} ₽ — срок окупаемости: ${incomeHTML('biz-uppayback',b.id)}</div>` : ''}
-      <div class="row-btns">
-        <button class="btn primary" data-act="bizCollect" data-id="${b.id}" ${st.cash >= 1 ? '' : 'disabled'}>Забрать</button>
-        ${st.lvl < BIZ_MAX_LVL ? priceBtn('bizUp', b.id, upCost, S.money >= upCost, `⬆️ ${fmtShort(upCost)}`) : '<button class="btn" disabled>MAX</button>'}
-        ${st.broken ? priceBtn('bizFix', b.id, b.price * 0.05, S.money >= b.price * 0.05, `🔧 ${fmtShort(b.price * 0.05)}`) : ''}
-      </div></div>`;
-  }).join('');
-  return `<div class="info-card biz-how"><b>Как работает бизнес</b> — 3 шага:<br>1️⃣ Купи. 2️⃣ Деньги сами капают в кассу, даже когда ты не в игре. 3️⃣ Заходи и жми «Забрать».
-      <br><small>Касса вмещает ${incomeHTML('biz-hours')} ч дохода. Цифры уже после налога ${BIZ_TAX * 100}%. ${incomeHTML('biz-note')}</small>
-      <br>Все твои бизнесы: <b>${incomeHTML('biz-total')}/ч</b></div>${rows}${clubPart}`;
-};
+// The business dashboard is defined in passive-business.js.
 
 // =====================================================================
 // 5. Уникальное имя бомжа = имя профиля

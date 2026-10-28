@@ -220,7 +220,7 @@ let CLAN = { data: undefined, list: null, at: 0, loading: false };
 
 function clanBonus() { return S.clan ? CLAN_BONUS * ((S.clan.level || 1) - 1) : 0; }
 HOOKS.mods.push((m) => { const b = clanBonus(); if (b) { m.tap *= 1 + b; m.work *= 1 + b; } });
-bizIncome = (function (orig) { return (b, st) => orig(b, st) * (1 + clanBonus()); })(bizIncome);
+// The gang business bonus is included once in businessRates().
 
 async function clanLoad(force) {
   if (!onlineOn() || CLAN.loading || (!force && Date.now() - CLAN.at < 15000)) return;
