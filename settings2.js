@@ -12,6 +12,29 @@ const SET_PAGES = [
 ];
 let SET_PAGE = null;
 function setEl(html) { const d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
+function communityRewardButtons() {
+  return setEl('<div class="set-block"><b>🎁 30 крышек + 1 день VIP</b><p>Вступи в беседу и проверь участие. Награда один раз на аккаунт. День VIP добавится к оставшемуся сроку.</p><button class="btn primary wide" data-act="communityReward">Проверить участие и получить награду</button></div>');
+}
+let communityRewardBusy = false;
+async function communityRewardCheck(silent = false) {
+  if (communityRewardBusy) return;
+  if (!onlineOn()) { if (!silent) toast('Открой игру через Telegram и проверь соединение'); return; }
+  communityRewardBusy = true;
+  const buttons = [...document.querySelectorAll('[data-act="communityReward"]')];
+  buttons.forEach(b => { b.disabled = true; b.textContent = 'Проверяем участие…'; });
+  try {
+    const r = await apiPost('community/reward');
+    if (!r.ok) { if (!silent) toast(r.error || 'Не удалось проверить участие'); return; }
+    // Обе части забираются штатной очередью подарков, совместимой со старым клиентом.
+    await giftClaim();
+    if (!silent && r.already) toast('Разовая награда уже выдана. Неполученный подарок придёт при входе в игру.');
+  } catch (e) { if (!silent) toast('Нет связи с сервером. Попробуй ещё раз.'); }
+  finally {
+    communityRewardBusy = false;
+    buttons.forEach(b => { b.disabled = false; b.textContent = 'Проверить участие и получить награду'; });
+  }
+}
+HOOKS.load.push(() => setTimeout(() => communityRewardCheck(true), 6500));
 
 openSettings = (function (orig) {
   return function () {
@@ -45,8 +68,8 @@ openSettings = (function (orig) {
       look: [grp('Подсказки', [rowBy('toggleTips')])],
       sound: [grp('Звук', soundRows), grp('Музыка и тема звуков', blocks)],
       progress: [grp('История', [btnBy('journal'), btnBy('story')]), grp('Обучение', [btnBy('restartTut')]), grp('⚠️ Опасная зона', [btnBy('reset')], 'danger')],
-      friends: secs.friends ? [grp('Сообщество', [setEl('<button class="btn primary wide" data-act="community">🍾 Беседа игроков в Telegram</button>')]), grp('Друзья', [...secs.friends.children])] : [],
-      help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>')]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news')]), secs.help.querySelector('.test-note')] : [],
+      friends: secs.friends ? [grp('Сообщество', [setEl('<button class="btn primary wide" data-act="community">🍾 Беседа игроков в Telegram</button>'), communityRewardButtons()]), grp('Друзья', [...secs.friends.children])] : [],
+      help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>'), communityRewardButtons()]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news')]), secs.help.querySelector('.test-note')] : [],
       admin: secs.admin ? [grp('Админ', [...secs.admin.children])] : [],
     };
     const list = [...SET_PAGES, ...(secs.admin ? [{ id: 'admin', e: '🛠️', t: 'Админ', d: 'Игроки, мир, сервер' }] : [])];
@@ -73,6 +96,7 @@ openSettings = (function (orig) {
 })(openSettings);
 
 Object.assign(ACTIONS, {
+  communityReward: () => communityRewardCheck(false),
   community: () => {
     if (tg && tg.openTelegramLink) tg.openTelegramLink(COMMUNITY_LINK);
     else window.open(COMMUNITY_LINK, '_blank', 'noopener,noreferrer');
