@@ -22,6 +22,11 @@ const AVATARS = [
   { id: 'legend', face: '🌟', name: 'Легенда', how: 'Начать новый круг (престиж)', need: () => (S.prestige || 0) >= 1 },
 ];
 
+// Заслуженная до престижа аватарка остаётся открытой после сброса уровня и сюжета.
+AVATARS.filter((a) => a.id !== 'vip').forEach((a) => {
+  const need = a.need;
+  a.need = () => (S.prestigeAvatars || []).includes(a.id) || need();
+});
 function avatarById(id) { return AVATARS.find((a) => a.id === id); }
 function currentAvatar() { const a = avatarById(S.avatar); return a && a.face && a.need() ? a : null; }
 // Что показать в кружке: значок аватарки или первая буква имени

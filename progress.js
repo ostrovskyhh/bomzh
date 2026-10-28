@@ -172,6 +172,10 @@ const FRAMES = [
   { id: 'champ', name: 'Чемпион турнира', need: () => counter('tourPrize') > 0, how: 'Выиграть турнир по вторникам' },
   { id: 'fire', name: 'Огненная', need: () => (S.fight && S.fight.best >= 10), how: 'Серия из 10 побед в драках' },
 ];
+FRAMES.filter((f) => f.id !== 'vip').forEach((f) => {
+  const need = f.need;
+  f.need = () => (S.prestigeFrames || []).includes(f.id) || need();
+});
 function achTotal() { return ACHS.reduce((a, x) => a + achTier(x), 0); }
 function currentFrame() { const f = FRAMES.find((x) => x.id === S.frame); return f && f.need() ? f.id : 'none'; }
 

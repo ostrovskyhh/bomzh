@@ -704,7 +704,7 @@ EXTRA_TABS.tasks.prestige = () => `
   <div class="premium-hero prestige"><div class="e">⭐</div><div><b>Престиж ${S.prestige || 0}</b>
     <p>Каждый круг: +10% ко всему доходу и +5% к опыту навсегда. Очки престижа — на постоянные перки.</p></div></div>
   <div class="info-card">Чтобы начать новый круг: <b>уровень ${PRESTIGE_REQ.level}</b> и <b>свой особняк</b>.
-    Сбросятся деньги, уровень, жильё, одежда, образование, бизнесы, транспорт и сюжет. Останутся: престиж, перки, достижения, питомцы и праздничные шапки.
+    Сбросятся игровые деньги, уровень, жильё, обычная одежда, образование, бизнесы, транспорт и сюжет. Сохранятся крышки, VIP и оплаченные бонусы, косметика, ключи кейсов, батл-пасс, достижения и их прогресс, коллекции, питомцы, наградные шапки, статистика и настройки.
     ${reqHTML({ level: PRESTIGE_REQ.level, housing: 6 })}
     ${canPrestige() ? `<br>Получишь: <b>+${prestigeGain()} очк. престижа</b>` : ''}</div>
   <button class="btn ${canPrestige() ? 'primary' : ''} wide" data-act="prestigeGo" ${canPrestige() ? '' : 'disabled'}>⭐ Начать новый круг</button>
@@ -716,11 +716,36 @@ EXTRA_TABS.tasks.prestige = () => `
       btn: l >= p.max ? '<button class="btn" disabled>MAX</button>' : `<button class="btn ${S.pp >= cost ? 'primary' : ''}" data-act="perkUp" data-id="${p.id}" ${S.pp >= cost ? '' : 'disabled'}>⭐ ${cost}</button>` });
   }).join('')}`;
 
+// Только прогресс текущего круга сбрасывается. Эти данные принадлежат профилю.
+function prestigeProfile() {
+  const keys = [
+    'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial',
+    'cosm', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
+    'pass', 'passFrame', 'frame', 'avatar', 'aura', 'tapFx', 'avatarsSeen',
+    'ach', 'achNotified', 'achProgress', 'coll', 'counters', 'stats', 'casinoStats',
+    'settings', 'name', 'log', 'play', 'daily', 'tasks', 'weekly', 'seasonCur',
+    'pets', 'pet', 'petBond', 'petNames', 'petPantry', 'petFood', 'petFedAt',
+    'petHp', 'petHpAt', 'petSick', 'petCd', 'petPetAt', 'petFindAt', 'petFind2At', 'petFind3At', 'shelter',
+    'refUsed', 'refInvited', 'refCapsFor', 'storyRewarded', 'clan', 'friendCount',
+    'onlineWins', 'rpsWins', 'cutSeen', 'storyScenes', 'storyPicks',
+    'tipsSeen', 'adviceSeen', 'unlockSeen', 'seenVersion', 'bcSeen', 'chatSeen',
+    'admin', 'rev', 'city', 'moves',
+  ];
+  const keep = {};
+  for (const key of keys) if (S[key] !== undefined) keep[key] = S[key];
+  keep.achProgress = { ...(S.achProgress || {}) };
+  for (const a of ACHS) keep.achProgress[a.id] = achValue(a);
+  keep.prestigeAvatars = [...new Set([...(S.prestigeAvatars || []), ...AVATARS.filter((a) => a.id !== 'vip' && !a.donate && a.need()).map((a) => a.id)])];
+  keep.prestigeFrames = [...new Set([...(S.prestigeFrames || []), ...FRAMES.filter((f) => f.id !== 'vip' && !f.donate && f.need()).map((f) => f.id)])];
+  return keep;
+}
+
 Object.assign(ACTIONS, {
   prestigeGo: () => {
     if (!canPrestige()) return;
     const doIt = () => {
       const keep = {
+        ...prestigeProfile(),
         prestige: (S.prestige || 0) + 1, pp: (S.pp || 0) + prestigeGain(), perks: S.perks, ach: S.ach, achNotified: S.achNotified,
         counters: S.counters, settings: S.settings, log: S.log, pets: S.pets, pet: S.pet, seasonCur: S.seasonCur,
         tut: { step: 99, done: true }, storySeen: true, questHistory: [...(S.questHistory || []), S.quest && S.quest.path].filter(Boolean),
@@ -732,14 +757,15 @@ Object.assign(ACTIONS, {
       S.owned.hat.push(...seasonal.hat);
       S.money = perk('capital') * 3000;
       track('prestigeDone');
-      renderedHousing = -1; renderedLook = '';
+      renderedHousing = -1; renderedLook = ''; renderedPet = '';
       save();
       confetti(120);
       sfx('jackpot');
       resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Валера проснулся на той же лавке… но теперь он знает, как подняться. Доход +${S.prestige * 10}%, опыт +${S.prestige * 5}%. Очков престижа: ${S.pp}`, btn: 'Погнали!' });
     };
-    if (tg && tg.initData && tg.showConfirm) tg.showConfirm('Начать новый круг? Деньги и имущество обнулятся.', (ok) => ok && doIt());
-    else if (confirm('Начать новый круг? Деньги и имущество обнулятся.')) doIt();
+    const warning = 'Начать новый круг? Игровые деньги, уровень, имущество и сюжет сбросятся. Крышки, VIP, покупки, достижения и питомцы сохранятся.';
+    if (tg && tg.initData && tg.showConfirm) tg.showConfirm(warning, (ok) => ok && doIt());
+    else if (confirm(warning)) doIt();
   },
   perkUp: (id) => {
     const p = PERKS.find((x) => x.id === id), cost = perk(id) + 1;
@@ -781,7 +807,7 @@ const ACHS = [
   { id: 'story', name: 'Летописец', emoji: '📖', key: 'questDone', goals: [5, 15, 30, 60], unit: 'сюжетных глав' },
 ];
 
-function achValue(a) { return a.fn ? a.fn() : counter(a.key); }
+function achValue(a) { return Math.max((S.achProgress || {})[a.id] || 0, a.fn ? a.fn() : counter(a.key)); }
 function achTier(a) { return S.ach[a.id] || 0; } // сколько уровней уже забрано
 function achReady(a) { const t = achTier(a); return t < a.goals.length && achValue(a) >= a.goals[t]; }
 
