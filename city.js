@@ -431,13 +431,4 @@ myStats = (function (orig) {
   return function () { return { ...orig(), city: CITIES[city()].idx, city_name: cityName() }; };
 })(myStats);
 
-// Престиж: новый круг начинается в том же городе
-const _prestigeGoCity = ACTIONS.prestigeGo;
-ACTIONS.prestigeGo = () => {
-  const keep = { city: S.city, moves: S.moves };
-  const before = S.prestige || 0;
-  _prestigeGoCity();
-  // Подтверждение в Telegram асинхронное — город возвращаем, когда круг действительно начался
-  const restore = () => { if ((S.prestige || 0) > before) { Object.assign(S, keep); applyCity(); save(); refresh(); return true; } return false; };
-  if (!restore()) { let n = 0; const t = setInterval(() => { if (restore() || ++n > 120) clearInterval(t); }, 500); }
-};
+// Город сохраняется в prestigeProfile и применяется сразу после подтверждённого сброса.

@@ -2174,16 +2174,19 @@ body.city-mex .res { box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
 @keyframes frameFiesta { 0% { box-shadow: 0 0 0 3px #FF3A8A, 0 0 0 5px #3CCB5A; } 33% { box-shadow: 0 0 0 3px #F2C744, 0 0 0 5px #FF3A8A; } 66% { box-shadow: 0 0 0 3px #3CCB5A, 0 0 0 5px #F2C744; } 100% { box-shadow: 0 0 0 3px #FF3A8A, 0 0 0 5px #3CCB5A; } }
 /* ===== Кейсы 4.1: осмотр вещи в 3D ===== */
 .insp h3 { text-align: center; margin: 0 0 8px; }
-.insp-stage { position: relative; height: 230px; border-radius: 18px; overflow: hidden; perspective: 600px; touch-action: none; cursor: grab;
+.insp-stage { position: relative; height: 300px; border-radius: 18px; overflow: hidden; touch-action: none; cursor: grab;
   background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c) 28%, transparent), transparent 60%), linear-gradient(180deg, #1A1D26, #0D0F14); }
 .insp-stage:active { cursor: grabbing; }
 .insp-glow { position: absolute; left: 50%; top: 46%; width: 150px; height: 150px; margin: -75px; border-radius: 50%; background: var(--c); opacity: .18; filter: blur(30px); animation: inspGlow 3s ease-in-out infinite; }
 @keyframes inspGlow { 50% { opacity: .32; transform: scale(1.15); } }
-.insp-obj { position: absolute; left: 50%; top: 44%; width: 120px; height: 120px; margin: -60px; transform-style: preserve-3d; will-change: transform; }
-.insp-obj span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 96px; line-height: 1; user-select: none; }
-.insp-obj span.front { filter: saturate(calc(1 - var(--wear) * .55)) sepia(calc(var(--wear) * .35)) drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
-.insp-marks { position: absolute; inset: 0; transform: translateZ(.5px); pointer-events: none; }
-.insp-marks i { position: absolute; height: 2px; border-radius: 2px; background: rgba(255,255,255,.55); box-shadow: 0 0 2px rgba(0,0,0,.6); mix-blend-mode: overlay; }
+.insp-obj { position: absolute; inset: 0; }
+.insp-obj canvas { display: block; width: 100%; height: 100%; }
+.insp-loading { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: var(--muted); font-size: 14px; }
+.insp-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px 0; }
+.insp-tools .btn { min-height: 38px; }
+.sheet.insp-large { width: min(96vw, 900px); max-width: 900px; }
+.sheet.insp-large .insp-stage { height: min(60vh, 620px); min-height: 300px; }
+.insp-stage:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .insp-floor { position: absolute; left: 50%; bottom: 26px; width: 140px; height: 18px; margin-left: -70px; border-radius: 50%; background: radial-gradient(rgba(0,0,0,.6), transparent 70%); }
 .insp-hint { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; color: rgba(255,255,255,.45); font-size: 10px; }
 .insp-tags { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
@@ -2194,6 +2197,17 @@ body.city-mex .res { box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
 .insp-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 13px; }
 .insp-row small { color: var(--muted); }
 .insp-btns { display: flex; gap: 6px; }
+.prestige-steps { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; }
+.prestige-steps i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--card2); color: var(--muted); font-style: normal; font-weight: 800; }
+.prestige-steps i.on { background: var(--gold); color: #251a0c; }
+.prestige-steps span { margin-left: 8px; font-size: 12px; color: var(--muted); }
+.prestige-warning { text-align: left; padding: 14px; border-radius: 14px; margin: 12px 0; border: 1px solid var(--line); background: var(--card2); }
+.prestige-warning.lost { border-color: #b65747; }
+.prestige-warning.kept { border-color: #4d9170; }
+.prestige-warning ul { margin: 10px 0 0; padding-left: 19px; font-size: 13px; line-height: 1.55; }
+.prestige-warning small { display: block; margin-top: 7px; line-height: 1.5; color: var(--muted); }
+.prestige-ack { display: flex; gap: 10px; align-items: flex-start; text-align: left; margin: 18px 0; font-size: 14px; line-height: 1.45; }
+.prestige-ack input { width: 22px; height: 22px; flex: 0 0 22px; accent-color: var(--gold); }
 /* ===== Мексика 4.1: свои мини-игры ===== */
 .mx-arena { color: #fff; }
 .mx-kitchen { background: radial-gradient(circle at 50% 120%, #FF6A00 0, #7A2A00 40%, #2A1208 75%); }

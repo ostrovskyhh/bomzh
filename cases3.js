@@ -132,25 +132,15 @@ caseRollItem = (function (orig) {
 let INSP = null;
 function inspectItem(it, opts = {}) {
   if (!it) return;
+  if (INSP && INSP.dispose) INSP.dispose();
   const rar = RARITY.find((r) => r.id === it.rar) || RARITY[0];
   const fl = itemWear(it);
   const from = CASES.find((c) => c.id === it.from);
-  const layers = 14;
-  const stack = Array.from({ length: layers }, (_, i) => {
-    const z = (i - layers + 1) * 1.4;
-    const front = i === layers - 1;
-    return `<span class="${front ? 'front' : ''}" style="transform:translateZ(${z}px);${front ? '' : `filter:brightness(${(0.25 + i * 0.03).toFixed(2)}) saturate(.6)`}">${it.e}</span>`;
-  }).join('');
-  const scratches = Math.round(fl * 9);
-  const marks = Array.from({ length: scratches }, (_, i) => {
-    const h = (it.pat || 7) * 37 + i * 101;
-    return `<i style="left:${(h * 13) % 80 + 10}%;top:${(h * 7) % 70 + 15}%;width:${8 + (h % 22)}%;transform:rotate(${(h * 17) % 180}deg)"></i>`;
-  }).join('');
   openModal(`<div class="insp" style="--c:${rar.color}">
     <h3>🔍 ${esc(it.name)}</h3>
-    <div class="insp-stage" id="inspStage"><div class="insp-glow"></div>
-      <div class="insp-obj" id="inspObj" style="--wear:${fl.toFixed(3)}">${stack}<div class="insp-marks">${marks}</div></div>
-      <div class="insp-floor"></div><small class="insp-hint">Крути пальцем · колесо — зум</small></div>
+    <div class="insp-stage" id="inspStage" tabindex="0" role="region" aria-label="Осмотр вещи: вращай пальцем или стрелками, масштаб — колесом или двумя пальцами"><div class="insp-glow"></div>
+      <div class="insp-obj" id="inspObj"></div><small class="insp-hint">Вращай пальцем · два пальца или колесо — зум</small></div>
+    <div class="insp-tools"><button class="btn small" data-act="inspZoom" data-id="out" aria-label="Отдалить">−</button><button class="btn small" data-act="inspZoom" data-id="in" aria-label="Приблизить">+</button><button class="btn small" data-act="inspAuto" aria-pressed="true">⏸ Остановить</button><button class="btn small" data-act="inspReset">↺ Сбросить вид</button><button class="btn small" data-act="inspExpand">⛶ Развернуть</button></div>
     <div class="insp-tags"><span style="color:${rar.color}">${rar.name}</span><span>${qualityName(it) || '—'}</span><span>${itemType(it.e)}</span></div>
     <div class="insp-wear"><div class="insp-bar"><b style="left:${(fl * 100).toFixed(1)}%"></b></div>
       <div class="insp-row"><small>Износ</small><b>${fl.toFixed(4)}</b></div>
@@ -160,44 +150,18 @@ function inspectItem(it, opts = {}) {
     <div class="btns" style="flex-direction:column;gap:8px">
       ${opts.sell !== undefined ? `<button class="btn primary wide" data-act="fleaSell" data-id="${opts.sell}">💰 Продать за ${fmt(fleaPrice(it))} ₽</button>` : ''}
       <button class="btn wide" data-act="${opts.back || 'flea'}">← Назад</button></div></div>`, { center: true });
-  inspBind();
+  inspBind(it);
 }
-function inspBind() {
+function inspBind(it) {
   const stage = $('inspStage'), obj = $('inspObj');
   if (!stage || !obj) return;
-  INSP = { rx: -12, ry: 25, vx: 0, vy: 0.35, zoom: 1, drag: null, raf: 0 };
-  const draw = () => { obj.style.transform = `scale(${INSP.zoom}) rotateX(${INSP.rx}deg) rotateY(${INSP.ry}deg)`; };
-  const loop = () => {
-    if (!INSP || !$('inspObj')) { INSP = null; return; }
-    if (!INSP.drag) {
-      INSP.ry += INSP.vy; INSP.rx += INSP.vx;
-      INSP.vy += (0.35 - INSP.vy) * 0.02; INSP.vx *= 0.94; INSP.rx += (-12 - INSP.rx) * 0.02;
-    }
-    draw();
-    INSP.raf = requestAnimationFrame(loop);
-  };
-  stage.addEventListener('pointerdown', (e) => { INSP.drag = { x: e.clientX, y: e.clientY, t: performance.now() }; try { stage.setPointerCapture(e.pointerId); } catch (err) { /* синтетическое касание */ } });
-  stage.addEventListener('pointermove', (e) => {
-    if (!INSP || !INSP.drag) return;
-    const dx = e.clientX - INSP.drag.x, dy = e.clientY - INSP.drag.y;
-    INSP.ry += dx * 0.6; INSP.rx = clamp(INSP.rx - dy * 0.5, -70, 70);
-    INSP.vy = dx * 0.25; INSP.vx = -dy * 0.15;
-    INSP.drag.x = e.clientX; INSP.drag.y = e.clientY;
-  });
-  const up = () => { if (INSP) INSP.drag = null; };
-  stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
-  stage.addEventListener('wheel', (e) => { e.preventDefault(); INSP.zoom = clamp(INSP.zoom - e.deltaY * 0.001, 0.6, 1.8); }, { passive: false });
-  // Двумя пальцами — зум
-  let pinch = 0;
-  stage.addEventListener('touchstart', (e) => { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }, { passive: true });
-  stage.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 2 || !pinch) return;
-    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    INSP.zoom = clamp(INSP.zoom * d / pinch, 0.6, 1.8); pinch = d;
-  }, { passive: true });
-  cancelAnimationFrame(INSP.raf);
-  loop();
+  INSP = ItemViewer.mount(stage, obj, it);
 }
+
+ACTIONS.inspZoom = (id) => { if (INSP && !INSP.disposed) INSP.zoomBy(id === 'in' ? 1.2 : 1 / 1.2); };
+ACTIONS.inspAuto = () => { if (INSP && !INSP.disposed) INSP.toggle(); };
+ACTIONS.inspReset = () => { if (INSP && !INSP.disposed) INSP.reset(); };
+ACTIONS.inspExpand = (_, button) => { const sheet = $('inspStage') && $('inspStage').closest('.sheet'); if (sheet) { const expanded = sheet.classList.toggle('insp-large'); if (button) button.textContent = expanded ? '↙ Свернуть' : '⛶ Развернуть'; } };
 
 ACTIONS.inspect = (i) => { const it = fleaInv()[+i]; inspectItem(it, { sell: +i }); };
 ACTIONS.inspectLast = () => { const inv = fleaInv(); inspectItem(inv[inv.length - 1], { sell: inv.length - 1, back: 'cases' }); };

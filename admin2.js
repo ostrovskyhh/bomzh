@@ -34,7 +34,7 @@ function admWorld() {
     <div class="subhead">🎲 События</div>
     <div class="admin-grid"><button class="btn" data-act="adm2" data-id="event">Уличное событие</button><button class="btn" data-act="adm2" data-id="tip">Окно «Поддержи»</button>
       <button class="btn" data-act="adm2" data-id="news">Окно «Что нового»</button><button class="btn" data-act="adm2" data-id="tut">Обучение заново</button>
-      <button class="btn" data-act="adm2" data-id="night">🌙 Ночь казино на 10 мин</button><button class="btn" data-act="adm2" data-id="beta">🧪 Бета-дизайн ${beta() ? 'выкл' : 'вкл'}</button></div>`;
+      <button class="btn" data-act="adm2" data-id="night">🌙 Ночь казино на 10 мин</button></div>`;
 }
 
 function admServer() {
@@ -200,7 +200,6 @@ Object.assign(ACTIONS, {
       case 'pets': PETS.forEach((p) => { if (!S.pets.includes(p.id)) S.pets.push(p.id); }); break;
       case 'fleaClear': S.flea = []; break;
       case 'night': S.admNightUntil = Date.now() + 10 * 60000; break;
-      case 'beta': S.settings.beta = !beta(); closeModal(); betaApply(); save(); return;
       case 'saveCopy': {
         const txt = JSON.stringify(S);
         navigator.clipboard.writeText(txt).then(() => toast('📋 Сохранение скопировано', 'good')).catch(() => { $('admSaveText').value = txt; toast('Скопируй текст из поля', 'good'); });

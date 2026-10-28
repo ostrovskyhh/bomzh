@@ -2972,7 +2972,7 @@ function init() {
   document.querySelectorAll('.seg button').forEach((b) => {
     b.onclick = () => { if (typeof BugReport !== 'undefined') BugReport.record('tab', { to: `${b.closest('.seg').dataset.group}/${b.dataset.tab}` }); TABS[b.closest('.seg').dataset.group] = b.dataset.tab; renderCurrent(true); haptic('light'); };
   });
-  document.querySelectorAll('#tabbar button').forEach((b) => { b.onclick = () => showScreen(b.dataset.screen); });
+  document.querySelectorAll('#tabbar button').forEach((b) => { b.onclick = () => b.dataset.hub ? ACTIONS.betaHub(b.dataset.hub) : showScreen(b.dataset.screen); });
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else { applyOffline(); lastTick = Date.now(); } });
   window.addEventListener('pagehide', save);

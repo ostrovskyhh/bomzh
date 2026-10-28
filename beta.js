@@ -1,10 +1,10 @@
-// Бета-дизайн 3.1 — включается в ⚙️ Настройках («🧪 Новый дизайн»). Без галочки игра выглядит как раньше.
+// Основной интерфейс игры: плитки разделов, живая сцена и витрина кейсов.
 // 1) Навигация: 6 кнопок внизу (Дом · Валера · Деньги · Досуг · Люди · Цели), в каждой — плитки с живым статусом.
 //    Плитка открывает старый раздел целиком, сверху — «‹ назад». Старые экраны и отрисовка не меняются.
 // 2) Живой Валера и питомец: сами что-то делают, говорят фразы, показывают голод и усталость.
 // 3) Премиальные кейсы: витрина с картинками, лента дропов игроков, открытие с подсветкой редкости.
 
-function beta() { return !!(S.settings && S.settings.beta); }
+function beta() { return true; } // Имя оставлено для совместимости модулей.
 
 // ---------- 1. Навигация ----------
 // Плитка: [экран, вкладка] старой игры или act — действие. alt — соседние вкладки одной плиткой (Врачи/Спорт)
@@ -35,7 +35,7 @@ const BETA_HUBS = [
     ['Трофеи', [{ s: 'tasks', t: 'ach' }, { s: 'tasks', t: 'coll' }, { s: 'tasks', t: 'prestige' }]],
   ] },
 ];
-const BNAV = { hub: 'home', origTabbar: '' };
+const BNAV = { hub: 'home' };
 
 function betaTabBtn(s, t) { return document.querySelector(`.seg[data-group="${s}"] button[data-tab="${t}"]`); }
 function betaHubOf(s, t) {
@@ -127,7 +127,6 @@ function betaMarkTabbar() {
 
 showScreen = (function (orig) {
   return function (name, tab) {
-    if (!beta()) return orig(name, tab);
     if (name === 'game') BNAV.hub = 'home';
     else if (name !== 'hub') { const h = betaHubOf(name, tab || TABS[name]) || betaHubOf(betaTileOf(name, tab || TABS[name])?.s, betaTileOf(name, tab || TABS[name])?.t); if (h) BNAV.hub = h.id; }
     orig(name, tab);
@@ -139,50 +138,27 @@ showScreen = (function (orig) {
 function betaApply() {
   const tb = $('tabbar');
   if (!tb) return;
-  if (!BNAV.origTabbar) BNAV.origTabbar = tb.innerHTML;
-  document.body.classList.toggle('beta', beta());
+  document.body.classList.add('beta');
+  if (S.settings) delete S.settings.beta;
   if (!$('screen-hub')) {
     document.querySelector('main').insertAdjacentHTML('beforeend', '<section class="screen" id="screen-hub"><div class="list" id="hubList"></div></section>');
     ['shop', 'life', 'fun', 'tasks'].forEach((s) => $('screen-' + s).insertAdjacentHTML('afterbegin', `<div class="beta-back" id="bb-${s}"></div>`));
   }
-  if (beta()) {
     // Точки «Жизни» и «Заданий» остаются в разметке: их включает старый код
     tb.innerHTML = BETA_HUBS.map((h) => `<button data-hub="${h.id}"><span>${h.e}</span>${h.n}<i class="dot hidden" data-hubdot="${h.id}"></i></button>`).join('')
       + '<i class="dot hidden" id="lifeDot" style="display:none"></i><i class="dot hidden" id="tasksDot" style="display:none"></i>';
     tb.querySelectorAll('button[data-hub]').forEach((b) => { b.onclick = () => ACTIONS.betaHub(b.dataset.hub); });
-  } else {
-    tb.innerHTML = BNAV.origTabbar;
-    tb.querySelectorAll('button').forEach((b) => { b.onclick = () => showScreen(b.dataset.screen); });
-  }
   BNAV.hub = 'home';
   showScreen('game');
 }
-HOOKS.load.push(betaApply); // после загрузки сохранения: только тогда известна галочка
+HOOKS.load.push(betaApply);
 HOOKS.hud.push(() => {
   if (!beta()) return;
   const al = typeof sectionAlerts === 'function' ? sectionAlerts() : {};
   document.querySelectorAll('#tabbar [data-hubdot]').forEach((d) => { const h = BETA_HUBS.find((x) => x.id === d.dataset.hubdot); d.classList.toggle('hidden', !h.groups || !betaHubAlert(h, al) || h.id === BNAV.hub); });
 });
 
-openSettings = (function (orig) {
-  return function () {
-    orig();
-    const list = document.querySelector('#modalRoot .set-list');
-    if (list) list.insertAdjacentHTML('afterbegin', `<div class="set-row beta-row"><div><b>🧪 Новый дизайн (бета)</b><small>Новые разделы внизу, живой Валера с питомцем, премиальные кейсы. Можно выключить в любой момент</small></div>
-      <button class="switch ${beta() ? 'on' : ''}" data-act="betaToggle"><i></i></button></div>`);
-  };
-})(openSettings);
-
 Object.assign(ACTIONS, {
-  betaToggle: (_, btn) => {
-    S.settings.beta = !beta();
-    btn.classList.toggle('on', beta());
-    save();
-    track('betaToggle');
-    closeModal();
-    betaApply();
-    toast(beta() ? '🧪 Новый дизайн включён. Вернуть старый — в ⚙️ Настройках' : 'Вернули привычный дизайн', 'good');
-  },
   betaHub: (id) => {
     BNAV.hub = id;
     if (id === 'home') { showScreen('game'); return; }
@@ -341,7 +317,6 @@ function rarColor(id) { return RARITY.find((r) => r.id === id).color; }
 
 openCases = (function (orig) {
   return function () {
-    if (!beta()) return orig();
     const gold = CASES.find((c) => c.caps), rest = CASES.filter((c) => !c.caps);
     const btn = (c) => {
       const ok = level() >= c.level, can = c.caps ? S.caps >= c.caps : S.money >= c.price;
@@ -369,7 +344,6 @@ openCases = (function (orig) {
 
 caseOpen = (function (orig) {
   return function (id) {
-    if (!beta()) return orig(id);
     const c = CASES.find((x) => x.id === id);
     if (!c || level() < c.level) return;
     if (c.caps ? S.caps < c.caps : S.money < c.price) { toast('Не хватает на кейс', 'bad'); return; }

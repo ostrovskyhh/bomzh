@@ -740,10 +740,23 @@ function prestigeProfile() {
   return keep;
 }
 
-Object.assign(ACTIONS, {
-  prestigeGo: () => {
-    if (!canPrestige()) return;
-    const doIt = () => {
+let PRESTIGE_FLOW = null;
+function prestigeWizard() {
+  if (!PRESTIGE_FLOW) return;
+  const step = PRESTIGE_FLOW.step;
+  const lost = `<ul><li>Игровые деньги и бутылки, включая замороженные средства.</li><li>Уровень, учёба, работа, сила и форма.</li><li>Жильё, обычная одежда, бизнесы и транспорт.</li><li>Обычный инвентарь и вещи на барахолке.</li><li>Текущий сюжет, криминальный прогресс, отношения и семья.</li></ul>`;
+  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, текущий город, престиж и перки.</li></ul>`;
+  const contents = step === 1
+    ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж сбросит прогресс этого круга. Отменить сброс или вернуть имущество кнопкой нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(perk('capital') * 3000)} ₽</b>.</p>`
+    : step === 2
+      ? `<h3>Продолжить с этими условиями?</h3><div class="prestige-warning kept"><b>Останется у тебя</b>${kept}</div><p>Остальное развитие начнётся заново. За этот круг получишь <b>+${prestigeGain()} очк. престижа</b>.</p>`
+      : `<h3>Последнее подтверждение</h3><p>Начать новый круг и сбросить прогресс?</p><div class="prestige-warning lost"><b>Потеряешь прогресс</b><small>Деньги, уровень, имущество, учёбу, работу, силу, форму, обычный инвентарь, сюжет и отношения.</small></div><div class="prestige-warning kept"><b>Сохранишь ценное</b><small>Крышки, VIP и покупки, батл-пасс, достижения, коллекции, питомцев, награды и перки.</small></div><label class="prestige-ack"><input type="checkbox" id="prestigeAck" data-act="prestigeAcknowledge"> Я понимаю, что прогресс сбросится без возможности отмены.</label>`;
+  openModal(`<div id="prestigeWizard" class="prestige-wizard"><div class="prestige-steps">${[1, 2, 3].map((n) => `<i class="${n <= step ? 'on' : ''}">${n}</i>`).join('')}<span>Шаг ${step} из 3</span></div>${contents}<div class="btns">${step < 3
+    ? `<button class="btn primary wide" data-act="prestigeNext">${step === 1 ? 'Понимаю потери — продолжить' : 'Да, перейти к подтверждению'}</button>`
+    : '<button class="btn danger wide" id="prestigeFinal" data-act="prestigeConfirm" disabled>Подтвердить сброс и получить престиж</button>'}
+    ${step > 1 ? '<button class="btn wide" data-act="prestigePrevious">← Ещё раз проверить</button>' : ''}<button class="btn wide" data-act="prestigeCancel">Отмена — сохранить прогресс</button></div></div>`, { center: true, locked: true });
+}
+function performPrestige() {
       const keep = {
         ...prestigeProfile(),
         prestige: (S.prestige || 0) + 1, pp: (S.pp || 0) + prestigeGain(), perks: S.perks, ach: S.ach, achNotified: S.achNotified,
@@ -758,14 +771,33 @@ Object.assign(ACTIONS, {
       S.money = perk('capital') * 3000;
       track('prestigeDone');
       renderedHousing = -1; renderedLook = ''; renderedPet = '';
+      if (typeof applyCity === 'function') applyCity();
       save();
       confetti(120);
       sfx('jackpot');
       resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Валера проснулся на той же лавке… но теперь он знает, как подняться. Доход +${S.prestige * 10}%, опыт +${S.prestige * 5}%. Очков престижа: ${S.pp}`, btn: 'Погнали!' });
-    };
-    const warning = 'Начать новый круг? Игровые деньги, уровень, имущество и сюжет сбросятся. Крышки, VIP, покупки, достижения и питомцы сохранятся.';
-    if (tg && tg.initData && tg.showConfirm) tg.showConfirm(warning, (ok) => ok && doIt());
-    else if (confirm(warning)) doIt();
+}
+function prestigeFlowValid() {
+  return PRESTIGE_FLOW && $('prestigeWizard') && canPrestige() && PRESTIGE_FLOW.prestige === (S.prestige || 0);
+}
+Object.assign(ACTIONS, {
+  prestigeGo: () => {
+    if (!canPrestige()) return;
+    PRESTIGE_FLOW = { step: 1, prestige: S.prestige || 0, acknowledged: false };
+    prestigeWizard();
+  },
+  prestigeNext: () => { if (!prestigeFlowValid() || PRESTIGE_FLOW.step >= 3) return; PRESTIGE_FLOW.step++; PRESTIGE_FLOW.acknowledged = false; prestigeWizard(); },
+  prestigePrevious: () => { if (!prestigeFlowValid() || PRESTIGE_FLOW.step <= 1) return; PRESTIGE_FLOW.step--; PRESTIGE_FLOW.acknowledged = false; prestigeWizard(); },
+  prestigeCancel: () => { PRESTIGE_FLOW = null; closeModal(); },
+  prestigeAcknowledge: () => {
+    if (!prestigeFlowValid() || PRESTIGE_FLOW.step !== 3) return;
+    PRESTIGE_FLOW.acknowledged = !!$('prestigeAck').checked;
+    $('prestigeFinal').disabled = !PRESTIGE_FLOW.acknowledged;
+  },
+  prestigeConfirm: () => {
+    if (!prestigeFlowValid() || PRESTIGE_FLOW.step !== 3 || !PRESTIGE_FLOW.acknowledged || !$('prestigeAck').checked) return;
+    PRESTIGE_FLOW = null;
+    performPrestige();
   },
   perkUp: (id) => {
     const p = PERKS.find((x) => x.id === id), cost = perk(id) + 1;

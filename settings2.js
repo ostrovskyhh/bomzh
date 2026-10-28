@@ -4,7 +4,7 @@
 const SET_PAGES = [
   { id: 'profile', e: '👤', t: 'Профиль', d: 'Имя, аватарка и рамка' },
   { id: 'notify', e: '🔔', t: 'Уведомления', d: 'О чём напишет бот' },
-  { id: 'look', e: '🎨', t: 'Интерфейс', d: 'Дизайн и подсказки' },
+  { id: 'look', e: '🎨', t: 'Интерфейс', d: 'Подсказки в игре' },
   { id: 'sound', e: '🔊', t: 'Звук и вибрация', d: 'Звуки, музыка, отклик' },
   { id: 'progress', e: '💾', t: 'Игра и прогресс', d: 'Журнал, интро, обучение, сброс' },
   { id: 'friends', e: '🤝', t: 'Друзья', d: 'Код приглашения и друзья' },
@@ -42,7 +42,7 @@ openSettings = (function (orig) {
         grp('Внешний вид в топе и чате', [setEl('<button class="btn wide" data-act="setLook">😎 Аватарка и рамка</button>')])],
       notify: [grp('Сообщения от бота', [rowBy('toggleRemind'), rowBy('toggleRateNotify')]),
         setEl('<div class="set-hint">Бот пишет, только если ты разрешил ему сообщения в Telegram</div>')],
-      look: [grp('Внешний вид', [rowBy('betaToggle')]), grp('Подсказки', [rowBy('toggleTips')])],
+      look: [grp('Подсказки', [rowBy('toggleTips')])],
       sound: [grp('Звук', soundRows), grp('Музыка и тема звуков', blocks)],
       progress: [grp('История', [btnBy('journal'), btnBy('story')]), grp('Обучение', [btnBy('restartTut')]), grp('⚠️ Опасная зона', [btnBy('reset')], 'danger')],
       friends: secs.friends ? [grp('Друзья', [...secs.friends.children])] : [],
