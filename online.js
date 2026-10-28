@@ -28,7 +28,7 @@ function myStats() {
     level: level(), prestige: S.prestige || 0, housing: S.ownedHousing || 0, edu: S.edu || 0,
     job: bj ? bj.r : 0, job_name: bj ? `${posName(bj.j.id, bj.r)} · ${bj.j.name}` : '',
     house_name: HOUSING[S.housing].name, rating: fs.rating, wins: fs.wins, online_wins: S.onlineWins || 0,
-    ach: ACHS.reduce((a, x) => a + achTier(x), 0), transport: S.transport || 0, biz: Object.keys(S.biz || {}).length,
+    ach: ACHS.filter((x) => x.id !== 'playtime').reduce((a, x) => a + achTier(x), 0), transport: S.transport || 0, biz: Object.keys(S.biz || {}).length,
     quest: (S.quest && S.quest.idx) || 0, married: S.married ? 1 : 0, earned: S.stats.earned, vip: isVip(),
   };
 }

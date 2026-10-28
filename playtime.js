@@ -3,6 +3,7 @@
 
 const PLAY_TICK_MAX = 5000; // больше 5 секунд между тиками — значит, игра «спала», это время не считаем
 let PLAY_LAST = 0;
+document.addEventListener('visibilitychange', () => { PLAY_LAST = Date.now(); });
 
 function playState() {
   if (!S.play) S.play = { ms: 0, sessions: 0, longest: 0, day: '', dayMs: 0, cityMs: {}, first: Date.now() };
@@ -39,18 +40,22 @@ function playFmt(ms) {
 }
 // В городах (при появлении мексики в списке городов) — поле mex тоже покажем
 HOOKS.load.push(() => { const p = playState(); if (p.cityMs.mex === undefined) p.cityMs.mex = p.cityMs.mex || 0; });
+function playHoursFmt(ms) {
+  const minutes = Math.floor(Math.max(0, Number.isFinite(ms) ? ms : 0) / 60000);
+  return `${Math.floor(minutes / 60)} ч ${minutes % 60} мин`;
+}
 function playHTML() {
   const p = playState();
   const avg = p.sessions ? p.ms / p.sessions : 0;
   const days = Math.max(1, Math.ceil((Date.now() - (p.first || Date.now())) / 86400000));
   return `<div class="subhead" style="text-align:left">⏱️ Время в игре</div>
     <div class="stat-grid play-grid" style="margin-bottom:12px;text-align:left">
-      <div>Всего<b>${playFmt(p.ms)}</b></div><div>Сегодня<b>${playFmt(p.dayMs || 0)}</b></div>
+      <div>Всего часов в игре<b>${playHoursFmt(p.ms)}</b></div><div>Сегодня<b>${playFmt(p.dayMs || 0)}</b></div>
       <div>Сессий<b>${fmt(p.sessions)}</b></div><div>Средняя сессия<b>${playFmt(avg)}</b></div>
       <div>Самая долгая<b>${playFmt(p.longest || 0)}</b></div><div>В среднем в день<b>${playFmt(p.ms / days)}</b></div>
       <div>🏚️ В Засранске<b>${playFmt(p.cityMs.zas || 0)}</b></div><div>🏙️ В Москвабаде<b>${playFmt(p.cityMs.msk || 0)}</b></div>
       ${p.cityMs.mex ? `<div>🌵 В Мексике<b>${playFmt(p.cityMs.mex)}</b></div>` : ''}
-    </div>`;
+    </div><p class="test-note">Время считается, пока игра открыта на экране. На место в топе не влияет.</p>`;
 }
 openProfile = (function (orig) {
   return function () {
