@@ -121,7 +121,7 @@ ACTIONS.feedbackSend = async (kind, button) => {
 async function broadcastCheck() {
   if (!onlineOn() || !LOADED || !S.storySeen) return;
   try {
-    const r = await apiPost('broadcast/latest', { after: S.bcSeen || 0 });
+    const r = await apiPost('broadcast/latest', { after: S.bcSeen || 0, communityButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.community });
     (r.items || []).forEach((b) => {
       S.bcSeen = Math.max(S.bcSeen || 0, b.id);
       // Кнопка рассылки ведёт в нужный раздел игры (admin5.js BC_BTNS)
