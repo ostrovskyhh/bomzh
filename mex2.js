@@ -491,7 +491,7 @@ function mxTunnel(mg, cfg) {
       if (mxOut(mg, cfg.maxMiss || 3)) return;
     }
     while (prog >= (seg + 1) / segs - 1e-6 && seg < segs) { seg++; mxHit($('tnD'), seg >= segs ? cfg.doneText || 'Свободен! +2' : '+1', seg >= segs ? 2 : 1); }
-    if (seg >= segs) { prog = 0; seg = 0; }
+    if (seg >= segs) { if (cfg.finishOnExit) { mgEnd(); return; } prog = 0; seg = 0; }
     $('tnT').style.width = (0.06 + prog * 0.86) * 100 + '%';
     $('tnD').style.left = dx * 100 + '%';
     $('tnA').style.width = Math.min(1, alarm) * 100 + '%';
@@ -874,7 +874,7 @@ const MX_JAIL = {
   pushups: { name: 'Бои во дворе', emoji: '🤼', desc: 'Сила растёт даже здесь',
     game: { title: 'Тюремная лучa', hint: 'Сокамерник-лучадор готовит приём — отвечай правильно', duration: 15, max: 8, setup: (mg) => mxLucha(mg, { foe: '🧟', bg: 'mx-cell-bg' }) } },
   escape: { name: 'Подкоп ложкой', emoji: '🥄', desc: 'Удачно — свобода, но розыск ⭐⭐⭐⭐⭐. Провал — срок +10 мин',
-    game: { title: 'Подкоп под стеной', hint: 'Копай, пока охранник далеко. Он над тобой — замри!', duration: 25, max: 6, setup: (mg) => mxTunnel(mg, { patrol: '💂', digger: '🥄', goal: '🌵', segs: 3, speed: 0.13, caughtText: 'Эй! Кто там?' }) } },
+    game: { title: 'Подкоп под стеной', hint: 'Пройди все 3 участка подкопа за 25 секунд. Держи «Копать», пока охранник далеко; видишь «Тише!» — отпускай. Следи за тревогой: 3 обнаружения — провал. Полный подкоп гарантирует свободу и розыск ⭐⭐⭐⭐⭐.', duration: 25, max: 4, setup: (mg) => mxTunnel(mg, { patrol: '💂', digger: '🥄', goal: '🌵', segs: 3, speed: 0.13, finishOnExit: true, caughtText: 'Эй! Кто там?' }) } },
 };
 
 // ---------- Криминал Мексики ----------

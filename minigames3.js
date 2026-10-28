@@ -766,27 +766,39 @@ function gameVent(mg) {
     <div class="vt-me" id="vtMe">🏃</div><div class="vt-goal">🔑 Свобода</div>`;
   arena.insertAdjacentHTML('beforeend', '<button class="btn primary wide mg-big" id="vtBtn">⬆️ Ползти</button>');
   const beams = [...arena.querySelectorAll('.vt-beam')];
-  let row = -1, t = 0, lvl = 0;
+  let row = -1, t = 0, lvl = 0, nextStep = 0;
   const sp = () => beams.map((_, i) => 0.8 + i * 0.25 + lvl * 0.25);
   let speeds = sp();
   const ph = beams.map(() => Math.random() * 6);
   const beamX = (i) => 0.5 + Math.sin(t * speeds[i] + ph[i]) * 0.42;
   // Ряды занимают полосу от кнопки (64px) до надписи сверху (26px): по 42px на ряд
-  const place = () => { $('vtMe').style.bottom = row < 0 ? '58px' : `${64 + row * 42 + 4}px`; };
+  const place = () => { $('vtMe').style.bottom = row < 0 ? '58px' : `${64 + (row + 0.5) * (arena.clientHeight - 90) / R - 15}px`; };
+  const status = arena.querySelector('.vt-goal');
+  const caught = () => {
+    mg.mistakes = (mg.mistakes || 0) + 1;
+    sfx('error'); haptic('error'); shakeArena();
+    row = -1; nextStep = t + 0.7; place();
+    if (mg.mistakes >= 3) { mgScore(-mg.score); mgEnd(); return; }
+    status.textContent = `🚨 Засекли! Ошибки ${mg.mistakes}/3 · маршрут ${lvl}/2`;
+  };
   place();
   mgLoop(mg, (dt) => {
     t += dt;
     beams.forEach((b, i) => { b.style.left = beamX(i) * 100 + '%'; });
     if (row >= 0 && Math.abs(beamX(row) - 0.5) < 0.09) {
-      mg.mistakes = (mg.mistakes || 0) + 1; mgScore(-1); sfx('error'); haptic('error'); shakeArena();
-      floatAt($('vtMe'), '🔦 Засекли!', 'bad'); row = -1; place();
+      caught();
     }
   });
   $('vtBtn').onpointerdown = (e) => {
     e.preventDefault();
-    if (!mgAlive(mg)) return;
-    row++; sfx('whoosh'); mgScore(1);
-    if (row >= R) { mgScore(2); sfx('coin'); floatAt($('vtMe'), '+🔑', 'good'); row = -1; lvl++; speeds = sp(); }
+    if (!mgAlive(mg) || t < nextStep) return;
+    if (row + 1 < R && Math.abs(beamX(row + 1) - 0.5) < 0.16) { caught(); return; }
+    row++; nextStep = t + 0.45; sfx('whoosh');
+    if (row >= R) {
+      mgScore(6); sfx('coin'); row = -1; lvl++; speeds = sp();
+      if (lvl >= 2) { mgEnd(); return; }
+    }
+    status.textContent = `🔑 Маршруты ${lvl}/2 · ряд ${row + 1}/5 · ошибки ${mg.mistakes || 0}/3`;
     place();
   };
 }
@@ -862,7 +874,7 @@ if (_cr('kiosk')) Object.assign(_cr('kiosk').game, { title: 'Погоня!', hin
 const _ja = (id) => JAIL_ACTS.find((a) => a.id === id);
 if (_ja('pushups')) Object.assign(_ja('pushups').game, { hint: 'Тапай как можно чаще: полоска растёт от нажатий и падает, когда устаёшь. Полная — один повтор', max: 6, setup: (mg) => gamePress(mg) });
 if (_ja('mittens')) Object.assign(_ja('mittens').game, { title: 'Швейный цех', hint: 'Шей по контуру: тапай по светящейся точке, пока нитка не порвалась. Весь контур — одна варежка', max: 4, setup: (mg) => gameSew(mg) });
-if (_ja('escape')) Object.assign(_ja('escape').game, { title: 'Побег через вентиляцию', hint: 'Ползи вверх по одному ряду, когда прожектор далеко. Засекли — обратно в начало', max: 12, setup: (mg) => gameVent(mg) });
+if (_ja('escape')) Object.assign(_ja('escape').game, { title: 'Побег через вентиляцию', hint: 'Пройди 2 маршрута за 30 секунд. Нажатие — шаг вверх; между шагами 0,45 с. Жди, пока прожектор следующего ряда уйдёт от центра. На текущем ряду тоже нельзя оставаться под светом! Засекли — в начало маршрута; 3 ошибки — провал. После пятого ряда нажми ещё раз для выхода.', duration: 30, max: 12, setup: (mg) => gameVent(mg) });
 
 // Зал: у каждого упражнения своя механика
 Object.assign(GYM_GAMES.cardio, { engine: gameRun, title: 'Бег', hint: 'Чередуй «Левой» и «Правой» как можно быстрее. 8 шагов — один отрезок, всего 6', fast: 2.2, ok: 3.4 });

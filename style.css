@@ -1933,10 +1933,10 @@ body.beta .tabbar .dot[data-hubdot] { top: 2px; right: 20%; }
 .lv-bowl b { position: absolute; left: 22px; top: -20px; background: #fff; color: var(--red); font-size: 13px; border-radius: 9px; padding: 0 6px; animation: lvBob 1.2s infinite; }
 .lv-heart { position: absolute; z-index: 7; font-size: 18px; pointer-events: none; animation: lvHeart 1.6s ease-out forwards; }
 @keyframes lvHeart { from { opacity: 1; transform: translateY(0) scale(.6); } to { opacity: 0; transform: translateY(-46px) scale(1.15); } }
-body.beta .scene.lv-on .pet-slot { transition: left 2.6s ease-in-out; }
+body.beta .scene.lv-on .pet-slot { left: 6% !important; transition: none; }
 body.beta .pet-slot.lv-flip { scale: -1 1; }
 body.beta .pet-slot.lv-psleep .pet { animation-duration: 5s; filter: brightness(.8); }
-body.beta .pet-slot.lv-phop { animation: lvPetHop .7s ease-out; }
+body.beta .pet-slot.lv-phop { animation: none; }
 @keyframes lvPetHop { 40% { translate: 0 -22px; } }
 
 /* Премиальные кейсы */

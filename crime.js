@@ -146,7 +146,7 @@ const JAIL_ACTS = [
   { id: 'escape', name: 'Побег', emoji: '🕳️', desc: 'Удачно — свобода, но розыск ⭐⭐⭐⭐⭐. Провал — срок +10 мин',
     game: { title: 'Побег через вентиляцию', hint: 'Уходи от охраны 👮, собирай ключи 🔑', duration: 20, max: 12, setup: (mg) => gameLanes(mg, { good: ['🔑', '🔑', '🧱'], bad: ['👮', '🔦', '🐕'], player: '🏃', speed: 1.25, goodRate: 0.45 }) },
     done: (perf) => {
-      if (perf >= 0.75 && Math.random() < 0.7) { S.busy = null; S.wanted = WANTED_MAX; S.wantedAt = Date.now(); track('escape'); confetti(50); return '🏃 Свобода! Но тебя ищет весь город — розыск на максимуме'; }
+      if (perf >= 1) { S.busy = null; S.wanted = WANTED_MAX; S.wantedAt = Date.now(); track('escape'); confetti(50); return '🏃 Свобода! Но тебя ищет весь город — розыск на максимуме'; }
       jailCut(-10); return '🚨 Поймали в вентиляции. Срок +10 минут';
     } },
 ];

@@ -279,18 +279,18 @@ function lvTick() {
     if (a === 'lv-yawn' && Math.random() < 0.5) lvBubble('Ааа-ах… спать охота 😴');
     if (now > LV.sayAt && !need && Math.random() < 0.45) { LV.sayAt = now + 20000; lvBubble(lvPhrase('idle')); }
   }
-  // Питомец гуляет по сцене
+  // Слот закреплён: питомец и пустая лежанка не перекрывают область тапов.
   const ps = $('petSlot');
   if (ps && ps.children.length && now > LV.petAt) {
     LV.petAt = now + 7000 + Math.random() * 8000;
     const hungry = S.petFood <= 20 || S.petSick;
-    const x = sleeping ? 18 : hungry ? 4 : Math.random() < 0.3 ? 30 : 4 + Math.random() * 60;
-    ps.classList.toggle('lv-flip', x < LV.petX);
+    const x = 6;
+    ps.classList.remove('lv-flip', 'lv-phop');
     LV.petX = x;
     ps.style.left = x + '%';
     ps.classList.toggle('lv-psleep', sleeping);
     let bowl = $('lvBowl');
-    if (hungry && !sleeping) { if (!bowl) sc.insertAdjacentHTML('beforeend', '<div class="lv-bowl" id="lvBowl">🥣<b>!</b></div>'); }
+    if (S.pet && hungry && !sleeping) { if (!bowl) sc.insertAdjacentHTML('beforeend', '<div class="lv-bowl" id="lvBowl">🥣<b>!</b></div>'); }
     else if (bowl) bowl.remove();
     // Подбежал к Валере — тот гладит, летят сердечки
     if (x === 30 && !hungry) setTimeout(() => { lvHearts(ps); if (Math.random() < 0.5) lvBubble(lvPhrase('pet')); }, 2600);
