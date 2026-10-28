@@ -1200,10 +1200,11 @@ function onTap(e) {
   f.className = 'float' + (crit ? ' crit' : '');
   f.style.left = x + 'px';
   f.style.top = y + 'px';
-  f.innerHTML = `${crit ? 'КРИТ! ' : ''}+${fmt(gain)} <i class="ic">${ICONS.bottle}</i>`;
+  f.innerHTML = `${crit ? 'КРИТ! ' : ''}+${fmt(gain)} <i class="ic">${typeof bottleTapIcon==='function'?bottleTapIcon():ICONS.bottle}</i>`;
   $('fx').appendChild(f);
   setTimeout(() => f.remove(), 900);
-  spawnParticles(x, y, crit ? 14 : 5);
+  if (typeof bottleTapBurst==='function') bottleTapBurst(x,y,crit,f);
+  else spawnParticles(x, y, crit ? 14 : 5);
 
   haptic(crit ? 'heavy' : 'light');
   sfx(crit ? 'crit' : 'tap');

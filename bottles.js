@@ -32,6 +32,38 @@ function bottleGraphic(b) {
 }
 function bottleHandSVG(id) { return `<g transform="translate(127 91)">${bottleGraphic(bottleById(id)||BOTTLE_SKINS[0])}</g>`; }
 function bottlePreview(b) { return `<svg class="bottle-preview" viewBox="-7 -3 38 66" role="img" aria-label="${b.name}">${bottleGraphic(b)}</svg>`; }
+function bottleTapIcon() { return `<svg viewBox="-7 -3 38 66" aria-hidden="true">${bottleGraphic(bottleCurrent())}</svg>`; }
+function bottleTapBurst(x,y,crit,float) {
+  const b=bottleCurrent(),layer=$('fx');
+  float.dataset.bottle=b.id;float.classList.add('bt-float');
+  float.style.setProperty('--bt-color',b.color);
+  if(b.effect)float.classList.add('bt-float-premium');
+  // Ограничиваем только визуальные узлы: каждый успешный тап уже учтён игрой.
+  const floats=layer.querySelectorAll('.float');
+  for(let i=0;i<floats.length-12;i++)floats[i].remove();
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const active=layer.querySelectorAll('.bt-tap-burst');
+  for(let i=0;i<=active.length-6;i++)active[i].remove();
+  const burst=document.createElement('div');
+  burst.className=`bt-tap-burst bt-burst-${b.effect||'glass'}${crit?' critical':''}`;
+  burst.dataset.bottle=b.id;burst.style.left=x+'px';burst.style.top=y+'px';
+  burst.style.setProperty('--bt-color',b.color);burst.style.setProperty('--bt-accent',b.cap);
+  if(b.effect)burst.innerHTML=`<i class="bt-ripple"></i><span class="bt-tap-echo">${bottleTapIcon()}</span>`;
+  const count=b.effect?(crit?12:8):(crit?6:3);
+  for(let i=0;i<count;i++){
+    const p=document.createElement('span');p.className='bt-tap-spark';
+    const angle=Math.PI*2*(i/count)+rand(-.15,.15),distance=rand(b.effect?40:22,b.effect?90:55)*(crit?1.15:1);
+    p.style.setProperty('--bx',Math.cos(angle)*distance+'px');
+    p.style.setProperty('--by',(Math.sin(angle)*distance-25)+'px');
+    p.style.setProperty('--br',rand(-140,140)+'deg');
+    p.style.setProperty('--bt-life',rand(520,b.effect?1000:750)+'ms');
+    if(!b.effect && i===0){p.classList.add('bt-mini-bottle');p.innerHTML=bottleTapIcon();}
+    else if(b.effect==='cosmos')p.textContent=i%2?'✦':'·';
+    else if(b.effect==='neon')p.textContent=i%2?'✧':'+';
+    burst.appendChild(p);
+  }
+  layer.appendChild(burst);setTimeout(()=>burst.remove(),1150);
+}
 lookState=(function(orig){return ()=>({...orig(),bottle:bottleCurrent().id});})(lookState);
 function bottleShopHTML(premium=false) {
   const list=BOTTLE_SKINS.filter(b=>!!b.caps===premium);
