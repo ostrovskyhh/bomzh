@@ -63,11 +63,17 @@ function feedbackDraft(kind) {
   return (feedbackDrafts[kind] = { text: value('fbText'), steps: value('fbSteps'), expected: value('fbExpected'), repeat: value('fbRepeat') });
 }
 function feedbackContext(draft) {
-  return BugReport.build(feedbackOrigin, { steps: draft.steps, expected: draft.expected, repeat: draft.repeat });
+  const reproduction = { steps: draft.steps, expected: draft.expected, repeat: draft.repeat };
+  if (typeof BugReport !== 'undefined') return BugReport.build(feedbackOrigin, reproduction);
+  // Старый кеш index.html может ещё не подключать diagnostics.js во время обновления.
+  return { schema: 1, version: typeof CURRENT_VERSION !== 'undefined' ? CURRENT_VERSION : '',
+    screen: `${currentScreen}/${TABS[currentScreen] || ''}`, level: level(), reproduction,
+    state: { diagnosticsUnavailable: true, money: S.money, caps: S.caps, city: S.city, edu: S.edu },
+    events: [], errors: [], log: (S.log || []).slice(0, 40).reverse() };
 }
 ACTIONS.feedback = (kind) => {
   const bug = kind === 'bug';
-  feedbackOrigin = BugReport.snapshot();
+  feedbackOrigin = typeof BugReport !== 'undefined' ? BugReport.snapshot() : null;
   const draft = feedbackDrafts[kind] || {};
   openModal(`<div class="feedback-form"><h3>${bug ? '🐞 Сообщить о проблеме' : '💡 Предложить изменение'}</h3>
     <p>${bug ? 'Что случилось и где? Например: «В “Вокзале” после конца игры окно не закрывается».' : 'Что добавить или изменить в игре? Лучшие идеи попадут в обновления.'}</p>
