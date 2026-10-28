@@ -295,7 +295,7 @@ startLessonGame = (function (orig) {
       1: { name: 'Найди сомбреро', hint: `Найди 👒 среди сувениров ${need} раз — тренируем глаз туриста`, setup: (mg) => gameSpot(mg, { find: '👒', junk: ['🌮', '🌵', '🪅', '🎸', '🥥', '🌽', '🎺', '🧉'] }) },
       2: { name: 'Испанский: слова', hint: `Выбери перевод слова. Набери ${need}`, setup: (mg) => lessonChoice(mg, () => { const [es, ru] = pick(MEX_ES); const opts = shuffle([ru, ...shuffle(MEX_ES.filter((x) => x[1] !== ru)).slice(0, 2).map((x) => x[1])]); return { q: `«${es}» — это…`, a: ru, opts, penalty: true }; }) },
       3: { name: 'Испанский: пары', hint: `Запоминай карточки — находи пары. Набери ${need} очков`, setup: (mg) => gamePairs(mg, { items: ['🌮', '🌵', '🪅', '🎸', '☀️', '🏖️', '🥑', '🌶️'] }) },
-      4: { name: 'Правда или «mentira»', hint: `Отличай правду от выдумки про Мексику. Набери ${need}`, setup: (mg) => lessonChoice(mg, () => { const [t, v] = pick(MEX_TF); return { q: t, a: v ? 'Verdad' : 'Mentira', opts: ['Verdad', 'Mentira'], penalty: true }; }) },
+      4: { name: 'Правда или ложь', hint: `Отличай правду от выдумки про Мексику. Набери ${need}`, setup: (mg) => lessonChoice(mg, () => { const [t, v] = pick(MEX_TF); return { q: t, a: v ? 'Правда' : 'Ложь', opts: ['Правда', 'Ложь'], penalty: true }; }) },
     };
     const g = games[stage];
     runGame({ title: `📖 ${g.name}`, scoreLabel: ` / ${need}`, hint: g.hint, duration: LESSON_TIME, setup: g.setup, finish: (score) => finishLesson(stage, score, need) });
@@ -401,13 +401,14 @@ QUESTS.push(
   { id: 'm_scam', city: 'msk', who: '📞', name: '«Служба безопасности банка»', title: 'Звонок, который всё изменил', move: true, mexMove: true, goals: [], reward: {},
     text: 'Тебе позвонили «из банка», запугали «кредитом на твоё имя» и втянули в «спецоперацию». Ты сам не заметил, как помог мошенникам обмануть бабушку. Полиция уже ищет «курьера». Остаётся одно — бежать. Далеко.' },
 );
+function mexClothesGoal(slot,label){return {...qv(()=>tierOf(slot),2,''),get text(){return `${label}: надень класс 2 или выше — например, ${CLOTHES[slot].filter(x=>x.tier>=2).slice(0,2).map(x=>x.name).join(' или ')}. Магазин → Одежда. Покупки без надевания недостаточно.`;}};}
 const MEX_Q = [
-  { id: 'x_arrive', who: '🚢', name: 'Капитан Ромеро', title: '¡Hola, México!', text: 'Порт Веракрус. Жара, пальмы и ни слова по-русски. В кармане — горсть долларов. Найди угол и первую работу, amigo.',
+  { id: 'x_arrive', who: '🚢', name: 'Капитан Ромеро', title: 'Привет, Мексика! · ¡Hola, México!', text: 'Порт Веракрус. Жара, пальмы и испанская речь вокруг. В кармане — горсть долларов. Найди угол и первую работу, amigo — друг.',
     goals: [qv(() => S.ownedHousing || 0, 1, 'Построй шалаш из агавы'), qc('shift', 3, 'Отработай 3 смены')], reward: { money: usd(50), xp: 400 } },
-  { id: 'x_amigo', who: '🧔🏽', name: 'Пепе', title: 'Casa de Amigos', text: '¡Órale! Русо? Заходи в нашу «Casa de Amigos» — тут гитара, тако и друзья. Обживайся, compadre.',
+  { id: 'x_amigo', who: '🧔🏽', name: 'Пепе', title: 'Дом друзей · Casa de Amigos', text: '¡Órale! Русо? Заходи в нашу «Casa de Amigos» — «Дом друзей»: тут гитара, тако и компания. Обживайся, compadre — приятель.',
     goals: [qv(() => S.ownedHousing || 0, 2, 'Поселись в «Casa de Amigos»'), qc('eat', 5, 'Пообедай 5 раз'), qc('events', 4, 'Переживи 4 мексиканских события')], reward: { money: usd(90), caps: 1, xp: 500 } },
   { id: 'x_spanish', who: '👵🏽', name: 'Сеньора Лусия', title: 'Испанский для бомжа', text: 'Mijo, без испанского тебе здесь только сомбреро продавать. Учись — и мир откроется.',
-    goals: [qv(() => S.edu, 1, 'Окончи курсы «¡Hola, amigo!»'), qv(() => Math.min(tierOf('body'), tierOf('shoes')), 2, 'Приоденься по-местному')], reward: { money: usd(150), caps: 1, xp: 600 } },
+    goals: [qv(() => S.edu, 1, 'Окончи курсы «¡Hola, amigo!» — «Привет, друг!»'), mexClothesGoal('body','Верх'),mexClothesGoal('shoes','Обувь')], reward: { money: usd(150), caps: 1, xp: 600 } },
   { id: 'x_luchador', who: '🤼', name: 'Эль Торо', title: 'Лучадор', text: 'Гринго, ты в моём районе. Здесь уважают только тех, кто выходит на ринг в маске. ¡Vamos!',
     goals: [qc('fightWin', 4, 'Выиграй 4 драки'), qv(() => Math.floor(S.form), 30, 'Форма 30+')],
     boss: { name: 'Эль Торо', style: 'brawler', eq: { hat: 'bandana', body: 'malinovy', shoes: 'boots' }, lvl: 0, form: 50, strength: 55, tier: 3, intro: '«¡Prepárate, gringo!»' },
@@ -424,7 +425,7 @@ const MEX_Q = [
     goals: [qv(() => level(), 30, 'Достигни 30 уровня'), qv(() => S.ownedHousing || 0, 5, 'Купи виллу в Канкуне')],
     boss: { name: 'Главарь колл-центра', style: 'tactic', eq: { hat: 'cilinder', body: 'kostum', shoes: 'boots' }, lvl: 2, form: 75, strength: 72, tier: 6, intro: '«Вам звонят из службы безопасности…»' },
     reward: { money: usd(5000), caps: 2, xp: 3000 } },
-  { id: 'x_final', who: '🌵', name: 'Вся Мексика', title: '¡Viva Valera!', text: 'Колл-центр закрыт, бабушка получила свои деньги и открытку из Канкуна. Осталось стать в Мексике своим по-настоящему.',
+  { id: 'x_final', who: '🌵', name: 'Вся Мексика', title: 'Да здравствует Валера! · ¡Viva Valera!', text: 'Колл-центр закрыт, бабушка получила свои деньги и открытку из Канкуна. Осталось стать в Мексике своим по-настоящему.',
     goals: [qv(() => S.ownedHousing || 0, 6, 'Купи гасиенду'), qc('promotion', 3, 'Получи ещё 3 повышения'), qv(() => S.onlineWins || 0, 5, 'Победи 5 живых игроков онлайн')], reward: { money: usd(15000), caps: 3, xp: 7000 } },
 ];
 MEX_Q.forEach((q) => { q.city = 'mex'; QUESTS.push(q); });
@@ -600,9 +601,9 @@ HOOKS.tick.push(() => {
   if (S.chapterIntro !== 'mex' || !popupTurn(2)) return;
   S.chapterIntro = null;
   openModal(`<div class="chapter-card mex"><div class="cc-sky">${sceneSVG(0)}</div><div class="cc-num">ГЛАВА III</div><div class="cc-title">Мексика</div>
-    <p>¡Hola, amigo! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Друзья и банда — с тобой.</p>
+    <p>¡Hola, amigo! — Привет, друг! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Друзья и банда — с тобой. Знать испанский заранее не нужно: в обучении есть русские подсказки.</p>
     <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 работ и 40 своих мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span><span>🦂 Картель и бандиты</span></div>
-    <button class="btn primary wide" data-act="close">¡Vamos!</button></div>`, { center: true });
+    <button class="btn primary wide" data-act="close">Вперёд! · ¡Vamos!</button></div>`, { center: true });
   sfx('levelup');
 });
 

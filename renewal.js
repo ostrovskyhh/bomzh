@@ -88,7 +88,7 @@ function baccaratRound(deck){
  const n=total(b),draw=third===null?n<=5:n<=2||(n===3&&third!==8)||(n===4&&third>=2&&third<=7)||(n===5&&third>=4&&third<=7)||(n===6&&(third===6||third===7));if(draw)b.push(deck.pop());}
  return {p,b,pv:total(p),bv:total(b),winner:total(p)>total(b)?'player':total(p)<total(b)?'banker':'tie'};
 }
-function baccaratReturn(choice,winner,bet){return winner==='tie'&&choice!=='tie'?bet:choice===winner?Math.floor(bet*(choice==='banker'?1.95:choice==='tie'?9:2)):0;}
+function baccaratReturn(choice,winner,bet){return winner==='tie'&&choice!=='tie'?bet:choice===winner?(choice==='banker'?bet+Math.floor(bet*95/100):bet*(choice==='tie'?9:2)):0;}
 let BACCARAT_BUSY=false;
 ACTIONS.baccarat=()=>openModal(`<h3>🃏 Баккара · ${cityIdentity().casino}</h3><p>Выбери сторону до раздачи. Игрок: чистый выигрыш 1:1. Банк: 0,95:1 после комиссии 5%. Ничья: 8:1. При ничьей ставки на игрока и банк возвращаются.</p><div id="baccaratTable" class="felt">Туз = 1; десятки и картинки = 0. Считается последняя цифра суммы. Добор карт автоматический.</div>${betPicker()}<div class="row-btns"><button class="btn" data-act="baccaratDeal" data-id="player">Игрок</button><button class="btn" data-act="baccaratDeal" data-id="banker">Банк</button><button class="btn" data-act="baccaratDeal" data-id="tie">Ничья</button></div>`,{center:true});
 ACTIONS.baccaratDeal=async(choice)=>{

@@ -319,9 +319,9 @@
       await allGames('mex');
       check('мексика: 6 своих криминальных дел', CRIMES.length === 6 && CRIMES.every((c) => c.id.startsWith('x_')), CRIMES.map((c) => c.id).join());
       check('мексика: сюжет про картель и бандитов', ['x_bandits', 'x_scorpions', 'x_kidnap', 'x_plaza', 'x_jefe'].every((id) => questList().some((q) => q.id === id)), questList().length);
-      check('мексика: свои игры свиданий и зала', DATE_GAMES.walk.title === 'Callejón del Beso' && GYM_GAMES.power.title === 'Камень ацтеков');
+      check('мексика: свои игры свиданий и зала', DATE_GAMES.walk.title === 'Переулок поцелуев · Callejón del Beso' && GYM_GAMES.power.title === 'Камень ацтеков');
       S.city = 'zas'; applyCity('zas');
-      check('мексика: в Засранске свои игры вернулись', CRIMES[0].id === 'pocket' && DATE_GAMES.walk.title !== 'Callejón del Beso' && GYM_GAMES.power.title !== 'Камень ацтеков', `${CRIMES[0].id} ${DATE_GAMES.walk.title}`);
+      check('мексика: в Засранске свои игры вернулись', CRIMES[0].id === 'pocket' && !DATE_GAMES.walk.title.includes('Callejón del Beso') && GYM_GAMES.power.title !== 'Камень ацтеков', `${CRIMES[0].id} ${DATE_GAMES.walk.title}`);
     } catch (e) { check('мексика: ошибка теста', false, e.message); }
     const pre = document.createElement('pre');
     pre.id = 'autotest-result';

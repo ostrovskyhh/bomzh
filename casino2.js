@@ -8,9 +8,15 @@ const BET_MAX = 10000000;
 betPicker = (function (orig) {
   return function () {
     const custom = !BETS.includes(S.bet);
-    return orig().replace(/<\/div>$/, `<button class="bet-custom ${custom ? 'on' : ''}" data-act="betCustom">✏️ ${custom ? fmt(S.bet) + ' ₽' : 'Своя'}</button></div>`);
+    return orig().replace(/<\/div>$/, `<button class="bet-custom ${custom ? 'on' : ''}" data-act="betCustom">✏️ ${custom ? fmt(S.bet) + ' ₽' : 'Своя'}</button><button data-act="betAdjust" data-id="half">½</button><button data-act="betAdjust" data-id="double">×2</button><button data-act="betAdjust" data-id="all">Всё</button></div>`);
   };
 })(betPicker);
+ACTIONS.betAdjust=(kind)=>{
+  if(roulSpinning || (typeof BACCARAT_BUSY!=='undefined'&&BACCARAT_BUSY))return;
+  const max=Math.min(BET_MAX,Math.floor(S.money));if(max<10){toast('Минимальная ставка — 10 ₽','bad');return;}
+  S.bet=Math.max(10,Math.min(max,Math.floor(kind==='all'?max:kind==='double'?S.bet*2:S.bet/2)));
+  const box=document.querySelector('#modalRoot .bets');if(box)box.outerHTML=betPicker();save();
+};
 ACTIONS.betCustom = () => {
   const box = document.querySelector('#modalRoot .bets') || document.querySelector('.bets');
   if (!box || box.querySelector('.bet-input')) return;

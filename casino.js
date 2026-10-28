@@ -53,6 +53,7 @@ for (let n = 0; n <= 36; n++) if (n) ROUL_BETS.push({ id: 'n' + n, name: String(
 let roulAngle = 0, roulBet = 'red', roulSpinning = false;
 // Несколько ставок за спин: { id ставки: сумма фишек }
 let ROUL_STAKES = {};
+let ROUL_UNDO = [];
 function roulTotal() { return Object.values(ROUL_STAKES).reduce((a, b) => a + b, 0); }
 
 function wheelSVG() {
@@ -81,12 +82,13 @@ function roulBoardHTML() {
   return `<div class="roul-bets" id="roulBets">${ROUL_BETS.filter((b) => !b.num).map(cell).join('')}</div>
     <div class="roul-nums">${ROUL_BETS.filter((b) => b.num).map(cell).join('')}</div>
     <div class="roul-sum">Ставок: <b>${Object.keys(ROUL_STAKES).length}</b> · всего <b>${fmt(roulTotal())} ₽</b>
-      <button class="btn small" data-act="roulClear" data-silent="1" ${roulTotal() ? '' : 'disabled data-why="Ставок пока нет"'}>Сбросить</button></div>`;
+      <button class="btn small" data-act="roulUndo" ${ROUL_UNDO.length && !roulSpinning ? '' : 'disabled'}>↶ Отменить последнюю</button><button class="btn small" data-act="roulClear" data-silent="1" ${roulTotal() ? '' : 'disabled data-why="Ставок пока нет"'}>Сбросить</button></div>`;
 }
 function roulRefresh() { const el = $('roulBoard'); if (el) el.innerHTML = roulBoardHTML(); }
 
 function openRoulette() {
   ROUL_STAKES = {};
+  ROUL_UNDO = [];
   openModal(`<h3>🎡 Рулетка</h3>
     <div class="roul-wrap"><div class="roul-pointer">▼</div>${wheelSVG()}<div class="roul-result" id="roulRes"></div></div>
     <p class="mg-hint">Выбери фишку и тапай по полям — можно ставить на несколько сразу. Число — ×36.</p>
@@ -103,6 +105,7 @@ function roulSpin() {
   if (S.money < total) { toast(`Не хватает ${fmt(total - S.money)} ₽ на все ставки`, 'bad'); return; }
   S.money -= total;
   const stakes = { ...ROUL_STAKES };
+  ROUL_UNDO = [];
   roulSpinning = true;
   $('roulBtn').disabled = true;
   $('roulRes').className = 'roul-result';
@@ -314,11 +317,13 @@ Object.assign(ACTIONS, {
     if (roulSpinning) return;
     const chip = S.bet;
     if (S.money < roulTotal() + chip) { toast(`Не хватает денег: на столе уже ${fmt(roulTotal())} ₽`, 'bad'); sfx('error'); return; }
+    ROUL_UNDO.push({...ROUL_STAKES});
     ROUL_STAKES[id] = (ROUL_STAKES[id] || 0) + chip;
     roulRefresh();
     sfx('chip');
   },
-  roulClear: () => { if (roulSpinning) return; ROUL_STAKES = {}; roulRefresh(); sfx('whoosh'); },
+  roulUndo: () => {if(roulSpinning || !ROUL_UNDO.length)return;ROUL_STAKES=ROUL_UNDO.pop();roulRefresh();sfx('chip');},
+  roulClear: () => { if (roulSpinning) return; if(roulTotal())ROUL_UNDO.push({...ROUL_STAKES}); ROUL_STAKES = {}; roulRefresh(); sfx('whoosh'); },
   roulSpin: () => roulSpin(),
   dice: () => openDice(),
   diceBet: (id) => { diceBet = id; document.querySelectorAll('.roul-bets.four button').forEach((b) => b.classList.toggle('on', b.dataset.id === id)); sfx('chip'); },

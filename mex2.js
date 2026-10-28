@@ -27,6 +27,7 @@ const MX_RU = {
 };
 // Перевести по словарю, если есть совпадение — иначе оставить как есть
 function mxRu(s) { return MX_RU[s] || s; }
+ACTIONS.mexGlossary=()=>openModal(`<h3>🌵 Мексика: понятно по-русски</h3><p>Веракрус — портовый город Мексики. Названия мест, еда и музыка сохраняют местный колорит; правила и управление доступны на русском.</p><p>Фиеста — праздник. Мариачи — ансамбль с гитарами и трубами. Кумбия — танцевальная музыка. Касита — небольшой дом. Патио — внутренний дворик. Гасиенда — усадьба. Серапе — традиционная накидка. Гуаябера — лёгкая рубашка.</p><p>Hola — привет; amigo — друг; gracias — спасибо; calle — улица; trabajo — работа; dinero — деньги; verdad — правда; mentira — ложь.</p><p>Числа: ${ES_NUM.slice(1).map((s,i)=>`${s} — ${i+1}`).join('; ')}.</p><button class="btn primary wide" data-act="close">Понятно</button>`,{center:true});
 
 function mxA(html, cls = '') { const a = $('mgArena'); a.className = `mg-arena mx-arena ${cls}`; a.innerHTML = html; return a; }
 function mxCap(el, e) { try { el.setPointerCapture(e.pointerId); } catch (err) { /* синтетическое касание */ } }
@@ -286,11 +287,11 @@ function mxAgave(mg, cfg) {
     st.forEach((x, i) => {
       x.t -= dt;
       if (x.t > 0) return;
-      const fast = 1 / (1 + mg.score * 0.025);
+      const fast = Math.max(cfg.minSpeed || 0, 1 / (1 + mg.score * 0.025));
       if (x.s === 'empty') {
         if (cfg.bad && Math.random() < (cfg.badRate || 0.15)) set(i, 'bad', rand(0.9, 1.5));
-        else set(i, cfg.young ? 'young' : 'ripe', cfg.young ? rand(...(cfg.youngT || [0.8, 2])) * fast : rand(...(cfg.ripeT || [1, 1.8])) * fast);
-      } else if (x.s === 'young') set(i, 'ripe', rand(...(cfg.ripeT || [1, 1.8])) * fast);
+        else set(i, cfg.young ? 'young' : 'ripe', cfg.young ? rand(...(cfg.youngT || [0.8, 2])) * fast : Math.max(cfg.minLife||0,rand(...(cfg.ripeT || [1, 1.8])) * fast));
+      } else if (x.s === 'young') set(i, 'ripe', Math.max(cfg.minLife||0,rand(...(cfg.ripeT || [1, 1.8])) * fast));
       else if (x.s === 'ripe') {
         if (cfg.rotPenalty) { mxMiss(mg, cells[i], cfg.rotText || 'Упустил!', 1); if (cfg.maxMiss && mxOut(mg, cfg.maxMiss)) return; }
         set(i, cfg.rot ? 'rot' : 'empty', 0.7);
@@ -612,7 +613,7 @@ function mxCalle(mg, cfg) {
     $('clS').innerHTML = nums.map((n) => `<button class="mx-house" data-n="${n}"><span>${pick(HOUSES)}</span><b>${n}</b></button>`).join('');
     document.querySelectorAll('.mx-house').forEach((b) => mxBtn(b, () => tap(b)));
   };
-  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Calle ${ES_NUM[want]}</b>${mg.score < (cfg.hintUntil || 4) ? ` <small>(${want})</small>` : ''}`; };
+  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Улица ${ES_NUM[want]}</b>${cfg.learn || mg.score < (cfg.hintUntil || 4) ? ` <small>дом №${want}</small>` : ''}`; };
   const tap = (b) => {
     if (!mgAlive(mg)) return;
     if (+b.dataset.n === want) {
@@ -639,7 +640,7 @@ function mxWords(mg, cfg) {
     const [q, a] = cfg.reverse ? [pr[1], pr[0]] : pr;
     const wrong = shuffle(pairs.filter((x) => x !== pr)).slice(0, 2).map((x) => (cfg.reverse ? x[0] : x[1]));
     cur = { a }; y = 0;
-    $('wdW').textContent = q;
+    $('wdW').textContent = cfg.learn ? `${q} — ${a}` : q;
     $('wdO').innerHTML = shuffle([a, ...wrong]).map((o) => `<button class="mx-pad word">${o}</button>`).join('');
     document.querySelectorAll('#wdO .mx-pad').forEach((b) => mxBtn(b, () => {
       if (!mgAlive(mg)) return;
@@ -773,15 +774,15 @@ Object.assign(MEX_JOB_GAMES, {
   loader: { engine: mxAgave, title: 'Урожай агавы', hint: 'Режь только синие созревшие 🌵. Зелёные 🌿 — рано, гнилые 🥀 уже не нужны', young: '🌿', ripe: '🌵', rot: '🥀', empty: '🟫', ripeText: 'Ананас!', earlyText: 'Рано!', earlyPenalty: true, target: 16 },
   courier: { engine: mxSurf, title: 'Осёл на горной тропе', hint: 'Держи — Педро карабкается вверх, отпусти — спускается. Собирай посылки, обходи кактусы и змей', player: '🫏', good: ['📦', '📦', '✉️'], bad: ['🌵', '🐍', '🪨'], bg: 'mx-canyon', target: 16 },
   guard: { engine: mxLasso, title: 'Спасатель Канкуна', hint: 'Бросай круг 🛟, когда тонущий внутри кольца. Акулу 🦈 не спасай — она сама', btn: '🛟 Бросить круг', ringIcon: '', good: ['🏊', '🙋', '🏊‍♀️'], bad: ['🦈', '🐬'], badRate: 0.2, bg: 'mx-ocean', hitText: 'Спас!', badText: 'Это акула!', target: 12 },
-  taxi: { engine: mxRoute, title: 'Такси по Канкуну', hint: 'Пассажир кричит, куда повернуть. Жми стрелку до перекрёстка!', player: '🚕', place: ['Hotel Zone', 'Playa Delfines', 'Mercado 28', 'El Centro', 'Aeropuerto'], target: 14 },
+  taxi: { engine: mxRoute, title: 'Такси по Канкуну', hint: 'Пассажир кричит, куда повернуть. Жми стрелку до перекрёстка!', player: '🚕', place: ['Отельная зона', 'Пляж Дельфинес', 'Рынок 28', 'Центр', 'Аэропорт'], target: 14 },
   seller: { engine: mxHaggle, title: 'Торг за сомбреро', hint: 'Держи «Цену выше» и смотри на лицо гринго. Продай подороже, но пока он не взбесился', item: '👒', base: 60, target: 14 },
   manager: { engine: mxBuild, title: 'Завтрак в номер', hint: 'Собери поднос по заказу: жми «Взять», когда нужное в рамке', pool: ['🥚', '🥓', '☕', '🍊', '🥐', '🍳', '🥑', '🌮'], size: [3, 4], btn: '🛎️ На поднос', orderName: 'Номер 404', target: 14 },
   director: { engine: mxJudge, title: 'Утро директора курорта', hint: 'Правило сверху меняется! Одобряй то, что подходит, остальное — «Нет»', limit: 3200, target: 16,
     buttons: [['✅<small>Да</small>', 'y'], ['❌<small>Нет</small>', 'n']],
     rules: [{ text: 'Одобряй всё, где есть 💰', f: (x) => x.includes('💰') }, { text: 'Одобряй всё для пляжа 🏖️', f: (x) => x.includes('🏖️') }, { text: 'Ничего с 🦈 и 🔥!', f: (x) => !x.includes('🦈') && !x.includes('🔥') }],
     next: (st) => { const set = shuffle(['💰', '🏖️', '🦈', '🔥', '🍹', '🎺', '🐢', '🌪️']).slice(0, 2); return { html: `<div class="mx-doc"><small>Идея</small><span>${set.join(' ')}</span></div>`, ok: st.rule.f(set) ? 'y' : 'n' }; } },
-  dvornik: { engine: mxAgave, title: 'Пляж до прилива', hint: 'Убирай мусор, пока волна не унесла его в океан. Черепашек 🐢 не трогай!', ripe: ['🥤', '🍾', '🛍️', '🩴', '🥫'], empty: '', bad: ['🐢', '🦀'], badRate: 0.18, rotPenalty: true, rotText: '🌊 Унесло!', ripeT: [1.3, 2.1], bg: 'mx-beach', target: 20 },
-  postman: { engine: mxCalle, title: 'Почтальон: calles', hint: 'Номер дома — по-испански. Найди дом и отдай письмо', target: 14 },
+  dvornik: { engine: mxAgave, title: 'Пляж до прилива', hint: 'Убирай мусор, пока волна не унесла его в океан. Черепашек 🐢 не трогай!', ripe: ['🥤', '🍾', '🛍️', '🩴', '🥫'], empty: '', bad: ['🐢', '🦀'], badRate: 0.18, rotPenalty: true, rotText: '🌊 Унесло!', ripeT: [1.3, 2.1], minLife:1.1, minSpeed:.65, bg: 'mx-beach', target: 20 },
+  postman: { engine: mxCalle, title: 'Почтальон: улицы Веракруса', hint: 'Прочитай название числа и русский номер дома. Найди дом и отдай письмо', learn:true, target: 14 },
   cook: { engine: mxComal, title: 'Тортильи на комале', hint: 'Переворачивай, когда кольцо золотое, и снимай со второй стороны. Передержал — сгорит', items: ['🫓', '🫓', '🌮'], target: 14 },
   police: { engine: mxLucha, title: 'Задержание на рынке', hint: 'Воришка — бывший лучадор! Смотри, какой приём он готовит, и отвечай: удар — блок, подсечка — прыжок, захват — уклон', foe: '🥷', me: '👮', target: 14 },
   teacher: { engine: mxWords, title: 'Русский для гринго', hint: 'Слово падает — выбери перевод на русский, пока не упало', target: 14 },
@@ -816,9 +817,9 @@ startLessonGame = (function (orig) {
     const need = Math.max(2, Math.round([0, 7, 10, 8, 9][stage] * (hasEffect('t_focus') ? 0.75 : 1)));
     const games = {
       1: { name: 'Лотерия: слова', hint: `Прочитай слово и русский перевод — нажми подходящую картинку. Набери ${need}`, setup: (mg) => mxLoteria(mg, { words: true, learn: true, score: 'marks', size: 3, every: 2.6, hit: 0.8 }) },
-      2: { name: 'Испанский: слова', hint: `Слово падает — выбери перевод. Набери ${need}`, setup: (mg) => mxWords(mg, {}) },
-      3: { name: 'Испанский: числа', hint: `Найди дом с номером, названным по-испански. Набери ${need}`, setup: (mg) => mxCalle(mg, { hintUntil: 2 }) },
-      4: { name: '¿Verdad o mentira?', hint: `Смахивай карточку: вправо — правда, влево — ложь. Набери ${need}`, setup: (mg) => mxQuiz(mg, { limit: 5500, gen: () => { const [t, v] = pick(MX_TF); return { q: t, a: v ? 'Verdad' : 'Mentira', opts: ['Mentira', 'Verdad'] }; } }) },
+      2: { name: 'Испанский: слова', hint: `Запоминай слово с русским переводом и нажимай подходящий ответ. Набери ${need}`, setup: (mg) => mxWords(mg, {learn:true}) },
+      3: { name: 'Испанский: числа', hint: `Прочитай испанское число и подсказку с номером дома. Набери ${need}`, setup: (mg) => mxCalle(mg, { hintUntil: 2,learn:true }) },
+      4: { name: 'Правда или ложь · Verdad o mentira', hint: `Смахивай карточку: вправо — правда, влево — ложь. Набери ${need}`, setup: (mg) => mxQuiz(mg, { limit: 5500, gen: () => { const [t, v] = pick(MX_TF); return { q: t, a: v ? 'Правда' : 'Ложь', opts: ['Ложь', 'Правда'] }; } }) },
     };
     const g = games[stage];
     runGame({ title: `📖 ${g.name}`, scoreLabel: ` / ${need}`, hint: g.hint, duration: LESSON_TIME, setup: g.setup, finish: (score) => finishLesson(stage, score, need) });
@@ -844,7 +845,7 @@ const MX_NOVELA = [['Дон Альфонсо оказался…', ['Её отц
   ['В завещании дедушки…', ['Всё получила служанка', 'Только рецепт', 'Карта сокровищ Шныря']], ['Злодейка в маске — это…', ['Сестра героя', 'Михалыч', 'Почтальон']]];
 const mxTalk = (bank) => () => { const [q, o] = pick(bank); return { q, a: o[0], opts: shuffle(o) }; };
 const MX_DATES = {
-  walk: { title: 'Callejón del Beso', hint: 'Ведите друг друга по переулкам Гуанахуато: она говорит, куда свернуть', duration: 20, max: 10, setup: (mg) => mxRoute(mg, { player: '💑', place: ['Callejón del Beso', 'Plaza de la Paz', 'Teatro Juárez', 'Mercado Hidalgo'], hardAt: 99, dur: 2.6 }) },
+  walk: { title: 'Переулок поцелуев · Callejón del Beso', hint: 'Ведите друг друга по переулкам Гуанахуато: она говорит, куда свернуть', duration: 20, max: 10, setup: (mg) => mxRoute(mg, { player: '💑', place: ['Callejón del Beso', 'Plaza de la Paz', 'Teatro Juárez', 'Mercado Hidalgo'], hardAt: 99, dur: 2.6 }) },
   skate: { title: 'Сёрф вдвоём', hint: 'Держи — вверх по волне, отпусти — вниз. Ракушки ей, медузы мимо', duration: 18, max: 10, setup: (mg) => mxSurf(mg, { player: '🏄', good: ['🐚', '🌺', '⭐'], bad: ['🪼', '🪨'] }) },
   cafe: { title: 'Кафе: разговор по-испански', hint: 'Отвечай ей правильно — по карточке, пока не кончилось время', duration: 25, max: 8, setup: (mg) => mxQuiz(mg, { gen: mxTalk(MX_TALK), bg: 'mx-cafe' }) },
   amuse: { title: 'Ярмарка: пиньята', hint: 'Бей, когда пиньята над палкой. Разбей для неё звезду!', duration: 0, max: 12, setup: (mg) => mxPinata(mg, { items: ['⭐', '🪅'], swings: 8, unit: true }) },
@@ -893,7 +894,7 @@ const MX_CRIMES = [
     game: { title: 'Ранчо ночью', hint: 'Бросай лассо, когда конь в петле. Быка 🐂 не лови — поднимет всех', duration: 20, max: 8, setup: (mg) => mxLasso(mg, { good: ['🐎', '🐴'], bad: ['🐂'], badRate: 0.25, bg: 'mx-ranch night' }) },
     reward: (perf) => Math.round((6000 + level() * 900) * perf) },
   { id: 'x_tunnel', name: 'Туннель под границей', emoji: '🕳️', level: 9, energy: 30, wanted: 2, risk: 0.16, cd: 600, desc: 'Копать для Скорпионов. Патруль ходит прямо над тобой',
-    game: { title: 'El Túnel', hint: 'Держи «Копать», пока патруль далеко. Над тобой 👣 — отпусти! Три тревоги — конец', duration: 25, max: 6, setup: (mg) => mxTunnel(mg, { patrol: '🚙', segs: 3, maxMiss: 3 }) },
+    game: { title: 'Тоннель · El Túnel', hint: 'Держи «Копать», пока патруль далеко. Над тобой 👣 — отпусти! Три тревоги — конец', duration: 25, max: 6, setup: (mg) => mxTunnel(mg, { patrol: '🚙', segs: 3, maxMiss: 3 }) },
     reward: (perf) => Math.round((15000 + level() * 1500) * perf) },
   { id: 'x_boat', name: 'Ящики «текилы» на катере', emoji: '🚤', level: 12, energy: 30, wanted: 3, risk: 0.18, cd: 900, desc: 'Ночная доставка вдоль побережья. Береговая охрана не спит',
     game: { title: 'Ночное побережье', hint: 'Держи — катер вверх, отпусти — вниз. Подбирай ящики 📦, уходи от патруля 🚨 и прожекторов 🔦', duration: 22, max: 12,

@@ -69,7 +69,7 @@ openSettings = (function (orig) {
       sound: [grp('Звук', soundRows), grp('Музыка и тема звуков', blocks)],
       progress: [grp('История', [btnBy('journal'), btnBy('story')]), grp('Обучение', [btnBy('restartTut')]), grp('⚠️ Опасная зона', [btnBy('reset')], 'danger')],
       friends: secs.friends ? [grp('Сообщество', [setEl('<button class="btn primary wide" data-act="community">🍾 Беседа игроков в Telegram</button>'), communityRewardButtons()]), grp('Друзья', [...secs.friends.children])] : [],
-      help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>'), communityRewardButtons()]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news')]), secs.help.querySelector('.test-note')] : [],
+      help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>'), communityRewardButtons()]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news'),city()==='mex'?setEl('<button class="btn wide" data-act="mexGlossary">🌵 Словарь Мексики</button>'):null]), secs.help.querySelector('.test-note')] : [],
       admin: secs.admin ? [grp('Админ', [...secs.admin.children])] : [],
     };
     const list = [...SET_PAGES, ...(secs.admin ? [{ id: 'admin', e: '🛠️', t: 'Админ', d: 'Игроки, мир, сервер' }] : [])];
