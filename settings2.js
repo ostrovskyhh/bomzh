@@ -45,8 +45,8 @@ openSettings = (function (orig) {
       look: [grp('Подсказки', [rowBy('toggleTips')])],
       sound: [grp('Звук', soundRows), grp('Музыка и тема звуков', blocks)],
       progress: [grp('История', [btnBy('journal'), btnBy('story')]), grp('Обучение', [btnBy('restartTut')]), grp('⚠️ Опасная зона', [btnBy('reset')], 'danger')],
-      friends: secs.friends ? [grp('Друзья', [...secs.friends.children])] : [],
-      help: secs.help ? [grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news')]), secs.help.querySelector('.test-note')] : [],
+      friends: secs.friends ? [grp('Сообщество', [setEl('<button class="btn primary wide" data-act="community">🍾 Беседа игроков в Telegram</button>')]), grp('Друзья', [...secs.friends.children])] : [],
+      help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>')]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news')]), secs.help.querySelector('.test-note')] : [],
       admin: secs.admin ? [grp('Админ', [...secs.admin.children])] : [],
     };
     const list = [...SET_PAGES, ...(secs.admin ? [{ id: 'admin', e: '🛠️', t: 'Админ', d: 'Игроки, мир, сервер' }] : [])];
@@ -73,6 +73,10 @@ openSettings = (function (orig) {
 })(openSettings);
 
 Object.assign(ACTIONS, {
+  community: () => {
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(COMMUNITY_LINK);
+    else window.open(COMMUNITY_LINK, '_blank', 'noopener,noreferrer');
+  },
   settings: (function (orig) { return () => { SET_PAGE = null; orig(); }; })(ACTIONS.settings),
   setGo: (id) => {
     SET_PAGE = id;
