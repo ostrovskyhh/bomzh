@@ -119,13 +119,13 @@ function roulSpin() {
   track('casino');
   setTimeout(() => {
     roulSpinning = false;
-    if (!$('roulRes')) return;
     // Каждая ставка считается отдельно
     let win = 0, best = 0;
     for (const [id, v] of Object.entries(stakes)) {
       const b = ROUL_BETS.find((x) => x.id === id);
       if (b && b.win(n)) { win += v * b.x; best = Math.max(best, b.x); }
     }
+    if (!$('roulRes')) { if(win){addMoney(win);track('roulWin');}save();return; }
     const color = n === 0 ? 'zero' : REDS.includes(n) ? 'red' : 'black';
     $('roulRes').className = `roul-result show ${color}`;
     $('roulRes').textContent = n;

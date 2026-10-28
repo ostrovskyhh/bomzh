@@ -5,7 +5,7 @@
 // 2) Экономика и правила: цены вещей из кейсов, выгода кейсов, ночь казино, автовывод ракеты, сон с кофе, бой, очередь окон.
 (function () {
   if (!/^#autotest/.test(location.hash)) return;
-  const RES = { games: [], checks: [], errors: [] };
+  const RES = { games: [], checks: [], errors: typeof BugReport !== 'undefined' ? BugReport.build().errors.filter(e=>e.message!=='Не загрузился ресурс').map(e=>e.message) : [] };
   let CUR = null;
   window.addEventListener('error', (e) => { const m = `${e.message} @${(e.filename || '').split('/').pop()}:${e.lineno}`; RES.errors.push(m); if (CUR) CUR.errors.push(m); });
   window.addEventListener('unhandledrejection', (e) => { const m = 'promise: ' + (e.reason && e.reason.message || e.reason); RES.errors.push(m); if (CUR) CUR.errors.push(m); });

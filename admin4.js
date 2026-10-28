@@ -4,7 +4,7 @@
 //   где любой параметр видно и меняется прямо в своей строке. Команды выполняются у игрока при входе или за минуту.
 // • «Связь» — рассылка всем, подарок, анонс. «Я», «Мир», «Сервер» — прежние инструменты (admin2.js), разложены по разделам.
 
-const ADM4_TABS = [['home', '📊', 'Обзор'], ['players', '👥', 'Игроки'], ['comms', '📢', 'Связь'], ['hero', '🧑', 'Я'], ['world', '🎮', 'Мир'], ['server', '🖥️', 'Сервер']];
+const ADM4_TABS = [['home', '📊', 'Обзор'], ['players', '👥', 'Игроки'], ['reports', '🐞', 'Обращения'], ['comms', '📢', 'Связь'], ['hero', '🧑', 'Я'], ['world', '🎮', 'Мир'], ['server', '🖥️', 'Сервер']];
 const ADM4_SORTS = [['recent', '🕘 Недавние'], ['online', '🟢 Онлайн'], ['rich', '💰 Богачи'], ['level', '⭐ Уровень'], ['banned', '🔇 Наказанные']];
 const ADM4_CITY = { zas: '🏚️', msk: '🏙️', mex: '🌵' };
 let ADM4 = { ov: null, ovAt: 0, list: null, listKey: '', sort: 'recent', query: '', loading: false };
@@ -124,7 +124,7 @@ function adm4Server() {
 openAdmin = function () {
   const tab = ADM4_TABS.some(([id]) => id === ADM_TAB) ? ADM_TAB : 'home';
   const body = { home: adm4Home, players: adm4Players, comms: adm4Comms, hero: () => `<div class="adm4-sec"><div class="adm4-sec-h">🧑 Мой персонаж — для проверки</div>${admHero()}</div>`,
-    world: () => `<div class="adm4-sec">${admWorld()}</div>`, server: adm4Server }[tab]();
+    reports: feedbackAdminPage, world: () => `<div class="adm4-sec">${admWorld()}</div>`, server: adm4Server }[tab]();
   const sc = document.querySelector('#modalRoot .sheet'), keep = sc && sc.querySelector('.adm4') && sc.querySelector('.adm4').dataset.tab === tab ? sc.scrollTop : 0;
   openModal(`<div class="adm4" data-tab="${tab}">
     <div class="adm4-top"><div><b>🛠️ Админ-панель</b><small>${adm4Online() ? '🟢 сервер подключён' : '⚪ без сервера'} · ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</small></div>

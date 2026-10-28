@@ -2441,13 +2441,11 @@ function spin() {
   });
   setTimeout(() => {
     spinning = false;
-    if (!$('slotMsg')) return;
     const [a, b, c] = res.map((s) => s[0]);
     let win = 0, text;
     if (a === b && b === c) {
       win = bet * res[0][2];
       text = `${a}${a}${a} — ВЫИГРЫШ x${res[0][2]}! +${fmt(win)} ₽`;
-      if (a === '🐀' && Math.random() < 0.3) { addEffect('ratbite'); text += ' …но из автомата выскочила крыса 🐀'; }
     } else if (a === b || b === c || a === c) {
       win = Math.floor(bet * SLOT_PAIR);
       text = `Пара! +${fmt(win)} ₽`;
@@ -2456,6 +2454,7 @@ function spin() {
     }
     if (win) addMoney(win);
     addMood(win > bet ? Math.min(20, 3 + Math.floor(win / bet)) : win ? 0 : -3);
+    if (!$('slotMsg')) { if(a==='7️⃣'&&a===b&&b===c)track('jackpot'); save(); return; }
     $('slotMsg').textContent = text;
     $('slotMsg').className = 'bj-msg ' + (win > bet ? 'win' : win ? '' : 'lose');
     if (a === '7️⃣' && a === b && b === c) { track('jackpot'); sfx('jackpot'); }
@@ -2593,10 +2592,10 @@ async function bjDeal() {
   }
   await wait(450);
   if (!bjAlive(id)) return;
-  if (handValue(BJ.p) === 21) {
+  if (handValue(BJ.p) === 21 || handValue(BJ.d) === 21) {
     await bjReveal();
     if (!bjAlive(id)) return;
-    bjSettle(handValue(BJ.d) === 21 ? 'push' : 'bj');
+    bjSettle(handValue(BJ.p) === 21 ? (handValue(BJ.d) === 21 ? 'push' : 'bj') : 'lose');
     return;
   }
   bjControls('play');
@@ -2660,7 +2659,7 @@ async function bjDouble() {
 }
 
 function bjSettle(result) {
-  if (!BJ) return;
+  if (!BJ || BJ.done) return;
   BJ.done = true;
   const pays = { bj: 2.5, win: 2, push: 1, lose: 0, bust: 0 };
   const texts = { bj: 'БЛЕКДЖЕК!', win: 'Победа!', push: 'Ничья', lose: 'Крупье выиграл', bust: 'Перебор!' };

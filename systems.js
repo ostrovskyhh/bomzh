@@ -685,8 +685,8 @@ const PERKS = [
 ];
 const PRESTIGE_REQ = { level: 20, housing: 6 };
 
-function prestigeMult() { return 1 + 0.1 * (S.prestige || 0); }
-function xpMult() { return 1 + 0.05 * (S.prestige || 0); }
+function prestigeMult() { return 1 + 0.2 * (S.prestige || 0); }
+function xpMult() { return 1 + 0.1 * (S.prestige || 0); }
 function perk(id) { return (S.perks && S.perks[id]) || 0; }
 function prestigeGain() { return 1 + Math.floor(Math.max(0, level() - PRESTIGE_REQ.level) / 5) + Math.floor(Math.log10(Math.max(1, S.stats.earned / 1e6))); }
 function canPrestige() { return level() >= PRESTIGE_REQ.level && S.ownedHousing >= PRESTIGE_REQ.housing; }
@@ -702,7 +702,7 @@ HOOKS.mods.push((m) => {
 
 EXTRA_TABS.tasks.prestige = () => `
   <div class="premium-hero prestige"><div class="e">⭐</div><div><b>Престиж ${S.prestige || 0}</b>
-    <p>Каждый круг: +10% ко всему доходу и +5% к опыту навсегда. Очки престижа — на постоянные перки.</p></div></div>
+    <p>Каждый круг навсегда добавляет +20% к тапам и оплате работы, +10% к опыту. Бонусы складываются между кругами. Очки престижа — на постоянные перки.</p></div></div>
   <div class="info-card">Чтобы начать новый круг: <b>уровень ${PRESTIGE_REQ.level}</b> и <b>свой особняк</b>.
     Сбросятся игровые деньги, уровень, жильё, обычная одежда, образование, бизнесы, транспорт и сюжет. Сохранятся крышки, VIP и оплаченные бонусы, косметика, ключи кейсов, батл-пасс, достижения и их прогресс, коллекции, питомцы, наградные шапки, статистика и настройки.
     ${reqHTML({ level: PRESTIGE_REQ.level, housing: 6 })}
@@ -729,7 +729,7 @@ function prestigeProfile() {
     'refUsed', 'refInvited', 'refCapsFor', 'storyRewarded', 'clan', 'friendCount',
     'onlineWins', 'rpsWins', 'cutSeen', 'storyScenes', 'storyPicks',
     'tipsSeen', 'adviceSeen', 'unlockSeen', 'seenVersion', 'bcSeen', 'chatSeen',
-    'admin', 'rev', 'city', 'moves',
+    'admin', 'rev',
   ];
   const keep = {};
   for (const key of keys) if (S[key] !== undefined) keep[key] = S[key];
@@ -745,9 +745,9 @@ function prestigeWizard() {
   if (!PRESTIGE_FLOW) return;
   const step = PRESTIGE_FLOW.step;
   const lost = `<ul><li>Игровые деньги и бутылки, включая замороженные средства.</li><li>Уровень, учёба, работа, сила и форма.</li><li>Жильё, обычная одежда, бизнесы и транспорт.</li><li>Обычный инвентарь и вещи на барахолке.</li><li>Текущий сюжет, криминальный прогресс, отношения и семья.</li></ul>`;
-  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, текущий город, престиж и перки.</li></ul>`;
+  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, престиж и перки.</li></ul><p><b>Постоянная выгода:</b> доход от тапов и работы ×${(1 + 0.2 * ((S.prestige || 0) + 1)).toFixed(2)}, опыт ×${(1 + 0.1 * ((S.prestige || 0) + 1)).toFixed(2)}. Ещё +${prestigeGain()} очк. для перков. Начнёшь в Засранске.</p>`;
   const contents = step === 1
-    ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж сбросит прогресс этого круга. Отменить сброс или вернуть имущество кнопкой нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(perk('capital') * 3000)} ₽</b>.</p>`
+    ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж вернёт тебя в первый город — Засранск — и сбросит прогресс этого круга. Отменить сброс нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(1000 + perk('capital') * 3000)} ₽</b>.</p>`
     : step === 2
       ? `<h3>Продолжить с этими условиями?</h3><div class="prestige-warning kept"><b>Останется у тебя</b>${kept}</div><p>Остальное развитие начнётся заново. За этот круг получишь <b>+${prestigeGain()} очк. престижа</b>.</p>`
       : `<h3>Последнее подтверждение</h3><p>Начать новый круг и сбросить прогресс?</p><div class="prestige-warning lost"><b>Потеряешь прогресс</b><small>Деньги, уровень, имущество, учёбу, работу, силу, форму, обычный инвентарь, сюжет и отношения.</small></div><div class="prestige-warning kept"><b>Сохранишь ценное</b><small>Крышки, VIP и покупки, батл-пасс, достижения, коллекции, питомцев, награды и перки.</small></div><label class="prestige-ack"><input type="checkbox" id="prestigeAck" data-act="prestigeAcknowledge"> Я понимаю, что прогресс сбросится без возможности отмены.</label>`;
@@ -768,14 +768,15 @@ function performPrestige() {
       const seasonal = { hat: S.owned.hat.filter((id) => (CLOTHES.hat.find((h) => h.id === id) || {}).season) };
       S = { ...freshState(), ...sysDefaults(), ...keep };
       S.owned.hat.push(...seasonal.hat);
-      S.money = perk('capital') * 3000;
+      S.city = 'zas'; S.moves = 0;
+      S.money = 1000 + perk('capital') * 3000;
       track('prestigeDone');
       renderedHousing = -1; renderedLook = ''; renderedPet = '';
       if (typeof applyCity === 'function') applyCity();
       save();
       confetti(120);
       sfx('jackpot');
-      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Валера проснулся на той же лавке… но теперь он знает, как подняться. Доход +${S.prestige * 10}%, опыт +${S.prestige * 5}%. Очков престижа: ${S.pp}`, btn: 'Погнали!' });
+      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Ты снова в Засранске. Постоянные бонусы: тапы и работа +${S.prestige * 20}%, опыт +${S.prestige * 10}%. Стартовый капитал ${fmt(S.money)} ₽. Очков для постоянных перков: ${S.pp}`, btn: 'Погнали!' });
 }
 function prestigeFlowValid() {
   return PRESTIGE_FLOW && $('prestigeWizard') && canPrestige() && PRESTIGE_FLOW.prestige === (S.prestige || 0);

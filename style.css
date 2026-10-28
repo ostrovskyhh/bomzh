@@ -13,6 +13,17 @@
   --radius: 16px;
   --safe-bottom: max(env(safe-area-inset-bottom), var(--tg-safe-area-inset-bottom, 0px));
 }
+body[data-city="zas"] { --city-accent:#d0a15b; }
+body[data-city="msk"] { --bg:#111824; --card:#1d283b; --card2:#26344b; --line:#354968; --gold:#72d9e6; --city-accent:#72d9e6; }
+body[data-city="mex"] { --bg:#241b22; --card:#3b2933; --card2:#4e353c; --line:#704a4c; --gold:#f0bc68; --city-accent:#f0bc68; }
+.city-banner { display:flex;flex-direction:column;gap:6px;padding:18px;margin-bottom:12px;border-radius:16px;border-left:4px solid var(--city-accent);background:var(--card2); }
+.city-banner small { color:var(--muted); }
+body[data-city="msk"] .bh-tile { background:linear-gradient(145deg,#273b58,#172132);border:1px solid #405d80; }
+body[data-city="mex"] .bh-tile { background:linear-gradient(145deg,#694239,#3b2838);border:1px solid #a26648; }
+.story-episode { background:var(--card2);border:1px solid var(--city-accent);border-radius:16px;padding:16px;margin-bottom:14px; }
+.story-episode p { line-height:1.55; }.story-episode small { color:var(--muted); }
+.casino-rules { padding:14px;background:var(--card2);border-radius:12px;margin-top:12px;text-align:left;font-size:13px;line-height:1.5; }
+.report-json { max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font-size:11px; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
