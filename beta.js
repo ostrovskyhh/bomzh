@@ -321,7 +321,7 @@ openCases = (function (orig) {
     const btn = (c) => {
       const ok = level() >= c.level, can = c.caps ? S.caps >= c.caps : S.money >= c.price;
       if (!ok) return `<button class="pc-price" disabled data-why="Нужен ${c.level} уровень">🔒 ${c.level} ур.</button>`;
-      return `<button class="pc-price" data-act="caseOpen" data-id="${c.id}" ${can ? '' : `disabled data-why="Не хватает ${c.caps ? 'крышек' : 'денег'}"`}>${c.caps ? `🟡 ${c.caps}` : `${fmt(c.price)} ₽`}</button>`;
+      return `<div class="case-buys"><button class="pc-price" data-act="caseOpen" data-id="${c.id}" ${can ? '' : `disabled data-why="Не хватает ${c.caps ? 'крышек' : 'денег'}"`}>${c.caps ? `🟡 ${c.caps}` : `${fmt(c.price)} ₽`}</button>${caseMultiHTML(c)}</div>`;
     };
     const loot = (c) => `<div class="pc-loot">${RARITY.map((r) => `<span style="--r:${r.color}">${c.loot[r.id][0][0]}</span>`).join('')}</div>`;
     openModal(`<div class="pc">

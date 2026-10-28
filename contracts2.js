@@ -229,6 +229,9 @@ if (_ctGame) _ctGame.desc = '3–5 вещей одной редкости → 1 
 const CASE_MULTI = [3, 5];
 function caseCost(c, n) { return c.caps ? c.caps * n : c.price * n; }
 function caseCan(c, n) { return level() >= c.level && (c.caps ? S.caps >= c.caps * n : S.money >= c.price * n); }
+function caseMultiHTML(c) {
+  return `<div class="case-x">${CASE_MULTI.map(n=>`<button class="btn small ${caseCan(c,n)?'':'off'}" data-act="caseMulti" data-id="${c.id}:${n}" ${caseCan(c,n)?'':`disabled data-why="Нужно ${c.caps?`${c.caps*n} 🟡`:`${fmt(c.price*n)} ₽`}"`}>×${n}<small class="case-total">${c.caps?`${c.caps*n} 🟡`:`${fmt(c.price*n)} ₽`}</small></button>`).join('')}</div>`;
+}
 openCases = (function (orig) {
   return function () {
     orig();
@@ -239,12 +242,13 @@ openCases = (function (orig) {
       wrap.className = 'case-buys';
       b.replaceWith(wrap);
       wrap.appendChild(b);
-      wrap.insertAdjacentHTML('beforeend', `<div class="case-x">${CASE_MULTI.map((n) => `<button class="btn small ${caseCan(c, n) ? '' : 'off'}" data-act="caseMulti" data-id="${c.id}:${n}" ${caseCan(c, n) ? '' : `disabled data-why="Нужно ${c.caps ? `${c.caps * n} 🟡` : `${fmt(c.price * n)} ₽`}"`}>×${n}</button>`).join('')}</div>`);
+      wrap.insertAdjacentHTML('beforeend', caseMultiHTML(c));
     });
   };
 })(openCases);
 
 function caseOpenMulti(id, n) {
+  if (![1,...CASE_MULTI].includes(n)) return;
   const c = CASES.find((x) => x.id === id);
   if (!c || !caseCan(c, n)) { toast('Не хватает на кейсы', 'bad'); return; }
   if (c.caps) S.caps -= c.caps * n; else S.money -= c.price * n;

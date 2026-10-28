@@ -2503,6 +2503,7 @@ body.city-mex .res { box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
 @keyframes ctSeal { to { transform: rotate(-14deg) scale(1); opacity: .9; } }
 .case-buys { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
 .case-x { display: flex; gap: 4px; } .case-x .btn { flex: 1; padding: 4px 6px; font-size: 12px; font-weight: 800; } .case-x .btn.off { opacity: .45; }
+.case-x .btn { flex-direction:column;gap:2px; } .case-total { font-size:10px;opacity:.85; }
 .cm-grid { display: grid; gap: 8px; margin: 10px 0; perspective: 800px; }
 .cm-grid.n3 { grid-template-columns: repeat(3, 1fr); } .cm-grid.n5 { grid-template-columns: repeat(3, 1fr); }
 .cm-card { position: relative; height: 128px; border: 0; padding: 0; background: none; transform-style: preserve-3d; animation: cmFlip .6s ease var(--d) both; }

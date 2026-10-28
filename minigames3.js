@@ -56,7 +56,7 @@ function gameSwipe(mg, cfg) {
     const moved = prev ? Math.hypot((p.x - prev.x) * p.w, (p.y - prev.y) * p.h) : 0;
     prev = p;
     if (pest.vx && Math.hypot((p.x - pest.x) * p.w, (p.y - pest.y) * p.h) < 30 && Date.now() - hurtAt > 900) {
-      hurtAt = Date.now(); mgScore(-2); sfx('error'); haptic('error'); shakeArena(); floatAt(pest.el, cfg.badText || 'Мяу!', 'bad');
+      hurtAt = Date.now(); mgScore(-2); sfx('error'); haptic('error'); shakeArena(); floatAt(pest.el, cfg.badText || (pest.el.textContent==='👵'?'Ой!':pest.el.textContent==='🐈'?'Мяу!':'Осторожно!'), 'bad');
     }
     for (const s of spots) {
       if (s.hp <= 0 || Math.hypot((p.x - s.x) * p.w, (p.y - s.y) * p.h) > 34) continue;
