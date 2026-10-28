@@ -2179,7 +2179,11 @@ function hospital() {
   S.mood = Math.max(S.mood, 20);
   S.effects = S.effects.filter((e) => EFFECTS[e.id].kind === 'good');
   S.busy = null;
-  resultModal({ emoji: '🚑', rays: 'bad', title: 'Валера потерял сознание', text: `Скорая увезла в больницу. Заодно вылечили все болячки. Лечение стоило ${fmt(lost)} ₽. Следи за здоровьем!`, btn: 'Выписаться' });
+  // Лечение применяется сразу, но уведомление ждёт закрытия текущего окна:
+  // общая ракета продолжает лететь на сервере, перекрывать кнопку вывода нельзя.
+  const notice = () => resultModal({ emoji: '🚑', rays: 'bad', title: 'Валера потерял сознание', text: `Скорая увезла в больницу. Заодно вылечили все болячки. Лечение стоило ${fmt(lost)} ₽. Следи за здоровьем!`, btn: 'Выписаться' });
+  if (typeof queuePopup === 'function') queuePopup('hospital-' + Date.now(), 1, notice);
+  else notice();
   haptic('error');
   save();
 }
