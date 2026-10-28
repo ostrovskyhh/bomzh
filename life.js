@@ -550,16 +550,16 @@ EXTRA_TABS.fun.dates = () => {
     ${hasSti() ? '<div class="info-card warn">Что-то чешется… Сходи к врачу, пока не заразил свою девушку.</div>' : ''}` +
     GIRLS.map((g) => {
       const st = S.girls[g.id] || { met: false, rel: 0 };
-      const ok = reqOk(g.req);
-      const hearts = '❤️'.repeat(Math.floor(st.rel / 20)) + '🤍'.repeat(5 - Math.floor(st.rel / 20));
       const mine = S.girlfriend === g.id;
+      const ok = mine || reqOk(g.req);
+      const hearts = '❤️'.repeat(Math.floor(st.rel / 20)) + '🤍'.repeat(5 - Math.floor(st.rel / 20));
       let btn;
       if (!ok) btn = lockBtn;
       else if (mine) btn = `<button class="btn green" data-act="dateMenu" data-id="${g.id}" ${cd > 0 ? 'disabled' : ''}>${S.married ? '👰' : '💍'} Свидание</button>`;
       else if (!st.met) btn = `<button class="btn primary" data-act="meet" data-id="${g.id}" ${cd > 0 ? 'disabled' : ''}>Познакомиться</button>`;
       else btn = `<button class="btn ${gf ? '' : 'primary'}" data-act="dateMenu" data-id="${g.id}" ${cd > 0 ? 'disabled' : ''}>${gf ? '😏 Налево' : 'Свидание'}</button>`;
       return card({ thumb: g.emoji, title: g.name, btn, cls: ok ? '' : 'locked',
-        desc: `${g.desc}${ok && !st.met ? `<br>Шанс познакомиться: <b>${Math.round(meetChance(g) * 100)}%</b>` : ''}${gf && !mine && st.met ? '<br><span style="color:var(--red)">Измена: могут спалить и заразить</span>' : ''}`,
+        desc: `${g.desc}${ok && !st.met && !mine ? `<br>Шанс познакомиться: <b>${Math.round(meetChance(g) * 100)}%</b>` : ''}${gf && !mine && st.met ? '<br><span style="color:var(--red)">Измена: могут спалить и заразить</span>' : ''}`,
         extra: (st.met ? `<div class="hearts">${hearts} ${Math.floor(st.rel)}/100</div>` : '') + (ok ? '' : reqHTML(g.req)) });
     }).join('');
 };

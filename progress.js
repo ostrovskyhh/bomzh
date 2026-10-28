@@ -16,7 +16,7 @@ const TASK_POOL = [
   { id: 'eat', text: (g) => `Поешь ${g} раза`, base: 4, grow: 0 },
   { id: 'shift', text: (g) => `Отработай ${g} смены`, base: 3, grow: 0.05, lvl: 2 },
   { id: 'fightWin', text: (g) => `Выиграй ${g} драки`, base: 3, grow: 0.05, lvl: 2 },
-  { id: 'lesson', text: (g) => `Сходи на ${g} занятия`, base: 2, grow: 0, lvl: 2 },
+  { id: 'lesson', text: (g) => `Сходи на ${g} занятия`, base: 2, grow: 0, lvl: 2, need: canFinishDailyLessons },
   { id: 'marketSold', text: (g) => `Продай Шнырю ${g} вещей`, base: 5, grow: 0.1, lvl: 2 },
   { id: 'leisureGame', text: (g) => `Отдохни с мини-игрой ${g} раза`, base: 2, grow: 0, lvl: 3 },
   { id: 'casino', text: (g) => `Сделай ${g} ставок в казино`, base: 10, grow: 0.1, lvl: 5 },
@@ -37,12 +37,21 @@ function seedPick(arr, n, seed) {
   return a.slice(0, n);
 }
 
+function canFinishDailyLessons() {
+  const left=EDU.slice(S.edu+1).reduce((sum,e,i)=>{const stage=S.edu+1+i;return sum+(S.study?.stage===stage?Math.max(0,S.study.need-S.study.done):(e.lessons||0));},0);
+  return left+(S.tasks?.progress?.lesson||0)>=2;
+}
 function buildDailyTasks() {
   const day = S.tasks.day || today();
   const seed = +day.replace(/-/g, '') + (S.tasks.salt || 0);
   const lv = level();
   const pool = TASK_POOL.filter((t) => lv >= (t.lvl || 1) && (!t.need || t.need()));
-  const chosen = seedPick(pool, DAILY_COUNT, seed);
+  let chosen = seedPick(pool, DAILY_COUNT, seed);
+  // Keep existing rows/progress when an impossible lesson has to be replaced.
+  if(S.tasks.list&&(!S.tasks.listSeed||S.tasks.listSeed===seed)){
+    const previous=S.tasks.list.split(',').map(id=>TASK_POOL.find(t=>t.id===id)).filter(t=>t&&(pool.includes(t)||S.tasks.claimed?.[t.id]));
+    chosen=[...previous,...seedPick(pool.filter(t=>!previous.includes(t)),DAILY_COUNT-previous.length,seed)].slice(0,DAILY_COUNT);
+  }
   const list = chosen.map((t) => {
     const goal = Math.max(1, Math.round(t.base * (1 + t.grow * (lv - 1))));
     // Крышки — редкая награда: примерно одно задание из десяти и только 1 штука
@@ -50,14 +59,14 @@ function buildDailyTasks() {
     return { id: t.id, name: t.text(goal), goal, reward: caps ? { caps: 1 } : { money: Math.round(80 * (1 + lv * 0.35) * (1 + goal / (t.base * 4))) } };
   });
   TASKS.splice(0, TASKS.length, ...list);
-  S.tasks.list = list.map((t) => t.id).join(',');
+  S.tasks.list = list.map((t) => t.id).join(',');S.tasks.listSeed=seed;
 }
 
 ensureTasksDay = (function (orig) {
   return () => {
     const before = S.tasks && S.tasks.day;
     orig();
-    if (S.tasks.day !== before || !S.tasks.list || TASKS.map((t) => t.id).join(',') !== S.tasks.list) buildDailyTasks();
+    if (S.tasks.day !== before || !S.tasks.list || TASKS.map((t) => t.id).join(',') !== S.tasks.list || (TASKS.some(t=>t.id==='lesson')&&!canFinishDailyLessons()&&!S.tasks.claimed.lesson)) buildDailyTasks();
   };
 })(ensureTasksDay);
 HOOKS.load.push(() => { if (S.tasks) buildDailyTasks(); });
