@@ -3,6 +3,9 @@
 // поменяй ?v= в index.html на тот же номер и загрузи файлы на GitHub.
 
 const CHANGELOG = [
+  { v: '4.27', title: 'Вид на Эйфелеву башню', items: [
+    '🇫🇷 Первая локация Парижа теперь называется «Вид на Эйфелеву башню». Обновлены название стартового места и карточка Парижа',
+  ] },
   { v: '4.26', title:'IV глава: Франция и новые бутылки', items:[
     '🇫🇷 Из Веракруса в Париж: продолжение истории телефонных мошенников и картеля. 15 новых сюжетных глав, два босса, местные персонажи, помощь кварталу, митинги и рискованные вылазки «Воронов»',
     '🥐 Парижская жизнь: евро, семь сцен жилья, свои работы, обучение, еда, одежда, бизнесы, транспорт, питомцы и знакомства. Новые мини-игры и оригинальные мелодии аккордеона и джаза',
@@ -374,10 +377,17 @@ const CHANGELOG = [
   ] },
 ];
 const CURRENT_VERSION = CHANGELOG[0].v;
+const QUIET_RELEASES = new Set(['4.27']);
 
-function openNews(fromVersion) {
+function newsForVersion(fromVersion) {
   const idx = CHANGELOG.findIndex((c) => c.v === fromVersion);
   const list = fromVersion === 'all' ? CHANGELOG : idx > 0 ? CHANGELOG.slice(0, idx) : CHANGELOG.slice(0, 1);
+  return fromVersion === 'all' ? list : list.filter((c) => !QUIET_RELEASES.has(c.v));
+}
+
+function openNews(fromVersion) {
+  const list = newsForVersion(fromVersion);
+  if (!list.length) return;
   openModal(`<div class="big-art" style="height:90px"><div class="rays"></div><div class="big-emoji" style="line-height:90px">📰</div></div>
     <h3>Что нового</h3>
     <div class="news-list">${list.map((c) => `<h4>Версия ${c.v} · ${c.title}</h4><ul>${c.items.map((i) => `<li>${i}</li>`).join('')}</ul>`).join('')}</div>
@@ -386,16 +396,18 @@ function openNews(fromVersion) {
 }
 
 // Показываем один раз после обновления. Новичкам (ещё не видели интро) — не показываем
-HOOKS.tick.push(() => {
+function checkReleaseNews() {
   if (S.seenVersion === CURRENT_VERSION) return;
   if (!S.storySeen) return;
   if (!S.seenVersion && (S.stats.taps || 0) < 30) { S.seenVersion = CURRENT_VERSION; return; }
+  if (!newsForVersion(S.seenVersion).length) { S.seenVersion = CURRENT_VERSION; save(); return; }
   if (!popupTurn(3) || S.busy || (S.tut && !S.tut.done)) return;
   const from = S.seenVersion;
   S.seenVersion = CURRENT_VERSION;
   save();
   openNews(from);
-});
+}
+HOOKS.tick.push(checkReleaseNews);
 
 openSettings = (function (orig) {
   return function () {
