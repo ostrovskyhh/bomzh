@@ -729,7 +729,7 @@ function prestigeProfile() {
     'refUsed', 'refInvited', 'refCapsFor', 'storyRewarded', 'clan', 'friendCount',
     'onlineWins', 'rpsWins', 'cutSeen', 'storyScenes', 'storyPicks',
     'tipsSeen', 'adviceSeen', 'unlockSeen', 'seenVersion', 'bcSeen', 'chatSeen',
-    'admin', 'rev',
+    'districtUnlocks', 'admin', 'rev',
   ];
   const keep = {};
   for (const key of keys) if (S[key] !== undefined) keep[key] = S[key];

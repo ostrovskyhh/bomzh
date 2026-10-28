@@ -45,7 +45,7 @@ function yardEpisode(e,y){
           ${done?'<small>✅ Эта часть готова</small>':tasks.map(t=>`<div class="yard-task"><small>${esc(t.hint)} · готово к сдаче: ${t.available}</small><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(t.go)}">Выполнить</button><button class="btn small primary" data-act="yardHelp" data-id="${e.id}:${t.id}" ${!t.available||!y.left||YARD.busy?'disabled':''}>Засчитать вклад</button></div></div>`).join('')}</div>`;
       }).join('')}
     ${e.kind==='story'&&e.state==='active'?`<details><summary>Возможные финалы и награды</summary>${e.options.map(o=>`<p><b>${esc(o.name)}</b><br>${esc(o.text)}</p>`).join('')}</details>`:''}
-    <p class="yard-own">Твой вклад: ${e.mine} поручений. За каждое — 3 репутации. ${e.kind==='story'?'За финал участникам — 10 репутации, деньги и 1 крышка (крышка не чаще раза в сутки на аккаунт).':'За открытие объекта участникам — 200 ₽ и 10 репутации.'}</p>
+    <p class="yard-own">Твой вклад: ${e.mine} поручений. За каждое — 3 репутации. ${e.kind==='story'?'За финал участникам — 10 репутации, деньги и 1 крышка (крышка не чаще раза в сутки на аккаунт, вместе с наградами за командные победы).':'За открытие объекта участникам — 200 ₽ и 10 репутации.'}</p>
     ${e.contributors.length?`<details><summary>Кто помог · ${e.contributors.length}</summary>${e.contributors.map(p=>`<div class="yard-person">${esc(p.name)} <b>${p.n}</b></div>`).join('')}</details>`:''}</article>`;
 }
 function yardHTML(c){
@@ -53,7 +53,7 @@ function yardHTML(c){
   if(!y||y.clanId!==c.id){setTimeout(()=>yardLoad(),0);return `<div class="info-card">${YARD.error||'🏡 Загружаем общий двор…'}<button class="btn small" data-act="yardRefresh">Обновить</button></div>`;}
   const rep=r.stats.reputation,title=rep>=250?'Душа команды':rep>=100?'Надёжный':rep>=25?'Свой':'Новичок двора';
   return `<section class="yard"><div class="yard-heading"><div><small>НАШ РАЙОН</small><h2>🏡 Двор «${esc(c.name)}»</h2></div><button class="btn small" data-act="yardRefresh" ${YARD.loading?'disabled':''}>↻</button></div>
-    ${yardArt(y.buildings)}<div class="yard-profile"><b>${title} · ${rep} репутации</b><small>Сегодня можно помочь ещё ${y.left}/${y.dailyLimit} раз. Лимит общий для всех банд. Пропуски дней ничего не отнимают.</small></div>
+    ${yardArt(y.buildings)}<div class="yard-profile"><b>${title} · ${rep} репутации</b><small>Сегодня можно помочь ещё ${y.left}/${y.dailyLimit} раз. Лимит общий для двора, подготовки, районов и поставок во всех бандах. Пропуски дней ничего не отнимают.</small></div>
     <div class="yard-buildings">${y.buildings.map(b=>`<details class="${b.built?'built':''}"><summary>${b.emoji} ${esc(b.name)} ${b.built?'✓':'🔒'}</summary><small>${esc(b.benefit)}</small></details>`).join('')}</div>
     ${y.episodes.map(e=>yardEpisode(e,y)).join('')}
     <div class="info-card">Тапы, работа и находки засчитываются во всех городах. Один заработанный вклад тратится на выбранное дело. Сначала открой двор, затем выполняй новые действия. Старые достижения, уровни и общак банды сохранены.</div>
@@ -93,7 +93,7 @@ ACTIONS.yardMetrics=async()=>{
   if(!S.admin)return;
   try{
     const r=await apiPost('admin/yard/metrics');if(r.error)throw new Error(r.error);
-    const labels={clans:'Банд',members:'Участников сейчас',activeMembers7d:'Участников заходило за 7 дней',contributors7d:'Игроков помогали двору за 7 дней',help7d:'Поручений за 7 дней',topShare:'Доля самого активного игрока, %',stories7d:'Историй завершено за 7 дней',buildings:'Объектов построено всего',caps7d:'Крышек за истории за 7 дней',returned7d:'Помогали на прошлой неделе и вернулись на этой'};
+    const labels={clans:'Банд',members:'Участников сейчас',activeMembers7d:'Участников заходило за 7 дней',contributors7d:'Игроков помогали двору за 7 дней',help7d:'Поручений за 7 дней',topShare:'Доля самого активного игрока, %',stories7d:'Историй завершено за 7 дней',buildings:'Объектов построено всего',caps7d:'Крышек за истории за 7 дней',districtTotalHelpers7d:'Помогали во всех делах двора за 7 дней',districtParticipants7d:'Добровольцев на сходках за 7 дней',districtMatches7d:'Рейтинговых встреч завершено за 7 дней',districtPractice7d:'Тренировок завершено за 7 дней',districtCoops7d:'Поставок с союзниками за 7 дней',districtAssists7d:'Просьб выполнено за 7 дней',districtPurchases7d:'Покупок за репутацию за 7 дней',returned7d:'Помогали на прошлой неделе и вернулись на этой'};
     openModal(`<h3>🏡 Жизнь банд</h3><div class="stat-grid">${Object.entries(labels).map(([k,v])=>`<div>${v}<b>${fmt(r[k]||0)}</b></div>`).join('')}</div><p class="test-note">Накапливается с версии 4.20. Новые данные о возвращении появятся после первой полной недели. Метрики не влияют на топ.</p><button class="btn wide" data-act="adminMenu">Назад в админку</button>`);
   }catch(e){toast('Статистика доступна только администратору на сервере.','bad');}
 };

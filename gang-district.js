@@ -1,0 +1,146 @@
+// Жизнь района: сервер владеет подготовкой, наградами и сезонными результатами.
+const DISTRICT={data:null,at:0,loading:false,busy:false,panel:'yard',error:''};
+const DISTRICT_KEYS=['gangPrep','gangWar','gangWarWin','gangCoop','gangAssist','gangRegion'];
+function districtApply(r){
+  DISTRICT.data=r;DISTRICT.at=Date.now();DISTRICT.error='';
+  if(Array.isArray(r.unlocks))S.districtUnlocks=[...r.unlocks];
+  for(const key of DISTRICT_KEYS){const delta=Math.max(0,(r.stats?.[key]||0)-counter(key));if(delta)track(key,delta);}
+}
+function districtCurrent(){const d=DISTRICT.data?.district;return d&&d.clanId===CLAN.data?.id?d:null;}
+async function districtLoad(force=false){
+  if(!onlineOn()||DISTRICT.loading||(!force&&Date.now()-DISTRICT.at<30000))return;
+  DISTRICT.loading=true;
+  try{districtApply(await apiPost('gang/district/state'));}
+  catch(e){DISTRICT.error='Не удалось загрузить район. Попробуй обновить.';DISTRICT.at=Date.now();}
+  finally{DISTRICT.loading=false;}
+  if(currentScreen==='fun'&&TABS.fun==='clan')renderCurrent(false);
+}
+HOOKS.load.push(()=>{if(onlineOn())setTimeout(()=>districtLoad(true),2000);});
+HOOKS.tick.push(()=>{if(onlineOn()&&S.storySeen&&Date.now()-DISTRICT.at>60000)districtLoad();});
+showScreen=(function(orig){return function(name,tab){const r=orig(name,tab);if(name==='fun'&&tab==='clan'&&onlineOn())setTimeout(()=>districtLoad(),0);return r;};})(showScreen);
+const districtWait=ts=>leftText(Math.max(0,ts*1000-Date.now()));
+const districtDisabled=test=>test||DISTRICT.busy?'disabled':'';
+function districtTaskHTML(d,ids,act,scope=''){
+  return ids.map(id=>d.tasks.find(t=>t.id===id)).filter(Boolean).map(t=>`<div class="district-task"><span>${esc(t.hint)}<small>Готово к сдаче: ${t.available}</small></span><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(t.go)}">Выполнить</button><button class="btn small primary" data-act="${act}" data-id="${scope?scope+':':''}${t.id}" ${districtDisabled(!t.available||!d.left)}>Засчитать</button></div></div>`).join('');
+}
+function districtReportHTML(m,cid){
+  const r=m.report;if(!r)return '';
+  const won=r.winner===cid,ownA=m.a===cid;
+  return `<details class="district-report"><summary>${m.practice?'🏟️ Тренировка':'🥊 Встреча'} · ${esc(m.names[String(ownA?m.b:m.a)]||'Другая команда')} · ${won?'победа':'поражение'} ${ownA?r.scoreA:r.scoreB}:${ownA?r.scoreB:r.scoreA}</summary>
+    <p>${esc(r.rule)}</p>${r.teams.filter(t=>t.clanId).map(t=>`<div class="district-report-team"><b>${esc(m.names[String(t.clanId)]||'Команда')}</b><small>${esc(DISTRICT.data?.district?.tactics[t.tactic]||t.tactic)} · помощь ролей +${t.supportPct}% · преимущество тактики +${t.tacticPct}%</small></div>`).join('')}
+    ${r.bouts.map((b,i)=>`<div class="district-bout"><small>Поединок ${i+1} · шанс первой стороны ${b.chanceA}%</small><div><span>${esc(b.a)}<small>сила ${b.powerA}</small></span><b>${b.winner===m.a?'1:0':'0:1'}</b><span>${esc(b.b)}<small>сила ${b.powerB}</small></span></div></div>`).join('')}
+    <p>${m.practice?'Тренировка: без денег, крышек, рейтинга и влияния. За участие — 5 репутации, не чаще раза в сутки.':`Бойцам и подготовленным помощникам: ${won?'400 ₽ и 10':'150 ₽ и 5'} репутации. ${won?'Команде +2 000 ₽ в общак. Победителю — 1 крышка, если общий суточный лимит историй и встреч ещё свободен.':'Общак, постройки и накопленные награды сохранены.'} Деньги и крышки приходят штатным подарком.`}</p>
+  </details>`;
+}
+function districtWarHTML(d){
+  const m=d.match,cid=d.clanId,own=m?.roster.filter(p=>p.clan_id===cid)||[],me=m?.mine;
+  const phase={recruiting:'Собираем команду',queued:'Ищем равного соперника',preparing:m?.practice?'Готовимся к тренировке':'Подготовка к встрече'};
+  return `<section class="district-war"><div class="district-kicker">ДОБРОВОЛЬНАЯ КОМАНДА</div><h2>🥊 Сходки района</h2><p>Три бойца и три разные роли помощи. Не нужно всем заходить одновременно: подготовка сохраняется, результат приходит по окончании таймера.</p>
+    <details class="district-rules"><summary>Условия, тактика и награды — до записи</summary><p>Равный подбор: сила составов отличается максимум на 35%, сезонный рейтинг — не больше чем на 250. Союзники не встречаются. Повтор с той же командой — не раньше чем через 24 часа.</p><p>После подбора даётся 6 часов. Бойцы фиксируются; до подбора можно выйти. Боец с подготовкой получает +3% личной силы. Подготовленные разведчик, снабженец и поддержка дают по +3% команде, суммарно не больше 9%.</p><p>Натиск побеждает строй, строй — контратаку, контратака — натиск: преимущество +6%. Решает большинство голосов записавшейся команды; при равенстве — первый вариант. Разведчик видит текущий выбор соперника. Исход каждого из трёх поединков случаен с учётом силы.</p><p>За победу участнику — 400 ₽ и 10 репутации, за поражение — 150 ₽ и 5. Бойцы участвуют автоматически по сохранённому составу; помощникам нужна подготовка. Победа даёт 1 крышку, не чаще раза в сутки вместе с историями двора, +10 очков недельной войны участнику и +2 000 ₽ в общак. Поражение ничего не забирает.</p><p>Сезонный рейтинг: старт 1 000, победа +20, поражение −10. Влияние в выбранном районе: победа +3, поражение +1. Между встречами — 6 часов отдыха. Сбор без соперника закрывается через 24 часа или на границе сезона. В последние 6 часов сезона новый рейтинговый подбор закрыт; тренировки доступны. После ручного закрытия сбора — перерыв 1 час.</p><p>Можно выбрать тренировку с соседями: хватит одного бойца, подготовка 15 минут. Три учебных поединка, без денег, крышек, рейтинга и влияния; 5 репутации за участие не чаще раза в сутки на аккаунт.</p></details>
+    ${!m?`<div class="district-empty">🏟️ Сбор пока не объявлен.${d.manager?'<button class="btn primary wide" data-act="districtRecruit">Открыть добровольный сбор</button>':'<p>Объявить сбор может главарь или заместитель. Пока можно помочь истории двора, району или союзникам.</p>'}</div>`:`<article class="district-card"><div class="district-status">${phase[m.state]} <span>⏳ ${districtWait(m.deadline)}</span></div>
+      ${m.b?`<h3>${esc(m.names[String(m.a)])} × ${esc(m.names[String(m.b)])}</h3><p>Соперник найден. Состав сохранён до результата. Ваша цель — ${esc(d.regions.find(r=>r.id===(m.a===cid?m.region_a:m.region_b))?.name||'район')}.</p>`:m.state==='queued'?'<p>Подбор идёт при обновлении двора. Если равного соперника пока нет, можно выбрать тренировку без рейтинга.</p>':'<p>Запишись на роль. До подбора можно передумать; после — команда участвует по сохранённой подготовке.</p>'}
+      <div class="district-roster">${Object.entries(d.roles).map(([key,role])=>{const people=own.filter(p=>p.role===key);return `<div class="district-role"><b>${role.emoji} ${esc(role.name)} · ${people.length}/${key==='fighter'?3:1}</b><small>${esc(role.text)}</small>${people.map(p=>`<p>${esc(p.name)} ${p.uid===me?.uid?'· ты':''}<small>${p.role==='fighter'?'сила '+p.power+' · ':''}${p.ready?'✅ Подготовлен':'Без подготовки'}</small></p>`).join('')}${m.state!=='preparing'&&me?.role!==key?`<button class="btn small" data-act="districtJoin" data-id="${key}" ${districtDisabled(people.length>=(key==='fighter'?3:1))}>${me?'Сменить роль':'Записаться'}</button>`:''}</div>`;}).join('')}</div>
+      ${me?`<div class="district-my-prep"><h3>${d.roles[me.role].emoji} Твоя роль: ${esc(d.roles[me.role].name)}</h3>${me.ready?'<p class="green">✅ Подготовка сохранена. Можно заниматься своими делами.</p>':districtTaskHTML(d,d.roles[me.role].tasks,'districtPrepare')}<h3>Общая тактика</h3><p>Сейчас: <b>${esc(d.tactics[m.tactic])}</b>. ${m.enemyTactic?`Разведка видит у соперника: <b>${esc(d.tactics[m.enemyTactic])}</b>.`:'Выбор соперника откроется подготовленному разведчику.'}</p><div class="district-options">${Object.entries(d.tactics).map(([key,label])=>`<button class="btn small ${m.myTactic===key?'primary':''}" data-act="districtTactic" data-id="${key}" ${districtDisabled(false)}>${m.myTactic===key?'✓ ':''}${esc(label)}</button>`).join('')}</div>${m.state!=='preparing'?'<button class="btn small" data-act="districtLeave">Выйти из состава</button>':''}</div>`:'<p class="test-note">Ты пока не записан на эту встречу. Дела двора, районные задания и помощь союзникам доступны отдельно.</p>'}
+      ${d.manager&&m.state!=='preparing'?`<div class="district-manager"><button class="btn primary wide" data-act="districtQueue" ${districtDisabled(own.filter(p=>p.role==='fighter').length!==3||m.state==='queued')}>${m.state==='queued'?'Поиск запущен':'Найти равного соперника · 3 бойца'}</button><button class="btn wide" data-act="districtPractice" ${districtDisabled(!own.some(p=>p.role==='fighter'))}>Тренировка с соседями · без рейтинга</button><button class="btn small" data-act="districtCancelMatch">Закрыть сбор · перерыв 1 час</button></div>`:''}</article>`}
+    <h3>Сохранённые отчёты</h3>${d.history.length?d.history.map(m=>districtReportHTML(m,cid)).join(''):'<p class="test-note">Здесь появятся результаты и причины каждого поединка.</p>'}</section>`;
+}
+function districtMapHTML(d){
+  const shapes=['M18 18H242V144H18Z','M262 18H582V88H262Z','M18 164H188V322H18Z','M208 108H400V322H208Z','M420 108H582V322H420Z'];
+  const pos=[[130,72],[422,47],[103,228],[304,205],[501,205]],short={market:'Рынок',station:'Вокзал',industry:'Промзона',park:'Парк',docks:'Причал'};
+  return `<section class="district-map"><div class="district-kicker">СЕЗОН ${d.season} · ЕЩЁ ${districtWait(d.seasonEnd)}</div><h2>🗺️ Карта влияния</h2><p>Соревнуемся за районы 28 дней. Встречи, общие истории и поставки добавляют влияние в выбранный район. Дело района можно выполнить один раз в сутки всей бандой — по одному в каждом районе.</p>
+    <svg class="district-map-art" viewBox="0 0 600 340" role="img" aria-label="Карта пяти районов и влияние вашей банды"><rect width="600" height="340" rx="22" fill="#172832"/><path d="M0 154H200V0M198 98H600M410 98V340M252 0V98" fill="none" stroke="#667379" stroke-width="9"/>${d.regions.map((r,i)=>`<g class="${r.id===d.settings.region?'district-map-selected':''}"><path d="${shapes[i]}" fill="${r.leaders[0]?.clan_id===d.clanId?'#3c7164':r.own?'#4b5263':'#2d4047'}" rx="12"/><text x="${pos[i][0]}" y="${pos[i][1]}" text-anchor="middle">${r.emoji} ${short[r.id]}</text><text class="district-map-score" x="${pos[i][0]}" y="${pos[i][1]+29}" text-anchor="middle">Наше влияние: ${r.own}</text></g>`).join('')}</svg>
+    <div class="district-regions">${d.regions.map(r=>{const t=d.tasks.find(t=>t.id===r.missionTask);return `<article class="district-card ${r.id===d.settings.region?'selected':''}"><h3>${r.emoji} ${esc(r.name)} ${r.id===d.settings.region?'· наша цель':''}</h3><p>${esc(r.text)}</p><small>Ваше влияние: ${r.own}. ${r.leaders.length?'Лидер: '+esc(r.leaders[0].name)+' · '+r.leaders[0].points:'Лидера пока нет'}</small>${r.leaders.length?`<ol>${r.leaders.map(l=>`<li>${esc(l.name)} <b>${l.points}</b></li>`).join('')}</ol>`:''}
+      ${r.missionDone?'<p class="green">✅ Дело района сегодня выполнено</p>':`<p>Дело района · +1 влияние, +3 личной репутации.<br><small>${esc(t?.hint||'')}</small></p><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(t?.go||'game')}">Выполнить</button><button class="btn small primary" data-act="districtMission" data-id="${r.id}" ${districtDisabled(!d.left||!t?.available)}>Сдать поручение</button></div>`}
+      ${d.manager&&r.id!==d.settings.region?`<button class="btn small" data-act="districtRegion" data-id="${r.id}" ${districtDisabled(false)}>Выбрать целью будущих дел</button>`:''}</article>`;}).join('')}</div>
+    <details class="district-rules"><summary>Что происходит в конце сезона</summary><p>Три лучшие банды каждого района получают памятный трофей, участвовавшие в делах игроки — личный знак в достижениях. Равенство влияния решается по номеру банды. Новому сезону передаются постройки, репутация, покупки, подарки и личная история; заново считаются только влияние и соревновательный рейтинг.</p><p>Трофеи и украшения не дают постоянного дохода или преимущества в боях. Новичкам остаётся место в следующем сезоне.</p></details>
+    <h3>🏆 Трофеи двора</h3>${d.trophies.length?d.trophies.map(t=>`<div class="district-trophy">${['','🥇','🥈','🥉'][t.place]} ${esc(d.regions.find(r=>r.id===t.region)?.name||t.region)} · сезон ${t.season}</div>`).join(''):'<p class="test-note">Первый сезон уже идёт. Здесь останется история ваших районов.</p>'}
+    <details><summary>Рейтинг встреч этого сезона</summary>${d.ladder.map((l,i)=>`<p>${i+1}. ${esc(l.name)} · ${l.points} рейтинга · ${l.wins}/${l.played} побед</p>`).join('')||'<p>Первые рейтинговые встречи ещё впереди.</p>'}</details></section>`;
+}
+function districtPeopleHTML(d){
+  const b=d.ballot,focus=d.focuses[d.settings.focus],episodes=YARD.data?.yard?.clanId===d.clanId?YARD.data.yard.episodes.filter(e=>e.state==='active'):[];
+  return `<section class="district-people"><div class="district-kicker">СВОИ ЛЮДИ И ДОГОВОРЁННОСТИ</div><h2>🤝 Жизнь команды</h2><article class="district-card"><h3>📌 Объявление двора</h3><p>${esc(d.settings.notice||'Главарь или заместитель может закрепить здесь план команды.')}</p>${d.manager?`<label class="district-input">Короткое сообщение своим<textarea id="districtNotice" maxlength="160" rows="2" placeholder="Например: сегодня собираем поставку к 20:00">${esc(d.settings.notice)}</textarea></label><button class="btn small" data-act="districtNotice" ${districtDisabled(false)}>Закрепить</button>`:''}</article>
+    <article class="district-card"><h3>${focus?.emoji||'🗳️'} Направление: ${esc(focus?.name||'ещё не выбрано')}</h3><p>Меняет атмосферу двора и тему следующей общей истории. Все постройки и обычные занятия доступны при любом направлении. Решают голоса своих: большинство активного состава или итоги через 12 часов; при равенстве — первый вариант. Менять направление можно раз в неделю.</p>
+      ${b&&!b.result?`<p>Голосование · осталось ${districtWait(b.deadline)}</p>`:''}<div class="district-focuses">${Object.entries(d.focuses).map(([id,f])=>`<button class="yard-choice ${b?.mine===id?'chosen':''}" data-act="districtFocus" data-id="${id}" ${districtDisabled(!!b?.result&&d.settings.focus_at*1000+7*86400000>Date.now())}><b>${f.emoji} ${esc(f.name)}</b><small>${esc(f.text)}</small><span>${b&&!b.result?(b.votes[id]||0)+' голосов':d.settings.focus===id?'Выбрано командой':'Голосовать'}</span></button>`).join('')}</div>
+      ${d.settings.focus_at?`<small>Следующее изменение — не раньше ${new Date((d.settings.focus_at+7*86400)*1000).toLocaleString('ru-RU')}.</small>`:''}</article>
+    <article class="district-card"><h3>🙋 Просьбы о помощи</h3><p>Попроси своих закончить нужную часть общего дела. Помощник выполняет настоящее поручение, получает вклад и репутацию; автор не получает награду за одно размещение просьбы. Новая просьба — раз в 24 часа на аккаунт.</p>
+      ${d.requests.map(r=>`<div class="district-request"><b>${esc(r.name)}</b><small>${esc({materials:'Нужны материалы',tools:'Нужен инструмент',contacts:'Нужны полезные вещи'}[r.task])} · ${districtWait(r.expires)}</small><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(d.tasks.find(t=>t.id===r.task)?.go||'game')}">Выполнить</button><button class="btn small primary" data-act="districtAssist" data-id="${r.id}" ${districtDisabled(r.uid===d.myUid||!d.left||!d.tasks.find(t=>t.id===r.task)?.available)}>Откликнуться</button>${r.uid===d.myUid||d.manager?`<button class="btn small" data-act="districtCloseRequest" data-id="${r.id}" ${districtDisabled(false)}>Закрыть</button>`:''}</div></div>`).join('')||'<p class="test-note">Открытых просьб пока нет.</p>'}
+      <details><summary>Попросить помощи с общим делом</summary>${episodes.map(e=>`<div class="district-request"><b>${esc(e.name)}</b>${['materials','tools','contacts'].filter(l=>e.progress[l]<e.target).map(l=>`<button class="btn small" data-act="districtRequest" data-id="${e.id}:${l}" ${districtDisabled(false)}>${esc({materials:'Материалы',tools:'Инструмент',contacts:'Находки'}[l])}</button>`).join('')}</div>`).join('')||'<p>Сейчас активных дел нет.</p>'}</details></article>
+    <article class="district-card"><h3>🕊️ Союзы дворов</h3><p>До двух союзников на 7 дней, по согласию руководства обеих банд. Союзники не встречаются в рейтинговом подборе и не ходят друг на друга в набеги. Поставки выполняются без переводов денег между игроками.</p>
+      ${d.allies.map(a=>{const other=a.lo===d.clanId?a.hi:a.lo,incoming=a.sender!==d.clanId;return `<div class="district-ally"><b>${esc(a.otherName)}</b><small>${a.state==='active'?'Действующий союз':incoming?'Входящее предложение':'Ваше предложение'} · ${districtWait(a.expires)}</small>${d.manager?(a.state==='active'?`<div class="btn-row"><button class="btn small primary" data-act="districtStartCoop" data-id="${other}" ${districtDisabled(false)}>Совместная поставка</button><button class="btn small" data-act="districtLeaveAlly" data-id="${other}" ${districtDisabled(false)}>Завершить союз</button></div>`:incoming?`<div class="btn-row"><button class="btn small primary" data-act="districtAcceptAlly" data-id="${other}" ${districtDisabled(false)}>Принять</button><button class="btn small" data-act="districtDeclineAlly" data-id="${other}" ${districtDisabled(false)}>Отклонить</button></div>`:''):''}</div>`;}).join('')||'<p class="test-note">Союзов пока нет.</p>'}
+      ${d.manager&&d.others.length?`<label class="district-input">Предложить союз<select id="districtAlly">${d.others.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label><button class="btn small" data-act="districtOfferAlly" ${districtDisabled(false)}>Отправить предложение</button>`:''}</article>
+    <h3>🚚 Совместные поставки</h3><p class="test-note">По 3 поручения с каждой стороны за 72 часа, максимум 2 от одного игрока. По завершении — каждой банде 2 000 ₽ в общак и +1 влияние; каждому помогавшему 250 ₽ и 10 репутации (личная награда не чаще раза в сутки). Одна поставка в сутки на банду, с тем же союзником — раз в неделю.</p>
+    ${d.coops.map(x=>`<article class="district-card"><h3>${esc(x.nameA)} ↔ ${esc(x.nameB)}</h3><p>${x.state==='completed'?'✅ Завершена':x.state==='active'?'⏳ '+districtWait(x.expires):'Срок закончился'} · ${x.progress_a}/3 + ${x.progress_b}/3</p><small>Твой вклад: ${x.mine}/2 поручений.</small>${x.state==='active'&&x[d.clanId===x.a?'progress_a':'progress_b']<3?districtTaskHTML(d,['materials','tools','contacts'],'districtCoop',String(x.id)):''}</article>`).join('')||'<p class="test-note">Первую поставку запускает руководство после заключения союза.</p>'}</section>`;
+}
+function districtShopHTML(d){
+  const stats=DISTRICT.data.stats;
+  return `<section class="district-shop"><div class="district-kicker">НАГРАДЫ ЗА УЧАСТИЕ</div><h2>✨ Репутация своих</h2><div class="district-wallet"><b>${fmt(stats.availableRep)} доступно</b><small>Заработано за всё время: ${fmt(stats.reputation)} · потрачено: ${fmt(stats.spentRep)}</small></div><p>Поручение даёт 3 репутации. Финалы историй, стройки, встречи и поставки добавляют репутацию за личное участие. Её нельзя купить за деньги или крышки. Здесь только внешние награды: без преимущества в боях и доходе.</p>
+    ${d.shop.map(item=>`<article class="district-card"><div class="district-item-icon">${item.emoji}</div><h3>${esc(item.name)}</h3><p>${esc(item.text)}</p>${item.owned?`<span class="green">✅ Куплено навсегда</span>${item.frame?`<button class="btn small" data-act="districtWear" data-id="${esc(item.frame)}">${S.frame===item.frame?'Надето':'Надеть рамку'}</button>`:item.id.startsWith('decor_')?`<button class="btn small" data-act="districtDecor" data-id="${item.id}" ${districtDisabled(d.decor.includes(item.id))}>${d.decor.includes(item.id)?'Установлено в этом дворе':'Установить в этом дворе'}</button>`:'<small>Звание отображается в твоей карточке двора.</small>'}`:`<button class="btn primary wide" data-act="districtBuy" data-id="${item.id}" ${districtDisabled(stats.availableRep<item.cost)}>Открыть · ${item.cost} репутации</button>`}</article>`).join('')}
+    <p class="test-note">Покупки и личная история сохраняются при престиже и смене банды. Расход репутации не уменьшает достигнутое звание. Рамки доступны также в профиле.</p></section>`;
+}
+yardHTML=(function(orig){return function(c){
+  const d=districtCurrent(),nav=`<nav class="district-nav" aria-label="Разделы двора">${[['yard','🏡','Двор'],['war','🥊','Сходки'],['map','🗺️','Районы'],['people','🤝','Свои'],['shop','✨','Награды']].map(([id,emoji,label])=>`<button class="${DISTRICT.panel===id?'on':''}" data-act="districtPanel" data-id="${id}" aria-current="${DISTRICT.panel===id?'page':'false'}">${emoji}<span>${label}</span></button>`).join('')}</nav>`;
+  if(!d){setTimeout(()=>districtLoad(),0);return nav+(DISTRICT.panel==='yard'?orig(c):`<div class="info-card">${esc(DISTRICT.error||'Загружаем жизнь района…')}<button class="btn small" data-act="districtRefresh">Обновить</button></div>`);}
+  const focus=d.focuses[d.settings.focus];let html;
+  if(DISTRICT.panel==='yard'){
+    if(YARD.data?.yard?.clanId===c.id)YARD.data.stats={...YARD.data.stats,reputation:(YARD.data.stats.yardHelp||0)*3+((YARD.data.stats.yardStory||0)+(YARD.data.stats.yardBuild||0))*10+Math.max(0,DISTRICT.data.stats.reputation-(DISTRICT.data.stats.yardHelp*3+(DISTRICT.data.stats.yardStory+DISTRICT.data.stats.yardBuild)*10))};
+    html=`${focus?`<div class="district-focus-tag">${focus.emoji} Двор ${esc(focus.name.toLowerCase())}</div>`:''}${d.settings.notice?`<div class="district-notice">📌 ${esc(d.settings.notice)}</div>`:''}${(S.districtUnlocks||[]).includes('title_helper')?'<div class="district-personal-title">🤝 Опора двора</div>':''}${d.decor.length?`<div class="district-decor">${d.decor.includes('decor_lights')?'<span>🏮 ✨ 🏮 ✨ 🏮</span>':''}${d.decor.includes('decor_banner')?`<span>🚩 ${esc(c.name)}</span>`:''}</div>`:''}${orig(c)}`;
+  }else html=({war:districtWarHTML,map:districtMapHTML,people:districtPeopleHTML,shop:districtShopHTML}[DISTRICT.panel]||districtWarHTML)(d);
+  return `<div class="district focus-${esc(d.settings.focus||'neighbors')}">${nav}<div class="district-shared"><span>Сегодня поручений: ${d.left}/6</span><button class="btn small" data-act="districtRefresh" ${DISTRICT.loading?'disabled':''}>↻</button></div>${html}</div>`;
+};})(yardHTML);
+async function districtAction(action,data={}){
+  if(DISTRICT.busy)return;DISTRICT.busy=true;
+  try{
+    if(['prepare','mission','assist','coop'].includes(action)){for(let i=0;i<40&&srvBusy;i++)await new Promise(r=>setTimeout(r,100));save(true);await serverWrite();}
+    const r=await apiPost('gang/district/'+action,data);
+    if(r.error){toast(r.error,'bad');await districtLoad(true);return;}
+    districtApply(r);save(true);toast({prepare:'Подготовка сохранена · +3 репутации',mission:'Дело района выполнено · +3 репутации',assist:'Ты помог своим · +3 репутации',coop:'Поручение поставки принято · +3 репутации',buy:'Награда открыта навсегда',focus:'Голос сохранён'}[action]||'Сохранено','good');
+    await yardLoad(true);if(typeof giftClaim==='function')await giftClaim();
+  }catch(e){toast('Нет связи с районом. Обнови двор и проверь результат.','bad');}
+  finally{DISTRICT.busy=false;renderCurrent(false);}
+}
+Object.assign(ACTIONS,{
+  districtPanel:id=>{if(!['yard','war','map','people','shop'].includes(id))return;DISTRICT.panel=id;renderCurrent(false);districtLoad();},
+  districtOpen:()=>{DISTRICT.panel='war';GANG.tab='main';showScreen('fun','clan');},
+  districtRefresh:async()=>{await districtLoad(true);await yardLoad(true);},
+  districtRecruit:()=>districtAction('recruit'),districtQueue:()=>districtAction('queue'),districtLeave:()=>districtAction('leave'),
+  districtCancelMatch:()=>districtAction('cancelMatch'),districtPrepare:task=>districtAction('prepare',{task}),districtTactic:value=>districtAction('tactic',{value}),
+  districtMission:region=>districtAction('mission',{region}),districtRegion:region=>districtAction('region',{region}),districtFocus:value=>districtAction('focus',{value}),
+  districtAssist:id=>districtAction('assist',{id:+id}),districtCloseRequest:id=>districtAction('cancelRequest',{id:+id}),
+  districtRequest:id=>{const [episode,task]=id.split(':');return districtAction('request',{episode:+episode,task});},
+  districtCoop:id=>{const [scope,task]=id.split(':');return districtAction('coop',{id:+scope,task});},
+  districtNotice:()=>districtAction('announce',{text:$('districtNotice')?.value||''}),
+  districtOfferAlly:()=>districtAction('alliance',{clan:+$('districtAlly')?.value}),districtAcceptAlly:id=>districtAction('acceptAlliance',{clan:+id}),
+  districtDeclineAlly:id=>districtAction('declineAlliance',{clan:+id}),districtLeaveAlly:id=>districtAction('leaveAlliance',{clan:+id}),districtStartCoop:id=>districtAction('startCoop',{clan:+id}),
+  districtDecor:key=>districtAction('decorate',{key}),districtWear:id=>{ACTIONS.pickFrame(id);save(true);renderCurrent(false);},
+  districtJoin:role=>{const r=districtCurrent()?.roles[role];if(!r)return;openModal(`<h3>${r.emoji} ${esc(r.name)}</h3><p>${esc(r.text)}</p><p>Запись добровольная. До подбора можно выйти. После подбора состав фиксируется, на подготовку будет 6 часов. Онлайн в момент результата быть не нужно.</p><p>Общак и постройки не теряются. Условия и награды доступны в правилах сходок.</p><button class="btn primary wide" data-act="districtJoinConfirm" data-id="${role}">Записаться на эту роль</button><button class="btn wide" data-act="closeModal">Подумаю</button>`);},
+  districtJoinConfirm:role=>{closeModal();return districtAction('join',{role});},
+  districtPractice:()=>openModal('<h3>🏟️ Тренировка с соседями</h3><p>Равного соперника ждать не нужно. У команды будет 15 минут на подготовку, затем три учебных поединка по сохранённому составу.</p><p>Без денег, крышек, рейтинга и влияния. За участие — 5 репутации, не чаще раза в сутки. Подготовленный помощник тоже участвует. После — обычный отдых команды 6 часов.</p><button class="btn primary wide" data-act="districtPracticeConfirm">Начать тренировку</button><button class="btn wide" data-act="closeModal">Пока нет</button>'),
+  districtPracticeConfirm:()=>{closeModal();return districtAction('practice');},
+  districtBuy:key=>{const item=districtCurrent()?.shop.find(i=>i.id===key);if(!item||item.owned)return;openModal(`<h3>${item.emoji} ${esc(item.name)}</h3><p>${esc(item.text)}</p><p>Списать ${item.cost} репутации из доступного остатка. Общее заработанное количество и звание сохранятся.</p><button class="btn primary wide" data-act="districtBuyConfirm" data-id="${item.id}">Открыть за ${item.cost} репутации</button><button class="btn wide" data-act="closeModal">Пока нет</button>`);},
+  districtBuyConfirm:key=>{closeModal();return districtAction('buy',{key});},
+});
+ACTIONS.gangWall=ACTIONS.districtOpen;
+FRAMES.push(
+  {id:'crew',name:'Свои люди',need:()=>(S.districtUnlocks||[]).includes('frame_crew')||(S.prestigeFrames||[]).includes('crew'),how:'Открыть за 25 репутации во дворе'},
+  {id:'urban',name:'Легенда района',need:()=>(S.districtUnlocks||[]).includes('frame_urban')||(S.prestigeFrames||[]).includes('urban'),how:'Открыть за 120 репутации во дворе'},
+);
+ACHS.push(
+  {id:'gang_prep',name:'Команда готова',emoji:'📦',key:'gangPrep',goals:[1,5,20,50,150],unit:'подготовок к встречам'},
+  {id:'gang_meet',name:'Плечом к плечу',emoji:'🥊',key:'gangWar',goals:[1,5,20,50,150],unit:'командных встреч'},
+  {id:'gang_win',name:'Победа своих',emoji:'🏆',key:'gangWarWin',goals:[1,5,15,40,100],unit:'командных побед'},
+  {id:'gang_coop',name:'Добрые соседи',emoji:'🚚',key:'gangCoop',goals:[1,3,10,25,75],unit:'поставок с союзниками'},
+  {id:'gang_assist',name:'Своих не бросаем',emoji:'🤝',key:'gangAssist',goals:[1,5,15,40,100],unit:'выполненных просьб'},
+  {id:'gang_region',name:'Наш район',emoji:'🗺️',key:'gangRegion',goals:[1,3,5,10,25],unit:'сезонных знаков районов'},
+);
+SIDE.push(
+  {id:'g_district_prep',group:'gang',who:'📦',from:'Команда двора',title:'Каждая роль важна',text:'Запишись на подходящую роль и подготовь её новым действием. Новичок может помочь разведкой или снабжением.',req:yardReady,reqText:'вступи в банду и открой двор',after:'g_yard_help',goals:[sg('gangPrep',1,'Подготовь 1 новую роль к встрече')],reward:{money:500,xp:100}},
+  {id:'g_district_assist',group:'gang',who:'🤝',from:'Свои люди',title:'Кто-то ждёт помощи',text:'Откликнись на просьбу товарища и выполни настоящее поручение для общего дела.',req:yardReady,reqText:'вступи в банду и открой двор',after:'g_yard_help',goals:[sg('gangAssist',1,'Выполни 1 новую просьбу товарища')],reward:{money:500,xp:100}},
+  {id:'g_district_coop',group:'gang',who:'🚚',from:'Соседний двор',title:'Между дворами',text:'Помоги завершить общую поставку с союзной бандой. Вклад каждой стороны важен.',req:yardReady,reqText:'вступи в банду и открой двор',after:'g_yard_story',goals:[sg('gangCoop',1,'Заверши 1 новую поставку с личным вкладом')],reward:{money:1000,xp:150}},
+);
+
+// Refresh shared quota when an ordinary yard action changes the server-owned history.
+yardApply=(function(orig){return function(r){
+  const before=YARD.data?.stats;const result=orig(r);
+  if(before&&['yardHelp','yardStory','yardBuild'].some(k=>(r.stats?.[k]||0)!==(before[k]||0))){DISTRICT.at=0;setTimeout(()=>districtLoad(),100);}
+  return result;
+};})(yardApply);

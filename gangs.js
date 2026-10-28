@@ -4,7 +4,7 @@
 // Сервер — bot/gangs.py (+ старые маршруты банд в bot/social.py).
 
 let GANG = { state: undefined, top: null, at: 0, topAt: 0, loading: false, tab: 'main' };
-const GANG_POINTS_HELP = 'Очки войны: победа в онлайн-бою +10, в КНБ +5 (со ставкой +7), стенка +10 каждому бойцу, удачный набег +30, взнос в общак +1 за 10 000 ₽ (до 20 в день)';
+const GANG_POINTS_HELP = 'Очки войны: победа в онлайн-бою +10, в КНБ +5 (со ставкой +7), командная победа +10 участнику, удачный набег +30, взнос в общак +1 за 10 000 ₽ (до 20 в день)';
 
 async function gangLoad(force) {
   if (!onlineOn() || GANG.loading || (!force && Date.now() - GANG.at < 15000)) return;
@@ -93,11 +93,10 @@ function gangGamesHTML(c, g) {
       ${p.joined ? '<button class="btn wide" disabled>✅ Ты в котле</button>' : priceBtn('gangPot', '', p.price, S.money >= p.price, `🍲 Кинуть ${fmt(p.price)} ₽ в котёл`).replace('class="btn', 'class="btn wide')}</div>
     <div class="gang-game war"><div class="gg-head"><span>⚔️</span><div><b>Война банд · ${g.place} место</b><small>Неделя кончится через ${leftText((GANG.top ? GANG.top.warEnds : 0) * 1000 - Date.now())}. Призы в общак: ${(GANG.top ? GANG.top.prizes : []).map((v, i) => `${['🥇', '🥈', '🥉'][i]} ${fmtShort(v)}`).join(' ')}</small></div></div>
       <small>${GANG_POINTS_HELP}</small><button class="btn wide" data-act="gangTop">🏆 Топ банд</button></div>
-    <div class="subhead">🧱 Стенка на стенку · 5 лучших бойцов против 5, раз в 3 часа</div>
-    <div class="info-card">Победитель забирает 5% меньшего общака, каждый боец победителей — +10 очков войны.${g.wallLeft ? `<br>⏳ Бойцы отдыхают ещё ${leftText(g.wallLeft * 1000)}` : ''}${g.canManage ? '' : '<br>Выводит банду на стенку главарь или его зам.'}</div>
+    <div class="info-card"><b>🥊 Командные встречи теперь во дворе</b><p>Добровольные роли, равный подбор и понятные отчёты. Общак и постройки не теряются.</p><button class="btn primary wide" data-act="districtOpen">Двор → Сходки</button></div>
+    <div class="subhead">⚔️ Набеги на другие банды</div>
     ${others.slice(0, 15).map((x) => card({ thumb: x.emoji, title: esc(x.name), desc: `ур. ${x.level} · ${x.members} бойцов · сила ${fmt(x.power)}${x.shield ? ' · 🛡️' : ''}`,
-      btn: g.canManage ? `<div class="btn-col"><button class="btn small ${g.wallLeft ? '' : 'primary'}" data-act="gangWall" data-id="${x.id}" ${g.wallLeft ? 'disabled data-why="Бойцы отдыхают после стенки"' : ''}>🧱 Стенка</button>
-        <button class="btn small" data-act="clanRaid" data-id="${x.id}" ${c.raidLeft || x.shield ? `disabled data-why="${x.shield ? 'Банда под защитой после набега' : 'Набег — раз в 12 часов'}"` : ''}>⚔️ Набег</button></div>` : '' })).join('') || '<div class="info-card">Других банд пока нет.</div>'}`;
+      btn: g.canManage ? `<div class="btn-col">        <button class="btn small" data-act="clanRaid" data-id="${x.id}" ${c.raidLeft || x.shield ? `disabled data-why="${x.shield ? 'Банда под защитой после набега' : 'Набег — раз в 12 часов'}"` : ''}>⚔️ Набег</button></div>` : '' })).join('') || '<div class="info-card">Других банд пока нет.</div>'}`;
 }
 
 function gangAgo(ts) { if (!ts) return 'давно'; const s = Date.now() / 1000 - ts; return s < 120 ? 'в игре' : s < 3600 ? `${Math.round(s / 60)} мин назад` : s < 86400 ? `${Math.round(s / 3600)} ч назад` : `${Math.round(s / 86400)} дн. назад`; }
