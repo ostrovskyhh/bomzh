@@ -55,6 +55,7 @@ function playHTML() {
       <div>Самая долгая<b>${playFmt(p.longest || 0)}</b></div><div>В среднем в день<b>${playFmt(p.ms / days)}</b></div>
       <div>🏚️ В Засранске<b>${playFmt(p.cityMs.zas || 0)}</b></div><div>🏙️ В Москвабаде<b>${playFmt(p.cityMs.msk || 0)}</b></div>
       ${p.cityMs.mex ? `<div>🌵 В Мексике<b>${playFmt(p.cityMs.mex)}</b></div>` : ''}
+      ${p.cityMs.fr ? `<div>🇫🇷 Во Франции<b>${playFmt(p.cityMs.fr)}</b></div>` : ''}
     </div><p class="test-note">Время считается, пока игра открыта на экране. На место в топе не влияет.</p>`;
 }
 openProfile = (function (orig) {

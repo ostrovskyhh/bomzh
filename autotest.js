@@ -52,11 +52,11 @@
 
   async function allGames(cityId) {
     S.city = cityId; applyCity();
-    const tag = { msk: 'МСК', mex: 'МЕКС' }[cityId] || 'ЗАС';
+    const tag = { msk: 'МСК', mex: 'МЕКС', fr:'ФР' }[cityId] || 'ЗАС';
     for (const j of JOBS) await play(`${tag} работа: ${j.name}`, (fin) => startShiftGame(j, fin), 50);
     for (const st of [1, 2, 3, 4, 5]) if (LESSON_GAMES[st] || cityId !== 'zas') await play(`${tag} урок ${st}`, () => startLessonGame(st), 60);
     if (cityId === 'msk') return;
-    const pre = cityId === 'mex' ? 'МЕКС ' : '';
+    const pre = cityId === 'mex' ? 'МЕКС ' : cityId === 'fr' ? 'ФР ' : '';
     for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`${pre}досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), (g.duration || 40) + 15);
     for (const [id, g] of Object.entries(DATE_GAMES)) await play(`${pre}свидание: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
     for (const [id, g] of Object.entries(KID_GAMES)) await play(`${pre}дети: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
@@ -320,6 +320,8 @@
       check('мексика: 6 своих криминальных дел', CRIMES.length === 6 && CRIMES.every((c) => c.id.startsWith('x_')), CRIMES.map((c) => c.id).join());
       check('мексика: сюжет про картель и бандитов', ['x_bandits', 'x_scorpions', 'x_kidnap', 'x_plaza', 'x_jefe'].every((id) => questList().some((q) => q.id === id)), questList().length);
       check('мексика: свои игры свиданий и зала', DATE_GAMES.walk.title === 'Переулок поцелуев · Callejón del Beso' && GYM_GAMES.power.title === 'Камень ацтеков');
+      await allGames('fr');
+      check('франция: четвёртый город с отдельным сюжетом и криминалом', CITIES.fr.idx===3&&questList().length===15&&CRIMES.length===5&&CRIMES.every(c=>c.id.startsWith('f_'))&&JOBS.every(j=>FR_JOBS[j.id]));
       S.city = 'zas'; applyCity('zas');
       check('мексика: в Засранске свои игры вернулись', CRIMES[0].id === 'pocket' && !DATE_GAMES.walk.title.includes('Callejón del Beso') && GYM_GAMES.power.title !== 'Камень ацтеков', `${CRIMES[0].id} ${DATE_GAMES.walk.title}`);
     } catch (e) { check('мексика: ошибка теста', false, e.message); }

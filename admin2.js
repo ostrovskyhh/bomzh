@@ -27,7 +27,7 @@ function admWorld() {
     <div class="adm-row"><select id="admChapter">${list.map((q, i) => `<option value="${i}" ${i === cur ? 'selected' : ''}>${i + 1}. ${q.title}${q.path ? (q.path === 'honest' ? ' 😇' : ' 😈') : ''}</option>`).join('')}</select><button class="btn primary" data-act="adm2" data-id="chapter">Перейти</button></div>
     <div class="admin-grid"><button class="btn" data-act="adm" data-id="quest">Пропустить главу</button><button class="btn" data-act="adm2" data-id="path">Сменить путь (${S.quest.path === 'dark' ? '😈' : '😇'})</button></div>
     <div class="subhead">🏙️ Города</div>
-    <div class="admin-grid"><button class="btn" data-act="adm2" data-id="cityZas">В Засранск</button><button class="btn" data-act="adm2" data-id="cityMsk">В Москвабад</button><button class="btn" data-act="adm2" data-id="cityMex">В Мексику 🌵</button>
+    <div class="admin-grid"><button class="btn" data-act="adm2" data-id="cityZas">В Засранск</button><button class="btn" data-act="adm2" data-id="cityMsk">В Москвабад</button><button class="btn" data-act="adm2" data-id="cityMex">В Мексику 🌵</button><button class="btn" data-act="adm2" data-id="cityFr">Во Францию 🇫🇷</button>
       <button class="btn" data-act="adm2" data-id="moveTest">Окно переезда</button><button class="btn" data-act="adm2" data-id="chapterCard">Экран «Глава II»</button></div>
     <div class="subhead">🎮 Любая мини-игра работы (без оплаты)</div>
     <div class="adm-row"><select id="admGame">${JOBS.map((j) => `<option value="${j.id}">${j.emoji} ${j.name} — ${(JOB_GAMES[j.id] || {}).title || ''}</option>`).join('')}</select><button class="btn primary" data-act="adm2" data-id="game">▶</button></div>
@@ -184,7 +184,7 @@ Object.assign(ACTIONS, {
       case 'debtClear': S.debt = 0; S.missed = 0; S.alimony = null; break;
       case 'chapter': S.quest.idx = Math.max(0, Math.min(questList().length - 1, num('admChapter'))); S.quest.base = { ...(S.counters || {}) }; break;
       case 'path': S.quest.path = S.quest.path === 'dark' ? 'honest' : 'dark'; break;
-      case 'cityZas': case 'cityMsk': case 'cityMex': S.city = id === 'cityMsk' ? 'msk' : id === 'cityMex' ? 'mex' : 'zas'; S.quest.idx = 0; S.quest.base = { ...(S.counters || {}) }; applyCity(); renderedHousing = -1; break;
+      case 'cityZas': case 'cityMsk': case 'cityMex': case 'cityFr': S.city = id === 'cityFr' ? 'fr' : id === 'cityMsk' ? 'msk' : id === 'cityMex' ? 'mex' : 'zas'; S.quest.idx = 0; S.quest.base = { ...(S.counters || {}) }; applyCity(); renderedHousing = -1; break;
       case 'moveTest': { if (city() !== 'zas') { toast('Окно переезда — только из Засранска', 'bad'); return; } const i = questList().findIndex((q) => q.move); if (i >= 0) S.quest.idx = i; closeModal(); moveStartModal(); return; }
       case 'chapterCard': closeModal(); S.chapterIntro = 'msk'; return;
       case 'game': { const gid = ($('admGame') || {}).value; const j = JOBS.find((x) => x.id === gid); if (!j) return; closeModal(); startShiftGame(j, (score) => { closeModal(); toast(`🎮 ${JOB_GAMES[j.id].title}: результат ${score} из ~${JOB_GAMES[j.id].target}`, 'good'); }); return; }

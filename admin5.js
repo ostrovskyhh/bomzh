@@ -28,7 +28,7 @@ let BC = { aud: { kind: 'all', city: 'zas', min: 1, max: 99, uids: '' }, emoji: 
 function bcAudText(a) {
   if (!a || a.kind === 'all') return 'всем';
   if (a.kind === 'online') return 'кто в игре';
-  if (a.kind === 'city') return { zas: 'в Засранске', msk: 'в Москвабаде', mex: 'в Мексике' }[a.city] || 'в городе';
+  if (a.kind === 'city') return { zas: 'в Засранске', msk: 'в Москвабаде', mex: 'в Мексике', fr:'во Франции' }[a.city] || 'в городе';
   if (a.kind === 'vip') return 'с VIP';
   if (a.kind === 'level') return `уровни ${a.min}–${a.max}`;
   if (a.kind === 'player') return `игрокам: ${(a.uids || []).length || String(a.uids || '').split(/[ ,]+/).filter(Boolean).length}`;
@@ -53,7 +53,7 @@ function bcHistHTML() {
 function bcHTML() {
   const a = BC.aud;
   const chip = (cur, val, label, act) => `<button class="${cur === val ? 'on' : ''}" data-act="${act}" data-id="${val}">${label}</button>`;
-  const audExtra = a.kind === 'city' ? `<div class="bc-chips">${[['zas', '🏚️ Засранск'], ['msk', '🏙️ Москвабад'], ['mex', '🌵 Мексика']].map(([v, t]) => chip(a.city, v, t, 'bcCity')).join('')}</div>`
+  const audExtra = a.kind === 'city' ? `<div class="bc-chips">${[['zas', '🏚️ Засранск'], ['msk', '🏙️ Москвабад'], ['mex', '🌵 Мексика'], ['fr', '🇫🇷 Франция']].map(([v, t]) => chip(a.city, v, t, 'bcCity')).join('')}</div>`
     : a.kind === 'level' ? `<div class="bc-row"><span>с</span><input id="bcLmin" type="number" inputmode="numeric" value="${a.min}"><span>по</span><input id="bcLmax" type="number" inputmode="numeric" value="${a.max}"><span>уровень</span></div>`
     : a.kind === 'player' ? `<input id="bcUids" placeholder="Telegram ID через пробел или запятую" value="${esc(a.uids)}"><small class="bc-hint">ID видно в карточке игрока во вкладке «Игроки»</small>` : '';
   const left = 600 - BC.text.length;

@@ -89,7 +89,12 @@ const _shopClothesTap = EXTRA_TABS.shop.clothes;
 EXTRA_TABS.shop.clothes = function clothesWithTotals() {
   let html;
   if (_shopClothesTap) html = _shopClothesTap();
-  else { delete EXTRA_TABS.shop.clothes; html = renderShop(); EXTRA_TABS.shop.clothes = clothesWithTotals; }
+  else {
+    // Preserve outer decorators (class hints, bottles) when calling the base renderer.
+    const restore = EXTRA_TABS.shop.clothes;
+    try { delete EXTRA_TABS.shop.clothes; html = renderShop(); }
+    finally { EXTRA_TABS.shop.clothes = restore; }
+  }
   const t = tapPower(), bonus = sumGear('tap');
   const parts = [`🍾 За тап сейчас: <b>${t % 1 ? t.toFixed(1) : t}</b> (одежда +${bonus})`, sumGear('energy') ? `⚡ +${sumGear('energy')} к энергии` : '',
     sumGear('crit') ? `💥 +${Math.round(sumGear('crit') * 100)}% крит` : '', sumGear('mood') ? `😊 +${sumGear('mood').toFixed(1)}/мин` : ''].filter(Boolean);

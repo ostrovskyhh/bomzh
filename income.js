@@ -6,6 +6,7 @@ function jobSalary(j, performance=1.25, rank=jobRank(j.id)) {
 function jobFuelCost(j){return JOB_GAMES[j.id]?.type==='lanes'&&S.transport&&!S.transportBroken?(vehicle().fuel||0):0;}
 function jobNetSalary(j){const pay=jobSalary(j),after=pay-(alimonyOn()?Math.round(pay*ALIMONY_SHARE):0);return Math.max(-S.money,after-jobFuelCost(j));}
 function incomeMoney(value){
+  if(typeof cityMoney==='function')return cityMoney(value);
   const mexican=typeof isMex==='function'&&isMex();
   return (mexican?'$':'')+(mexican?value/USD_RATE:value).toLocaleString('ru-RU',{maximumFractionDigits:2})+(mexican?'':' ₽');
 }

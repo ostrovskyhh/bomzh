@@ -6,7 +6,7 @@
 
 const ADM4_TABS = [['home', '📊', 'Обзор'], ['players', '👥', 'Игроки'], ['reports', '🐞', 'Обращения'], ['comms', '📢', 'Связь'], ['hero', '🧑', 'Я'], ['world', '🎮', 'Мир'], ['server', '🖥️', 'Сервер']];
 const ADM4_SORTS = [['recent', '🕘 Недавние'], ['online', '🟢 Онлайн'], ['rich', '💰 Богачи'], ['level', '⭐ Уровень'], ['banned', '🔇 Наказанные']];
-const ADM4_CITY = { zas: '🏚️', msk: '🏙️', mex: '🌵' };
+const ADM4_CITY = { zas: '🏚️', msk: '🏙️', mex: '🌵', fr:'🇫🇷' };
 let ADM4 = { ov: null, ovAt: 0, list: null, listKey: '', sort: 'recent', query: '', loading: false };
 ADM_TAB = 'home';
 
@@ -63,7 +63,7 @@ function adm4Card(c) {
   const sv = c.save || {}, st = c.stats || {}, bans = c.bans || {};
   const banTxt = (k) => (bans[k] ? (bans[k] > 2e9 ? 'навсегда' : `до ${new Date(bans[k] * 1000).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`) : '');
   const sec = (id, title, html, open) => `<details class="adm4-card-sec" ${open ? 'open' : ''}><summary>${title}</summary><div>${html}</div></details>`;
-  const city = { zas: 'Засранск', msk: 'Москвабад', mex: 'Мексика' }[sv.city] || st.city_name || '—';
+  const city = { zas: 'Засранск', msk: 'Москвабад', mex: 'Мексика', fr:'Франция' }[sv.city] || st.city_name || '—';
   const online = Date.now() / 1000 - (c.seen || 0) < 120;
   const opts = (list) => list.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join('');
   return `<button class="adm4-back" data-act="adm4Back">‹ Все игроки</button>
@@ -88,7 +88,7 @@ function adm4Card(c) {
     ${sec('story', '🧭 Сюжет, город, криминал', `
       ${adm4Field('quest', '📖 Глава сюжета', sv.quest !== undefined ? sv.quest + 1 : undefined, 'номер с 1')}
       <div class="adm4-btns"><button class="btn small" data-act="admSetQuick" data-id="path:honest">😇 Честный путь</button><button class="btn small" data-act="admSetQuick" data-id="path:dark">😈 Тёмный путь</button></div>
-      <div class="adm4-f"><div><b>📍 Город</b><small>сейчас: <i>${city}</i> · без переезда</small></div><select id="admCity">${opts([['zas', '🏚️ Засранск'], ['msk', '🏙️ Москвабад'], ['mex', '🌵 Мексика']])}</select><button class="btn small primary" data-act="admSetCity">Перенести</button></div>
+      <div class="adm4-f"><div><b>📍 Город</b><small>сейчас: <i>${city}</i> · без переезда</small></div><select id="admCity">${opts([['zas', '🏚️ Засранск'], ['msk', '🏙️ Москвабад'], ['mex', '🌵 Мексика'], ['fr', '🇫🇷 Франция']])}</select><button class="btn small primary" data-act="admSetCity">Перенести</button></div>
       ${adm4Field('crime', '🕶️ Криминальный опыт', sv.crime, 'в текущем городе')}
       ${adm4Field('wanted', '🚨 Розыск', sv.wanted, '0–5')}`)}
     ${sec('give', '🎁 Выдать вещь', `<div class="adm4-f"><select id="admGK">${Object.entries(ADM_GIVE).map(([k, [t]]) => `<option value="${k}" ${k === ADM_GK ? 'selected' : ''}>${t}</option>`).join('')}</select>

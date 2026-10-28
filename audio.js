@@ -329,9 +329,26 @@ const Sound = (() => {
     if (Math.random() < 0.35) tone({ ...m, t: at, f: N(CUMBIA.acc[(s + bar) % 8]), type: 'sawtooth', dur: eighth * 1.6, vol: 0.016, vibrato: 5, rv: 0.2, filter: { f: 2200 } });
   }
 
+  // Original Paris motifs: a three-beat musette and a restrained jazz quartet.
+  const FR_MUSIC={chords:[[62,65,69],[67,70,74],[60,64,67],[57,61,64]],roots:[38,43,36,33],tune:[74,77,76,74,72,69,72,73,74,77,81,79,77,76,73,74]};
+  function scheduleMusette(t,s){
+    const beat=60/126,bar=Math.floor(s/3)%4,e=s%3,at=t-ctx.currentTime,m={bus:musicBus};
+    if(e===0)tone({...m,t:at,f:N(FR_MUSIC.roots[bar]),type:'triangle',dur:beat*.8,vol:.12,filter:{f:650}});
+    else FR_MUSIC.chords[bar].forEach((n,i)=>tone({...m,t:at+i*.008,f:N(n),type:'sawtooth',dur:beat*.65,vol:.012,vibrato:4,filter:{f:1700},rv:.2}));
+    tone({...m,t:at,f:N(FR_MUSIC.tune[s%16]),type:'sawtooth',dur:beat*.85,vol:.022,vibrato:5,filter:{f:2100},rv:.25});
+  }
+  function scheduleFrJazz(t,s){
+    const beat=60/102/2,bar=Math.floor(s/8)%4,e=s%8,at=t-ctx.currentTime,m={bus:musicBus};
+    if(e%2===0)tone({...m,t:at,f:N(FR_MUSIC.roots[bar]+(e===4?7:0)),type:'triangle',dur:beat*1.5,vol:.1,filter:{f:500}});
+    if(e===1||e===5)FR_MUSIC.chords[bar].forEach(n=>tone({...m,t:at,f:N(n),type:'sine',dur:beat*2.5,vol:.022,rv:.3}));
+    if(e===3||e===7)tone({...m,t:at,f:N(FR_MUSIC.tune[(s+2)%16]),type:'triangle',dur:beat*1.7,vol:.025,vibrato:3,rv:.3});
+    if(e%2===1)noise({...m,t:at,dur:.06,vol:.015,type:'highpass',f:6000});
+  }
   const pickN = (arr) => arr[Math.floor(Math.random() * arr.length)];
   // Каждой мелодии — свой «шаг» сетки и планировщик
   const TRACKS = {
+    musette:{step:()=>60/126,play:scheduleMusette},
+    frjazz:{step:()=>60/102/2,play:scheduleFrJazz},
     lounge: { step: () => 60 / LOUNGE.bpm / 2, play: scheduleLounge },
     lofi: { step: () => 60 / LOFI.bpm / 2, play: scheduleLofi },
     waltz: { step: () => 60 / WALTZ.bpm, play: scheduleWaltz },
