@@ -117,21 +117,21 @@ EXTRA_TABS.life.business = () => {
     const st = S.biz[b.id];
     if (!st) {
       const ok = level() >= b.level;
-      const inc = net(b.income);
+      const inc = net(bizIncome(b,{lvl:1,broken:false}));
       return card({ thumb: b.emoji, title: b.name, cls: ok ? '' : 'locked',
-        desc: `💰 Приносит <b>${fmt(inc)} ₽/ч</b> чистыми<br>⏱️ Окупится за <b>${hoursText(b.price / inc)}</b>`,
+        desc: `💰 Приносит <b>${incomeHTML('biz-rate',b.id)}/ч</b> чистыми<br>⏱️ Срок окупаемости: <b>${incomeHTML('biz-payback',b.id)}</b>`,
         extra: ok ? '' : reqHTML({ level: b.level }), btn: ok ? priceBtn('bizBuy', b.id, b.price, S.money >= b.price) : lockBtn });
     }
-    const inc = net(bizIncome(b, st)), cap = bizCap(b, st), pct = st.cash / cap;
-    const fillH = Math.max(0, (cap - st.cash) / bizIncome(b, st));
+    const rate = bizIncome(b,st), cap = bizCap(b, st), pct = cap>0?Math.min(1,st.cash/cap):0;
+    const fillH = rate>0?Math.max(0,(cap-st.cash)/rate):Infinity;
     const upCost = bizUpgradeCost(b, st);
-    const upGain = net(b.income * 0.35 * prestigeMult());
+    const upGain = incomeUpgradeGain(b);
     return `<div class="card card-col biz">
       <div class="biz-head"><div class="thumb">${b.emoji}</div><div class="card-body"><div class="card-title">${b.name} <span class="rarity rare">ур. ${st.lvl}/${BIZ_MAX_LVL}</span></div>
-        <div class="card-desc">💰 Приносит <b>${fmt(inc)} ₽/ч</b>${st.broken ? ' · <span style="color:var(--red)">🔧 сломано: доход вдвое меньше</span>' : ''}</div></div></div>
-      <div class="progress"><div style="width:${pct * 100}%;${pct >= 1 ? 'background:var(--red)' : ''}"></div></div>
-      <div class="card-desc">🗃️ В кассе <b>${fmt(net(st.cash))} ₽</b> — ${pct >= 1 ? '<span style="color:var(--red)">касса полная, доход стоит! Забери</span>' : `заполнится через ${leftText(fillH * 3600000)}`}</div>
-      ${st.lvl < BIZ_MAX_LVL ? `<div class="card-desc">⬆️ Улучшение: <b>+${fmt(upGain)} ₽/ч</b> за ${fmt(upCost)} ₽ — окупится за ${hoursText(upCost / upGain)}</div>` : ''}
+        <div class="card-desc">💰 Приносит <b>${incomeHTML('biz-rate',b.id)}/ч</b>${st.broken ? ' · <span style="color:var(--red)">🔧 сломано: доход вдвое меньше</span>' : ''}</div></div></div>
+      <div class="progress"><div data-income-progress="${b.id}" style="width:${pct * 100}%;${pct >= 1 ? 'background:var(--red)' : ''}"></div></div>
+      <div class="card-desc">🗃️ В кассе <b>${incomeHTML('biz-cash',b.id)}</b> — ${incomeHTML('biz-fill',b.id)}</div>
+      ${st.lvl < BIZ_MAX_LVL ? `<div class="card-desc">⬆️ Улучшение: <b>+${incomeHTML('biz-upgain',b.id)}/ч</b> за ${fmt(upCost)} ₽ — срок окупаемости: ${incomeHTML('biz-uppayback',b.id)}</div>` : ''}
       <div class="row-btns">
         <button class="btn primary" data-act="bizCollect" data-id="${b.id}" ${st.cash >= 1 ? '' : 'disabled'}>Забрать</button>
         ${st.lvl < BIZ_MAX_LVL ? priceBtn('bizUp', b.id, upCost, S.money >= upCost, `⬆️ ${fmtShort(upCost)}`) : '<button class="btn" disabled>MAX</button>'}
@@ -139,8 +139,8 @@ EXTRA_TABS.life.business = () => {
       </div></div>`;
   }).join('');
   return `<div class="info-card biz-how"><b>Как работает бизнес</b> — 3 шага:<br>1️⃣ Купи. 2️⃣ Деньги сами капают в кассу, даже когда ты не в игре. 3️⃣ Заходи и жми «Забрать».
-      <br><small>Касса вмещает ${BIZ_CAP_HOURS} ч дохода${isVip() ? ' (с VIP — 12 ч)' : ''}. Цифры уже после налога ${BIZ_TAX * 100}%.</small>
-      ${totalH ? `<br>Все твои бизнесы: <b>${fmt(totalH)} ₽/ч</b>` : ''}</div>${rows}${clubPart}`;
+      <br><small>Касса вмещает ${incomeHTML('biz-hours')} ч дохода. Цифры уже после налога ${BIZ_TAX * 100}%. ${incomeHTML('biz-note')}</small>
+      <br>Все твои бизнесы: <b>${incomeHTML('biz-total')}/ч</b></div>${rows}${clubPart}`;
 };
 
 // =====================================================================

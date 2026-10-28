@@ -45,7 +45,7 @@ function careerLadderHTML() {
   let nextHtml = '';
   if (nx) {
     const reqs = reqList(nx.req);
-    nextHtml = `<div class="cl-next"><div class="cl-label">Следующая работа: <b>${nx.emoji} ${nx.name}</b> · до ${fmt(nx.pay * 1.25)} ₽ за смену</div>
+    nextHtml = `<div class="cl-next"><div class="cl-label">Следующая работа: <b>${nx.emoji} ${nx.name}</b> · до ${incomeHTML('job',nx.id)} за смену</div>
       <div class="cl-reqs">${reqs.map((q) => `<span class="${q.ok ? 'ok' : 'no'}">${q.ok ? '✅' : '❌'} ${q.text}</span>`).join('')}</div>
       <small>${reqs.some((q) => !q.ok && /:/.test(q.text) && nx.req.rank) ? `Должность на прошлой работе получают аттестацией — см. выше.` : 'Выполни все пункты — работа откроется сама.'}</small></div>`;
   }

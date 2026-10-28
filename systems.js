@@ -328,7 +328,7 @@ const BIZ_MAX_LVL = 5;
 const BIZ_TAX = 0.1;
 const BIZ_CAP_HOURS = 6;
 
-function bizIncome(b, st) { return b.income * (1 + 0.35 * (st.lvl - 1)) * (st.broken ? 0.5 : 1) * prestigeMult(); }
+function bizIncome(b, st) { return b.income * (1 + 0.35 * (st.lvl - 1)) * (st.broken ? 0.5 : 1) * prestigeMult() * (isVip() ? 2 : 1); }
 function bizCap(b, st) { return bizIncome(b, st) * BIZ_CAP_HOURS * (isVip() ? 2 : 1); }
 function bizUpgradeCost(b, st) { return Math.round(b.price * 0.6 * st.lvl); }
 
@@ -339,14 +339,14 @@ HOOKS.tick.push(() => {
     if (!st) continue;
     const hours = (now - st.last) / 3600000;
     st.last = now;
-    st.cash = Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * hours);
+    st.cash = Math.max(st.cash, Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * hours));
     // Раз в 20–40 минут у бизнеса что-то случается
     if (now >= (st.eventAt || 0)) {
       st.eventAt = now + rand(20, 40) * 60000;
       if (!st.started || now - st.started < 60000) continue;
       const r = Math.random();
       if (r < 0.2) { const lost = Math.floor(st.cash * 0.15); st.cash -= lost; toast(`${b.emoji} Налоговая проверка в «${b.name}»: −${fmt(lost)} ₽ из кассы`, 'bad'); }
-      else if (r < 0.35) { st.cash = Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * 0.5); toast(`${b.emoji} Наплыв клиентов в «${b.name}»! Касса пополнилась`, 'good'); }
+      else if (r < 0.35) { st.cash = Math.max(st.cash, Math.min(bizCap(b, st), st.cash + bizIncome(b, st) * 0.5)); toast(`${b.emoji} Наплыв клиентов в «${b.name}»! Касса пополнилась`, 'good'); }
       else if (r < 0.45 && !st.broken) { st.broken = true; toast(`${b.emoji} В «${b.name}» сломалось оборудование: доход −50%, нужен ремонт`, 'bad'); sfx('break'); }
     }
   }

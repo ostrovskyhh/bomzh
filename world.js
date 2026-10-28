@@ -159,13 +159,13 @@ EXTRA_TABS.life.business = () => {
   let html = _bizTab();
   if (!S.biz.club) return html;
   const cdP = cdLeft('clubParty');
-  const party = Math.round(bizIncome(BUSINESSES.find((b) => b.id === 'club'), S.biz.club) * 4);
+  const party = incomePartyGain();
   html += `<div class="subhead">🪩 Персонал клуба · доход ×${clubMult().toFixed(2)}, зарплаты −${fmt(clubSalary())} ₽/ч</div>
     ${STAFF.map((s) => { const l = staffLvl(s.id), cost = s.price * (l + 1); return card({ thumb: s.emoji, title: `${s.name} ${l ? `<span class="rarity rare">${l}/${STAFF_MAX}</span>` : ''}`,
       desc: `${s.desc}<br>+${Math.round(s.boost * 100)}% к доходу · зарплата ${fmt(s.salary)} ₽/ч за уровень`,
       btn: l >= STAFF_MAX ? '<button class="btn" disabled>MAX</button>' : priceBtn('hireStaff', s.id, cost, S.money >= cost, `${l ? '⬆️' : 'Нанять'} ${fmt(cost)} ₽`) }); }).join('')}
-    ${card({ thumb: '🎉', title: 'VIP-вечеринка', desc: `Раз в 6 часов: сразу в кассу ~${fmt(party)} ₽. Нужен диджей`,
-      btn: cdP > 0 ? timerBtn(S.cd.clubParty) : `<button class="btn ${staffLvl('dj') ? 'primary' : ''}" data-act="clubParty" ${staffLvl('dj') ? '' : 'disabled data-why="Сначала найми диджея"'}>Устроить</button>` })}`;
+    ${card({ thumb: '🎉', title: 'VIP-вечеринка', desc: `Раз в 6 часов: сейчас в кассу ${incomeHTML('biz-party','club')} (до налога). Нужен диджей`,
+      btn: cdP > 0 ? timerBtn(S.cd.clubParty) : `<button data-income-party="1" class="btn ${staffLvl('dj')&&party>0 ? 'primary' : ''}" data-act="clubParty" ${staffLvl('dj')&&party>0 ? '' : 'disabled data-why="Нужны диджей и свободное место в кассе"'}>Устроить</button>` })}`;
   return html;
 };
 
@@ -184,10 +184,10 @@ Object.assign(ACTIONS, {
   clubParty: () => {
     const st = S.biz.club;
     if (!st || cdLeft('clubParty') > 0 || !staffLvl('dj')) return;
+    const m = incomePartyGain();
+    if(m<=0){toast('Сначала забери деньги из кассы клуба','bad');return;}
     setCd('clubParty', PARTY_CD);
-    const b = BUSINESSES.find((x) => x.id === 'club');
-    const m = Math.round(bizIncome(b, st) * 4);
-    st.cash = Math.min(bizCap(b, st) * 1.5, st.cash + m);
+    st.cash += m;
     track('clubParty');
     confetti(80); sfx('jackpot');
     resultModal({ emoji: '🪩', title: 'VIP-вечеринка удалась!', text: `Звёзды района до утра на танцполе. В кассу +${fmt(m)} ₽`, btn: 'Огонь' });

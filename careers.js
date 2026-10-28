@@ -193,8 +193,7 @@ finishJob = function (j, score, mg) {
   const cfg = JOB_GAMES[j.id];
   const perf = score > 0 ? shiftPerf(j, score, mg) : 0;
   const r = jobRank(j.id);
-  const road = cfg.type === 'lanes' ? 1 + transportJobBonus() : 1;
-  const pay = Math.round(j.pay * perf * mods().work * POS_MULT[r] * road * (j.physical ? 1 + S.strength / 200 : 1));
+  const pay = jobSalary(j,perf,r);
   addMoney(pay);
   addMood(j.mood);
   if (j.health) hurt(-j.health);
@@ -276,7 +275,7 @@ ACTIONS.job = (id) => {
   S.hired[id] = true;
   track('hired');
   jobCeremony({ kind: 'hire', j, to: posName(id, 0), mult: POS_MULT[0],
-    text: `Оклад до <b>${fmt(j.pay * 1.25)} ₽</b> за смену. Наработаешь смены — сдашь аттестацию на «${posName(id, 1)}».`, onOk: () => _jobAction(id) });
+    text: `Оклад до <b>${incomeHTML('job',j.id)}</b> за смену. Наработаешь смены — сдашь аттестацию на «${posName(id, 1)}».`, onOk: () => _jobAction(id) });
 };
 
 function promote(j, how) {
@@ -308,12 +307,12 @@ EXTRA_TABS.life.work = () => {
     const tags = [j.state ? '🏛️ госслужба' : '', j.official ? '✉️ откаты' : '', j.physical ? '💪 сила' : '',
       JOB_GAMES[j.id].type === 'lanes' && transportJobBonus() ? `${vehicle().emoji} +${Math.round(transportJobBonus() * 100)}%` : ''].filter(Boolean).join(' · ');
     return card({ thumb: j.emoji, title: j.name, btn, cls: ok ? '' : 'locked',
-      desc: `До <b>${fmt(j.pay * 1.25 * POS_MULT[r])} ₽</b> за смену · ${JOB_GAMES[j.id].title}${tags ? ` · ${tags}` : ''}
-        <br>−${j.energy} ⚡ · −${j.food} 🍞${j.health ? ` · ${j.health} ❤️` : ''}`,
+      desc: `До <b>${incomeHTML('job',j.id)}</b> за смену · ${JOB_GAMES[j.id].title}${tags ? ` · ${tags}` : ''}
+        <br><small>${incomeHTML('job-net',j.id)}</small><details><summary>Как рассчитан максимум</summary>${incomeHTML('job-details',j.id)}</details><br>−${j.energy} ⚡ · −${j.food} 🍞${j.health ? ` · ${j.health} ❤️` : ''}`,
       extra: (jobShifts(j.id) ? `<div class="card-desc">🎖️ <b>${posName(j.id, r)}</b> (×${POS_MULT[r]}) · смен: ${jobShifts(j.id)}${next && !canPromote(j.id) ? ` · до аттестации ${next.shifts - jobShifts(j.id)}` : ''}</div>` : '') + extra + reqHTML(j.req) });
   };
   const priv = JOBS.filter((j) => !j.state), gov = JOBS.filter((j) => j.state);
-  return `<div class="info-card">Смена — мини-игра на ~30 секунд, оплата зависит от результата. Наработал смены — сдай <b>аттестацию</b> (сыграй на ${Math.round(EXAM_PASS * 100)}%+) и получи новую должность: до ×${POS_MULT[4]} к оплате.
+  return `<div class="info-card">Смена — мини-игра на ~30 секунд, оплата зависит от результата. Максимум рассчитан при 125% результата со всеми твоими действующими бонусами и штрафами. Суммы обновляются, пока вкладка открыта; при выплате учитываются бонусы на момент конца смены. Наработал смены — сдай <b>аттестацию</b> (сыграй на ${Math.round(EXAM_PASS * 100)}%+) и получи новую должность: до ×${POS_MULT[4]} к оплате.
       На госслужбе платят даже за слабую смену, а повышение можно «ускорить» конвертом.
       ${S.health < 25 ? '<br><b style="color:var(--red)">Ты слишком болен для работы — подлечись.</b>' : ''}</div>
     <div class="subhead">🏛️ Госслужба</div>${gov.map(row).join('')}
