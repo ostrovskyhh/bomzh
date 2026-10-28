@@ -149,4 +149,3 @@ const PARTY_CD = 6 * 3600;
 function staffLvl(id) { return Math.max(0,Math.min(STAFF_MAX,Math.floor(Number(S.clubStaff?.[id])||0)));  }
 function clubMult() { return 1 + STAFF.reduce((a, s) => a + s.boost * staffLvl(s.id), 0); }
 function clubSalary() { const scale=(BUSINESSES.find(b=>b.id==='club')?.price||12000000)/12000000; return STAFF.reduce((a, s) => a + s.salary * staffLvl(s.id), 0)*scale; }
-
