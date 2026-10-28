@@ -36,6 +36,11 @@ const PARTNER_GAMES = [
 
 let PARTNER = null;
 
+// Paid relationship choices must be affordable both when shown and when selected.
+function partnerChoiceButton(action,index,label,cost=0){
+  return cost>0?priceBtn(action,index,cost,S.money>=cost,`${esc(label)} · ${incomeMoney(cost)}`).replace('class="btn','class="btn wide'):`<button class="btn wide" data-act="${action}" data-id="${index}">${esc(label)}</button>`;
+}
+
 function partnerEvent() {
   const g = partner();
   if (!g) return;
@@ -48,7 +53,7 @@ function partnerEvent() {
     const [q, answers] = pick(PARTNER_Q);
     PARTNER = { kind, answers };
     openModal(`${head}<h3>${partnerTitle()} ${g.name.split(' ').pop()}:</h3><p>«${q}»</p>
-      <div class="btns" style="flex-direction:column;gap:8px">${shuffle(answers.map((a, i) => [a, i])).map(([a, i]) => `<button class="btn wide" data-act="pAnswer" data-id="${i}">${a[0]}</button>`).join('')}</div>`, { center: true, locked: true });
+      <div class="btns" style="flex-direction:column;gap:8px">${shuffle(answers.map((a, i) => [a, i])).map(([a, i]) => partnerChoiceButton('pAnswer',i,a[0],wifeRequestCost(a[5]||0))).join('')}</div>`, { center: true, locked: true });
   } else if (kind === 'ask') {
     const [what, emoji, k] = pick(PARTNER_ASK);
     const sum = wifeRequestCost(Math.max(100, Math.round(ALLOWANCE[girlIdx(g.id)] * k * rand(0.8, 1.2) / 10) * 10));
@@ -114,12 +119,14 @@ HOOKS.tick.push(() => {
 
 Object.assign(ACTIONS, {
   pAnswer: (i) => {
-    const p = PARTNER; PARTNER = null;
-    if (!p) return;
-    const [, trust, rel, mood, reply, rawMoney] = p.answers[+i];
+    const p = PARTNER, answer=p?.answers?.[+i];
+    if (!answer) return;
+    const [, trust, rel, mood, reply, rawMoney] = answer;
     const money=wifeRequestCost(rawMoney||0);
+    if(S.money<money){toast('Не хватает денег для этого ответа','bad');return;}
+    PARTNER=null;
+    S.money-=money;
     addTrust(trust); addRel(rel); addMood(mood);
-    if (money) S.money = Math.max(0, S.money - money);
     partnerReply(trust >= 0 ? '😊' : '😠', trust >= 0 ? 'Хороший ответ' : 'Зря ты так', `${reply}${money ? `<br>−${fmt(money)} ₽` : ''}<br>Доверие ${trust >= 0 ? '+' : ''}${trust}`, trust >= 0);
   },
   pAsk: (id) => {

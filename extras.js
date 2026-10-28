@@ -238,12 +238,12 @@ PARTNER_GAMES.push(
 const PARTNER_STORIES = [
   { e: '👀', t: 'Она видела, как ты смотрел на продавщицу Свету', choices: [
     ['Оправдываться', () => (Math.random() < 0.5 ? (addTrust(3), '«Ладно, поверю. В этот раз»') : (addTrust(-8), '«Не верю ни одному слову!»'))],
-    ['💐 Купить цветы', () => { S.money = Math.max(0, S.money - 500); addTrust(6); addRel(4); return '«Ой, мои любимые!» (−500 ₽)'; }],
+    ['💐 Купить цветы', () => { addTrust(6); addRel(4); return '«Ой, мои любимые!» (−500 ₽)'; }, 500],
     ['Промолчать', () => (addTrust(-5), '«Молчание — знак согласия!»')]] },
   { e: '👵', t: 'Приехала мама. На неделю', choices: [
     ['Терпеть и улыбаться', () => (addMood(-10), addTrust(6), addRel(5), 'Тёща довольна. Ты — не очень. −10 😊')],
     ['🎣 Сбежать на рыбалку', () => (addMood(8), addTrust(-8), '«Опять сбежал! Мама обиделась»')],
-    ['🎂 Задобрить тортом', () => { S.money = Math.max(0, S.money - 800); addTrust(4); addRel(3); return 'Тёща сказала: «Ну хоть не дурак». Это комплимент! (−800 ₽)'; }]] },
+    ['🎂 Задобрить тортом', () => { addTrust(4); addRel(3); return 'Тёща сказала: «Ну хоть не дурак». Это комплимент! (−800 ₽)'; }, 800]] },
   { e: '🍲', t: 'Она приготовила ужин по рецепту из интернета. Выглядит… странно', choices: [
     ['Съесть и нахваливать', () => { addTrust(6); addRel(5); if (Math.random() < 0.4) { addEffect('poison', 4); return '«Я так рада!» …а ночью 🤢 отравление'; } feed(40); return 'Оказалось вкусно! Сытость +40'; }],
     ['Вежливо отказаться', () => (addTrust(-7), '«Я старалась, а ты!..»')],
@@ -289,15 +289,19 @@ partnerEvent = (function (orig) {
     sfx('notify');
     openModal(`<div class="big-art" style="height:96px"><div class="big-emoji" style="line-height:96px">${st.e}</div></div>
       <h3>${partnerTitle()} ${g.name.split(' ').pop()}</h3><p>${st.t}</p>
-      <div class="btns" style="flex-direction:column;gap:8px">${st.choices.map((c, i) => `<button class="btn wide" data-act="pStory" data-id="${i}">${c[0]}</button>`).join('')}</div>`, { center: true, locked: true });
+      <div class="btns" style="flex-direction:column;gap:8px">${st.choices.map((c, i) => partnerChoiceButton('pStory',i,c[0],c[2]||0)).join('')}</div>`, { center: true, locked: true });
   };
 })(partnerEvent);
 
 ACTIONS.pStory = (i) => {
-  const p = PARTNER; PARTNER = null;
-  if (!p || !p.st) return;
+  const p = PARTNER, choice=p?.st?.choices?.[+i];
+  if(!choice)return;
+  const cost=choice[2]||0;
+  if(S.money<cost){toast('Не хватает денег для этого подарка','bad');return;}
+  PARTNER=null;
+  S.money-=cost;
   const before = S.trust;
-  const reply = p.st.choices[+i][1]();
+  const reply = choice[1]();
   track('partnerStory');
   partnerReply(S.trust >= before ? '😊' : '😠', p.st.choices[+i][0], reply, S.trust >= before);
 };
