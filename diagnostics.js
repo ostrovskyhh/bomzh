@@ -84,8 +84,8 @@ const BugReport = (() => {
         viewport: `${window.innerWidth}x${window.innerHeight}`, pixelRatio: window.devicePixelRatio,
         online: navigator.onLine, visibility: document.visibilityState, timezone: safe(() => Intl.DateTimeFormat().resolvedOptions().timeZone),
         telegramVersion: safe(() => tg && tg.version), uptimeMs: Date.now() - startedAt,
-        assets: safe(() => [...document.querySelectorAll('script[src]')].filter((s) => new URL(s.src).origin === location.origin)
-          .map((s) => { const u = new URL(s.src); return { file: u.pathname.split('/').pop(), v: clean(u.searchParams.get('v'), 60) }; }), []),
+        assets: safe(() => [...document.querySelectorAll('script[src],script[data-source]')].filter((s) => s.dataset.source || new URL(s.src).origin === location.origin)
+          .map((s) => { const u = new URL(s.src || s.dataset.source, document.baseURI); return { file: u.pathname.split('/').pop(), v: clean(u.searchParams.get('v'), 60) }; }), []),
       },
       reproduction, origin: origin || snapshot(), state: snapshot(),
       events: events.filter((e) => Date.parse(e.at) >= since), errors: errors.slice(),

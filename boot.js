@@ -4,13 +4,13 @@ init();
 // Telegram любит показывать игру из кэша, даже когда на GitHub уже новая версия.
 // Поэтому игра сама сверяет свой номер версии с сайтом и, если вышла новая, перезагружается на неё.
 (function autoUpdate() {
-  const me = document.currentScript && document.currentScript.src;
+  const me = document.currentScript && (document.currentScript.src || document.currentScript.dataset.source);
   const cur = me && (me.match(/[?&]v=([\w.]+)/) || [])[1];
   if (!cur || location.protocol === 'file:') return;
-  const check = () => fetch(`${location.pathname}?nocache=${Date.now()}`, { cache: 'no-store' })
+  const check = () => fetch(new URL(`changelog.js?nocache=${Date.now()}`, document.baseURI), { cache: 'no-store' })
     .then((r) => (r.ok ? r.text() : ''))
     .then((html) => {
-      const v = (html.match(/boot\.js\?v=([\w.]+)/) || [])[1];
+      const v = (html.match(/\bv:\s*['"]([\w.]+)['"]/) || [])[1];
       if (!v || v === cur) return;
       // Не больше одной перезагрузки на версию — вдруг сайт ещё не обновился до конца
       const key = `bomzh_reload_${v}`;
