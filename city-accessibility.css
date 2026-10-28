@@ -1,0 +1,7 @@
+.city-activity{padding:16px;border:1px solid #b0a18a55;border-radius:18px;background:linear-gradient(145deg,#aa805016,#6677aa13);text-align:center;max-width:100%;box-sizing:border-box}
+.city-activity h3{font-size:19px;line-height:1.35;margin:12px 0;overflow-wrap:anywhere}.city-activity p{line-height:1.5;font-size:14px}.city-activity small{opacity:.8}.city-sample{font-size:40px;line-height:1.5;margin:12px 0}
+.city-options{display:grid;gap:10px;margin:16px 0}.city-options button,.city-activity>button{width:100%;min-height:52px;white-space:normal;touch-action:manipulation}.city-option span{font-size:27px;display:block}.city-option b{display:block;font-size:14px;margin-top:4px}.city-facts{display:grid;gap:12px;text-align:left;padding:14px;border-radius:12px;background:#8881}.city-rule{padding:12px;border-radius:12px;background:#bc943622}#civicFeedback{min-height:24px}
+
+.mg-arena.city-game-arena{height:auto;max-height:none;min-height:250px;overflow:visible!important;justify-content:flex-start;padding:8px!important;touch-action:pan-y}.city-game-arena .city-activity{width:100%;flex-shrink:0}.mg:has(.civic-arena) .mg-time{display:none}
+
+.city-game-arena[data-city="mex"]{background:linear-gradient(150deg,#5d4233,#28453a)!important}.city-game-arena[data-city="zas"]{background:linear-gradient(150deg,#494137,#2c3130)!important}

@@ -820,7 +820,7 @@ startShiftGame = (function (orig) {
     const base = JOB_GAMES[j.id];
     if (!base || !base.engine) { orig(j, onFinish, titleExtra); return; }
     const cfg = base.type === 'lanes' ? { ...base, player: roadPlayer(j) } : base;
-    runGame({ title: `${j.emoji} ${cfg.title}${titleExtra}`, hint: cfg.hint, duration: 30, setup: (mg) => cfg.engine(mg, cfg), finish: onFinish });
+    runGame({ title: `${j.emoji} ${cfg.title}${titleExtra}`, hint: cfg.hint, duration: cfg.duration === undefined ? 30 : cfg.duration, setup: (mg) => cfg.engine(mg, cfg), finish: onFinish });
   };
 })(startShiftGame);
 

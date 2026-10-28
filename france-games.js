@@ -80,10 +80,4 @@ function frMemory(mg,cfg={}){
   }));next();
 }
 
-function frLanguage(mg,cfg={}){
-  let answer='';const bank=cfg.words||FR_WORDS;
-  frArena('<div class="fr-shop-sign">'+(cfg.sign||'BONJOUR · французский без паники')+'</div><p class="fr-glossary">'+bank.map(([a,b])=>`${a} — ${b}`).join(' · ')+'</p><h3 id="frWord"></h3><div class="fr-choices">'+Array.from({length:3},()=>'<button class="fr-option"></button>').join('')+'</div>','fr-language');
-  const buttons=[...document.querySelectorAll('.fr-option')];
-  const next=()=>{const [word,ru]=pick(bank);answer=ru;$('frWord').textContent='«'+word+'» — это…';const opts=shuffle([ru,...shuffle(bank.filter(x=>x[1]!==ru)).slice(0,2).map(x=>x[1])]);buttons.forEach((b,i)=>b.textContent=opts[i]);};
-  buttons.forEach(b=>frInput(b,mg,()=>{const good=b.textContent===answer;frPoint(mg,good,b);if(good)next();}));next();
-}
+function frLanguage(mg,cfg={}) { return cityRequestGame(mg,{...cfg,theme:'fr'}); }

@@ -356,8 +356,8 @@ function mxLoteria(mg, cfg) {
     const left = board.filter((_, i) => !marked[i]);
     const c = left.length && Math.random() < (cfg.hit || 0.62) ? pick(left) : pick(LOTERIA);
     called = [c[1], ...called].slice(0, 2);
-    $('ltE').textContent = cfg.words ? '🎴' : c[0];
-    $('ltN').textContent = cfg.words ? `¡${c[1]}!${cfg.learn ? ' — ' + mxRu(c[1]) : ''}` : c[1];
+    $('ltE').textContent = c[0];
+    $('ltN').textContent = mxRu(c[1]);
     $('ltC').textContent = cfg.calls ? `${calls} карт` : '';
     sfx('chip');
     $('ltE').animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0)' }], { duration: 250 });
@@ -613,14 +613,14 @@ function mxCalle(mg, cfg) {
     $('clS').innerHTML = nums.map((n) => `<button class="mx-house" data-n="${n}"><span>${pick(HOUSES)}</span><b>${n}</b></button>`).join('');
     document.querySelectorAll('.mx-house').forEach((b) => mxBtn(b, () => tap(b)));
   };
-  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Улица ${ES_NUM[want]}</b>${cfg.learn || mg.score < (cfg.hintUntil || 4) ? ` <small>дом №${want}</small>` : ''}`; };
+  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Доставь в дом №${want}</b> <small>Номер всегда виден на письме</small>`; };
   const tap = (b) => {
     if (!mgAlive(mg)) return;
     if (+b.dataset.n === want) {
       mxHit(b, cfg.okText || 'Доставлено!'); b.classList.add('ok');
       if (++done % 3 === 0) layout();
       ask();
-    } else mxMiss(mg, b, `Это ${ES_NUM[+b.dataset.n]}`, 1);
+    } else mxMiss(mg, b, `Это дом №${b.dataset.n}. Сверь номер на письме`, 1);
   };
   layout(); ask();
   mxEnd(mg, cfg.time);
@@ -631,32 +631,7 @@ const MX_ES = [['Hola', 'Привет'], ['Gracias', 'Спасибо'], ['Amigo'
   ['Gato', 'Кот'], ['Trabajo', 'Работа'], ['Comida', 'Еда'], ['Cerveza', 'Пиво'], ['Sol', 'Солнце'], ['Mañana', 'Завтра'], ['Fiesta', 'Праздник'], ['Amor', 'Любовь'],
   ['Calle', 'Улица'], ['Coche', 'Машина'], ['Libro', 'Книга'], ['Escuela', 'Школа'], ['Mercado', 'Рынок'], ['Iglesia', 'Церковь'], ['Policía', 'Полиция'], ['Cárcel', 'Тюрьма'],
   ['Pollo', 'Курица'], ['Queso', 'Сыр'], ['Hermano', 'Брат'], ['Abuela', 'Бабушка'], ['Noche', 'Ночь'], ['Luna', 'Луна']];
-function mxWords(mg, cfg) {
-  const pairs = cfg.pairs || MX_ES;
-  mxA(`<div class="mx-wfall"><div class="mx-word" id="wdW"></div></div><div class="mx-pads three" id="wdO"></div>`, cfg.bg || 'mx-school');
-  let cur = null, y = 0, fall = cfg.fall || 5;
-  const next = () => {
-    const pr = pick(pairs);
-    const [q, a] = cfg.reverse ? [pr[1], pr[0]] : pr;
-    const wrong = shuffle(pairs.filter((x) => x !== pr)).slice(0, 2).map((x) => (cfg.reverse ? x[0] : x[1]));
-    cur = { a }; y = 0;
-    $('wdW').textContent = cfg.learn ? `${q} — ${a}` : q;
-    $('wdO').innerHTML = shuffle([a, ...wrong]).map((o) => `<button class="mx-pad word">${o}</button>`).join('');
-    document.querySelectorAll('#wdO .mx-pad').forEach((b) => mxBtn(b, () => {
-      if (!mgAlive(mg)) return;
-      if (b.textContent === cur.a) { mxHit($('wdW'), 'Правильно!'); fall = Math.max(2.4, fall * 0.95); }
-      else mxMiss(mg, $('wdW'), cur.a, 1);
-      next();
-    }));
-  };
-  next();
-  mgLoop(mg, (dt) => {
-    y += dt / fall;
-    $('wdW').style.top = y * 78 + '%';
-    if (y >= 1) { mxMiss(mg, $('wdW'), cur.a); next(); }
-  });
-  mxEnd(mg, cfg.time);
-}
+function mxWords(mg, cfg={}) { return cityRequestGame(mg,{theme:cfg.reverse?'school':'mex'}); }
 
 // ---------- 17. Вопрос-карточка: смахни или выбери ответ ----------
 function mxQuiz(mg, cfg) {
@@ -928,6 +903,6 @@ MEX_RESKIN.push((on) => {
 });
 // Подписи игр свиданий
 if (typeof DATE_GAME_ICON !== 'undefined') {
-  const MX_ICON = { walk: '🧭 переулки', skate: '🏄 сёрф', cafe: '🗣️ испанский', amuse: '🪅 пиньята', cinema: '📺 сериал', picnic: '🐦 чайки', museum: '🎴 лотерия', karaoke: '🎺 мариачи', bowling: '🧲 подкова', rest: '🫓 тортильи', yacht: '🤿 снорклинг' };
+  const MX_ICON = { walk: '🧭 переулки', skate: '🏄 сёрф', cafe: '☕ заказ для двоих', amuse: '🪅 пиньята', cinema: '📺 сериал', picnic: '🐦 чайки', museum: '🎴 лотерия', karaoke: '🎺 мариачи', bowling: '🧲 подкова', rest: '🫓 тортильи', yacht: '🤿 снорклинг' };
   Object.entries(MX_ICON).forEach(([k, v]) => mxSwap(DATE_GAME_ICON, k, v));
 }

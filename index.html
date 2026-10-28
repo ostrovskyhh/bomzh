@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4.27">
-  <link rel="stylesheet" href="baccarat.css?v=4.27">
-  <link rel="stylesheet" href="bottles.css?v=4.27">
-  <link rel="stylesheet" href="gang-yard.css?v=4.27">
-  <link rel="stylesheet" href="gang-district.css?v=4.27">
-  <link rel="stylesheet" href="france.css?v=4.27">
+  <link rel="stylesheet" href="style.css?v=4.28">
+  <link rel="stylesheet" href="baccarat.css?v=4.28">
+  <link rel="stylesheet" href="bottles.css?v=4.28">
+  <link rel="stylesheet" href="gang-yard.css?v=4.28">
+  <link rel="stylesheet" href="gang-district.css?v=4.28">
+  <link rel="stylesheet" href="france.css?v=4.28">
+  <link rel="stylesheet" href="city-accessibility.css?v=4.28">
 </head>
 <body class="beta">
   <!-- Общие паттерны для всех SVG (полоски тельняшки, кирпичи и т.д.) -->
@@ -145,7 +146,7 @@
   <div id="toastRoot"></div>
 
   <!-- ?v= — номер версии. Меняй его при каждом обновлении, иначе Telegram покажет старые файлы из кэша -->
-  <script data-source="diagnostics.js?v=4.27">// Локальный ограниченный журнал. Отправляется только вместе с обращением игрока.
+  <script data-source="diagnostics.js?v=4.28">// Локальный ограниченный журнал. Отправляется только вместе с обращением игрока.
 const BugReport = (() => {
   const startedAt = Date.now();
   const session = Math.random().toString(36).slice(2, 10);
@@ -250,9 +251,9 @@ const BugReport = (() => {
   return { record, error, snapshot, actionStart, actionEnd, build, clean };
 })();
 
-//# sourceURL=diagnostics.js?v=4.27
+//# sourceURL=diagnostics.js?v=4.28
 </script>
-  <script data-source="audio.js?v=4.27">// Звук: всё синтезируется на лету через WebAudio — ни одного аудиофайла, игра не тяжелеет.
+  <script data-source="audio.js?v=4.28">// Звук: всё синтезируется на лету через WebAudio — ни одного аудиофайла, игра не тяжелеет.
 // Sound.play('tap') — короткий эффект, Sound.music('lounge') / Sound.music(null) — фоновая музыка.
 
 const Sound = (() => {
@@ -669,9 +670,9 @@ const Sound = (() => {
   return { play, music, unlock, applyVolume, get track() { return track; } };
 })();
 
-//# sourceURL=audio.js?v=4.27
+//# sourceURL=audio.js?v=4.28
 </script>
-  <script data-source="art.js?v=4.27">// Вся графика игры: векторные SVG, собираются кодом.
+  <script data-source="art.js?v=4.28">// Вся графика игры: векторные SVG, собираются кодом.
 // Персонаж собирается из слоёв (обувь, одежда, шапка), локации — отдельные сцены.
 
 const SKIN = '#F1C7A1';
@@ -1077,9 +1078,9 @@ function sceneThumbSVG(level) {
   return sceneSVG(level).replace('preserveAspectRatio="xMidYMax slice"', 'preserveAspectRatio="xMidYMid slice"');
 }
 
-//# sourceURL=art.js?v=4.27
+//# sourceURL=art.js?v=4.28
 </script>
-  <script data-source="msk_art.js?v=4.27">// Графика Москвабада (3.0): новые животные и 7 сцен жилья. Зависит только от art.js —
+  <script data-source="msk_art.js?v=4.28">// Графика Москвабада (3.0): новые животные и 7 сцен жилья. Зависит только от art.js —
 // поэтому её можно рисовать и в генераторе картинок (branding/render). Город спрашивает city() в момент рисования.
 
 Object.assign(PET_ART, {
@@ -1187,9 +1188,9 @@ sceneSVG = (function (orig) {
 })(sceneSVG);
 
 
-//# sourceURL=msk_art.js?v=4.27
+//# sourceURL=msk_art.js?v=4.28
 </script>
-  <script data-source="mex_art.js?v=4.27">// Графика Мексики (4.0): 7 сцен жилья и новые животные. Как msk_art.js — зависит только от art.js,
+  <script data-source="mex_art.js?v=4.28">// Графика Мексики (4.0): 7 сцен жилья и новые животные. Как msk_art.js — зависит только от art.js,
 // город спрашивает city() в момент рисования.
 
 Object.assign(PET_ART, {
@@ -1279,9 +1280,9 @@ sceneSVG = (function (orig) {
   };
 })(sceneSVG);
 
-//# sourceURL=mex_art.js?v=4.27
+//# sourceURL=mex_art.js?v=4.28
 </script>
-  <script data-source="game.js?v=4.27">// «Симулятор бомжа» — Mini App для Telegram.
+  <script data-source="game.js?v=4.28">// «Симулятор бомжа» — Mini App для Telegram.
 // Весь прогресс хранится на клиенте (localStorage + Telegram CloudStorage).
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
@@ -4279,9 +4280,9 @@ function init() {
 }
 // init() вызывается в boot.js — после загрузки всех модулей
 
-//# sourceURL=game.js?v=4.27
+//# sourceURL=game.js?v=4.28
 </script>
-  <script data-source="systems.js?v=4.27">// Системы: настройки и журнал, инвентарь и рынок Шныря, питомцы, бизнесы, транспорт,
+  <script data-source="systems.js?v=4.28">// Системы: настройки и журнал, инвентарь и рынок Шныря, питомцы, бизнесы, транспорт,
 // жильё (аренда, коммуналка, поломки), престиж, достижения, сезонные ивенты.
 
 const MONTH_MS = 3 * 3600000; // 1 игровой месяц = 3 часа реального времени
@@ -5259,9 +5260,9 @@ function renderSeason() {
 HOOKS.load.push(renderSeason);
 HOOKS.tick.push(() => { if (Math.random() < 0.002) renderSeason(); });
 
-//# sourceURL=systems.js?v=4.27
+//# sourceURL=systems.js?v=4.28
 </script>
-  <script data-source="minigames.js?v=4.27">// Мини-игры: смена на работе и занятия в учёбе — это не ожидание таймера, а короткая игра на 25–35 секунд.
+  <script data-source="minigames.js?v=4.28">// Мини-игры: смена на работе и занятия в учёбе — это не ожидание таймера, а короткая игра на 25–35 секунд.
 // Оплата смены зависит от результата, занятие засчитывается, только если набрал нужный счёт.
 
 // ---------- Карьера: ранги на каждой работе ----------
@@ -5709,9 +5710,9 @@ function finishLesson(stage, score, need) {
   save();
 }
 
-//# sourceURL=minigames.js?v=4.27
+//# sourceURL=minigames.js?v=4.28
 </script>
-  <script data-source="fights.js?v=4.27">// PvP-драки. Пока у игры нет сервера, соперники — сгенерированные бойцы твоего уровня
+  <script data-source="fights.js?v=4.28">// PvP-драки. Пока у игры нет сервера, соперники — сгенерированные бойцы твоего уровня
 // (у каждого свои статы, одежда, рейтинг и стиль боя). С сервером их заменят реальные игроки — механика та же.
 
 const FIGHT_LEVEL = 2;
@@ -5988,9 +5989,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=fights.js?v=4.27
+//# sourceURL=fights.js?v=4.28
 </script>
-  <script data-source="fight3.js?v=4.27">// Бой 2.0 (3.2): интерактивная драка, где решает спортзал.
+  <script data-source="fight3.js?v=4.28">// Бой 2.0 (3.2): интерактивная драка, где решает спортзал.
 // Атака: у соперника видна стойка («в блоке» или «открыт»), выбираешь удар или мощный и попадаешь в зону
 // на бегущей полоске — в золотую середину это крит, серия точных ударов даёт комбо.
 // Защита: соперник замахивается, вокруг кулака сужается кольцо. «Уклон» в последний момент — ноль урона
@@ -6277,9 +6278,9 @@ ACTIONS.f3Give = () => {
   if (tg && tg.showConfirm) tg.showConfirm('Сдаться? Бой засчитают как поражение', (ok) => ok && go()); else if (confirm('Сдаться?')) go();
 };
 
-//# sourceURL=fight3.js?v=4.27
+//# sourceURL=fight3.js?v=4.28
 </script>
-  <script data-source="casino.js?v=4.27">// Казино «Золотая крышка»: лобби, рулетка, кости, «Ракета» (crash) + слоты и блекджек из game.js.
+  <script data-source="casino.js?v=4.28">// Казино «Золотая крышка»: лобби, рулетка, кости, «Ракета» (crash) + слоты и блекджек из game.js.
 // В зале играет лаунж-джаз (audio.js). Ставки только в игровых рублях.
 
 function inCasino() { return currentScreen === 'fun' && TABS.fun === 'casino' && level() >= CASINO_LEVEL; }
@@ -6613,9 +6614,9 @@ Object.assign(ACTIONS, {
   crashGo: (_, btn) => crashGo(btn),
 });
 
-//# sourceURL=casino.js?v=4.27
+//# sourceURL=casino.js?v=4.28
 </script>
-  <script data-source="quests.js?v=4.27">// Сюжетные квесты (с развилкой: честный путь или тёмная дорожка) и обучение для новичков.
+  <script data-source="quests.js?v=4.28">// Сюжетные квесты (с развилкой: честный путь или тёмная дорожка) и обучение для новичков.
 
 // ---------- Цели квестов ----------
 // qc — счётчик с момента начала главы, qv — значение, которое должно достичь порога
@@ -6925,9 +6926,9 @@ Object.assign(ACTIONS, {
   restartTut: () => { closeModal(); showScreen('game'); S.tut = { step: 0, done: false, base: counter('taps') }; tutRender(); },
 });
 
-//# sourceURL=quests.js?v=4.27
+//# sourceURL=quests.js?v=4.28
 </script>
-  <script data-source="life.js?v=4.27">// Жизнь: переедание с приколами, свидания с мини-играми, измены и ЗППП, свадьба и развод,
+  <script data-source="life.js?v=4.28">// Жизнь: переедание с приколами, свидания с мини-играми, измены и ЗППП, свадьба и развод,
 // болезни и корм питомцев, расширенная мусорка.
 
 function lifeDefaults() {
@@ -7717,9 +7718,9 @@ LOOT.push(
   { name: 'Тебя сняли для мемов', emoji: '📸', rarity: 'bad', w: 3, give: () => { addMood(-5); return 'Блогер снял, как ты достаёшь банан из бака. Миллион просмотров. −5 😊'; } },
 );
 
-//# sourceURL=life.js?v=4.27
+//# sourceURL=life.js?v=4.28
 </script>
-  <script data-source="family.js?v=4.27">// Семья: девушка или жена иногда сама выходит на связь — задаёт вопросы, просит денег, зовёт помочь
+  <script data-source="family.js?v=4.28">// Семья: девушка или жена иногда сама выходит на связь — задаёт вопросы, просит денег, зовёт помочь
 // или в спальню. Доверие (S.trust) растёт и падает от твоих ответов. Плюс курсовое лечение ЗППП.
 
 const PARTNER_EVERY = [7, 12]; // минут между окнами
@@ -8010,9 +8011,9 @@ EXTRA_TABS.life.health = function healthWithSti() {
 
 ACTIONS.venVisit = (id) => venVisit(id);
 
-//# sourceURL=family.js?v=4.27
+//# sourceURL=family.js?v=4.28
 </script>
-  <script data-source="careers.js?v=4.27">// Карьера: новые работы (в том числе госслужба и чиновники), должности на каждой работе,
+  <script data-source="careers.js?v=4.28">// Карьера: новые работы (в том числе госслужба и чиновники), должности на каждой работе,
 // аттестация на повышение, взятки и откаты.
 
 // state — госслужба: платят даже за слабую смену. official — чиновник: предлагают откаты
@@ -8399,9 +8400,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=careers.js?v=4.27
+//# sourceURL=careers.js?v=4.28
 </script>
-  <script data-source="cutscenes.js?v=4.27">// Анимированные мультики: после важных глав сюжета, перед боссом, при переезде, на свадьбе,
+  <script data-source="cutscenes.js?v=4.28">// Анимированные мультики: после важных глав сюжета, перед боссом, при переезде, на свадьбе,
 // при разводе и на вершине карьеры. Кадр — сцена, персонажи с репликами в облачках, предметы и эффекты.
 
 // Кадр: bg — номер сцены жилья (0–6) или 'red' / 'gold' / 'night'; night — ночной фильтр; cam — 'shake' или 'zoom'.
@@ -8750,9 +8751,9 @@ finishWedding = (w, perf) => playCutscene('wedding', () => _finishWeddingCut(w, 
 const _startDivorceCut = startDivorce;
 startDivorce = (byWife, reason) => { if (!wife()) return; playCutscene('divorce', () => _startDivorceCut(byWife, reason)); };
 
-//# sourceURL=cutscenes.js?v=4.27
+//# sourceURL=cutscenes.js?v=4.28
 </script>
-  <script data-source="extras.js?v=4.27">// Дополнения: отдых с мини-играми и лечение разбитого сердца, сценки с девушкой/женой,
+  <script data-source="extras.js?v=4.28">// Дополнения: отдых с мини-играми и лечение разбитого сердца, сценки с девушкой/женой,
 // гаражи и угоны машин, плашка хлама на сцене, новые навыки с уровнями, админ-меню по кодовому слову.
 
 // =====================================================================
@@ -9345,9 +9346,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=extras.js?v=4.27
+//# sourceURL=extras.js?v=4.28
 </script>
-  <script data-source="config.js?v=4.27">// Настройки, которые нужно вписать перед выкладкой (см. ИНСТРУКЦИЯ.md, часть «Рефералка»).
+  <script data-source="config.js?v=4.28">// Настройки, которые нужно вписать перед выкладкой (см. ИНСТРУКЦИЯ.md, часть «Рефералка»).
 
 // Адрес сервера рефералок — твой постоянный адрес из ngrok, без слэша в конце.
 // Пример: 'https://bomzh-game.ngrok-free.app'. Пустая строка — рефералка выключена.
@@ -9360,9 +9361,9 @@ const BOT_LINK = 'https://t.me/bomzhik_simulator_bot';
 // Официальное сообщество игроков в Telegram.
 const COMMUNITY_LINK = 'https://t.me/+Drb0gHGUjEMwNGUy';
 
-//# sourceURL=config.js?v=4.27
+//# sourceURL=config.js?v=4.28
 </script>
-  <script data-source="referral.js?v=4.27">// Рефералка: у каждого игрока свой код (английское слово из 6 букв), он виден в настройках.
+  <script data-source="referral.js?v=4.28">// Рефералка: у каждого игрока свой код (английское слово из 6 букв), он виден в настройках.
 // Новичок вводит код друга в поле «Кодовое слово» → +1000 ₽ и опыт ×1.5 на 30 минут, владельцу кода — 500 ₽.
 // Коды и награды хранит сервер в боте (bot/referral.py), до него игра достукивается через ngrok.
 
@@ -9479,9 +9480,9 @@ ACTIONS.codeWord = (function (adminCheck) {
   };
 })(ACTIONS.codeWord);
 
-//# sourceURL=referral.js?v=4.27
+//# sourceURL=referral.js?v=4.28
 </script>
-  <script data-source="online.js?v=4.27">// Онлайн: общий топ игроков и бои с живыми игроками по коду. Всё идёт через сервер в боте (bot/online.py)
+  <script data-source="online.js?v=4.28">// Онлайн: общий топ игроков и бои с живыми игроками по коду. Всё идёт через сервер в боте (bot/online.py)
 // по тому же адресу ngrok, что и рефералка (REF_API в config.js).
 
 function onlineOn() { return !!REF_API && !!refInitData(); }
@@ -9804,9 +9805,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=online.js?v=4.27
+//# sourceURL=online.js?v=4.28
 </script>
-  <script data-source="gym.js?v=4.27">// Спортзал: каждое упражнение — своя мини-игра, прирост формы и силы зависит от результата.
+  <script data-source="gym.js?v=4.28">// Спортзал: каждое упражнение — своя мини-игра, прирост формы и силы зависит от результата.
 // Энергия и сытость видны прямо в зале; не хватает — кнопка подскажет, что делать.
 
 EXERCISES.push({ id: 'bag', name: 'Боксёрская груша', emoji: '🥊', energy: 25, food: 12, fatigue: 25, form: 1, strength: 1.5, health: 1, mood: 4, desc: 'Сила и форма для драк' });
@@ -9971,9 +9972,9 @@ function finishWorkout(ex, g, score) {
   save();
 }
 
-//# sourceURL=gym.js?v=4.27
+//# sourceURL=gym.js?v=4.28
 </script>
-  <script data-source="ux.js?v=4.27">// Удобства: пересчёт опыта под новую кривую, окно «энергия кончилась», красные точки на разделах,
+  <script data-source="ux.js?v=4.28">// Удобства: пересчёт опыта под новую кривую, окно «энергия кончилась», красные точки на разделах,
 // готовые награды наверху списков, подсказка «почему нельзя» при нажатии на недоступную кнопку.
 
 // ---------- Разные сохранения на телефоне и компьютере: спрашиваем, какое оставить ----------
@@ -10304,9 +10305,9 @@ document.addEventListener('click', (e) => {
   b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 200 });
 });
 
-//# sourceURL=ux.js?v=4.27
+//# sourceURL=ux.js?v=4.28
 </script>
-  <script data-source="lotto.js?v=4.27">// Вкладка «Лото» в Досуге: моментальные лотерейные билеты разных цен (стираешь защитный слой)
+  <script data-source="lotto.js?v=4.28">// Вкладка «Лото» в Досуге: моментальные лотерейные билеты разных цен (стираешь защитный слой)
 // и русское лото с Михалычем и бабой Зиной — кто первый закроет ряд («квартиру»), тот забирает банк.
 
 // ---------- Лотерейные билеты ----------
@@ -10542,13 +10543,18 @@ Object.assign(ACTIONS, {
   lotoQuit: () => { if (!LOTO) { closeModal(); return; } const L = LOTO; L.over = true; clearInterval(L.timer); LOTO = null; closeModal(); toast('Ты встал из-за стола. Ставка осталась в банке', 'bad'); },
 });
 
-//# sourceURL=lotto.js?v=4.27
+//# sourceURL=lotto.js?v=4.28
 </script>
-  <script data-source="changelog.js?v=4.27">// «Что нового»: после обновления игрок один раз видит окно с кратким списком изменений.
+  <script data-source="changelog.js?v=4.28">// «Что нового»: после обновления игрок один раз видит окно с кратким списком изменений.
 // Как выпустить обновление: допиши НОВУЮ запись в самое начало CHANGELOG (v — новый номер версии),
 // поменяй ?v= в index.html на тот же номер и загрузи файлы на GitHub.
 
 const CHANGELOG = [
+  { v: '4.28', title: 'Понятные задания без языкового барьера', items: [
+    '🦂 Эль Алакран: собери досье, выбери помощь союзника и победи ослабленного босса. Требования 35-го уровня и случайных драк убраны',
+    '🌮🇫🇷 Учёба, работа и встречи в Мексике и Франции проходят по русским условиям, картинкам и цифрам. Переводить слова для победы больше не нужно',
+    '🏛️ Чиновник и депутат: пять коротких дел с объяснением каждого решения. Время на чтение не ограничено, правила видны на экране',
+  ] },
   { v: '4.27', title: 'Вид на Эйфелеву башню', items: [
     '🇫🇷 Первая локация Парижа теперь называется «Вид на Эйфелеву башню». Обновлены название стартового места и карточка Парижа',
   ] },
@@ -10966,9 +10972,9 @@ openSettings = (function (orig) {
 })(openSettings);
 ACTIONS.news = () => openNews('all');
 
-//# sourceURL=changelog.js?v=4.27
+//# sourceURL=changelog.js?v=4.28
 </script>
-  <script data-source="social.js?v=4.27">// Социальное в игре: оплата Telegram Stars, напоминания от бота, приглашение через историю и ссылку,
+  <script data-source="social.js?v=4.28">// Социальное в игре: оплата Telegram Stars, напоминания от бота, приглашение через историю и ссылку,
 // чат района (кнопка на главном экране) и банды. Всё идёт через сервер в боте (bot/social.py).
 
 // =====================================================================
@@ -11288,9 +11294,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=social.js?v=4.27
+//# sourceURL=social.js?v=4.28
 </script>
-  <script data-source="arena.js?v=4.27">// Арена: сложные боты (за победу — половина рейтинга и награды, за поражение ничего не теряешь)
+  <script data-source="arena.js?v=4.28">// Арена: сложные боты (за победу — половина рейтинга и награды, за поражение ничего не теряешь)
 // и еженедельный турнир по вторникам (взнос 1000 ₽ в общий банк, рейтинг за победу ×2, банк забирает победитель).
 
 // =====================================================================
@@ -11396,9 +11402,9 @@ EXTRA_TABS.fun.fights = () => {
   return (i > 0 ? base.slice(0, i) + tour + base.slice(i) : base + tour) + hard;
 };
 
-//# sourceURL=arena.js?v=4.27
+//# sourceURL=arena.js?v=4.28
 </script>
-  <script data-source="life2.js?v=4.27">// Отношения подробнее: новые свидания со своими мини-играми, подарки и цветы, шкала «Любовь» —
+  <script data-source="life2.js?v=4.28">// Отношения подробнее: новые свидания со своими мини-играми, подарки и цветы, шкала «Любовь» —
 // до свадьбы теперь надо ухаживать долго. И дети после свадьбы: растут, радуют, помогают.
 
 // =====================================================================
@@ -11671,9 +11677,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=life2.js?v=4.27
+//# sourceURL=life2.js?v=4.28
 </script>
-  <script data-source="crime.js?v=4.27">// Криминал (тёмная дорожка): угоны, карманы на вокзале, ограбление ларька с погоней, подпольный покер.
+  <script data-source="crime.js?v=4.28">// Криминал (тёмная дорожка): угоны, карманы на вокзале, ограбление ларька с погоней, подпольный покер.
 // Каждое дело поднимает розыск ⭐. Поймали — взятка или тюрьма, где свои занятия: шить варежки, качаться, бежать.
 
 const WANTED_MAX = 5;
@@ -11960,9 +11966,9 @@ Object.assign(ACTIONS, {
   pokerFold: () => pokerFinish(false),
 });
 
-//# sourceURL=crime.js?v=4.27
+//# sourceURL=crime.js?v=4.28
 </script>
-  <script data-source="world.js?v=4.27">// Мир вокруг: время суток и погода (влияют на доход и самочувствие), коллекции редкостей из мусорки,
+  <script data-source="world.js?v=4.28">// Мир вокруг: время суток и погода (влияют на доход и самочувствие), коллекции редкостей из мусорки,
 // ночной клуб — топовый бизнес, где нанимаешь персонал.
 
 // =====================================================================
@@ -12158,9 +12164,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=world.js?v=4.27
+//# sourceURL=world.js?v=4.28
 </script>
-  <script data-source="progress.js?v=4.27">// Прогресс: задания дня из большого набора (сложнее, растут с уровнем), недельная цепочка заданий,
+  <script data-source="progress.js?v=4.28">// Прогресс: задания дня из большого набора (сложнее, растут с уровнем), недельная цепочка заданий,
 // уникальные шапки за достижения, рамки аватара в топе и чате, настройки музыки, звука и напоминаний.
 
 // =====================================================================
@@ -12415,9 +12421,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=progress.js?v=4.27
+//# sourceURL=progress.js?v=4.28
 </script>
-  <script data-source="tips.js?v=4.27">// Подсказки: понятное обучение по шагам, совет при первом заходе в каждый раздел, сообщение об открытии
+  <script data-source="tips.js?v=4.28">// Подсказки: понятное обучение по шагам, совет при первом заходе в каждый раздел, сообщение об открытии
 // новых функций, советы по ситуации и «Справочник» в настройках, где всё можно перечитать.
 
 // =====================================================================
@@ -12594,9 +12600,9 @@ Object.assign(GO_KEYS, {
   crime: ['fun', 'crime', '#funList .card:not(.locked)', 'Иди на дело'],
 });
 
-//# sourceURL=tips.js?v=4.27
+//# sourceURL=tips.js?v=4.28
 </script>
-  <script data-source="promo.js?v=4.27">// Акции на крышки: появляются случайно и идут 2 часа. Расписание считается одинаково в игре
+  <script data-source="promo.js?v=4.28">// Акции на крышки: появляются случайно и идут 2 часа. Расписание считается одинаково в игре
 // и на сервере (bot/social.py), поэтому скидку и бонус проверяет сервер — подделать нельзя.
 
 const PROMO_SLOT = 6 * 3600000;  // в каждом 6-часовом окне…
@@ -12688,9 +12694,9 @@ ACTIONS.promoGo = () => { closeModal(); showScreen('shop', 'premium'); };
 const _sectionAlertsPromo = sectionAlerts;
 sectionAlerts = () => { const a = _sectionAlertsPromo(); const p = promoAt(); a.shop.premium = !!p && S.promoVisited !== p.slot; return a; };
 
-//# sourceURL=promo.js?v=4.27
+//# sourceURL=promo.js?v=4.28
 </script>
-  <script data-source="donate.js?v=4.27">// Донат больше не вкладка магазина: он открывается только по нажатию на плашку крышек наверху.
+  <script data-source="donate.js?v=4.28">// Донат больше не вкладка магазина: он открывается только по нажатию на плашку крышек наверху.
 // Здесь же — обмен крышек на рубли пачками: чем больше пачка, тем выгоднее курс, а сам курс растёт
 // вместе с жильём (как и цены), поэтому купленные крышки не обесцениваются на любом этапе игры.
 
@@ -12777,9 +12783,9 @@ HOOKS.hud.push(() => {
   $('resCaps').classList.toggle('has-dot', !!p && S.promoVisited !== p.slot);
 });
 
-//# sourceURL=donate.js?v=4.27
+//# sourceURL=donate.js?v=4.28
 </script>
-  <script data-source="duels.js?v=4.27">// Живые игроки: кто сейчас в игре, вызов конкретного игрока на бой или в «камень-ножницы-бумагу»
+  <script data-source="duels.js?v=4.28">// Живые игроки: кто сейчас в игре, вызов конкретного игрока на бой или в «камень-ножницы-бумагу»
 // (бот присылает ему уведомление), и сама онлайн-КНБ до трёх побед со ставками. Сервер — bot/duels.py.
 
 const DUEL_PING_EVERY = 10000; // так вызов доходит до игрока, который уже в игре, за считанные секунды
@@ -13241,9 +13247,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=duels.js?v=4.27
+//# sourceURL=duels.js?v=4.28
 </script>
-  <script data-source="pass.js?v=4.27">// Батл-пасс «Сезон района»: 28 дней, 30 уровней по 100 очков сезона (⭐).
+  <script data-source="pass.js?v=4.28">// Батл-пасс «Сезон района»: 28 дней, 30 уровней по 100 очков сезона (⭐).
 // Очки дают 3 задания дня и 3 задания недели. Бесплатная дорожка — у всех,
 // «Золотой пропуск» (Stars) открывает вторую дорожку с крышками, деньгами, шапкой, VIP и рамкой.
 // Задания подбираются под то, что игроку уже доступно; прогресс считается по общим счётчикам (track).
@@ -13434,9 +13440,9 @@ Object.assign(ACTIONS, {
 const _sectionAlertsPass = sectionAlerts;
 sectionAlerts = () => { const a = _sectionAlertsPass(); a.tasks.pass = passClaimable(); return a; };
 
-//# sourceURL=pass.js?v=4.27
+//# sourceURL=pass.js?v=4.28
 </script>
-  <script data-source="balance.js?v=4.27">// Баланс 1.8: драки с ботами и случайные события.
+  <script data-source="balance.js?v=4.28">// Баланс 1.8: драки с ботами и случайные события.
 //
 // Драки: три соперника — лёгкий, равный и сильный. Их сила подгоняется под твою (≈80% / 100% / 120%),
 // а награда и рейтинг зависят от сложности. Боты подстраиваются под твои привычки: сильный быстрее
@@ -13682,9 +13688,9 @@ maybeEvent = function () {
   });
 };
 
-//# sourceURL=balance.js?v=4.27
+//# sourceURL=balance.js?v=4.28
 </script>
-  <script data-source="workloot.js?v=4.27">// Находки на работе и больше хлама для рынка Шныря.
+  <script data-source="workloot.js?v=4.28">// Находки на работе и больше хлама для рынка Шныря.
 // После каждой смены есть шанс унести «сувенир» (чем лучше отработал и выше должность — тем чаще),
 // у каждой работы свой набор находок. Всё продаётся у Шныря по плавающим ценам.
 
@@ -13765,9 +13771,9 @@ const _marketTabLoot = EXTRA_TABS.fun.market;
 EXTRA_TABS.fun.market = () => _marketTabLoot().replace('Сумка пуста. Хлам находится в мусорках, его можно продать Шнырю.',
   'Сумка пуста. Хлам находится в мусорках, а со смен на работе иногда удаётся что-то унести — всё это можно продать Шнырю.');
 
-//# sourceURL=workloot.js?v=4.27
+//# sourceURL=workloot.js?v=4.28
 </script>
-  <script data-source="heart.js?v=4.27">// Энергетик «Бык»: быстро даёт энергию. Но больше двух банок за 20 минут — сердце не выдерживает:
+  <script data-source="heart.js?v=4.28">// Энергетик «Бык»: быстро даёт энергию. Но больше двух банок за 20 минут — сердце не выдерживает:
 // сначала «колотится сердце» (предупреждение), дальше — болезнь сердца, которая сама не проходит.
 // Лечит только больница: кардиолог (или платная клиника).
 
@@ -13846,9 +13852,9 @@ ACTIONS.cardio = () => {
   sfx('good');
 };
 
-//# sourceURL=heart.js?v=4.27
+//# sourceURL=heart.js?v=4.28
 </script>
-  <script data-source="admingift.js?v=4.27">// Админ-меню: подарок конкретному игроку (деньги, уровни, крышки) через сервер.
+  <script data-source="admingift.js?v=4.28">// Админ-меню: подарок конкретному игроку (деньги, уровни, крышки) через сервер.
 // Право проверяет сервер по Telegram ID из ADMIN_IDS. Игрок забирает подарок сам — при входе или в течение минуты.
 
 let GIFT = { players: [], pick: null, busy: false };
@@ -13957,9 +13963,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=admingift.js?v=4.27
+//# sourceURL=admingift.js?v=4.28
 </script>
-  <script data-source="pets2.js?v=4.27">// Питомцы 2.0: у каждого своя «профессия» и уровень дружбы (1–10). Чем крепче дружба,
+  <script data-source="pets2.js?v=4.28">// Питомцы 2.0: у каждого своя «профессия» и уровень дружбы (1–10). Чем крепче дружба,
 // тем сильнее бонус. Дружба растёт от занятий: погладить, поиграть (мини-игра), прогулка,
 // дрессировка, выставка. Окно занятий открывается тапом по питомцу на главном экране.
 
@@ -14203,9 +14209,9 @@ EXTRA_TABS.shop.pets = () => {
 const _sectionAlertsPet = sectionAlerts;
 sectionAlerts = () => { const a = _sectionAlertsPet(); if (a.shop) a.shop.pets = a.shop.pets || !!S.pet && PET_ACTS.some((x) => x.id !== 'pat' && !petCd(x.id) && !petActWhy(x)); return a; };
 
-//# sourceURL=pets2.js?v=4.27
+//# sourceURL=pets2.js?v=4.28
 </script>
-  <script data-source="avatars.js?v=4.27">// Аватарки: вместо буквы имени — значок за заслуги. Открываются за достижения, сюжет, драки,
+  <script data-source="avatars.js?v=4.28">// Аватарки: вместо буквы имени — значок за заслуги. Открываются за достижения, сюжет, драки,
 // питомцев и т.д. Видны на главном экране, в топе и в чате (вместе с рамкой).
 
 const AVATARS = [
@@ -14297,9 +14303,9 @@ ACTIONS.pickAvatar = (id) => {
   if (typeof topSubmit === 'function' && onlineOn()) topSubmit().catch(() => {});
 };
 
-//# sourceURL=avatars.js?v=4.27
+//# sourceURL=avatars.js?v=4.28
 </script>
-  <script data-source="refrewards.js?v=4.27">// Награды за приглашённых друзей: 30 крышек за каждого, плюс уникальные рамки и аватарки
+  <script data-source="refrewards.js?v=4.28">// Награды за приглашённых друзей: 30 крышек за каждого, плюс уникальные рамки и аватарки
 // за 1 / 3 / 5 / 10 / 15 / 25 / 30 приглашённых. Число приглашённых считает сервер (bot/referral.py).
 
 const REF_CAPS = 30;
@@ -14352,9 +14358,9 @@ refBoxHTML = (function (orig) {
   };
 })(refBoxHTML);
 
-//# sourceURL=refrewards.js?v=4.27
+//# sourceURL=refrewards.js?v=4.28
 </script>
-  <script data-source="romance.js?v=4.27">// Девушки сами проявляют инициативу.
+  <script data-source="romance.js?v=4.28">// Девушки сами проявляют инициативу.
 // Одинокий Валера несколько игровых дней не знакомился — девушка подходит знакомиться сама.
 // Есть девушка — изредка кто-то строит глазки; женат — совсем редко, раз в 5 игровых дней.
 // Тогда моральный выбор: остаться честным или изменить (с риском спалиться, развода и ЗППП).
@@ -14494,9 +14500,9 @@ ACTIONS.romance = (choice) => {
   save();
 };
 
-//# sourceURL=romance.js?v=4.27
+//# sourceURL=romance.js?v=4.28
 </script>
-  <script data-source="casinonight.js?v=4.27">// «Ночь казино» 4.2: с 23:00 до 05:00 по Москве — время берём с сервера, а не с телефона.
+  <script data-source="casinonight.js?v=4.28">// «Ночь казино» 4.2: с 23:00 до 05:00 по Москве — время берём с сервера, а не с телефона.
 // • комплимент от заведения за первый визит за ночь;
 // • +15% к чистому выигрышу в играх казино (сверх ставки). Бонус за ночь ограничен — иначе казино начало бы
 //   платить больше, чем забирает. Лото, лотерея и кейсы в ночь казино не входят. (Кешбэк 10% из 4.0 отменён.)
@@ -14613,9 +14619,9 @@ ACTIONS.nightGo = () => { closeModal(); showScreen('fun', 'casino'); };
 const _sectionAlertsNight = sectionAlerts;
 sectionAlerts = () => { const a = _sectionAlertsNight(); if (a.fun && level() >= CASINO_LEVEL) a.fun.casino = a.fun.casino || (casinoNight() && S.nightGift !== nightKey()); return a; };
 
-//# sourceURL=casinonight.js?v=4.27
+//# sourceURL=casinonight.js?v=4.28
 </script>
-  <script data-source="chest.js?v=4.27">// Офлайн-сундук: пока игрока нет хотя бы 30 минут, Валера собирает сундук с находками.
+  <script data-source="chest.js?v=4.28">// Офлайн-сундук: пока игрока нет хотя бы 30 минут, Валера собирает сундук с находками.
 // Деревянный (до 2 ч), серебряный (до 6 ч), золотой (6 ч+). Чем дольше отсутствие, тем богаче.
 // Открывается мини-игрой «Взлом»: тапай по сундуку — чем быстрее, тем больше награда.
 
@@ -14703,9 +14709,9 @@ ACTIONS.chestOpen = () => {
     } });
 };
 
-//# sourceURL=chest.js?v=4.27
+//# sourceURL=chest.js?v=4.28
 </script>
-  <script data-source="friends.js?v=4.27">// Друзья в игре (Досуг → Друзья): заявки, список с онлайном, подарки раз в день каждому другу,
+  <script data-source="friends.js?v=4.28">// Друзья в игре (Досуг → Друзья): заявки, список с онлайном, подарки раз в день каждому другу,
 // «в гости» — посмотреть, как живёт друг, вызов на бой или КНБ. Сервер — bot/friends.py.
 // Кто пришёл по твоему коду, сразу становится другом. За друзей и подарки — достижения и аватарка.
 
@@ -14848,9 +14854,9 @@ AVATARS.push({ id: 'buddy', face: '🫂', name: 'Свой в доску', how: '
 const _sectionAlertsFr = sectionAlerts;
 sectionAlerts = () => { const a = _sectionAlertsFr(); if (a.fun) a.fun.friends = FR.requests > 0 || !!(FR.data && FR.data.friends.some((f) => !f.sent)); return a; };
 
-//# sourceURL=friends.js?v=4.27
+//# sourceURL=friends.js?v=4.28
 </script>
-  <script data-source="cosmetics.js?v=4.27">// Донат 2.3: «Набор новичка» (49 ⭐, только первые 3 дня) и косметика за звёзды:
+  <script data-source="cosmetics.js?v=4.28">// Донат 2.3: «Набор новичка» (49 ⭐, только первые 3 дня) и косметика за звёзды:
 // эффекты тапа, рамки и аватарки. Всё появляется в окне доната (плашка крышек наверху).
 
 const STARTER_DAYS = 3;
@@ -14965,9 +14971,9 @@ ACTIONS.cosmUse = (id) => {
   donateRefresh();
 };
 
-//# sourceURL=cosmetics.js?v=4.27
+//# sourceURL=cosmetics.js?v=4.28
 </script>
-  <script data-source="gangs.js?v=4.27">// Банды 2.0 (Досуг → Банда): вступить можно с 1 уровня, режим «открытая» или «по приглашению»,
+  <script data-source="gangs.js?v=4.28">// Банды 2.0 (Досуг → Банда): вступить можно с 1 уровня, режим «открытая» или «по приглашению»,
 // ссылка-приглашение через бота, отдельный топ банд (Задания → Топ → Банды) и игры:
 // между бандами — недельная война за очки и «Стенка на стенку», внутри — задание дня и «Котёл».
 // Сервер — bot/gangs.py (+ старые маршруты банд в bot/social.py).
@@ -15253,9 +15259,9 @@ ACTIONS.clanCreate = async () => {
 });
 HOOKS.init.push(() => setTimeout(() => gangLoad(true), 5000));
 
-//# sourceURL=gangs.js?v=4.27
+//# sourceURL=gangs.js?v=4.28
 </script>
-  <script data-source="stability.js?v=4.27">// Надёжность мини-игр и мелкие улучшения интерфейса.
+  <script data-source="stability.js?v=4.28">// Надёжность мини-игр и мелкие улучшения интерфейса.
 //
 // Почему мини-игры зависали: пока идёт игра, другое окно (подарок друга, «Пока тебя не было…»,
 // награда за приглашение, рассылка и т.п.) могло открыться поверх и стереть поле игры — таймер
@@ -15358,9 +15364,9 @@ EXTRA_TABS.shop.clothes = function clothesWithTotals() {
   return `<div class="info-card">${parts.join(' · ')}<br><small>Бонусы работают только у <b>надетых</b> вещей. Настроение, голод и болезни умножают тап.</small></div>` + html;
 };
 
-//# sourceURL=stability.js?v=4.27
+//# sourceURL=stability.js?v=4.28
 </script>
-  <script data-source="service.js?v=4.27">// Сервис 2.5: настройки по разделам, баг-репорт и «предложить изменение» (приходят админу в бота),
+  <script data-source="service.js?v=4.28">// Сервис 2.5: настройки по разделам, баг-репорт и «предложить изменение» (приходят админу в бота),
 // всплывающие рассылки от админа, напоминания бота о счетах за жильё, автоплатёж за звёзды,
 // «Позвать в банду» из профиля игрока и списка друзей.
 
@@ -15595,9 +15601,9 @@ ACTIONS.gangInvitePlayer = async (pid) => {
   } catch (e) { toast(refErrorText(e), 'bad'); }
 };
 
-//# sourceURL=service.js?v=4.27
+//# sourceURL=service.js?v=4.28
 </script>
-  <script data-source="guide.js?v=4.27">// Подсказки «куда нажать» без невидимых целей.
+  <script data-source="guide.js?v=4.28">// Подсказки «куда нажать» без невидимых целей.
 // Переход по заданию/главе (➜) раньше подсвечивал элемент, которого на низком уровне ещё нет
 // (работа, драки, казино закрыты) — игрок видел пустой экран. Теперь берётся первый видимый
 // подходящий элемент, а если раздел закрыт — подсвечивается его карточка с требованиями.
@@ -15676,9 +15682,9 @@ ACTIONS.tutGoto = (screen) => {
   setTimeout(tutRender, 200);
 };
 
-//# sourceURL=guide.js?v=4.27
+//# sourceURL=guide.js?v=4.28
 </script>
-  <script data-source="donate2.js?v=4.27">// Премиальное окно доната (по нажатию на крышки наверху). Те же товары и действия, что раньше,
+  <script data-source="donate2.js?v=4.28">// Премиальное окно доната (по нажатию на крышки наверху). Те же товары и действия, что раньше,
 // но витрина: золотая шапка с балансом, крупные цены в звёздах, наборы крышек плиткой,
 // VIP и пропуск — отдельными карточками, траты крышек свёрнуты ниже.
 
@@ -15743,9 +15749,9 @@ donateRefresh = (function (orig) {
   };
 })(donateRefresh);
 
-//# sourceURL=donate2.js?v=4.27
+//# sourceURL=donate2.js?v=4.28
 </script>
-  <script data-source="career2.js?v=4.27">// Понятная карьера: наверху вкладки «Работа» — «Карьерная лестница».
+  <script data-source="career2.js?v=4.28">// Понятная карьера: наверху вкладки «Работа» — «Карьерная лестница».
 // Видно текущую должность, сколько смен до аттестации и большая кнопка «Сдать аттестацию»,
 // а ниже — какая работа следующая и чего для неё не хватает (с ✅/❌ по каждому пункту).
 
@@ -15806,9 +15812,9 @@ EXTRA_TABS.life.work = () => {
   return careerLadderHTML() + html;
 };
 
-//# sourceURL=career2.js?v=4.27
+//# sourceURL=career2.js?v=4.28
 </script>
-  <script data-source="pets3.js?v=4.27">// Питомцы 3.0: новые виды (енот, коза, ворон), премиум-питомцы за звёзды (тигр, единорог, дракон)
+  <script data-source="pets3.js?v=4.28">// Питомцы 3.0: новые виды (енот, коза, ворон), премиум-питомцы за звёзды (тигр, единорог, дракон)
 // с сильными бонусами, и у каждого питомца свой раздел: его корм (3 вида), здоровье, дружба, занятия.
 
 const emojiPet = (e) => `<svg viewBox="0 0 80 70"><text x="40" y="60" font-size="54" text-anchor="middle">${e}</text></svg>`;
@@ -15976,9 +15982,9 @@ ACTIONS.petSel = (id) => { S.petSel = id; renderCurrent(false); };
 const _petPick3 = ACTIONS.petPick;
 ACTIONS.petPick = (id) => { _petPick3(id); S.petSel = id; };
 
-//# sourceURL=pets3.js?v=4.27
+//# sourceURL=pets3.js?v=4.28
 </script>
-  <script data-source="pharma.js?v=4.27">// Фарма в спортзале: быстрее качаться, но с последствиями.
+  <script data-source="pharma.js?v=4.28">// Фарма в спортзале: быстрее качаться, но с последствиями.
 // Креатин — мягко и почти безопасно. Анаболики «Метан» — прирост ×2, но копится «нагрузка на печень»:
 // каждая тренировка на них — шанс уехать в больницу с «Отказом печени», который лечится только курсом
 // у гепатолога (3 капельницы с перерывами).
@@ -16085,9 +16091,9 @@ ACTIONS.liverVisit = () => {
   } else toast(`💧 Капельница ${c.visits}/${LIVER_COURSE}. Следующая через 3 минуты`, 'good');
 };
 
-//# sourceURL=pharma.js?v=4.27
+//# sourceURL=pharma.js?v=4.28
 </script>
-  <script data-source="clarity.js?v=4.27">// Понятность 2.6: правила баллов топа таблицей, гайд «Как качать уровень», классы одежды,
+  <script data-source="clarity.js?v=4.28">// Понятность 2.6: правила баллов топа таблицей, гайд «Как качать уровень», классы одежды,
 // простая бизнес-математика, уникальное имя бомжа (= имя профиля) и окно «Пригласить друга».
 
 // =====================================================================
@@ -16301,9 +16307,9 @@ ACTIONS.refCopyLink = async () => {
   catch (e) { toast(refLink()); }
 };
 
-//# sourceURL=clarity.js?v=4.27
+//# sourceURL=clarity.js?v=4.28
 </script>
-  <script data-source="minigames2.js?v=4.27">// Мини-игры 2.6: понятнее и разнообразнее.
+  <script data-source="minigames2.js?v=4.28">// Мини-игры 2.6: понятнее и разнообразнее.
 // • Перед первой игрой каждого вида — карточка «Как играть»: цель, что нажимать, сколько очков = 100%.
 // • Три новых вида: «Память» (найди пары), «Сортировка» (разложи по двум корзинам), «Повтори» (запомни
 //   последовательность). Почтальон, менеджер и директор теперь играют в них — у работ меньше одинаковых игр.
@@ -16442,9 +16448,9 @@ runGame = (function (orig) {
 let MG_PENDING = null;
 ACTIONS.mgRulesGo = () => { const o = MG_PENDING; MG_PENDING = null; if (o) runGame(o); };
 
-//# sourceURL=minigames2.js?v=4.27
+//# sourceURL=minigames2.js?v=4.28
 </script>
-  <script data-source="pets4.js?v=4.27">// Пустая лежанка на главном экране (намёк, что можно завести питомца) и свои имена питомцам.
+  <script data-source="pets4.js?v=4.28">// Пустая лежанка на главном экране (намёк, что можно завести питомца) и свои имена питомцам.
 
 // ---------- Лежанка ----------
 const PET_BED = `<svg viewBox="0 0 80 70"><ellipse cx="40" cy="58" rx="34" ry="9" fill="#5A3A22"/><ellipse cx="40" cy="54" rx="31" ry="10" fill="#8E5A2B"/>
@@ -16521,9 +16527,9 @@ ACTIONS.petBuy = (function (orig) {
   };
 })(ACTIONS.petBuy);
 
-//# sourceURL=pets4.js?v=4.27
+//# sourceURL=pets4.js?v=4.28
 </script>
-  <script data-source="casinostats.js?v=4.27">// Статистика казино: сколько партий в каждой игре, сколько поставлено и выиграно, итог (плюс или минус),
+  <script data-source="casinostats.js?v=4.28">// Статистика казино: сколько партий в каждой игре, сколько поставлено и выиграно, итог (плюс или минус),
 // самый крупный выигрыш. Плюс достижения за каждую игру, за крупный выигрыш и за проигранную сумму.
 
 const CASINO_KINDS = [['slots', '🎰', 'Слоты'], ['bj', '🃏', 'Блекджек'], ['roul', '🎡', 'Рулетка'], ['dice', '🎲', 'Кости'], ['crash', '🚀', 'Ракета']];
@@ -16598,9 +16604,9 @@ ACHS.push(
   { id: 'cs_all', name: 'Завсегдатай', emoji: '🎩', fn: () => CASINO_KINDS.filter(([k]) => (cst().games[k] || 0) >= 10).length, goals: [3, 5], unit: 'игр, сыгранных по 10+ раз' },
 );
 
-//# sourceURL=casinostats.js?v=4.27
+//# sourceURL=casinostats.js?v=4.28
 </script>
-  <script data-source="dates2.js?v=4.27">// Свидания 2.8: у каждого свидания своя мини-игра. Заодно починены каток и караоке —
+  <script data-source="dates2.js?v=4.28">// Свидания 2.8: у каждого свидания своя мини-игра. Заодно починены каток и караоке —
 // они вызывали несуществующую игру и зависали.
 // Кафе — разговор, кино — угадай фильм по эмодзи, ресторан — разлей вино, музей — викторина об искусстве,
 // каток — удержи равновесие, караоке — ноты в ритм. Остальные (прогулка, тир, шашлык, боулинг, яхта) уже свои.
@@ -16791,9 +16797,9 @@ openDateMenu = (function (orig) {
   };
 })(openDateMenu);
 
-//# sourceURL=dates2.js?v=4.27
+//# sourceURL=dates2.js?v=4.28
 </script>
-  <script data-source="girls2.js?v=4.27">// Девушки 2.8: статус девушки. Чем круче статус, тем дороже подарки она ждёт (дешёвые её не впечатляют),
+  <script data-source="girls2.js?v=4.28">// Девушки 2.8: статус девушки. Чем круче статус, тем дороже подарки она ждёт (дешёвые её не впечатляют),
 // тем чаще просит что-то конкретное — и тем больше привилегий даёт, пока она с тобой.
 // Плюс: искушения при девушке/жене стали заметно реже.
 
@@ -16947,9 +16953,9 @@ HOOKS.load.push(() => { if (S.girlfriend && !S.temptFix28) { S.temptFix28 = true
 
 ACHS.push({ id: 'gf_wish', name: 'Золотая рыбка', emoji: '💝', fn: () => S.wishesDone || 0, goals: [1, 5, 20, 50], unit: 'исполненных желаний девушки' });
 
-//# sourceURL=girls2.js?v=4.27
+//# sourceURL=girls2.js?v=4.28
 </script>
-  <script data-source="social2.js?v=4.27">// Социальное 2.8: карточка любой банды из топа, премиальный чат, плашка «Поддержать проект»
+  <script data-source="social2.js?v=4.28">// Социальное 2.8: карточка любой банды из топа, премиальный чат, плашка «Поддержать проект»
 // (1 звезда или своя сумма) и раздел «Профиль» в настройках со сменой уникального имени.
 
 // =====================================================================
@@ -17251,9 +17257,9 @@ ACTIONS.nameSave = (function (orig) {
 })(ACTIONS.nameSave);
 ACTIONS.nameConfirm = () => _nameSaveOrig('0'); // исходное сохранение читает имя из скрытого поля #nameInp
 
-//# sourceURL=social2.js?v=4.27
+//# sourceURL=social2.js?v=4.28
 </script>
-  <script data-source="joy.js?v=4.27">// Радость 2.8: понятные ступени и зачем её поднимать.
+  <script data-source="joy.js?v=4.28">// Радость 2.8: понятные ступени и зачем её поднимать.
 // Радость тратится на дела (смена, тренировка, криминал) и тает сама; чем она выше, тем больше опыта,
 // денег и крит-шанс. Довёл до 100 — «Окрылён» на 20 минут и раз в сутки сундучок счастья.
 
@@ -17322,9 +17328,9 @@ renderFun = function () {
 
 ACHS.push({ id: 'joy_top', name: 'Счастливчик', emoji: '🤩', fn: () => S.joyPeaks || 0, goals: [1, 10, 50, 200], unit: 'раз довёл радость до 100' });
 
-//# sourceURL=joy.js?v=4.27
+//# sourceURL=joy.js?v=4.28
 </script>
-  <script data-source="fights2.js?v=4.27">// Драки 2.8: настоящий опыт — в онлайн-боях с живыми игроками. Бои с ботами (обычные и сложные)
+  <script data-source="fights2.js?v=4.28">// Драки 2.8: настоящий опыт — в онлайн-боях с живыми игроками. Бои с ботами (обычные и сложные)
 // теперь тренировки: опыта в 5 раз меньше, зато каждая победа добавляет +1 к форме. Сюжетные бои не трогаем.
 
 const TRAIN_XP = 0.2;
@@ -17373,9 +17379,9 @@ const _fightsTabTrain = EXTRA_TABS.fun.fights;
 EXTRA_TABS.fun.fights = () => `<div class="info-card train-info">🥋 <b>Бои с ботами — это тренировки:</b> опыта ×${TRAIN_XP}, но победа даёт +1 к форме.
     <br>🟢 <b>Онлайн-победа над игроком:</b> +${onlineWinXp()} опыта${S.onlineStreak ? `, серия ${S.onlineStreak} 🔥` : ''} — каждая победа подряд добавляет ещё.</div>` + _fightsTabTrain();
 
-//# sourceURL=fights2.js?v=4.27
+//# sourceURL=fights2.js?v=4.28
 </script>
-  <script data-source="underworld.js?v=4.27">// «Скользкая дорожка»: честный Валера может по сюжету свернуть в криминальный мир.
+  <script data-source="underworld.js?v=4.28">// «Скользкая дорожка»: честный Валера может по сюжету свернуть в криминальный мир.
 // Шнырь появляется в трудную минуту (пусто в кармане, грусть, проигрыш, долги) и втягивает шаг за шагом:
 // подержать сумку → постоять на шухере → первое дело. На каждом шаге можно отказаться.
 // Свернул — открывается вкладка «Криминал», но честная прибавка к работе пропадает. Завязать можно за откуп.
@@ -17502,9 +17508,9 @@ ACHS.push(
   { id: 'uw_fall', name: 'Не та дорожка', emoji: '🕶️', fn: () => counter('uwFall'), goals: [1], unit: 'раз свернул в криминал с честного пути' },
 );
 
-//# sourceURL=underworld.js?v=4.27
+//# sourceURL=underworld.js?v=4.28
 </script>
-  <script data-source="timers.js?v=4.27">// Защита таймеров. Перезарядки и дела хранятся как «время окончания» по часам устройства.
+  <script data-source="timers.js?v=4.28">// Защита таймеров. Перезарядки и дела хранятся как «время окончания» по часам устройства.
 // Если сохранение пришло с телефона/ПК с другими часами или часы на устройстве перевели,
 // таймер мог «улететь» — например, мусорка через 290 минут вместо 5.
 // Теперь игра помнит длительность каждой перезарядки и обрезает всё, что длиннее неё.
@@ -17555,9 +17561,9 @@ HOOKS.tick.push(() => {
   fixTimers();
 });
 
-//# sourceURL=timers.js?v=4.27
+//# sourceURL=timers.js?v=4.28
 </script>
-  <script data-source="minigames3.js?v=4.27">// Мини-игры 2.9: у каждого занятия — своя игра. Раньше «тапай по целям», «полоска с меткой» и «полосы»
+  <script data-source="minigames3.js?v=4.28">// Мини-игры 2.9: у каждого занятия — своя игра. Раньше «тапай по целям», «полоска с меткой» и «полосы»
 // повторялись у десятка работ, свиданий и семейных дел. Теперь у них собственные механики:
 // свайп-уборка, рентген на конвейере, опознание, руль, рецепт по шагам, фото на яхте, удержание в зоне,
 // башня из покупок, поиск предмета, нарезка, боулинг, ловля корзиной, прятки, тир, карманник, погоня,
@@ -18379,7 +18385,7 @@ startShiftGame = (function (orig) {
     const base = JOB_GAMES[j.id];
     if (!base || !base.engine) { orig(j, onFinish, titleExtra); return; }
     const cfg = base.type === 'lanes' ? { ...base, player: roadPlayer(j) } : base;
-    runGame({ title: `${j.emoji} ${cfg.title}${titleExtra}`, hint: cfg.hint, duration: 30, setup: (mg) => cfg.engine(mg, cfg), finish: onFinish });
+    runGame({ title: `${j.emoji} ${cfg.title}${titleExtra}`, hint: cfg.hint, duration: cfg.duration === undefined ? 30 : cfg.duration, setup: (mg) => cfg.engine(mg, cfg), finish: onFinish });
   };
 })(startShiftGame);
 
@@ -18483,9 +18489,9 @@ startLessonGame = (function (orig) {
   };
 })(startLessonGame);
 
-//# sourceURL=minigames3.js?v=4.27
+//# sourceURL=minigames3.js?v=4.28
 </script>
-  <script data-source="city.js?v=4.27">// Города. Игрок начинает в Засранске. Когда пройдена вся история Засранска, налоговая объявляет Валеру
+  <script data-source="city.js?v=4.28">// Города. Игрок начинает в Засранске. Когда пройдена вся история Засранска, налоговая объявляет Валеру
 // в розыск — он бежит в Москвабад: с собой 10% рублей (крышки не считаются), жена и дети — если согласится
 // их взять (отказ — развод и алименты 20% с любого дохода 7 игровых дней). Всё нажитое остаётся.
 // В Москвабаде новое всё: работы, жильё, учёба, девушки, развлечения, питомцы, события и свой сюжет.
@@ -18920,9 +18926,9 @@ myStats = (function (orig) {
 
 // Город сохраняется в prestigeProfile и применяется сразу после подтверждённого сброса.
 
-//# sourceURL=city.js?v=4.27
+//# sourceURL=city.js?v=4.28
 </script>
-  <script data-source="fleet.js?v=4.27">// Автопарк: старый транспорт больше не сдаётся автоматически. После покупки нового игрок решает —
+  <script data-source="fleet.js?v=4.28">// Автопарк: старый транспорт больше не сдаётся автоматически. После покупки нового игрок решает —
 // продать прошлый за 25% цены или оставить себе. Оставленные стоят в автопарке: на любой можно пересесть
 // или продать позже. Ездишь (и рискуешь угоном без гаража) только на том, на котором сидишь сейчас.
 
@@ -19028,9 +19034,9 @@ if (typeof doMove === 'function') {
   doMove = (function (orig) { return function (family) { S.fleet = []; S.fleetBroken = {}; orig(family); }; })(doMove);
 }
 
-//# sourceURL=fleet.js?v=4.27
+//# sourceURL=fleet.js?v=4.28
 </script>
-  <script data-source="rate.js?v=4.27">// Общий курс бутылок. Формула прежняя (две синусоиды от времени), но время берём с сервера:
+  <script data-source="rate.js?v=4.28">// Общий курс бутылок. Формула прежняя (две синусоиды от времени), но время берём с сервера:
 // у кого на телефоне сбиты часы, курс больше не отличается — у всех игроков он одинаковый.
 // В настройках можно включить уведомление от бота, когда курс на пике (по умолчанию выключено).
 
@@ -19100,9 +19106,9 @@ notifySync = async function () {
   try { await apiPost('notify/state', { enabled: S.settings.remind !== false, rate: !!S.settings.rateNotify, plan: notifyPlan() }); } catch (e) { /* не страшно */ }
 };
 
-//# sourceURL=rate.js?v=4.27
+//# sourceURL=rate.js?v=4.28
 </script>
-  <script data-source="nudges.js?v=4.27">// 2.9: просьба поддержать проект раз в 3 часа (можно отключить навсегда), пробный VIP на 2 дня
+  <script data-source="nudges.js?v=4.28">// 2.9: просьба поддержать проект раз в 3 часа (можно отключить навсегда), пробный VIP на 2 дня
 // за вход по коду друга и потом VIP со скидкой 30%, долги по счетам на главном экране,
 // подсказки, где искать редкие и коллекционные предметы.
 
@@ -19292,9 +19298,9 @@ function collNear() {
   return null;
 }
 
-//# sourceURL=nudges.js?v=4.27
+//# sourceURL=nudges.js?v=4.28
 </script>
-  <script data-source="sidequests.js?v=4.27">// Побочные поручения (Задания → Поручения): необязательные квесты от корешей, банды и друзей.
+  <script data-source="sidequests.js?v=4.28">// Побочные поручения (Задания → Поручения): необязательные квесты от корешей, банды и друзей.
 // Кореша свои в каждом городе. Одновременно — до 3 поручений. Банда и друзья дают повторяемые
 // поручения (раз в несколько часов). Прогресс считается от момента, когда взял поручение.
 
@@ -19481,9 +19487,9 @@ if (typeof doMove === 'function') doMove = (function (orig) {
 })(doMove);
 ACHS.push({ id: 'side', name: 'Свой человек', emoji: '🤝', key: 'sideDone', goals: [5, 25, 100, 300, 1000], unit: 'поручений' });
 
-//# sourceURL=sidequests.js?v=4.27
+//# sourceURL=sidequests.js?v=4.28
 </script>
-  <script data-source="msk.js?v=4.27">// Москвабад как новая глава игры (3.0): свои сцены жилья, животные, еда, одежда, транспорт, бизнесы,
+  <script data-source="msk.js?v=4.28">// Москвабад как новая глава игры (3.0): свои сцены жилья, животные, еда, одежда, транспорт, бизнесы,
 // мини-игры на работе и в учёбе, музыка и звуки. Всё дороже, чем в Засранске: игрок приезжает с деньгами.
 // Устроено как city.js: у таблиц меняются названия, картинки и цены, а id и механика остаются прежними.
 
@@ -19700,9 +19706,9 @@ ACHS.push(
   { id: 'msk_home', name: 'Пентхаус', emoji: '🌃', fn: () => (city() === 'msk' ? S.ownedHousing || 0 : 0), goals: [2, 4, 6], unit: 'ступеней жилья в Москвабаде' },
 );
 
-//# sourceURL=msk.js?v=4.27
+//# sourceURL=msk.js?v=4.28
 </script>
-  <script data-source="msk_story.js?v=4.27">// Сюжет Москвабада 2.0 (3.5): больше истории, та же сложность.
+  <script data-source="msk_story.js?v=4.28">// Сюжет Москвабада 2.0 (3.5): больше истории, та же сложность.
 // 1) Сцены-диалоги: когда открывается глава, герои говорят с Валерой (несколько реплик и иногда выбор —
 //    он влияет на настроение и мелкие бонусы, но не на сложность). Сцену можно пролистать.
 // 2) Новые лёгкие главы между старыми: метро, письмо Михалыча, «кто-то следит» и по одной на путь.
@@ -19847,9 +19853,9 @@ Object.assign(STORY_SCENES, {
     ['📱', 'Незнакомый номер', 'Бззз… Звонок с неизвестного. Валера сбрасывает. Через минуту — снова.'] ] },
 });
 
-//# sourceURL=msk_story.js?v=4.27
+//# sourceURL=msk_story.js?v=4.28
 </script>
-  <script data-source="playtime.js?v=4.27">// Статистика времени в игре (3.0): всего, сегодня, сессии, по городам. Считается только время,
+  <script data-source="playtime.js?v=4.28">// Статистика времени в игре (3.0): всего, сегодня, сессии, по городам. Считается только время,
 // когда игра открыта на экране (свёрнутая не считается). Видно в профиле — тап по аватарке.
 
 const PLAY_TICK_MAX = 5000; // больше 5 секунд между тиками — значит, игра «спала», это время не считаем
@@ -19919,9 +19925,9 @@ openProfile = (function (orig) {
 
 ACHS.push({ id: 'playtime', name: 'Завсегдатай', emoji: '⏱️', fn: () => Math.floor(playState().ms / 3600000), goals: [1, 10, 50, 200, 1000], unit: 'часов в игре' });
 
-//# sourceURL=playtime.js?v=4.27
+//# sourceURL=playtime.js?v=4.28
 </script>
-  <script data-source="casino2.js?v=4.27">// Казино 3.0: своя сумма ставки во всех играх, общая «Ракета» для всех игроков (сервер bot/crash.py)
+  <script data-source="casino2.js?v=4.28">// Казино 3.0: своя сумма ставки во всех играх, общая «Ракета» для всех игроков (сервер bot/crash.py)
 // с автовыводом на заданном иксе, кейсы с вещами разной редкости и «Барахолка», где их продают.
 
 // =====================================================================
@@ -20417,9 +20423,9 @@ CASINO_GAMES.push({ act: 'contracts', cls: 'contracts', emoji: '📝', name: 'К
 Object.assign(ACTIONS, { contracts: () => openContracts(), contractSign: () => contractSign(), contractRoll: () => contractRoll() });
 
 
-//# sourceURL=casino2.js?v=4.27
+//# sourceURL=casino2.js?v=4.28
 </script>
-  <script data-source="item-models.js?v=4.27">// Procedural solid meshes. No emoji planes: each family has its own silhouette and details.
+  <script data-source="item-models.js?v=4.28">// Procedural solid meshes. No emoji planes: each family has its own silhouette and details.
 const ItemModels = (() => {
   function kind(it) {
     const n = String(it.name || '').toLowerCase(), e = it.e || '';
@@ -20757,9 +20763,9 @@ const ItemModels = (() => {
   return { kind, build, dispose };
 })();
 
-//# sourceURL=item-models.js?v=4.27
+//# sourceURL=item-models.js?v=4.28
 </script>
-  <script data-source="item-viewer.js?v=4.27">// Lazy-loaded renderer; viewing a mesh never changes the inventory item or its price.
+  <script data-source="item-viewer.js?v=4.28">// Lazy-loaded renderer; viewing a mesh never changes the inventory item or its price.
 const ItemViewer = (() => {
   let loading = null;
   function library() {
@@ -20920,9 +20926,9 @@ const ItemViewer = (() => {
   return { mount, library };
 })();
 
-//# sourceURL=item-viewer.js?v=4.27
+//# sourceURL=item-viewer.js?v=4.28
 </script>
-  <script data-source="cases3.js?v=4.27">// Кейсы 4.1: в каждом кейсе втрое больше ширпотреба в разных ценовых сегментах (от копеечного до «почти ходового»),
+  <script data-source="cases3.js?v=4.28">// Кейсы 4.1: в каждом кейсе втрое больше ширпотреба в разных ценовых сегментах (от копеечного до «почти ходового»),
 // шесть новых кейсов от 300 ₽ до 3 млн, у каждой вещи тип (одежда, техника, еда…) и износ, как float в CS.
 // Осмотр: любую вещь можно покрутить пальцем в 3D и рассмотреть потёртости.
 
@@ -21133,9 +21139,9 @@ openCases = (function (orig) {
   };
 })(openCases);
 
-//# sourceURL=cases3.js?v=4.27
+//# sourceURL=cases3.js?v=4.28
 </script>
-  <script data-source="contracts2.js?v=4.27">// Контракты 4.4 (вместо 4.3): честные правила как в CS.
+  <script data-source="contracts2.js?v=4.28">// Контракты 4.4 (вместо 4.3): честные правила как в CS.
 // • Кладёшь 3–5 вещей ОДНОЙ редкости (кроме легенд) → получаешь 1 вещь СЛЕДУЮЩЕЙ редкости, гарантированно.
 // • Вещь берётся из тех же кейсов, что и вложенные: чем больше вещей из кейса, тем выше его шанс.
 // • 4-я и 5-я вещь — «надбавка»: каждая даёт +12% шанс прыгнуть сразу через редкость.
@@ -21421,9 +21427,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=contracts2.js?v=4.27
+//# sourceURL=contracts2.js?v=4.28
 </script>
-  <script data-source="mex.js?v=4.27">// Мексика — третий город (4.0). Валера попался на телефонных мошенников: его заставили обмануть бабушку,
+  <script data-source="mex.js?v=4.28">// Мексика — третий город (4.0). Валера попался на телефонных мошенников: его заставили обмануть бабушку,
 // и, чтобы не сесть, он на теплоходе уплыл в Мексику. Рубли в спешке менял у барыги по 300 за доллар
 // (честный курс — 80). В Мексике всё в долларах, всё в мексиканском стиле: жильё, работы, еда, одежда,
 // транспорт, животные, девушки, музыка и сюжет с амиго.
@@ -21525,18 +21531,18 @@ const MEX_HOUSING = [
 ];
 const MEX_EDU = [
   { name: 'Нет мексиканских бумаг' },
-  { name: 'Курсы испанского «¡Hola, amigo!»', emoji: '🗣️', price: usd(10), desc: 'Научат говорить «пор фавор» и «грасиас»' },
+  { name: 'Как устроен Веракрус', emoji: '🗣️', price: usd(10), desc: 'Рынок, адреса и заказы: всё по-русски и по картинкам' },
   { name: 'Колледж туризма', emoji: '🏖️', price: usd(120), desc: 'Как улыбаться гринго 12 часов подряд' },
   { name: 'Школа текильеро', emoji: '🥃', price: usd(600), desc: 'Голубая агава, соль и лайм — по науке' },
   { name: 'Университет Гвадалахары', emoji: '🏛️', price: usd(3000), desc: 'Диплом, который уважают от Тихуаны до Канкуна' },
-  { name: 'MBA в Мехико', emoji: '🧠', price: usd(15000), desc: '«Синергия», но на испанском' },
+  { name: 'MBA в Мехико', emoji: '🧠', price: usd(15000), desc: 'Сравнивай прибыль сделок. Все условия на русском' },
 ];
 const MEX_JOBS = {
   flyers: { name: 'Зазывала в кантину', emoji: '📣' }, loader: { name: 'Сборщик агавы', emoji: '🌵' }, courier: { name: 'Курьер на осле', emoji: '🫏' },
   guard: { name: 'Спасатель на пляже', emoji: '🛟' }, taxi: { name: 'Таксист на «Вочо»', emoji: '🚕' }, seller: { name: 'Продавец сомбреро', emoji: '👒' },
   manager: { name: 'Менеджер отеля', emoji: '🏨' }, director: { name: 'Директор курорта', emoji: '🌴' }, dvornik: { name: 'Уборщик пляжа', emoji: '🧹' },
   postman: { name: 'Почтальон на велосипеде', emoji: '📬' }, cook: { name: 'Тако-мастер', emoji: '🌮' }, police: { name: 'Полиция Канкуна', emoji: '👮' },
-  teacher: { name: 'Учитель русского для гринго', emoji: '🧑‍🏫' }, clerk: { name: 'Чиновник муниципалитета', emoji: '🏛️' }, deputy: { name: 'Депутат штата', emoji: '🎖️' },
+  teacher: { name: 'Ведущий мастерской на площади', emoji: '🧑‍🏫' }, clerk: { name: 'Чиновник муниципалитета', emoji: '🏛️' }, deputy: { name: 'Депутат штата', emoji: '🎖️' },
 };
 const MEX_PAY = 3;
 const MEX_LEISURE = {
@@ -21832,8 +21838,8 @@ const MEX_Q = [
     goals: [qv(() => S.ownedHousing || 0, 1, 'Построй шалаш из агавы'), qc('shift', 3, 'Отработай 3 смены')], reward: { money: usd(50), xp: 400 } },
   { id: 'x_amigo', who: '🧔🏽', name: 'Пепе', title: 'Дом друзей · Casa de Amigos', text: '¡Órale! Русо? Заходи в нашу «Casa de Amigos» — «Дом друзей»: тут гитара, тако и компания. Обживайся, compadre — приятель.',
     goals: [qv(() => S.ownedHousing || 0, 2, 'Поселись в «Casa de Amigos»'), qc('eat', 5, 'Пообедай 5 раз'), qc('events', 4, 'Переживи 4 мексиканских события')], reward: { money: usd(90), caps: 1, xp: 500 } },
-  { id: 'x_spanish', who: '👵🏽', name: 'Сеньора Лусия', title: 'Испанский для бомжа', text: 'Mijo, без испанского тебе здесь только сомбреро продавать. Учись — и мир откроется.',
-    goals: [qv(() => S.edu, 1, 'Окончи курсы «¡Hola, amigo!» — «Привет, друг!»'), mexClothesGoal('body','Верх'),mexClothesGoal('shoes','Обувь')], reward: { money: usd(150), caps: 1, xp: 600 } },
+  { id: 'x_spanish', who: '👵🏽', name: 'Сеньора Лусия', title: 'Освоиться в Веракрусе', text: 'Лусия поможет освоиться: собери заказ на рынке и найди нужный дом. Всё видно по картинкам и цифрам.',
+    goals: [qv(() => S.edu, 1, 'Окончи курс «Как устроен Веракрус»'), mexClothesGoal('body','Верх'),mexClothesGoal('shoes','Обувь')], reward: { money: usd(150), caps: 1, xp: 600 } },
   { id: 'x_luchador', who: '🤼', name: 'Эль Торо', title: 'Лучадор', text: 'Гринго, ты в моём районе. Здесь уважают только тех, кто выходит на ринг в маске. ¡Vamos!',
     goals: [qc('fightWin', 4, 'Выиграй 4 драки'), qv(() => Math.floor(S.form), 30, 'Форма 30+')],
     boss: { name: 'Эль Торо', style: 'brawler', eq: { hat: 'bandana', body: 'malinovy', shoes: 'boots' }, lvl: 0, form: 50, strength: 55, tier: 3, intro: '«¡Prepárate, gringo!»' },
@@ -21874,9 +21880,9 @@ Object.assign(STORY_SCENES, {
     choices: [{ label: '🎸 Сыграть Пепе русскую песню', run: () => { addMood(10); return 'Пепе прослезился: «¡Qué bonito!» +10 😊'; } },
       { label: '🌮 Угостить всех тако', run: () => { const m = takeMoney(0.02, usd(5)); addMood(6); S.karma = (S.karma || 0) + 1; return `Ты теперь любимец «Casa de Amigos». −${fmt(m)} ₽ +6 😊`; } }] },
   x_spanish: { lines: [
-    ['👵🏽', 'Сеньора Лусия', 'Mijo, ты говоришь по-испански как осёл Педро. Даже хуже — Педро хотя бы знает «sí».'],
-    ['🧳', 'Валера', 'Sí… sí, сеньора.'],
-    ['👵🏽', 'Сеньора Лусия', '¡Muy bien! Два слова — уже прогресс. Иди учись, а потом купи нормальную одежду — в пончо на собеседование не ходят.'] ] },
+    ['👵🏽', 'Сеньора Лусия', 'На рынке важнее внимательность: сверяй предмет и количество в заказе.'],
+    ['🧳', 'Валера', 'А словарь зубрить не придётся?'],
+    ['👵🏽', 'Сеньора Лусия', 'Нет, все условия на русском и с картинками. Потом найди нужный дом по номеру — и ты уже местный!'] ] },
   x_luchador: { lines: [
     ['🤼', 'Эль Торо', '¡Gringo! Ты в районе Эль Торо. Тут уважают только тех, кто выходит на ринг. В маске!'],
     ['🧳', 'Валера', 'Я дрался в Засранске. И в Москвабаде. Маска не нужна.'],
@@ -22049,9 +22055,9 @@ ACHS.push(
   { id: 'mex_home', name: 'Гасиенда', emoji: '🛖', fn: () => (city() === 'mex' ? S.ownedHousing || 0 : 0), goals: [2, 4, 6], unit: 'ступеней жилья в Мексике' },
 );
 
-//# sourceURL=mex.js?v=4.27
+//# sourceURL=mex.js?v=4.28
 </script>
-  <script data-source="mex2.js?v=4.27">// Мексика 4.1: все мини-игры — свои. 19 новых механик, которых нет ни в Засранске, ни в Москвабаде:
+  <script data-source="mex2.js?v=4.28">// Мексика 4.1: все мини-игры — свои. 19 новых механик, которых нет ни в Засранске, ни в Москвабаде:
 // комаль с тортильями, пиньята, лассо, сальса, сёрф, агава, сборка заказа на ленте, лотерия, глубоководная рыбалка,
 // лучадор, подкоп, торг, «одобрить/отказать» по правилам, маршрут по-испански, улица с номерами, слова, «правда/ложь»,
 // баланс и сейф. Работы, отдых, учёба, зал, свидания, дети, дела с ней, тюрьма и криминал в Мексике — на этих играх.
@@ -22409,8 +22415,8 @@ function mxLoteria(mg, cfg) {
     const left = board.filter((_, i) => !marked[i]);
     const c = left.length && Math.random() < (cfg.hit || 0.62) ? pick(left) : pick(LOTERIA);
     called = [c[1], ...called].slice(0, 2);
-    $('ltE').textContent = cfg.words ? '🎴' : c[0];
-    $('ltN').textContent = cfg.words ? `¡${c[1]}!${cfg.learn ? ' — ' + mxRu(c[1]) : ''}` : c[1];
+    $('ltE').textContent = c[0];
+    $('ltN').textContent = mxRu(c[1]);
     $('ltC').textContent = cfg.calls ? `${calls} карт` : '';
     sfx('chip');
     $('ltE').animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0)' }], { duration: 250 });
@@ -22666,14 +22672,14 @@ function mxCalle(mg, cfg) {
     $('clS').innerHTML = nums.map((n) => `<button class="mx-house" data-n="${n}"><span>${pick(HOUSES)}</span><b>${n}</b></button>`).join('');
     document.querySelectorAll('.mx-house').forEach((b) => mxBtn(b, () => tap(b)));
   };
-  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Улица ${ES_NUM[want]}</b>${cfg.learn || mg.score < (cfg.hintUntil || 4) ? ` <small>дом №${want}</small>` : ''}`; };
+  const ask = () => { want = pick(nums); $('clL').innerHTML = `${cfg.icon || '✉️'} <b>Доставь в дом №${want}</b> <small>Номер всегда виден на письме</small>`; };
   const tap = (b) => {
     if (!mgAlive(mg)) return;
     if (+b.dataset.n === want) {
       mxHit(b, cfg.okText || 'Доставлено!'); b.classList.add('ok');
       if (++done % 3 === 0) layout();
       ask();
-    } else mxMiss(mg, b, `Это ${ES_NUM[+b.dataset.n]}`, 1);
+    } else mxMiss(mg, b, `Это дом №${b.dataset.n}. Сверь номер на письме`, 1);
   };
   layout(); ask();
   mxEnd(mg, cfg.time);
@@ -22684,32 +22690,7 @@ const MX_ES = [['Hola', 'Привет'], ['Gracias', 'Спасибо'], ['Amigo'
   ['Gato', 'Кот'], ['Trabajo', 'Работа'], ['Comida', 'Еда'], ['Cerveza', 'Пиво'], ['Sol', 'Солнце'], ['Mañana', 'Завтра'], ['Fiesta', 'Праздник'], ['Amor', 'Любовь'],
   ['Calle', 'Улица'], ['Coche', 'Машина'], ['Libro', 'Книга'], ['Escuela', 'Школа'], ['Mercado', 'Рынок'], ['Iglesia', 'Церковь'], ['Policía', 'Полиция'], ['Cárcel', 'Тюрьма'],
   ['Pollo', 'Курица'], ['Queso', 'Сыр'], ['Hermano', 'Брат'], ['Abuela', 'Бабушка'], ['Noche', 'Ночь'], ['Luna', 'Луна']];
-function mxWords(mg, cfg) {
-  const pairs = cfg.pairs || MX_ES;
-  mxA(`<div class="mx-wfall"><div class="mx-word" id="wdW"></div></div><div class="mx-pads three" id="wdO"></div>`, cfg.bg || 'mx-school');
-  let cur = null, y = 0, fall = cfg.fall || 5;
-  const next = () => {
-    const pr = pick(pairs);
-    const [q, a] = cfg.reverse ? [pr[1], pr[0]] : pr;
-    const wrong = shuffle(pairs.filter((x) => x !== pr)).slice(0, 2).map((x) => (cfg.reverse ? x[0] : x[1]));
-    cur = { a }; y = 0;
-    $('wdW').textContent = cfg.learn ? `${q} — ${a}` : q;
-    $('wdO').innerHTML = shuffle([a, ...wrong]).map((o) => `<button class="mx-pad word">${o}</button>`).join('');
-    document.querySelectorAll('#wdO .mx-pad').forEach((b) => mxBtn(b, () => {
-      if (!mgAlive(mg)) return;
-      if (b.textContent === cur.a) { mxHit($('wdW'), 'Правильно!'); fall = Math.max(2.4, fall * 0.95); }
-      else mxMiss(mg, $('wdW'), cur.a, 1);
-      next();
-    }));
-  };
-  next();
-  mgLoop(mg, (dt) => {
-    y += dt / fall;
-    $('wdW').style.top = y * 78 + '%';
-    if (y >= 1) { mxMiss(mg, $('wdW'), cur.a); next(); }
-  });
-  mxEnd(mg, cfg.time);
-}
+function mxWords(mg, cfg={}) { return cityRequestGame(mg,{theme:cfg.reverse?'school':'mex'}); }
 
 // ---------- 17. Вопрос-карточка: смахни или выбери ответ ----------
 function mxQuiz(mg, cfg) {
@@ -22981,13 +22962,13 @@ MEX_RESKIN.push((on) => {
 });
 // Подписи игр свиданий
 if (typeof DATE_GAME_ICON !== 'undefined') {
-  const MX_ICON = { walk: '🧭 переулки', skate: '🏄 сёрф', cafe: '🗣️ испанский', amuse: '🪅 пиньята', cinema: '📺 сериал', picnic: '🐦 чайки', museum: '🎴 лотерия', karaoke: '🎺 мариачи', bowling: '🧲 подкова', rest: '🫓 тортильи', yacht: '🤿 снорклинг' };
+  const MX_ICON = { walk: '🧭 переулки', skate: '🏄 сёрф', cafe: '☕ заказ для двоих', amuse: '🪅 пиньята', cinema: '📺 сериал', picnic: '🐦 чайки', museum: '🎴 лотерия', karaoke: '🎺 мариачи', bowling: '🧲 подкова', rest: '🫓 тортильи', yacht: '🤿 снорклинг' };
   Object.entries(MX_ICON).forEach(([k, v]) => mxSwap(DATE_GAME_ICON, k, v));
 }
 
-//# sourceURL=mex2.js?v=4.27
+//# sourceURL=mex2.js?v=4.28
 </script>
-  <script data-source="mex_story.js?v=4.27">// Мексика 4.1: большая история про картель «Лос Алакранес» (Скорпионы) и бандитов Эль Койота.
+  <script data-source="mex_story.js?v=4.28">// Мексика 4.1: большая история про картель «Лос Алакранес» (Скорпионы) и бандитов Эль Койота.
 // Шесть новых глав вплетены в сюжет Мексики (их стало 16), у каждой — сцена с героями. Честный путь помогает
 // команданте Рамирес, тёмный — работает на Скорпионов и их криминальные дела (свои мини-игры, mex2.js).
 // Плюс поручения картеля и бандитов, их «заказы» на криминал и новые достижения.
@@ -23110,9 +23091,9 @@ ACHS.push(
 // Удачное дело в Мексике — отдельный счётчик для достижения
 HOOKS.track.push((key, n) => { if (key === 'crimeOk' && city() === 'mex') track('mexCrimeOk', n); });
 
-//# sourceURL=mex_story.js?v=4.27
+//# sourceURL=mex_story.js?v=4.28
 </script>
-  <script data-source="crime2.js?v=4.27">// Криминал 4.2: в каждом городе свои дела и своё развитие. Удачные дела дают криминальный опыт этого города,
+  <script data-source="crime2.js?v=4.28">// Криминал 4.2: в каждом городе свои дела и своё развитие. Удачные дела дают криминальный опыт этого города,
 // опыт поднимает ранг (у каждого города свои названия), ранг открывает дела посерьёзнее и даёт бонусы:
 // больше добычи и меньше риск. Переехал — в новом городе начинаешь с нуля: тебя там никто не знает.
 // Засранск: 3 старых дела + 2 новых. Москвабад: 6 своих дел. Мексика: 6 своих (mex2.js).
@@ -23247,9 +23228,9 @@ EXTRA_TABS.fun.crime = () => {
   return html;
 };
 
-//# sourceURL=crime2.js?v=4.27
+//# sourceURL=crime2.js?v=4.28
 </script>
-  <script data-source="wear.js?v=4.27">// Одежда 4.2: в каждом городе вся одежда и обувь своя — не только названия (msk.js, mex.js), но и рисунок:
+  <script data-source="wear.js?v=4.28">// Одежда 4.2: в каждом городе вся одежда и обувь своя — не только названия (msk.js, mex.js), но и рисунок:
 // бини и федора в Москвабаде, сомбреро и шляпа мариачи в Мексике; худи, пуховик-кокон, пончо, серапе;
 // лоферы, кроссовки «Аир», уарачи и ковбойские сапоги. Механика вещей (id, уровни, бонусы) прежняя.
 
@@ -23338,9 +23319,9 @@ cityArt(BODIES, 'kostum',
 MSK_RESKIN.push(() => { if (typeof renderedLook !== 'undefined') renderedLook = ''; });
 MEX_RESKIN.push(() => { if (typeof renderedLook !== 'undefined') renderedLook = ''; });
 
-//# sourceURL=wear.js?v=4.27
+//# sourceURL=wear.js?v=4.28
 </script>
-  <script data-source="city3.js?v=4.27">// Города 4.2:
+  <script data-source="city3.js?v=4.28">// Города 4.2:
 // • Новичок в новом городе: с собой не больше «стартовой суммы» города, остальное заморожено
 //   (налоговая в Москвабаде, таможня в Мексике) и возвращается по 7% за каждую главу сюжета этого города.
 //   Так развитие в каждом городе идёт постепенно, а накопленное не пропадает совсем.
@@ -23512,9 +23493,9 @@ mexCut = function (opts) {
   ];
 };
 
-//# sourceURL=city3.js?v=4.27
+//# sourceURL=city3.js?v=4.28
 </script>
-  <script data-source="ring.js?v=4.27">// «Подпольный ринг» 3.0 — глава тёмной дорожки без рейтинга драк. Вместо «наберись рейтинга 1500 и
+  <script data-source="ring.js?v=4.28">// «Подпольный ринг» 3.0 — глава тёмной дорожки без рейтинга драк. Вместо «наберись рейтинга 1500 и
 // выиграй 30 драк» — турнир-«лестница» из трёх бойцов ринга. Перед каждым боем выбираешь тактику
 // (она ослабляет соперника по-своему) и ставишь на себя — победа приносит выигрыш по коэффициенту.
 
@@ -23613,9 +23594,9 @@ Object.assign(ACTIONS, {
   ringFight: () => ringFight(),
 });
 
-//# sourceURL=ring.js?v=4.27
+//# sourceURL=ring.js?v=4.28
 </script>
-  <script data-source="admin2.js?v=4.27">// Админ-меню 3.0: вкладки вместо одной кучи кнопок, свои суммы, переход по главам и городам,
+  <script data-source="admin2.js?v=4.28">// Админ-меню 3.0: вкладки вместо одной кучи кнопок, свои суммы, переход по главам и городам,
 // запуск любой мини-игры для проверки, состояние сервера, копия сохранения. Видно только админу.
 
 let ADM_TAB = 'hero';
@@ -23838,9 +23819,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=admin2.js?v=4.27
+//# sourceURL=admin2.js?v=4.28
 </script>
-  <script data-source="visit.js?v=4.27">// «В гостях у друга» 3.0: его жильё и город, его Валера в его одежде, его питомец и кнопка «Подарить» прямо тут.
+  <script data-source="visit.js?v=4.28">// «В гостях у друга» 3.0: его жильё и город, его Валера в его одежде, его питомец и кнопка «Подарить» прямо тут.
 // Одежду и питомца игра отправляет вместе со статистикой топа (online.js → bot/online.py).
 
 myStats = (function (orig) {
@@ -23883,9 +23864,9 @@ ACTIONS.frVisit = async (pid) => {
   } catch (e) { toast(refErrorText(e), 'bad'); }
 };
 
-//# sourceURL=visit.js?v=4.27
+//# sourceURL=visit.js?v=4.28
 </script>
-  <script data-source="donate3.js?v=4.27">// Донат 4.1: золотые крышки — редкая донатная валюта с одним курсом.
+  <script data-source="donate3.js?v=4.28">// Донат 4.1: золотые крышки — редкая донатная валюта с одним курсом.
 // • 1 крышка = 2 ⭐ во всех наборах (без «чем больше, тем выгоднее»), выгода — в наборах, скидке дня и акциях.
 // • 1 крышка = ~30% лучшей смены игрока в рублях: курс считается от зарплаты в текущем городе и на текущей
 //   должности, поэтому крышка весит одинаково и в Засранске на старте, и в Мексике на вилле.
@@ -24311,9 +24292,9 @@ function dcSpin({ c, win, text }) {
 // Покупки: акция и бонусы — как раньше (promo.js), ключи кейсов и наборы — через PREM_GIVE
 HOOKS.load.push(() => { if (!S.cosm) S.cosm = []; if (!S.dkeys) S.dkeys = {}; });
 
-//# sourceURL=donate3.js?v=4.27
+//# sourceURL=donate3.js?v=4.28
 </script>
-  <script data-source="donate4.js?v=4.27">// Донат 4.5: любой набор, VIP, пропуск и набор новичка можно открыть и посмотреть, что внутри:
+  <script data-source="donate4.js?v=4.28">// Донат 4.5: любой набор, VIP, пропуск и набор новичка можно открыть и посмотреть, что внутри:
 // каждая вещь с картинкой и пояснением, сколько стоило бы по отдельности, сколько экономишь, и кнопка покупки.
 
 function dnLook(id) {
@@ -24400,9 +24381,9 @@ dnSetsTab = (function (orig) {
 })(dnSetsTab);
 starterHTML = (function (orig) { return function () { const h = orig(); return h ? h.replace('<b>Набор новичка</b>', '<b>Набор новичка</b> <button class="dni-link" data-act="dnInfo" data-id="starter">что внутри ›</button>') : h; }; })(starterHTML);
 
-//# sourceURL=donate4.js?v=4.27
+//# sourceURL=donate4.js?v=4.28
 </script>
-  <script data-source="fight3b.js?v=4.27">// Бой 2.0 и турнир 2.0 (3.2) — часть, которая должна идти после balance.js, arena.js и прочих.
+  <script data-source="fight3b.js?v=4.28">// Бой 2.0 и турнир 2.0 (3.2) — часть, которая должна идти после balance.js, arena.js и прочих.
 // 1) Соперники больше не копируют твои силу и форму: их сила зависит от твоего рейтинга. Подкачался в зале —
 //    побеждаешь чаще, рейтинг растёт, соперники крепчают. Сложные боты — с фиксированной силой: их можно «перерасти».
 // 2) В спортзале видно, что каждая тренировка даёт в бою.
@@ -24590,9 +24571,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=fight3b.js?v=4.27
+//# sourceURL=fight3b.js?v=4.28
 </script>
-  <script data-source="beta.js?v=4.27">// Основной интерфейс игры: плитки разделов, живая сцена и витрина кейсов.
+  <script data-source="beta.js?v=4.28">// Основной интерфейс игры: плитки разделов, живая сцена и витрина кейсов.
 // 1) Навигация: 6 кнопок внизу (Дом · Валера · Деньги · Досуг · Люди · Цели), в каждой — плитки с живым статусом.
 //    Плитка открывает старый раздел целиком, сверху — «‹ назад». Старые экраны и отрисовка не меняются.
 // 2) Живой Валера и питомец: сами что-то делают, говорят фразы, показывают голод и усталость.
@@ -24977,9 +24958,9 @@ caseOpen = (function (orig) {
   };
 })(caseOpen);
 
-//# sourceURL=beta.js?v=4.27
+//# sourceURL=beta.js?v=4.28
 </script>
-  <script data-source="settings2.js?v=4.27">// Настройки 4.2: сначала меню разделов (плитки с пояснением), внутри раздела — подписанные группы.
+  <script data-source="settings2.js?v=4.28">// Настройки 4.2: сначала меню разделов (плитки с пояснением), внутри раздела — подписанные группы.
 // Все переключатели и кнопки остаются прежними (те же data-act), меняется только раскладка.
 
 const SET_PAGES = [
@@ -25099,9 +25080,9 @@ Object.assign(ACTIONS, {
   toggleSet: (function (orig) { return (key, btn) => { orig(key, btn); document.querySelectorAll(`#modalRoot [data-act="toggleSet"][data-id="${key}"]`).forEach((b) => b.classList.toggle('on', !!S.settings[key])); }; })(ACTIONS.toggleSet),
 });
 
-//# sourceURL=settings2.js?v=4.27
+//# sourceURL=settings2.js?v=4.28
 </script>
-  <script data-source="admin3.js?v=4.27">// Админка 4.2: управление любым параметром развития игрока (карточка игрока → «Развитие» и «Выдать»).
+  <script data-source="admin3.js?v=4.28">// Админка 4.2: управление любым параметром развития игрока (карточка игрока → «Развитие» и «Выдать»).
 // Команды уходят на сервер (bot/admin.py проверяет поле и диапазон) и выполняются в игре игрока
 // при следующем входе или в течение минуты — как деньги, уровни и VIP раньше.
 
@@ -25245,9 +25226,9 @@ adminApply = (function (orig) {
   };
 })(adminApply);
 
-//# sourceURL=admin3.js?v=4.27
+//# sourceURL=admin3.js?v=4.28
 </script>
-  <script data-source="admin4.js?v=4.27">// Админ-панель 4.5: дашборд вместо набора кнопок.
+  <script data-source="admin4.js?v=4.28">// Админ-панель 4.5: дашборд вместо набора кнопок.
 // • «Обзор» — цифры по игре (плитки кликабельны), богачи, кто заходил, быстрые действия.
 // • «Игроки» — поиск и фильтры (недавние, онлайн, богачи, уровень, наказанные); карточка игрока по разделам,
 //   где любой параметр видно и меняется прямо в своей строке. Команды выполняются у игрока при входе или за минуту.
@@ -25440,9 +25421,9 @@ Object.assign(ACTIONS, {
 // Поиск по Enter
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target && e.target.id === 'adm4Q') ACTIONS.adm4Find(); });
 
-//# sourceURL=admin4.js?v=4.27
+//# sourceURL=admin4.js?v=4.28
 </script>
-  <script data-source="admin5.js?v=4.27">// Рассылка 4.5: кому (все, онлайн, город, VIP, уровни, конкретные игроки), шаблоны, кнопка в окне,
+  <script data-source="admin5.js?v=4.28">// Рассылка 4.5: кому (все, онлайн, город, VIP, уровни, конкретные игроки), шаблоны, кнопка в окне,
 // срок показа, живой предпросмотр «как увидит игрок», счётчик получателей и история с «кто видел» и остановкой.
 
 const BC_BTNS = {
@@ -25591,9 +25572,9 @@ Object.assign(ACTIONS, {
   },
 });
 
-//# sourceURL=admin5.js?v=4.27
+//# sourceURL=admin5.js?v=4.28
 </script>
-  <script data-source="renewal.js?v=4.27">// City identity, shorter story episodes and classic casino tables.
+  <script data-source="renewal.js?v=4.28">// City identity, shorter story episodes and classic casino tables.
 const CITY_IDENTITY = {
   zas: { name:'Засранск', tag:'Дворы, гаражи и свои люди', music:'waltz', casino:'Золотая крышка', color:'#d0a15b' },
   msk: { name:'Москвабад', tag:'Неон, метро и большие сделки', music:'metro', casino:'Сити Рояль', color:'#6bcfe4' },
@@ -25705,9 +25686,9 @@ function slotTheoreticalReturn(){const total=SLOT_SYMS.reduce((s,x)=>s+x[1],0);l
 const openSlotsRules=ACTIONS.slots;
 ACTIONS.slots=(...args)=>{openSlotsRules(...args);const box=document.querySelector('#modalRoot .sheet');if(box)box.insertAdjacentHTML('beforeend',`<p class="test-note">Теоретический возврат базового автомата: ${(slotTheoreticalReturn()*100).toFixed(1)}% на очень большой серии. Это не обещание возврата твоей ставки; отдельный спин может вернуть 0. Ночные бонусы считаются отдельно.</p>`);};
 
-//# sourceURL=renewal.js?v=4.27
+//# sourceURL=renewal.js?v=4.28
 </script>
-  <script data-source="baccarat.js?v=4.27">// Commission baccarat: eight-deck shoe, automatic draw, one settlement per round.
+  <script data-source="baccarat.js?v=4.28">// Commission baccarat: eight-deck shoe, automatic draw, one settlement per round.
 const BAC_NAMES={player:'Игрок',banker:'Банк',tie:'Ничья'};
 let BAC={shoe:[],history:[],choice:'player',round:null,visible:0,seq:0};
 function bacShoe(){if(!BACCARAT_BUSY && BAC.shoe.length<52){BAC.shoe=shuffle(Array.from({length:8},()=>newDeck()).flat());BAC.history=[];BAC.round=null;}}
@@ -25755,9 +25736,9 @@ for(const name of ['bet','betAdjust','betCustomOk']){
   ACTIONS[name]=(...args)=>{if($('baccaratTable')&&BACCARAT_BUSY)return;const result=old(...args);if($('baccaratTable'))bacRender();return result;};
 }
 
-//# sourceURL=baccarat.js?v=4.27
+//# sourceURL=baccarat.js?v=4.28
 </script>
-  <script data-source="admin-reports.js?v=4.27">const FBADMIN={items:null,filter:'new',query:'',report:null,loading:false,note:''};
+  <script data-source="admin-reports.js?v=4.28">const FBADMIN={items:null,filter:'new',query:'',report:null,loading:false,note:''};
 const FBSTAT={new:'Новые',investigating:'В работе',fixed:'Выполнены',duplicate:'Дубликаты',rejected:'Отклонены'};
 function feedbackAdminPage(){
  if(!adm4Online())return adm4Need();
@@ -25783,9 +25764,9 @@ ACTIONS.reportFixAsk=()=>{FBADMIN.note=($('reportResolution')||{}).value||'';if(
  openModal(`<h3>Подтвердить исправление №${FBADMIN.report.id}?</h3><p>${esc(FBADMIN.note)}</p><p>Автору будет выдано 30 крышек один раз за это обращение. Награды за разные обращения суммируются.</p><button class="btn primary wide" data-act="reportStatus" data-id="fixed">Да, исправлено в опубликованной версии</button><button class="btn wide" data-act="reportFixCancel">Отмена</button>`,{center:true,locked:true});};
 ACTIONS.reportFixCancel=()=>openAdmin();
 
-//# sourceURL=admin-reports.js?v=4.27
+//# sourceURL=admin-reports.js?v=4.28
 </script>
-  <script data-source="bottles.js?v=4.27">// Внешний вид бутылки: отдельная косметика без игровых бонусов.
+  <script data-source="bottles.js?v=4.28">// Внешний вид бутылки: отдельная косметика без игровых бонусов.
 const BOTTLE_SKINS = [
   { id:'bt_green', name:'Зелёная классика', price:0, color:'#55a66b', dark:'#20543b', cap:'#d2b358', label:'В', shape:'slim' },
   { id:'bt_amber', name:'Янтарное стекло', price:1500, color:'#d08b3b', dark:'#71391f', cap:'#ba8358', label:'Я', shape:'round' },
@@ -25894,9 +25875,9 @@ Object.assign(ACTIONS,{
   bottleBack,
 });
 
-//# sourceURL=bottles.js?v=4.27
+//# sourceURL=bottles.js?v=4.28
 </script>
-  <script data-source="gang-yard.js?v=4.27">// Двор банды: сервер проверяет вклад, хранит историю и выдаёт подарки.
+  <script data-source="gang-yard.js?v=4.28">// Двор банды: сервер проверяет вклад, хранит историю и выдаёт подарки.
 const YARD={data:null,at:0,loading:false,busy:false,error:''};
 function yardApply(r){
   YARD.data=r;YARD.at=Date.now();YARD.error='';
@@ -25996,9 +25977,9 @@ ACTIONS.yardMetrics=async()=>{
   }catch(e){toast('Статистика доступна только администратору на сервере.','bad');}
 };
 
-//# sourceURL=gang-yard.js?v=4.27
+//# sourceURL=gang-yard.js?v=4.28
 </script>
-  <script data-source="gang-district.js?v=4.27">// Жизнь района: сервер владеет подготовкой, наградами и сезонными результатами.
+  <script data-source="gang-district.js?v=4.28">// Жизнь района: сервер владеет подготовкой, наградами и сезонными результатами.
 const DISTRICT={data:null,at:0,loading:false,busy:false,panel:'yard',error:''};
 const DISTRICT_KEYS=['gangPrep','gangWar','gangWarWin','gangCoop','gangAssist','gangRegion'];
 function districtApply(r){
@@ -26145,9 +26126,9 @@ yardApply=(function(orig){return function(r){
   return result;
 };})(yardApply);
 
-//# sourceURL=gang-district.js?v=4.27
+//# sourceURL=gang-district.js?v=4.28
 </script>
-  <script data-source="income.js?v=4.27">// Единые расчёты начисления и живого отображения дохода конкретного игрока.
+  <script data-source="income.js?v=4.28">// Единые расчёты начисления и живого отображения дохода конкретного игрока.
 function jobSalary(j, performance=1.25, rank=jobRank(j.id)) {
   const road=JOB_GAMES[j.id]?.type==='lanes'?1+transportJobBonus():1;
   return Math.round(j.pay*performance*mods().work*POS_MULT[rank]*road*(j.physical?1+S.strength/200:1));
@@ -26192,9 +26173,9 @@ function incomeRefresh(){
 let INCOME_REFRESH_AT=0;
 HOOKS.tick.push(()=>{const now=Date.now();if(now-INCOME_REFRESH_AT>=1000){INCOME_REFRESH_AT=now;incomeRefresh();}});
 
-//# sourceURL=income.js?v=4.27
+//# sourceURL=income.js?v=4.28
 </script>
-  <script data-source="gang-guide.js?v=4.27">// Обучение бандам: чтение и переходы, без расхода поручений и изменения прогресса.
+  <script data-source="gang-guide.js?v=4.28">// Обучение бандам: чтение и переходы, без расхода поручений и изменения прогресса.
 const GANG_GUIDE_PAGES=[
   {id:'start',emoji:'🏡',title:'Зачем вступать в банду',intro:'Банда — это свои люди, общий двор и занятия, в которых полезен даже новичок.',points:[
     'Двор: выбирайте постройки и готовьте общие истории. За личный вклад растёт твоя репутация.',
@@ -26281,9 +26262,9 @@ ACTIONS.gangGuideGo=panel=>{if(!['yard','war','map','people','shop'].includes(pa
 BC_BTNS.gangGuide=['📘','Обучение бандам',()=>ACTIONS.gangGuide('start')];
 EXTRA_TABS.fun.clan=(function(orig){return()=>`<div class="gang-guide-entry"><button class="btn wide" data-act="gangGuide">📘 Как устроены банды · обучение</button></div>`+orig();})(EXTRA_TABS.fun.clan);
 
-//# sourceURL=gang-guide.js?v=4.27
+//# sourceURL=gang-guide.js?v=4.28
 </script>
-  <script data-source="france-games.js?v=4.27">// France's games use the common lifecycle: all timers die with MG and every input
+  <script data-source="france-games.js?v=4.28">// France's games use the common lifecycle: all timers die with MG and every input
 // checks mgAlive. Rewards and costs are handled by the calling activity, not setup.
 const FR_WORDS=[['Bonjour','Здравствуйте'],['Merci','Спасибо'],['Pain','Хлеб'],['Fromage','Сыр'],['Grève','Забастовка'],['Mairie','Мэрия'],['Sortie','Выход'],['Liberté','Свобода'],['Demain','Завтра'],['Billet','Билет']];
 function frArena(html,kind=''){
@@ -26365,17 +26346,11 @@ function frMemory(mg,cfg={}){
   }));next();
 }
 
-function frLanguage(mg,cfg={}){
-  let answer='';const bank=cfg.words||FR_WORDS;
-  frArena('<div class="fr-shop-sign">'+(cfg.sign||'BONJOUR · французский без паники')+'</div><p class="fr-glossary">'+bank.map(([a,b])=>`${a} — ${b}`).join(' · ')+'</p><h3 id="frWord"></h3><div class="fr-choices">'+Array.from({length:3},()=>'<button class="fr-option"></button>').join('')+'</div>','fr-language');
-  const buttons=[...document.querySelectorAll('.fr-option')];
-  const next=()=>{const [word,ru]=pick(bank);answer=ru;$('frWord').textContent='«'+word+'» — это…';const opts=shuffle([ru,...shuffle(bank.filter(x=>x[1]!==ru)).slice(0,2).map(x=>x[1])]);buttons.forEach((b,i)=>b.textContent=opts[i]);};
-  buttons.forEach(b=>frInput(b,mg,()=>{const good=b.textContent===answer;frPoint(mg,good,b);if(good)next();}));next();
-}
+function frLanguage(mg,cfg={}) { return cityRequestGame(mg,{...cfg,theme:'fr'}); }
 
-//# sourceURL=france-games.js?v=4.27
+//# sourceURL=france-games.js?v=4.28
 </script>
-  <script data-source="france-art.js?v=4.27">// Code-native art matches the existing 360 × 420 home scene and stays sharp on phones.
+  <script data-source="france-art.js?v=4.28">// Code-native art matches the existing 360 × 420 home scene and stays sharp on phones.
 let FR_ART_SEQ=0;
 function frTower(x,y,s=1){return `<g transform="translate(${x} ${y}) scale(${s})" fill="none" stroke="#b69668" stroke-width="3"><path d="M0 0L-25 118M0 0l25 118M-25 118q25-42 50 0M-17 78h34M-11 53h22M-5 24H5M-18 77L9 54M18 77L-9 54M-11 52L4 25M11 52L-4 25M-28 118h56M0-9V0"/></g>`;}
 function frFacades(y=170){return [0,64,128,192,256,320].map((x,i)=>`<g><rect x="${x}" y="${y+i%2*10}" width="62" height="118" fill="${i%2?'#bcb0a5':'#ddd1b9'}"/><path d="M${x-4} ${y+i%2*10}l8-24h46l12 24z" fill="#434f68"/>${[0,1,2].map(r=>[0,1,2].map(c=>`<rect x="${x+8+c*18}" y="${y+14+r*30+i%2*10}" width="9" height="17" rx="3" fill="${(r+c+i)%3?'#777c89':'#f9d78b'}"/><path d="M${x+6+c*18} ${y+32+r*30+i%2*10}h14" stroke="#3f464e"/>`).join('')).join('')}</g>`).join('');}
@@ -26401,9 +26376,9 @@ function frPetArt(kind){
   return `<svg viewBox="0 0 80 70"><ellipse cx="44" cy="49" rx="${ferret?25:19}" ry="${bird?15:13}" fill="${color}"/><path class="wag" d="M60 48q15-14 13 1" stroke="${color}" stroke-width="6" fill="none"/><circle cx="25" cy="36" r="${dog?15:12}" fill="${color}"/>${bird?'<path d="M13 37L2 41l13 3z" fill="#d6a163"/>':`<path d="M15 29L13 ${dog?6:16}l12 10M32 27l9-13-1 22" fill="${color}"/>`}<circle cx="20" cy="36" r="2" fill="#252a38"/><circle cx="29" cy="36" r="2" fill="#252a38"/><path d="M21 44q5 3 8-1" stroke="#403c3d" fill="none"/><path d="M30 59v7M53 59v7" stroke="${color}" stroke-width="5"/><path d="M12 23q14-14 28 0l-3 5H15z" fill="#344c6b"/><path d="M24 14l4-3" stroke="#344c6b" stroke-width="3"/><path d="M32 45l12 3-5 6-8-5" fill="#b14e61"/></svg>`;
 }
 
-//# sourceURL=france-art.js?v=4.27
+//# sourceURL=france-art.js?v=4.28
 </script>
-  <script data-source="france.js?v=4.27">// Chapter IV. Stored money stays in the common unit used by saves/server/gangs;
+  <script data-source="france.js?v=4.28">// Chapter IV. Stored money stays in the common unit used by saves/server/gangs;
 // the euro is an in-game display/input unit, not a real-world exchange-rate feed.
 CITIES.fr={name:'Франция',emoji:'🇫🇷',idx:3};
 CITY_IDENTITY.fr={name:'Париж',tag:'Мансарды, метро, багеты и большие перемены',music:'musette',casino:'Le Velours',color:'#d9b78d'};
@@ -26465,14 +26440,14 @@ const FR_HOUSING=[
   {name:'Особняк с французским садом',price:eur(220000),rent:eur(6200),util:eur(750),desc:'Месье Валера, вас ждут в зимнем саду'},
 ];
 const FR_EDU=[
-  {name:'Пока только «бонжур»'},
-  {name:'Французский для новой жизни',emoji:'🗣️',price:eur(12),desc:'Меню, метро и вежливое «спасибо». Шпаргалка в игре'},
+  {name:'Новичок в Париже'},
+  {name:'Как устроен Париж',emoji:'🗣️',price:eur(12),desc:'Кафе, маршруты и заказы: подсказки на русском'},
   {name:'Курсы ремесла у месье Жюля',emoji:'🥐',price:eur(100),desc:'Круассаны не прощают спешки'},
   {name:'Колледж городских профессий',emoji:'🎓',price:eur(500),desc:'Диплом с тремя печатями. Каждая настоящая'},
   {name:'Университет Сорбонны',emoji:'🏛️',price:eur(2200),desc:'Философия, экономика и искусство спорить'},
   {name:'Парижская школа управления',emoji:'📊',price:eur(10000),desc:'Как управлять компанией, если все на забастовке'},
 ];
-const FR_JOBS={flyers:['Раздатчик афиш у метро','🪧'],loader:['Грузчик рынка Рюнжи','🧺'],courier:['Велокурьер с багетами','🚲'],guard:['Смотритель музея','🖼️'],taxi:['Парижский таксист','🚕'],seller:['Продавец в сырной лавке','🧀'],manager:['Управляющий брассери','🍽️'],director:['Директор дома моды','🧵'],dvornik:['Работник городской чистоты','🧹'],postman:['Почтальон квартала','📮'],cook:['Пекарь-круассанье','🥐'],police:['Патрульный комиссариата','👮'],teacher:['Преподаватель разговорного клуба','🧑‍🏫'],clerk:['Служащий бюро №404','📑'],deputy:['Депутат районного совета','🏛️']};
+const FR_JOBS={flyers:['Раздатчик афиш у метро','🪧'],loader:['Грузчик рынка Рюнжи','🧺'],courier:['Велокурьер с багетами','🚲'],guard:['Смотритель музея','🖼️'],taxi:['Парижский таксист','🚕'],seller:['Продавец в сырной лавке','🧀'],manager:['Управляющий брассери','🍽️'],director:['Директор дома моды','🧵'],dvornik:['Работник городской чистоты','🧹'],postman:['Почтальон квартала','📮'],cook:['Пекарь-круассанье','🥐'],police:['Патрульный комиссариата','👮'],teacher:['Ведущий городских мастерских','🧑‍🏫'],clerk:['Служащий бюро №404','📑'],deputy:['Депутат районного совета','🏛️']};
 const FR_WORK={
   flyers:[frMarch,'Афиша для Бастилии','Раздавай афиши в ритм. Нажимай, когда написано «ПОРА»',14],
   loader:[frBakery,'Рынок Рюнжи','Собирай ящики по заказу слева направо',24,{items:['🧀','🥖','🍎','🥬'],sign:'RUNGIS · утренний рынок'}],
@@ -26486,7 +26461,7 @@ const FR_WORK={
   postman:[frMetro,'Письма не бастуют','Найди открытый маршрут в нужный квартал',18],
   cook:[frBakery,'Утро в булочной','Круассаны, багеты, сыр и кофе — слева направо',24],
   police:[frForms,'Дежурство в комиссариате','Проверяй обращения: нужны оба штампа',16,{sign:'COMMISSARIAT · приём обращений',windowMs:2200}],
-  teacher:[frLanguage,'Разговорный клуб','Выбирай перевод. Словарь остаётся на экране',18],
+  teacher:[frLanguage,'Мастерская квартала','Собирай заказы по образцу: предмет и количество видны по-русски',18],
   clerk:[frForms,'Подтверждение подтверждения','Синий круг И золотая звезда: принять. Иначе вернуть',16],
   deputy:[frMarch,'Слушания районного совета','Дай слово жителям в нужный момент',14,{sign:'CONSEIL · районный совет',chants:['Кому нужен новый сквер?','Голосуем за ремонт!','Выслушаем соседей!','Перерыв на кофе!']}],
 };
@@ -26566,9 +26541,9 @@ syncMusic=function(){if(!isFrance())return syncMusicBeforeFrance();if(typeof Sou
 HOOKS.screen.push(()=>{if(isFrance())syncMusic();});
 HOOKS.hud.push(()=>{if(isFrance()&&S.settings.mainMusic!=='off')syncMusic();});
 
-//# sourceURL=france.js?v=4.27
+//# sourceURL=france.js?v=4.28
 </script>
-  <script data-source="france-story.js?v=4.27">// All names/companies in this chapter's criminal plot are fictional. The optional
+  <script data-source="france-story.js?v=4.28">// All names/companies in this chapter's criminal plot are fictional. The optional
 // Pavel episode is explicitly an alternate, fictional game story, not news.
 NEW_CITY_CASH.fr=eur(180);FROZEN_WHO.fr='Парижское бюро проверки переводов';
 newcomerCashText=(function(orig){return c=>c==='fr'?cityMoney(NEW_CITY_CASH.fr,'fr'):orig(c);})(newcomerCashText);
@@ -26602,10 +26577,10 @@ const frQuestData=[
    'В кафе знают, где найти ночлег и первую подработку. Здесь тоже начинают с малого — только голуби ходят увереннее.',
    [qv(()=>S.housing,1,'Обзавестись палаткой или жильём лучше'),qc('shift',1,'Закончить 1 рабочую смену')],45,
    [['☕','Инес','В нашем квартале сначала говорят «бонжур», потом просят пароль от вай-фая.'],['🧳','Валера','А если мне сначала поспать?'],['☕','Инес','Палатка у канала стоит дешевле круассана в туристическом кафе. Работу ищи в разделе «Деньги».']]],
-  ['f_language','🧑‍🏫','Месье Лоран','Сначала — «бонжур»',
-   'Без языка любая справка превращается в квест. Учи полезные слова с открытой шпаргалкой, а не угадывай вслепую.',
-   [qv(()=>S.edu,1,'Закончить курс французского для новой жизни')],60,
-   [['🧑‍🏫','Лоран','Grève — забастовка. Sortie — выход. Во Франции оба слова пригодятся одновременно.'],['🧳','Валера','А слово «открыто»?'],['🧑‍🏫','Лоран','Его изучим после обеда. У нас перерыв.']]],
+  ['f_language','🧑‍🏫','Месье Лоран','Париж по понятной схеме',
+   'Лоран показывает город через понятные схемы, цифры и картинки. Собирай заказы и осваивай маршруты — учить французский для прохождения не нужно.',
+   [qv(()=>S.edu,1,'Закончить курс «Как устроен Париж»')],60,
+   [['🧑‍🏫','Лоран','Сначала смотри на значок и количество в заказе. Все условия написаны по-русски.'],['🧳','Валера','А слово «открыто»?'],['🧑‍🏫','Лоран','Его изучим после обеда. У нас перерыв.']]],
   ['f_bakery','👨🏾‍🍳','Жюль','Багет без предварительной записи',
    'Жюль кормит весь квартал. Несколько честных смен дадут деньги и познакомят с людьми, которым можно доверять.',
    [qc('shift',2,'Закончить 2 смены на любой работе'),qc('eat',1,'Поесть в местной лавке')],75,
@@ -26787,12 +26762,126 @@ SIDE.push(
   {id:'f_side_jules',group:'pals',city:'fr',who:'👨🏾‍🍳',from:'Жюль',title:'Первые багеты для соседей',text:'Новая булочная помогает общественной кухне. Отработай две смены и зайди на соседский ужин.',goals:[sg('shift',2,'Закончить 2 смены'),sg('frHelp',1,'Помочь соседской кухне')],reward:{money:eur(45),xp:450,mood:8}},
   {id:'f_side_camille',group:'pals',city:'fr',who:'🪧',from:'Камиль',title:'Плакаты без чужого сценария',text:'Двор сам решит, что ему нужно. Поддержи митинг и разберись с обращениями жителей.',goals:[sg('frMarch',1,'Поддержать митинг'),sg('frBureau',1,'Заверить обращения в бюро')],reward:{money:eur(60),xp:550,mood:10}},
   {id:'f_side_ibra',group:'pals',city:'fr',who:'🧔🏿',from:'Ибрагим',title:'Велосипед вместо плохой компании',text:'Я вытащил себя из уличной банды. Хочу показать младшим, что заработать можно по-другому.',goals:[sg('shift',3,'Закончить 3 рабочие смены'),sg('frMetro',1,'Доставить письмо через метро')],reward:{money:eur(80),xp:600}},
-  {id:'f_side_ines',group:'pals',city:'fr',who:'☕',from:'Инес',title:'Разговор за чашкой кофе',text:'Подтяни французский и помоги соседям — знакомства здесь ценнее визиток.',goals:[sg('lesson',2,'Пройти 2 занятия'),sg('frHelp',1,'Помочь соседям')],reward:{money:eur(50),xp:450,mood:10}},
+  {id:'f_side_ines',group:'pals',city:'fr',who:'☕',from:'Инес',title:'Разговор за чашкой кофе',text:'Освой городские мастерские и помоги соседям — знакомства здесь ценнее визиток.',goals:[sg('lesson',2,'Пройти 2 занятия'),sg('frHelp',1,'Помочь соседям')],reward:{money:eur(50),xp:450,mood:10}},
 );
 
-//# sourceURL=france-story.js?v=4.27
+//# sourceURL=france-story.js?v=4.28
 </script>
-  <script data-source="autotest.js?v=4.27">// Автотест игры (3.3). Работает только по адресу index.html#autotest — игрокам ничего не делает.
+  <script data-source="city-accessibility.js?v=4.28">// Russian instructions and visible clues, with city-specific objects rather than translation tests.
+const CITY_OBJECTS = {
+  mex: [['🌮','Тако'],['🥑','Авокадо'],['🌽','Кукуруза'],['🧃','Сок']],
+  fr: [['🥐','Круассаны'],['🥖','Багеты'],['🧀','Сыр'],['☕','Кофе']],
+  school: [['📚','Книги'],['✏️','Карандаши'],['🎨','Краски'],['🧩','Головоломки']],
+  dossier: [['📄','Выписки'],['🧾','Квитанции'],['📁','Папки'],['📷','Снимки']],
+};
+function cityRequestGame(mg,cfg={}) {
+  const bank=CITY_OBJECTS[cfg.theme]||CITY_OBJECTS[S.city]||CITY_OBJECTS.school;
+  $('mgArena').classList.add('fr-arena','city-game-arena');
+  $('mgArena').dataset.city=S.city;
+  let active=null,finished=false;
+  const draw=()=>{
+    if(!mgAlive(mg)||finished)return;
+    const item=pick(bank),n=pick([1,2,3]),other=pick(bank.filter(x=>x!==item));
+    const round={item,n};active=round;
+    const options=shuffle([{item,n},{item,n:n%3+1},{item:other,n}]);
+    $('mgArena').innerHTML=`<div class="city-activity"><small>${cfg.theme==='dossier'?'Досье Скорпионов':'Собери заказ по образцу'}</small><h3>Нужно: ${item[1]}, ${n} шт.</h3><div class="city-sample">${item[0].repeat(n)}</div><p>Выбери такой же предмет и количество. Верно +1, ошибка −1.</p><div class="city-options">${options.map((x,i)=>`<button class="fr-option city-option" data-option="${i}"><span>${x.item[0].repeat(x.n)}</span><b>${x.item[1]} · ${x.n} шт.</b></button>`).join('')}</div></div>`;
+    document.querySelectorAll('.city-option').forEach((b,i)=>frInput(b,mg,()=>{
+      if(active!==round||finished)return;active=null;
+      const good=options[i].item===item&&options[i].n===n;
+      if(!good)mg.mistakes=(mg.mistakes||0)+1;
+      mgScore(good?1:-1);sfx(good?'tap':'error');
+      if(cfg.goal&&mg.score>=cfg.goal){finished=true;frTimer(mg,mgEnd,250);}else draw();
+    }));
+  };draw();
+}
+
+// Five decisions, no reading deadline. Completing quickly cannot shorten the paid shift.
+const CIVIC_MIN_MS=30000;
+function civicGame(mg,cfg={}) {
+  $('mgArena').classList.add('fr-arena','city-game-arena','civic-arena');
+  $('mgArena').dataset.city=S.city;
+  const deputy=cfg.civic==='deputy',place={zas:'Засранск',msk:'Москва',mex:'Веракрус',fr:'Париж'}[S.city]||'Город';
+  const local={zas:['Осветить двор','Поставить урны','Починить остановку'],msk:['Обустроить двор у метро','Починить лифт','Открыть библиотеку'],mex:['Поставить навес на рынке','Обустроить пляж','Осветить площадь'],fr:['Починить велодорожку','Озеленить набережную','Обустроить сквер']}[S.city]||['Починить двор','Посадить деревья','Поставить скамейки'];
+  const laws=shuffle([
+    ...local.map((title,i)=>({title,cost:2+i,useful:true,why:'Жители получат полезное улучшение.'})),
+    {title:'Купить позолоченное кресло депутату',cost:3,useful:false,why:'Только личная роскошь за общий счёт.'},
+    {title:'Построить дворец из мрамора',cost:20,useful:true,why:'Идея слишком дорогая для бюджета этой смены.'},
+  ]);
+  const papers=shuffle([{sign:true,stamp:true},{sign:false,stamp:true},{sign:true,stamp:false},{sign:true,stamp:true},{sign:false,stamp:false}]);
+  let index=0,budget=10,answered=false,card=null;
+  // The generic watchdog assumes untimed games are stuck after two minutes. Reading is deliberate here.
+  mg.limit=Infinity;
+  const render=()=>{
+    if(!mgAlive(mg))return;
+    if(index===5){
+      const remaining=Math.max(0,CIVIC_MIN_MS-(Date.now()-mg.start));
+      $('mgArena').innerHTML=`<div class="city-activity"><div class="city-sample">✅</div><h3>Все 5 решений приняты</h3><p>Результат: ${mg.score}/10. Оплата — по результату, обычные бонусы сохраняются.</p><p>Смена завершится ${remaining?'через '+Math.ceil(remaining/1000)+' сек.':'сейчас'} Минимальная длительность — 30 секунд.</p></div>`;
+      frTimer(mg,mgEnd,remaining);return;
+    }
+    answered=false;card=deputy?laws[index]:papers[index];
+    const good=deputy?card.useful&&card.cost<=budget:card.sign&&card.stamp;
+    const body=deputy?`<h3>${card.title}</h3><div class="city-facts"><b>Цена: ${card.cost}</b><b>Бюджет: ${budget}</b></div><p>${card.why}</p>`:`<h3>Заявление №${index+1}</h3><div class="city-facts"><b>${card.sign?'✅':'❌'} Подпись ${card.sign?'есть':'отсутствует'}</b><b>${card.stamp?'✅':'❌'} Печать ${card.stamp?'есть':'отсутствует'}</b></div>`;
+    $('mgArena').innerHTML=`<div class="city-activity"><small>${place} · ${index+1} / 5</small><p class="city-rule">${deputy?'Одобряй полезное жителям, если хватает бюджета. Личные привилегии отклоняй.':'Одобряй только документы с подписью И печатью. Если чего-то нет — верни.'}</p>${body}<p>Время на чтение не ограничено. Верный ответ +2, ошибка — без очков.</p><div class="city-options"><button class="fr-option" data-decision="yes">${deputy?'✅ Принять закон':'✅ Одобрить'}</button><button class="fr-option" data-decision="no">${deputy?'❌ Отклонить':'↩️ Вернуть'}</button></div><p id="civicFeedback" aria-live="polite"></p></div>`;
+    const buttons=[...document.querySelectorAll('[data-decision]')];
+    buttons.forEach(b=>frInput(b,mg,()=>{
+      if(answered)return;answered=true;buttons.forEach(x=>x.disabled=true);
+      const yes=b.dataset.decision==='yes',correct=yes===good;
+      if(correct)mgScore(2);
+      // Invalid decisions never enact an unaffordable or self-serving law.
+      if(deputy&&yes&&good)budget-=card.cost;
+      const reason=deputy?(good?'Полезное улучшение укладывается в бюджет.':!card.useful?'Общие деньги не тратим на личные привилегии.':'Бюджета на этот проект не хватает.'):(good?'Подпись и печать на месте.':'Для одобрения нужны и подпись, и печать.');
+      $('civicFeedback').textContent=(correct?'Верно! +2. ':'Ошибка, 0 очков. ')+reason;
+      const next=document.createElement('button');next.className='fr-option';next.textContent=index===4?'Завершить решения':'Следующее дело';next.dataset.civicNext='';$('civicFeedback').after(next);
+      frInput(next,mg,()=>{if(!answered||next.disabled)return;next.disabled=true;index++;render();});
+    }));
+  };render();
+}
+function applyAccessibleCity() {
+  for(const id of ['clerk','deputy'])Object.assign(JOB_GAMES[id],{engine:civicGame,civic:id,duration:0,target:8,title:id==='clerk'?'Бюро: пять понятных дел':'Совет: пять решений для города',hint:'5 дел без таймера на чтение. 8 очков — 100% оплаты, 10 — 125%. Смена от 30 секунд.'});
+}
+applyCity=(function(orig){return function(){const result=orig.apply(this,arguments);applyAccessibleCity();return result;};})(applyCity);
+
+// Update shared config objects in place: Mexico's restoration registry keeps their references.
+Object.assign(MEX_JOB_GAMES.teacher,{title:'Мастерская на площади',hint:'Собирай наглядные заказы: предмет и количество видны по-русски.',engine:mg=>cityRequestGame(mg)});
+Object.assign(MEX_JOB_GAMES.postman,{hint:'На письме всегда указан номер дома цифрами. Найди такой же номер.'});
+Object.assign(MX_DATES.cafe,{title:'Кафе: заказ для двоих',hint:'Соберите заказ по видимому образцу — иностранные слова не нужны.',setup:mg=>cityRequestGame(mg)});
+Object.assign(MX_KIDS.teen,{title:'Домашка: школьная мастерская',hint:'Помоги собрать нужные предметы и количество по образцу.',setup:mg=>cityRequestGame(mg,{theme:'school'})});
+startLessonGame=(function(orig){return function(stage){
+  if((S.city!=='mex'&&S.city!=='fr')||(S.city==='mex'&&stage===5))return orig(stage);
+  if(stage<1||stage>5)return;
+  const need=Math.max(2,Math.round([0,6,8,8,9,10][stage]*(hasEffect('t_focus')?.75:1)));
+  const setup=S.city==='mex'?(stage===3?mg=>mxCalle(mg,{}):mg=>cityRequestGame(mg,{theme:stage===4?'dossier':'mex'})):(stage===2?frBakery:stage===3?frMetro:mg=>cityRequestGame(mg,{theme:stage>=4?'school':'fr'}));
+  runGame({title:EDU[stage].name,scoreLabel:' / '+need,hint:`Все задания на русском, с видимыми образцами. Набери ${need} очков.`,duration:LESSON_TIME,setup,finish:score=>finishLesson(stage,score,need)});
+};})(startLessonGame);
+
+function alacranState(){return S.quest.alacran||(S.quest.alacran={});}
+function alacranQuest(){return currentQuest()?.id==='x_jefe';}
+const ALACRAN=QUESTS.find(q=>q.id==='x_jefe');
+if(ALACRAN){
+  ALACRAN.text='В выписках колл-центра нашлись следы Скорпионов. Собери досье по образцам, выбери помощь союзника и вызови Эль Алакрана. Победа требует подготовки, а не десятков случайных драк.';
+  ALACRAN.goals=[qv(()=>S.quest.alacran?.dossier?1:0,1,'Собери досье: три точных комплекта'),qv(()=>S.quest.alacran?.route?1:0,1,'Выбери помощь союзника')];
+  Object.assign(ALACRAN.boss,{lvl:1,form:64,strength:60,tier:5,intro:'«Думал, сюда никто не доберётся?..»'});
+}
+questGoalsHTML=(function(orig){return function(q){const html=orig(q);if(q.id!=='x_jefe')return html;const a=alacranState();return html+(!a.dossier?'<button class="btn primary wide" data-act="alacranDossier">📁 Собрать досье</button>':'<p>✅ Досье собрано. Улики переданы Рамиресу.</p>')+(!a.route?'<p>Союзники помогут в финальном бою. Выбери один вариант:</p><button class="btn wide" data-act="alacranSupport" data-id="ramirez">👮 Рамирес прикроет: сила босса −8</button><button class="btn wide" data-act="alacranSupport" data-id="pepe">🌮 Пепе отвлечёт: форма босса −8</button>':`<p>✅ ${a.route==='ramirez'?'Рамирес прикрывает: сила босса −8':'Пепе отвлекает: форма босса −8'}. Бой — следующий шаг.</p>`);};})(questGoalsHTML);
+ACTIONS.alacranDossier=()=>{
+  if(!alacranQuest()||alacranState().dossier||MG||MG_PENDING)return;
+  runGame({title:'Досье Эль Алакрана',hint:'Собери три комплекта по наглядным образцам: предмет и количество. Языки знать не нужно.',duration:25,setup:mg=>cityRequestGame(mg,{theme:'dossier',goal:3}),finish:score=>{
+    if(score>=3&&alacranQuest()){alacranState().dossier=true;save();}
+    resultModal({emoji:score>=3?'📁':'🔎',title:score>=3?'Досье готово':'Проверим ещё раз',text:score>=3?'Следы Скорпионов подтверждены. Выбери союзника в задании, затем победи босса.':'Нужно три точных комплекта. Попытку можно повторить.',btn:'К заданию'});
+  }});
+};
+ACTIONS.alacranSupport=id=>{if(!alacranQuest()||alacranState().route||!['ramirez','pepe'].includes(id))return;alacranState().route=id;save();toast('Союзник готов помочь в бою','good');};
+startFight=(function(orig){return function(op,options){
+  if(alacranQuest()&&op.name==='Эль Алакран'){
+    if(!goalsDone(currentQuest())){toast('Сначала собери досье и выбери союзника','bad');return;}
+    const a=alacranState();op={...op,strength:op.strength-(a.route==='ramirez'?8:0),form:op.form-(a.route==='pepe'?8:0)};
+  }
+  return orig(op,options);
+};})(startFight);
+
+//# sourceURL=city-accessibility.js?v=4.28
+</script>
+  <script data-source="autotest.js?v=4.28">// Автотест игры (3.3). Работает только по адресу index.html#autotest — игрокам ничего не делает.
 // Запуск перед выкладкой: tests\run_all.ps1 (открывает игру в Edge без окна и читает итог).
 // 1) Все мини-игры обоих городов: работы, уроки, досуг, свидания, дети, криминал, тюрьма, спортзал, игры с партнёром.
 //    Каждую «играем» случайными нажатиями и ждём конца. Не закончилась вовремя — зависание. Ошибка JS — провал.
@@ -27128,9 +27217,9 @@ SIDE.push(
   window.addEventListener('load', () => setTimeout(run, 500));
 })();
 
-//# sourceURL=autotest.js?v=4.27
+//# sourceURL=autotest.js?v=4.28
 </script>
-  <script data-source="boot.js?v=4.27">// Запуск игры — после того как все модули подключили свои хуки
+  <script data-source="boot.js?v=4.28">// Запуск игры — после того как все модули подключили свои хуки
 init();
 
 // Telegram любит показывать игру из кэша, даже когда на GitHub уже новая версия.
@@ -27157,7 +27246,7 @@ init();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
 })();
 
-//# sourceURL=boot.js?v=4.27
+//# sourceURL=boot.js?v=4.28
 </script>
 </body>
 </html>
