@@ -11,7 +11,6 @@ let CASINO_TRACK_EVENT=null;
 function casinoKind() {
   if(CASINO_TRACK_EVENT)return CASINO_TRACK_EVENT.kind;
   if ($('reels')) return 'slots';
-  if ($('bjOnline')) return 'bj';
   if ($('bjChip') || (typeof BJ !== 'undefined' && BJ)) return 'bj';
   if ($('roulRes')) return 'roul';
   if ($('dicePair')) return 'dice';
