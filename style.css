@@ -755,6 +755,8 @@ main { flex: 1; min-height: 0; position: relative; }
 .goal.go { cursor: pointer; }
 .goal .go-arrow { font-style: normal; color: var(--gold); font-weight: 800; }
 .goal-hl { position: relative; z-index: 3; animation: goalHl 1s ease-in-out infinite; border-radius: 14px; }
+/* A hint must not move the absolutely positioned character into document flow. */
+.valera-wrap.goal-hl { position: absolute; }
 @keyframes goalHl { 0%, 100% { box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(242,199,68,.6); } 50% { box-shadow: 0 0 0 6px rgba(242,199,68,.35), 0 0 28px rgba(242,199,68,.8); } }
 /* Окно «Что нового» */
 .news-list { text-align: left; margin: 8px 0; max-height: 50vh; overflow-y: auto; }
