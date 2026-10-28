@@ -1366,14 +1366,14 @@ function revealLoot() {
 // Случайные события
 // =====================================================================
 
-let nextEventAt = Date.now() + rand(70, 110) * 1000;
-let nextMiniAt = Date.now() + rand(25, 45) * 1000;
+let nextEventAt = Date.now() + rand(140, 220) * 1000;
+let nextMiniAt = Date.now() + rand(50, 90) * 1000;
 
 function maybeEvent() {
   if (!S.storySeen || !popupTurn(2)) return;
   const now = Date.now();
   if (now >= nextMiniAt && !(S.busy && S.busy.type === 'sleep')) {
-    nextMiniAt = now + rand(35, 70) * 1000;
+    nextMiniAt = now + rand(70, 140) * 1000;
     const bad = Math.random() < badChance();
     const pool = (bad ? MINI_BAD : MINI_GOOD).filter((m) => !m.cond || m.cond());
     const ev = pick(pool);
@@ -1386,7 +1386,7 @@ function maybeEvent() {
     return;
   }
   if (now < nextEventAt || !$('screen-game').classList.contains('active') || S.busy) return;
-  nextEventAt = now + rand(90, 160) * 1000;
+  nextEventAt = now + rand(180, 320) * 1000;
   const ev = pick(EVENTS);
   const back = openModal(`
     <div class="big-art" style="font-size:84px;height:110px">${ev.emoji}</div>

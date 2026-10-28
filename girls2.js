@@ -44,7 +44,7 @@ ACTIONS.giveGift = (function (orig) {
   return (arg) => {
     const [gid, id] = arg.split(':');
     const x = GIFTS.find((y) => y.id === id), t = girlTier(gid);
-    if (!x || S.money < x.price || cdLeft('gift_' + id) > 0) return;
+    if (!x || S.money < giftPayPrice(gid,x) || cdLeft('gift_' + id) > 0) return;
     const wish = S.gfWish && S.gfWish.id === id && S.girlfriend === gid;
     const cheap = x.price < t.min;
     const loveBefore = S.love || 0, relBefore = girlState(gid).rel;
@@ -56,7 +56,7 @@ ACTIONS.giveGift = (function (orig) {
     }
     if (wish) {
       S.gfWish = null;
-      S.gfWishNext = Date.now() + rand(4, 8) * GAME_DAY;
+      S.gfWishNext = Date.now() + rand(8, 16) * GAME_DAY;
       addLove(15);
       if (typeof addTrust === 'function') addTrust(6);
       S.wishesDone = (S.wishesDone || 0) + 1;
@@ -99,14 +99,14 @@ HOOKS.tick.push(() => {
   if (S.gfWish && now > S.gfWish.until) {
     const g = GIRLS.find((x) => x.id === S.girlfriend);
     S.gfWish = null;
-    S.gfWishNext = now + rand(5, 9) * GAME_DAY;
+    S.gfWishNext = now + rand(10, 18) * GAME_DAY;
     addLove(-10);
     if (typeof addTrust === 'function') addTrust(-4);
     toast(`😤 ${girlShort(g)} обиделась: ты так и не исполнил её просьбу. 💗 −10`, 'bad');
     return;
   }
   if (S.gfWish || !popupTurn(2) || S.busy || MG) return;
-  if (!S.gfWishNext) { S.gfWishNext = now + 3 * GAME_DAY; return; }
+  if (!S.gfWishNext) { S.gfWishNext = now + 6 * GAME_DAY; return; }
   if (now < S.gfWishNext) return;
   const g = GIRLS.find((x) => x.id === S.girlfriend), t = girlTier(g.id);
   const x = GIFTS.find((y) => y.id === pick(t.wish));
@@ -116,7 +116,7 @@ HOOKS.tick.push(() => {
     <h3>${girlShort(g)} кое-что хочет</h3>
     <p>«Зай, а купишь мне <b>${x.emoji} ${WISH_ACC[x.id] || x.name.toLowerCase()}</b>? Ну пожа-а-алуйста!»</p>
     <p class="test-note">${tierTag(g.id)} Подари в течение 8 игровых дней: 💗 +15 сверху и доверие +6. Не успеешь — обидится.</p>
-    <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="giftMenu" data-id="${g.id}">🎁 К подаркам · ${fmt(x.price)} ₽</button>
+    <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="giftMenu" data-id="${g.id}">🎁 К подаркам · ${fmt(giftPayPrice(g.id,x))} ₽</button>
     <button class="btn wide" data-act="close">Позже</button></div></div>`, { center: true });
 });
 

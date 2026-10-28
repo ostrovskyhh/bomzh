@@ -205,7 +205,7 @@ maybeEvent = function () {
   if (!S.storySeen || !popupTurn(2)) return;
   const now = Date.now();
   if (now >= nextMiniAt && !(S.busy && S.busy.type === 'sleep')) {
-    nextMiniAt = now + rand(40, 75) * 1000;
+    nextMiniAt = now + rand(80, 150) * 1000;
     const bad = Math.random() < badChance();
     badStreak = bad ? badStreak + 1 : 0;
     const pool = (bad ? MINI_BAD : MINI_GOOD).filter((m) => !m.cond || m.cond());
@@ -219,7 +219,7 @@ maybeEvent = function () {
     return;
   }
   if (now < nextEventAt || !$('screen-game').classList.contains('active') || S.busy) return;
-  nextEventAt = now + rand(150, 260) * 1000;
+  nextEventAt = now + rand(300, 520) * 1000;
   const pool = EVENTS.filter((e) => (!e.cond || e.cond()) && !recentEvents.includes(e.id));
   const ev = pick(pool.length ? pool : EVENTS);
   recentEvents.push(ev.id);

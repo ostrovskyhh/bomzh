@@ -61,8 +61,9 @@ async function bjDo(op){
   finally{BJ_NET.busy=false;if($('bjOnline'))bjRender();}
 }
 function bjTrackRound(t){
-  S.bjSeenRounds=S.bjSeenRounds||[];
+  S.bjSeenRounds=S.bjSeenRounds||[];S.bjEarningsSeen=S.bjEarningsSeen||[];
   for(const r of [...(t.results||[])].reverse()){
+    if(!S.bjEarningsSeen.includes(r.round)){S.bjEarningsSeen.push(r.round);if(S.bjEarningsSeen.length>100)S.bjEarningsSeen.shift();S.stats.earned+=Math.max(0,r.payout);if(r.payout>0)bump('resMoney');}
     if(S.bjSeenRounds.includes(r.round))continue;
     S.bjSeenRounds.push(r.round);if(S.bjSeenRounds.length>100)S.bjSeenRounds.shift();
     const stat=cst(),prior=stat.games.bj||0,event=CASINO_TRACK_EVENT;

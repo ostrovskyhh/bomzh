@@ -297,6 +297,9 @@ function finishDate(g, d, perf) {
 // ---------- Свадьба ----------
 
 const RINGS = [3000, 8000, 15000, 50000, 200000, 800000]; // по индексу девушки в GIRLS
+// Family requests keep their original relationship value; only the price is reduced.
+function wifeRequestCost(amount,married=S.married){return amount*(married?0.5:1);}
+function giftPayPrice(gid,gift){const w=S.gfWish;return S.married&&gid===S.girlfriend&&w?.id===gift.id&&(!w.gid||w.gid===gid)?gift.price/2:gift.price;}
 const ALLOWANCE = [300, 1000, 3000, 10000, 40000, 150000]; // семейный бюджет в игровой месяц
 const WEDDINGS = [
   { id: 'zags', name: 'Тихая роспись в ЗАГСе', emoji: '🏛️', price: 5000, mood: 30, gifts: 0, honey: 15, desc: 'Двое свидетелей и шампанское из пластиковых стаканов' },
@@ -393,7 +396,7 @@ function finishWedding(w, perf) {
   resultModal({ emoji: '💒', title: `Свадьба! ${g.name} теперь твоя жена`,
     text: `Первый танец: ${perf >= 0.7 ? 'гости аплодировали стоя' : perf >= 0.4 ? 'неплохо, почти не наступил на платье' : 'отдавил невесте обе ноги'}.<br>${pick(WEDDING_JOKES)}.
       ${gifts ? `<br>Гости надарили <b style="color:var(--gold)">${fmt(gifts)} ₽</b>.` : ''}<br><br>💒 Медовый месяц: доход +20%. Жена радует (+1 😊/мин) и подкармливает.
-      Раз в игровой месяц семейный бюджет: <b>${fmt(ALLOWANCE[girlIdx(g.id)])} ₽</b>. Не изменяй — при разводе она заберёт 20% денег и кое-что из имущества!`, btn: 'Горько!' });
+      Раз в игровой месяц семейный бюджет: <b>${fmt(wifeRequestCost(ALLOWANCE[girlIdx(g.id)]))} ₽</b>. Не изменяй — при разводе она заберёт 20% денег и кое-что из имущества!`, btn: 'Горько!' });
 }
 
 // Семейная жизнь: бюджет, отношения остывают без свиданий
@@ -406,7 +409,7 @@ HOOKS.tick.push(() => {
   if (now < S.wifeDue || !popupTurn(2)) return;
   S.wifeDue = now + MONTH_MS;
   const st = girlState(g.id);
-  const sum = ALLOWANCE[girlIdx(g.id)];
+  const sum = wifeRequestCost(ALLOWANCE[girlIdx(g.id)]);
   st.rel = Math.max(0, st.rel - 8);
   if (S.money >= sum) { S.money -= sum; toast(`👰 Семейный бюджет: −${fmt(sum)} ₽. Своди жену на свидание, она скучает`, 'bad'); }
   else { st.rel = Math.max(0, st.rel - 25); toast('👰 Не хватило на семейный бюджет! Жена в ярости', 'bad'); }
@@ -531,7 +534,7 @@ EXTRA_TABS.fun.dates = () => {
   if (gf && S.married) {
     const st = girlState(gf.id);
     family = `<div class="premium-hero wife-hero"><div class="e">👰</div><div><b>Жена: ${gf.name}</b>
-        <p>Отношения ${Math.floor(st.rel)}/100 · доверие ${Math.round(S.trust === undefined ? 70 : S.trust)}/100. Семейный бюджет ${fmt(ALLOWANCE[girlIdx(gf.id)])} ₽ через <span data-until="${S.wifeDue}"></span>.
+        <p>Отношения ${Math.floor(st.rel)}/100 · доверие ${Math.round(S.trust === undefined ? 70 : S.trust)}/100. Семейный бюджет ${fmt(wifeRequestCost(ALLOWANCE[girlIdx(gf.id)]))} ₽ через <span data-until="${S.wifeDue}"></span>.
         Своди жену на свидание, чтобы не остыла. Изменишь — может подать на развод.</p></div></div>
       <button class="btn wide" data-act="divorceAsk">💔 Подать на развод</button>`;
   } else if (gf) {

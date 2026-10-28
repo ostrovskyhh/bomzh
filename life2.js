@@ -97,7 +97,7 @@ function openGifts(gid) {
       const cd = cdLeft('gift_' + x.id);
       const mult = taste.likes === x.id ? 2 : taste.meh === x.id ? 0.5 : 1;
       return card({ thumb: x.emoji, title: x.name, desc: `+${Math.round(x.love * mult)} ${mine ? '💗' : '❤️'}${mult === 2 ? ' · <b style="color:var(--green)">её любимое!</b>' : ''}`,
-        btn: cd > 0 ? timerBtn(S.cd['gift_' + x.id]) : priceBtn('giveGift', `${gid}:${x.id}`, x.price, S.money >= x.price) });
+        btn: cd > 0 ? timerBtn(S.cd['gift_' + x.id]) : priceBtn('giveGift', `${gid}:${x.id}`, giftPayPrice(gid,x), S.money >= giftPayPrice(gid,x)) });
     }).join('')}</div>
     <div class="btns"><button class="btn wide" data-act="close">Закрыть</button></div>`);
 }
@@ -106,8 +106,8 @@ ACTIONS.giftMenu = (gid) => openGifts(gid);
 ACTIONS.giveGift = (arg) => {
   const [gid, id] = arg.split(':');
   const x = GIFTS.find((y) => y.id === id), g = GIRLS.find((y) => y.id === gid);
-  if (!x || S.money < x.price || cdLeft('gift_' + id) > 0) return;
-  S.money -= x.price;
+  if (!x || S.money < giftPayPrice(gid,x) || cdLeft('gift_' + id) > 0) return;
+  S.money -= giftPayPrice(gid,x);
   setCd('gift_' + id, GIFT_CD);
   const taste = GIRL_TASTE[gid] || {};
   const mult = taste.likes === id ? 2 : taste.meh === id ? 0.5 : 1;

@@ -1,7 +1,7 @@
 // Семья: девушка или жена иногда сама выходит на связь — задаёт вопросы, просит денег, зовёт помочь
 // или в спальню. Доверие (S.trust) растёт и падает от твоих ответов. Плюс курсовое лечение ЗППП.
 
-const PARTNER_EVERY = [7, 12]; // минут между окнами
+const PARTNER_EVERY = [14, 24]; // минут между окнами
 const TRUST_START = 70;
 
 function partner() { return S.girlfriend ? GIRLS.find((g) => g.id === S.girlfriend) : null; }
@@ -51,7 +51,7 @@ function partnerEvent() {
       <div class="btns" style="flex-direction:column;gap:8px">${shuffle(answers.map((a, i) => [a, i])).map(([a, i]) => `<button class="btn wide" data-act="pAnswer" data-id="${i}">${a[0]}</button>`).join('')}</div>`, { center: true, locked: true });
   } else if (kind === 'ask') {
     const [what, emoji, k] = pick(PARTNER_ASK);
-    const sum = Math.max(100, Math.round(ALLOWANCE[girlIdx(g.id)] * k * rand(0.8, 1.2) / 10) * 10);
+    const sum = wifeRequestCost(Math.max(100, Math.round(ALLOWANCE[girlIdx(g.id)] * k * rand(0.8, 1.2) / 10) * 10));
     PARTNER = { kind, sum, what };
     openModal(`${head}<h3>${emoji} «Дай денег ${what}!»</h3><p>${g.name} смотрит жалобными глазами. Нужно <b>${fmt(sum)} ₽</b>.</p>
       <div class="btns" style="flex-direction:column;gap:8px">
@@ -116,7 +116,8 @@ Object.assign(ACTIONS, {
   pAnswer: (i) => {
     const p = PARTNER; PARTNER = null;
     if (!p) return;
-    const [, trust, rel, mood, reply, money] = p.answers[+i];
+    const [, trust, rel, mood, reply, rawMoney] = p.answers[+i];
+    const money=wifeRequestCost(rawMoney||0);
     addTrust(trust); addRel(rel); addMood(mood);
     if (money) S.money = Math.max(0, S.money - money);
     partnerReply(trust >= 0 ? '😊' : '😠', trust >= 0 ? 'Хороший ответ' : 'Зря ты так', `${reply}${money ? `<br>−${fmt(money)} ₽` : ''}<br>Доверие ${trust >= 0 ? '+' : ''}${trust}`, trust >= 0);
@@ -158,7 +159,7 @@ Object.assign(ACTIONS, {
       return;
     }
     // Отказ — она требует доказательств любви
-    const sum = Math.max(200, Math.round(ALLOWANCE[girlIdx(g.id)] * 2 / 10) * 10);
+    const sum = wifeRequestCost(Math.max(200, Math.round(ALLOWANCE[girlIdx(g.id)] * 2 / 10) * 10));
     PARTNER = { kind: 'gift', sum };
     openModal(`<div class="big-art" style="height:96px"><div class="big-emoji" style="line-height:96px">😠</div></div>
       <h3>«Голова у него болит…»</h3><p>${g.name}: «Значит, разлюбил? Тогда докажи — купи мне подарок на <b>${fmt(sum)} ₽</b>. Или у тебя кто-то есть?!»</p>
