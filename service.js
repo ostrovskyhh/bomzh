@@ -56,34 +56,57 @@ ACTIONS.openFriendsTab = () => { closeModal(); showScreen('fun', 'friends'); };
 // =====================================================================
 // Баг-репорт и предложения — приходят админам в бота
 // =====================================================================
+let feedbackOrigin = null, feedbackSending = false;
+const feedbackDrafts = {};
+function feedbackDraft(kind) {
+  const value = (id) => String((($(id) || {}).value || '')).trim();
+  return (feedbackDrafts[kind] = { text: value('fbText'), steps: value('fbSteps'), expected: value('fbExpected'), repeat: value('fbRepeat') });
+}
+function feedbackContext(draft) {
+  return BugReport.build(feedbackOrigin, { steps: draft.steps, expected: draft.expected, repeat: draft.repeat });
+}
 ACTIONS.feedback = (kind) => {
   const bug = kind === 'bug';
-  openModal(`<h3>${bug ? '🐞 Сообщить о проблеме' : '💡 Предложить изменение'}</h3>
+  feedbackOrigin = BugReport.snapshot();
+  const draft = feedbackDrafts[kind] || {};
+  openModal(`<div class="feedback-form"><h3>${bug ? '🐞 Сообщить о проблеме' : '💡 Предложить изменение'}</h3>
     <p>${bug ? 'Что случилось и где? Например: «В “Вокзале” после конца игры окно не закрывается».' : 'Что добавить или изменить в игре? Лучшие идеи попадут в обновления.'}</p>
-    <textarea id="fbText" class="fb-text" maxlength="1000" placeholder="${bug ? 'Опиши проблему…' : 'Твоя идея…'}"></textarea>
-    <small class="fb-note">Вместе с сообщением отправятся версия игры, уровень, экран и последние действия за 5 минут — это поможет быстрее разобраться.</small>
+    <textarea id="fbText" class="fb-text" maxlength="1000" placeholder="${bug ? 'Что произошло на самом деле?' : 'Твоя идея…'}">${esc(draft.text || '')}</textarea>
+    ${bug ? `<label>Как повторить? <small>(необязательно)</small><textarea id="fbSteps" class="fb-text" maxlength="700" placeholder="1. Открыл… 2. Нажал… 3. Получил…">${esc(draft.steps || '')}</textarea></label>
+      <label>Что должно было произойти? <small>(необязательно)</small><textarea id="fbExpected" class="fb-text" maxlength="500" placeholder="Ожидал, что…">${esc(draft.expected || '')}</textarea></label>
+      <label>Повторяется? <select id="fbRepeat"><option value="unknown">Не знаю</option><option value="always" ${draft.repeat === 'always' ? 'selected' : ''}>Каждый раз</option><option value="sometimes" ${draft.repeat === 'sometimes' ? 'selected' : ''}>Иногда</option><option value="once" ${draft.repeat === 'once' ? 'selected' : ''}>Один раз</option></select></label>` : ''}
+    <small class="fb-note">К обращению приложатся до 120 последних событий за 10 минут текущего запуска, ошибки и состояние игры. Текст чатов, коды входа и платёжные данные автоматически не собираются. Если отправка не работает — скопируй отчёт и передай разработчику.</small>
     <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="feedbackSend" data-id="${kind}">Отправить</button>
-    <button class="btn wide" data-act="settings">Назад</button></div>`, { center: true });
+    <button class="btn wide" data-act="feedbackCopy" data-id="${kind}">📋 Скопировать полный отчёт</button>
+    <button class="btn wide" data-act="settings">Назад</button></div></div>`, { center: true });
   setTimeout(() => { const t = $('fbText'); if (t) t.focus(); }, 100);
 };
-ACTIONS.feedbackSend = async (kind) => {
-  const text = (($('fbText') || {}).value || '').trim();
+ACTIONS.feedbackCopy = async (kind) => {
+  const draft = feedbackDraft(kind);
+  const report = JSON.stringify({ format: 'bomzh-bug-report/v1', kind, text: draft.text, ctx: feedbackContext(draft) }, null, 2);
+  try { await navigator.clipboard.writeText(report); toast('Полный отчёт скопирован — передай разработчику', 'good'); }
+  catch (_) {
+    openModal(`<h3>Полный отчёт</h3><p>Выдели и скопируй текст целиком.</p><textarea id="fbExport" class="fb-text" readonly rows="12"></textarea><button class="btn wide" data-act="feedback" data-id="${kind}">Назад к обращению</button>`, { center: true });
+    $('fbExport').value = report; $('fbExport').select();
+  }
+};
+ACTIONS.feedbackSend = async (kind, button) => {
+  if (feedbackSending) return;
+  const draft = feedbackDraft(kind), text = draft.text;
   if (text.length < 5) { toast('Опиши чуть подробнее', 'bad'); return; }
   if (!onlineOn()) { toast('Отправка работает в игре внутри Telegram', 'bad'); return; }
-  const since = Date.now() - 5 * 60000; // последние 5 минут действий из журнала
-  const log = (S.log || []).filter((x) => x.t >= since).slice(0, 25).map((x) => ({
-    t: new Date(x.t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-    text: String(x.text || '').slice(0, 160), kind: x.kind || '',
-  }));
-  const ctx = { version: typeof CURRENT_VERSION !== 'undefined' ? CURRENT_VERSION : '', level: level(), screen: `${currentScreen}/${TABS[currentScreen] || ''}`,
-    device: (tg && tg.platform) || navigator.platform || '', size: `${window.innerWidth}×${window.innerHeight}`, money: Math.floor(S.money), city: typeof cityName === 'function' ? cityName() : '', log };
+  const ctx = feedbackContext(draft);
+  feedbackSending = true;
+  if (button) button.disabled = true;
   try {
     const r = await apiPost('feedback', { kind, text, ctx });
     if (r.error) { toast(r.error, 'bad'); return; }
+    delete feedbackDrafts[kind];
     track(kind === 'bug' ? 'bugReport' : 'ideaSent');
     closeModal();
-    resultModal({ emoji: kind === 'bug' ? '🛠️' : '💡', title: 'Спасибо!', text: kind === 'bug' ? 'Сообщение о проблеме отправлено разработчику. Постараемся исправить как можно скорее.' : 'Идея отправлена разработчику. Возможно, она появится в следующем обновлении!', btn: 'Ок' });
+    resultModal({ emoji: kind === 'bug' ? '🛠️' : '💡', title: `Обращение №${r.id || ''} принято`, text: kind === 'bug' ? 'Описание и полный диагностический отчёт сохранены для разработчика. Спасибо — это поможет найти причину!' : 'Идея сохранена для разработчика. Спасибо!', btn: 'Ок' });
   } catch (e) { toast(refErrorText(e), 'bad'); }
+  finally { feedbackSending = false; if (button && button.isConnected) button.disabled = false; }
 };
 
 // =====================================================================

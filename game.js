@@ -817,19 +817,29 @@ function netVisible() {
   });
 }
 async function netPost(url, body) {
-  const payload = JSON.stringify({ rid: Math.random().toString(36).slice(2) + Date.now().toString(36), ...body });
+  const rid = body.rid || Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const payload = JSON.stringify({ ...body, rid });
+  const route = String(url).split('?')[0].replace(/^https?:\/\/[^/]+/, '');
   let last;
   for (let i = 0; i <= NET_DELAYS.length; i++) {
     if (i) { await wait(NET_DELAYS[i - 1]); await netVisible(); }
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = ctl && setTimeout(() => ctl.abort(), 15000);
     try {
+      const sentAt = Date.now();
       const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: payload, signal: ctl && ctl.signal });
-      if (r.ok) return await r.json();
+      if (r.ok) {
+        const result = await r.json();
+        if (typeof BugReport !== 'undefined' && (result.error || Date.now() - sentAt > 3000 || !/(?:\/(?:state|health|latest|feed|get|presence)|\/save\/put)$/.test(route))) BugReport.record('api',
+          { route, rid, attempt: i + 1, status: r.status, durationMs: Date.now() - sentAt, error: BugReport.clean(result.error || '', 300) });
+        return result;
+      }
+      if (typeof BugReport !== 'undefined') BugReport.record('api-http', { route, rid, attempt: i + 1, status: r.status });
       last = new Error('http ' + r.status);
       if (r.status < 500 && r.status !== 429) throw last; // ошибка запроса — повтор не поможет
     } catch (e) {
       last = e;
+      if (typeof BugReport !== 'undefined') BugReport.record('api-failure', { route, rid, attempt: i + 1, error: BugReport.clean(e.message, 300) });
       if (String(e.message || '').startsWith('http 4')) throw e;
     } finally { if (timer) clearTimeout(timer); }
   }
@@ -1089,6 +1099,10 @@ function flyCoins(fromEl, toEl, count = 8, icon = 'coin') {
 // =====================================================================
 
 function openModal(html, { center = false, locked = false } = {}) {
+  if (typeof BugReport !== 'undefined') {
+    const heading = String(html).match(/<(?:h3|b)[^>]*>([\s\S]*?)<\/(?:h3|b)>/i);
+    BugReport.record('modal', { title: BugReport.clean(heading ? heading[1].replace(/<[^>]*>/g, '') : '', 150), locked });
+  }
   $('modalRoot').innerHTML = '';
   BJ = null;
   const back = document.createElement('div');
@@ -1150,6 +1164,7 @@ function renderScene() {
 }
 
 function onTap(e) {
+  if (typeof BugReport !== 'undefined') BugReport.record('tap');
   e.preventDefault();
   if ($('tapHint')) $('tapHint').remove();
   const valera = $('valera');
@@ -1757,6 +1772,7 @@ function renderCurrent(animate = false) {
 }
 
 function showScreen(name, tab) {
+  if (typeof BugReport !== 'undefined') BugReport.record('screen', { to: `${name}/${tab || TABS[name] || ''}` });
   currentScreen = name;
   if (tab) TABS[name] = tab;
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === 'screen-' + name));
@@ -2012,7 +2028,18 @@ document.addEventListener('click', (e) => {
   const fn = ACTIONS[b.dataset.act];
   if (!fn) return;
   if (!b.dataset.silent) sfx('click');
-  fn(b.dataset.id, b);
+  const diagnostic = typeof BugReport !== 'undefined' ? BugReport.actionStart(b.dataset.act, b.dataset.id) : null;
+  try {
+    const result = fn(b.dataset.id, b);
+    if (result && typeof result.then === 'function') result.then(
+      () => { if (diagnostic) BugReport.actionEnd(diagnostic); },
+      (err) => { if (diagnostic) BugReport.error(`action:${b.dataset.act}`, err); }
+    );
+    else if (diagnostic) BugReport.actionEnd(diagnostic);
+  } catch (err) {
+    if (diagnostic) BugReport.error(`action:${b.dataset.act}`, err);
+    throw err;
+  }
   clampStats();
   if (!modalOpen() || b.dataset.act === 'close') refresh();
   else updateHud();
@@ -2943,7 +2970,7 @@ function init() {
   $('resCaps').onclick = () => openDonate();
   $('profileBtn').onclick = openProfile;
   document.querySelectorAll('.seg button').forEach((b) => {
-    b.onclick = () => { TABS[b.closest('.seg').dataset.group] = b.dataset.tab; renderCurrent(true); haptic('light'); };
+    b.onclick = () => { if (typeof BugReport !== 'undefined') BugReport.record('tab', { to: `${b.closest('.seg').dataset.group}/${b.dataset.tab}` }); TABS[b.closest('.seg').dataset.group] = b.dataset.tab; renderCurrent(true); haptic('light'); };
   });
   document.querySelectorAll('#tabbar button').forEach((b) => { b.onclick = () => showScreen(b.dataset.screen); });
   document.addEventListener('contextmenu', (e) => e.preventDefault());

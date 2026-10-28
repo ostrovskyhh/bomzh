@@ -51,7 +51,7 @@ function queuePopup(key, prio, fn) {
 function flushPopups() {
   if (!POPUP_Q.length || popupBusy() || (typeof LOADED !== 'undefined' && !LOADED)) return;
   const q = POPUP_Q.shift();
-  try { q.fn(); } catch (e) { console.warn('popup', q.key, e); }
+  try { q.fn(); } catch (e) { if (typeof BugReport !== 'undefined') BugReport.error('popup', e, { key: q.key }); console.warn('popup', q.key, e); }
 }
 function flushModalQueue() {
   if (MG || modalOpen() || !MODAL_QUEUE.length) return;
@@ -68,7 +68,10 @@ runGame = (function (orig) {
   };
 })(runGame);
 setInterval(() => {
-  if (MG && MG.start && !MG.over && Date.now() - MG.start > MG.limit) mgEnd();
+  if (MG && MG.start && !MG.over && Date.now() - MG.start > MG.limit) {
+    if (typeof BugReport !== 'undefined') BugReport.record('minigame-watchdog', { title: MG.title, score: MG.score, elapsedMs: Date.now() - MG.start, limit: MG.limit });
+    mgEnd();
+  }
   if (!MG && !modalOpen() && MODAL_QUEUE.length) flushModalQueue();
   flushPopups();
 }, 1000);

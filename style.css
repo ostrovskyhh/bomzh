@@ -1378,6 +1378,10 @@ button:disabled { pointer-events: none; }
 .set-sec { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .set-sec .set-list { margin: 0; }
 .fb-text { width: 100%; min-height: 110px; padding: 10px; border-radius: 12px; border: 0; background: var(--card); color: var(--text); font: inherit; font-size: 14px; resize: vertical; box-sizing: border-box; }
+.feedback-form label { display: block; text-align: left; margin: 12px 0; font-size: 14px; }
+.feedback-form label small { color: var(--muted); }
+.feedback-form label .fb-text { min-height: 75px; margin-top: 6px; }
+.feedback-form select { display: block; width: 100%; margin-top: 6px; padding: 10px; border: 0; border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
 .fb-note { display: block; color: var(--muted); font-size: 11px; margin: 6px 0; }
 .bc-pop { text-align: center; }
 .bc-e { font-size: 56px; line-height: 1.2; animation: dcPop .5s cubic-bezier(.3,1.6,.5,1); }

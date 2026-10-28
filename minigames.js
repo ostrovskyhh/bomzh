@@ -56,7 +56,8 @@ let MG = null;
 
 function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
   const id = Date.now();
-  MG = { id, score: 0, over: false, timers: [], raf: null, finish };
+  MG = { id, title, score: 0, over: false, timers: [], raf: null, finish };
+  if (typeof BugReport !== 'undefined') BugReport.record('minigame-start', { id, title, duration });
   openModal(`<div class="mg">
       <div class="mg-head"><b>${title}</b><span class="mg-score"><span id="mgScore">0</span>${scoreLabel}</span></div>
       <div class="mg-time"><div id="mgTime"></div></div>
@@ -72,7 +73,11 @@ function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
     $('mgCount').remove();
     sfx('bell');
     MG.start = Date.now();
-    setup(MG);
+    try { setup(MG); }
+    catch (err) {
+      if (typeof BugReport !== 'undefined') BugReport.error('minigame-setup', err, { title });
+      throw err;
+    }
     if (duration) {
       const t = setInterval(() => {
         if (!MG || MG.id !== id || !$('mgTime')) { clearInterval(t); return; }
@@ -98,13 +103,14 @@ function mgScore(d) {
 function mgEnd() {
   if (!MG || MG.over) return;
   const mg = MG;
+  if (typeof BugReport !== 'undefined') BugReport.record('minigame-finish', { id: mg.id, title: mg.title, score: mg.score, mistakes: mg.mistakes || 0 });
   mg.over = true;
   mg.timers.forEach((t) => { clearInterval(t); clearTimeout(t); });
   if (mg.raf) cancelAnimationFrame(mg.raf);
   MG = null;
   // Если в подсчёте итогов ошибка — не оставляем игрока перед замершим полем
   try { mg.finish(mg.score, mg); }
-  catch (e) { console.error(e); closeModal(); toast('Что-то пошло не так с мини-игрой — попробуй ещё раз', 'bad'); }
+  catch (e) { if (typeof BugReport !== 'undefined') BugReport.error('minigame-finish', e, { title: mg.title, score: mg.score }); console.error(e); closeModal(); toast('Что-то пошло не так с мини-игрой — попробуй ещё раз', 'bad'); }
 }
 
 function shakeArena() {
