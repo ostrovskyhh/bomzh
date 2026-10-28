@@ -22,8 +22,9 @@ async function giftClaim() {
     save(true);
     confetti(70); sfx('jackpot');
     const pot = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍲'));
+    const yard = gifts.length && gifts.every((g) => (g.note || '').startsWith('🏡'));
     const community = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍾 За вступление'));
-    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
+    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: yard ? 'Награда за общее дело!' : pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
   } catch (e) { /* сервер выключен — заберём позже */ }
 }
 // Команды админа для этой игры (3.1): деньги ±, уровни, VIP, лечение, долги, сообщение

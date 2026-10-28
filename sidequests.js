@@ -127,7 +127,7 @@ EXTRA_TABS.tasks.side = () => {
   const freeIn = sideFreeRerollIn();
   html += `<div class="subhead">Предлагают · ${offers.length}</div><small class="sq-note">Не нравится поручение — замени: ${freeIn ? `бесплатно через <b>${leftText(freeIn)}</b> или за 🟡 ${SIDE_REROLL_CAPS}` : '<b>одна бесплатная замена доступна</b>, дальше раз в час или за 🟡 ' + SIDE_REROLL_CAPS}</small>`;
   html += offers.length ? offers.map((q) => sideCard(q).replace(/<\/div><\/div>$/, `${sideRerollBtn(q)}</div></div>`)).join('') : '<div class="info-card">Новых поручений пока нет — загляни позже (повторяемые возвращаются через несколько часов)</div>';
-  if (!inGang()) html += '<div class="info-card">Вступи в банду (Досуг → Банда) — появятся поручения банды. Они повторяются каждые несколько часов.</div>';
+  if (!inGang()) html += '<div class="info-card">Вступи в банду (Люди → Банда) — появятся поручения банды и общего двора.</div>';
   return html;
 };
 

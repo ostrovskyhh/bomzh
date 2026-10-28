@@ -79,7 +79,7 @@ const BETA_STATUS = {
   'fun:rest': () => 'бар, баня, отдых',
   'fun:dates': () => { const g = S.girlfriend && GIRLS.find((x) => x.id === S.girlfriend); return S.married ? 'семья' : g ? g.name : 'познакомься'; },
   'fun:friends': () => 'в гости, бой, КНБ',
-  'fun:clan': () => 'общак и набеги',
+  'fun:clan': () => 'свой двор и общие истории',
   'act:chat': () => 'район и банда',
   'tasks:top': () => 'рейтинг игроков',
   'tasks:story': () => { const q = currentQuest(); return q ? q.title : 'всё пройдено'; },

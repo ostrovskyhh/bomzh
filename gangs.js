@@ -48,7 +48,7 @@ EXTRA_TABS.fun.clan = () => {
   const c = CLAN.data, g = GANG.state;
   if (!c) {
     const can = level() >= CLAN_LEVEL_REQ;
-    return `<div class="premium-hero clan-hero"><div class="e">🏴</div><div><b>Банды района</b><p>Вступить можно с любого уровня. Общак, бонус к доходу до +${CLAN_BONUS * 400}%, война банд, стенка на стенку, «Котёл» и свой чат.</p></div></div>
+    return `<div class="premium-hero clan-hero"><div class="e">🏡</div><div><b>Найди своих — постройте общий двор</b><p>Вступить можно с любого уровня. Стройки, общие истории, личная репутация и награды за участие. Новичкам тоже есть чем помочь! Общак, бонусы, чат и события банды сохраняются.</p></div></div>
       <div class="subhead">Вступить · открытые банды</div>
       ${GANG.top ? gangListHTML(GANG.top.gangs, false) : '<div class="info-card">⏳ Загружаем список банд…</div>'}
       <div class="info-card">🔒 В закрытые банды вступают по ссылке-приглашению — попроси её у любого бойца.</div>
@@ -61,7 +61,7 @@ EXTRA_TABS.fun.clan = () => {
   const bonus = Math.round(clanBonus() * 100);
   const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>${g && g.motto ? `<i class="g-motto">«${esc(g.motto)}»</i>` : ''}
       <p>${g ? modeTag(g.mode) + ' · ' : ''}Общак <b>${fmt(c.treasury)} ₽</b>${bonus ? ` · +${bonus}% к доходу` : ''}<br>${g ? `⚔️ Неделя: <b>${g.place} место</b>, ${fmt(g.week)} очков` : ''}</p></div></div>
-    <div class="seg-mini gang-tabs">${[['main', '🏠 Банда'], ['games', '🎲 Игры'], ['crew', `👥 Бойцы ${c.members.length}`]].map(([id, t]) => `<button class="${GANG.tab === id ? 'on' : ''}" data-act="gangTab" data-id="${id}">${t}</button>`).join('')}</div>`;
+    <div class="seg-mini gang-tabs">${[['main', '🏡 Двор'], ['games', '🎲 Игры'], ['crew', `👥 Бойцы ${c.members.length}`]].map(([id, t]) => `<button class="${GANG.tab === id ? 'on' : ''}" data-act="gangTab" data-id="${id}">${t}</button>`).join('')}</div>`;
   if (!g) return head + '<div class="info-card">⏳ Загружаем…</div>';
   return head + (GANG.tab === 'games' ? gangGamesHTML(c, g) : GANG.tab === 'crew' ? gangCrewHTML(c, g) : gangMainHTML(c, g));
 };
