@@ -198,17 +198,21 @@ finishJob = function (j, score, mg) {
   addMoney(pay);
   addMood(j.mood);
   if (j.health) hurt(-j.health);
-  S.jobs[j.id] = jobShifts(j.id) + 1;
-  S.stats.shifts++;
-  track('shift');
-  if (j.state) track('stateShift');
-  addXp(8 + Math.min(JOBS.indexOf(j), 9) * 6);
+  // Минимальная оплата не превращает нулевой результат в выполненную смену.
+  const credited = score > 0;
+  if (credited) {
+    S.jobs[j.id] = jobShifts(j.id) + 1;
+    S.stats.shifts++;
+    track('shift');
+    if (j.state) track('stateShift');
+    addXp(8 + Math.min(JOBS.indexOf(j), 9) * 6);
+  }
   const roadNote = cfg.type === 'lanes' ? useTransport() : '';
   const stars = perf >= 1 ? 3 : perf >= 0.6 ? 2 : 1;
   const next = RANKS[r + 1];
   const promoNote = canPromote(j.id) ? `<br><br>🎖️ <b>Можно на повышение: «${posName(j.id, r + 1)}»!</b> Пройди аттестацию в «Работе»` :
     next ? `<br><small>До аттестации на «${posName(j.id, r + 1)}»: ${next.shifts - jobShifts(j.id)} смен</small>` : '';
-  const text = `${posName(j.id, r)} · результат ${score} (${Math.round(perf * 100)}%)<br>Заработано: <b style="color:var(--gold)">+${fmt(pay)} ₽</b>${roadNote}${promoNote}`;
+  const text = `${posName(j.id, r)} · результат ${score} (оплата ${Math.round(perf * 100)}%)<br>Заработано: <b style="color:var(--gold)">+${fmt(pay)} ₽</b>${roadNote}${!credited ? '<br><b>Смена не засчитана:</b> нулевой результат не даёт опыта, прогресса заданий и смен до аттестации. Набери очки в мини-игре.' : ''}${promoNote}`;
   sfx(stars === 1 ? 'lose' : 'win');
   if (stars === 3) confetti(50);
   // Чиновникам иногда заносят конверт
