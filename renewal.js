@@ -12,13 +12,13 @@ RENDER.hub[1]=renderHub;
 // Separate motifs for story, city life and casino. Existing volume/mute settings still apply.
 MAIN_MUSIC.push(['city','🌍 Музыка города']);
 syncMusic = function(){
-  if(typeof Sound==='undefined')return;
+  if(typeof Sound==='undefined'||typeof S==='undefined'||!S.settings)return;
   if(S.settings.mainMusic==='off'){Sound.music(null);return;}
   const story=currentScreen==='tasks'&&TABS.tasks==='story';
   const casinoTrack={zas:'lounge',msk:'neon',mex:'cumbia'}[city()];
   const darkTrack={zas:'chip',msk:'neon',mex:'cumbia'}[city()];
   const chosen=S.settings.mainMusic;
-  Sound.music(inCasino()?casinoTrack:story?(S.quest.path==='dark'?darkTrack:cityIdentity().music):(chosen&&chosen!=='city'?chosen:cityIdentity().music));
+  Sound.music(inCasino()?casinoTrack:story?(S.quest&&S.quest.path==='dark'?darkTrack:cityIdentity().music):(chosen&&chosen!=='city'?chosen:cityIdentity().music));
 };
 HOOKS.screen.push(syncMusic);
 const RENEWAL_EPISODES = {

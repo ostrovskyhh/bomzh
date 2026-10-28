@@ -17,6 +17,12 @@ const MX_RU = {
   '¡Clic!': 'Клик!', '¡Ringer!': 'Попал!', '¡Salvado!': 'Спас!', '¡Piña!': 'Ананас!', '¡Gracias!': 'Спасибо!',
   '¡Ladrón!': 'Вор!', '¡Oye! Кто там?': 'Эй! Кто там?', '¡Qué bonito!': 'Красиво!', '¡Mayoría!': 'Большинство!',
   '¡Rico! +2': 'Богато! +2', '¡Oye! Кто там?': 'Эй! Кто там?', '¡Qué rico!': 'Как вкусно!', '¡Claro que sí!': 'Конечно!',
+  'El Sol': 'Солнце', 'La Luna': 'Луна', 'La Estrella': 'Звезда', 'El Nopal': 'Кактус',
+  'El Pescado': 'Рыба', 'La Rosa': 'Роза', 'El Paraguas': 'Зонт', 'El Venado': 'Олень',
+  'El Gallo': 'Петух', 'La Calavera': 'Череп', 'La Sirena': 'Русалка', 'El Catrín': 'Щёголь',
+  'El Corazón': 'Сердце', 'La Sandía': 'Арбуз', 'El Tambor': 'Барабан', 'El Árbol': 'Дерево',
+  'La Rana': 'Лягушка', 'El Pájaro': 'Птица', 'La Escalera': 'Лестница', 'La Botella': 'Бутылка',
+  'El Mundo': 'Мир', 'El Alacrán': 'Скорпион', 'El Violoncello': 'Виолончель', 'La Bota': 'Сапог',
   '¡Tacos!': 'Тако!', '¡Margaritas!': 'Маргариты!', '¡Mariachi!': 'Мариачи!', '¡Libre!': 'Свободен!',
 };
 // Перевести по словарю, если есть совпадение — иначе оставить как есть
@@ -350,7 +356,7 @@ function mxLoteria(mg, cfg) {
     const c = left.length && Math.random() < (cfg.hit || 0.62) ? pick(left) : pick(LOTERIA);
     called = [c[1], ...called].slice(0, 2);
     $('ltE').textContent = cfg.words ? '🎴' : c[0];
-    $('ltN').textContent = cfg.words ? `¡${c[1]}!` : c[1];
+    $('ltN').textContent = cfg.words ? `¡${c[1]}!${cfg.learn ? ' — ' + mxRu(c[1]) : ''}` : c[1];
     $('ltC').textContent = cfg.calls ? `${calls} карт` : '';
     sfx('chip');
     $('ltE').animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0)' }], { duration: 250 });
@@ -809,7 +815,7 @@ startLessonGame = (function (orig) {
     if (city() !== 'mex' || stage < 1 || stage > 4) { orig(stage); return; }
     const need = Math.max(2, Math.round([0, 7, 10, 8, 9][stage] * (hasEffect('t_focus') ? 0.75 : 1)));
     const games = {
-      1: { name: 'Лотерия: слова', hint: `Ведущий кричит слово по-испански — найди картинку. Набери ${need}`, setup: (mg) => mxLoteria(mg, { words: true, score: 'marks', size: 3, every: 2.6, hit: 0.8 }) },
+      1: { name: 'Лотерия: слова', hint: `Прочитай слово и русский перевод — нажми подходящую картинку. Набери ${need}`, setup: (mg) => mxLoteria(mg, { words: true, learn: true, score: 'marks', size: 3, every: 2.6, hit: 0.8 }) },
       2: { name: 'Испанский: слова', hint: `Слово падает — выбери перевод. Набери ${need}`, setup: (mg) => mxWords(mg, {}) },
       3: { name: 'Испанский: числа', hint: `Найди дом с номером, названным по-испански. Набери ${need}`, setup: (mg) => mxCalle(mg, { hintUntil: 2 }) },
       4: { name: '¿Verdad o mentira?', hint: `Смахивай карточку: вправо — правда, влево — ложь. Набери ${need}`, setup: (mg) => mxQuiz(mg, { limit: 5500, gen: () => { const [t, v] = pick(MX_TF); return { q: t, a: v ? 'Verdad' : 'Mentira', opts: ['Mentira', 'Verdad'] }; } }) },

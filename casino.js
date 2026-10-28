@@ -3,7 +3,8 @@
 
 function inCasino() { return currentScreen === 'fun' && TABS.fun === 'casino' && level() >= CASINO_LEVEL; }
 function syncMusic() { if (typeof Sound !== 'undefined') Sound.music(inCasino() ? 'lounge' : null); }
-HOOKS.screen.push(syncMusic);
+// Берём актуальную функцию: следующие модули добавляют музыку города и настройки.
+HOOKS.screen.push(() => syncMusic());
 document.addEventListener('visibilitychange', () => { if (!document.hidden) syncMusic(); });
 
 const CASINO_GAMES = [
