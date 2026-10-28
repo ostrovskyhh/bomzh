@@ -720,7 +720,7 @@ EXTRA_TABS.tasks.prestige = () => `
 function prestigeProfile() {
   const keys = [
     'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial',
-    'cosm', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
+    'cosm', 'bottleSkin', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
     'pass', 'passFrame', 'frame', 'avatar', 'aura', 'tapFx', 'avatarsSeen',
     'ach', 'achNotified', 'achProgress', 'coll', 'counters', 'stats', 'casinoStats',
     'settings', 'name', 'log', 'play', 'daily', 'tasks', 'weekly', 'seasonCur',

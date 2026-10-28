@@ -62,6 +62,7 @@ function rollJobLoot(jobId) {
 const _finishJobLoot = finishJob;
 finishJob = function (j, score, mg) {
   _finishJobLoot(j, score, mg);
+  if (!(score > 0)) return;
   const perf = clamp(score / ((JOB_GAMES[j.id] && JOB_GAMES[j.id].target) || 1), 0, 1.25);
   const rank = typeof jobRank === 'function' ? jobRank(j.id) : 0;
   if (Math.random() > JOB_LOOT_CHANCE * (0.6 + perf * 0.5) * (1 + rank * 0.08)) return;

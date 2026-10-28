@@ -191,7 +191,7 @@ let KICKBACK = null;
 
 finishJob = function (j, score, mg) {
   const cfg = JOB_GAMES[j.id];
-  const perf = shiftPerf(j, score, mg);
+  const perf = score > 0 ? shiftPerf(j, score, mg) : 0;
   const r = jobRank(j.id);
   const road = cfg.type === 'lanes' ? 1 + transportJobBonus() : 1;
   const pay = Math.round(j.pay * perf * mods().work * POS_MULT[r] * road * (j.physical ? 1 + S.strength / 200 : 1));
@@ -216,7 +216,7 @@ finishJob = function (j, score, mg) {
   sfx(stars === 1 ? 'lose' : 'win');
   if (stars === 3) confetti(50);
   // Чиновникам иногда заносят конверт
-  if (j.official && Math.random() < KICKBACK_CHANCE) {
+  if (credited && j.official && Math.random() < KICKBACK_CHANCE) {
     KICKBACK = { job: j.id, sum: Math.round(pay * rand(1.2, 2.5)) };
     openModal(`<div class="big-art"><div class="rays"></div><div class="big-emoji">✉️</div></div>
       <h3>${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)} Смена окончена</h3><p>${text}</p>

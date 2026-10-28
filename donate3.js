@@ -238,7 +238,7 @@ function dcOpen(id) {
 
 // ---------- Окно доната ----------
 let DN_TAB = 'caps', DN_STYLE = 'fx';
-const DN_TABS = [['caps', '🟡', 'Крышки'], ['sets', '🎁', 'Наборы'], ['cases', '🎰', 'Кейсы'], ['style', '✨', 'Стиль'], ['spend', '💱', 'Обмен']];
+const DN_TABS = [['caps', '🟡', 'Крышки'], ['sets', '🎁', 'Наборы'], ['cases', '🎰', 'Кейсы'], ['style', '✨', 'Стиль'], ['bottles', '🍾', 'Бутылки'], ['spend', '💱', 'Обмен']];
 
 function dnStars(id, stars, full) {
   return `<button class="dn-buy" data-act="prem" data-id="${id}">${starPrice(stars, full)}</button>`;
@@ -335,7 +335,7 @@ function dnSpendTab() {
 donateHTML = function donate41() {
   const p = promoAt();
   const banner = p ? `<div class="dn-banner"><span>${p.emoji}</span><div><b>Акция: ${p.title}</b><small>${p.desc} · осталось <span data-until="${p.ends}"></span></small></div></div>` : '';
-  const body = { caps: dnCapsTab, sets: dnSetsTab, cases: dnCasesTab, style: dnStyleTab, spend: dnSpendTab }[DN_TAB](p);
+  const body = { caps: dnCapsTab, sets: dnSetsTab, cases: dnCasesTab, style: dnStyleTab, bottles:()=>bottleShopHTML(true), spend: dnSpendTab }[DN_TAB](p);
   return `<div id="donateBox" class="donate">
     <div class="dn-hero"><div class="dn-shine"></div>
       <small>ЗОЛОТЫЕ КРЫШКИ</small><div class="dn-balance"><span>🟡</span>${fmt(S.caps)}</div>

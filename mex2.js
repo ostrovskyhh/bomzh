@@ -458,7 +458,7 @@ function mxLucha(mg, cfg) {
       const fin = combo % 3 === 0;
       mxHit($('lcF'), fin ? cfg.finText || 'Планка! +2' : 'Отлично!', fin ? 2 : 1);
       $('lcF').animate([{ transform: 'translateX(-50%) rotate(0)' }, { transform: `translateX(-50%) rotate(${fin ? 180 : 20}deg) scale(.9)` }, { transform: 'translateX(-50%) rotate(0)' }], { duration: 350 });
-      win = Math.max(0.42, win * 0.96);
+      win = Math.max((cfg.minWindow || 420) / 1000, win * 0.96);
     } else { combo = 0; mxMiss(mg, $('lcF'), 'Не тот приём!', 1); if (cfg.maxMiss && mxOut(mg, cfg.maxMiss)) return; }
     setIdle();
   }));
@@ -784,7 +784,7 @@ Object.assign(MEX_JOB_GAMES, {
   dvornik: { engine: mxAgave, title: 'Пляж до прилива', hint: 'Убирай мусор, пока волна не унесла его в океан. Черепашек 🐢 не трогай!', ripe: ['🥤', '🍾', '🛍️', '🩴', '🥫'], empty: '', bad: ['🐢', '🦀'], badRate: 0.18, rotPenalty: true, rotText: '🌊 Унесло!', ripeT: [1.3, 2.1], minLife:1.1, minSpeed:.65, bg: 'mx-beach', target: 20 },
   postman: { engine: mxCalle, title: 'Почтальон: улицы Веракруса', hint: 'Прочитай название числа и русский номер дома. Найди дом и отдай письмо', learn:true, target: 14 },
   cook: { engine: mxComal, title: 'Тортильи на комале', hint: 'Переворачивай, когда кольцо золотое, и снимай со второй стороны. Передержал — сгорит', items: ['🫓', '🫓', '🌮'], target: 14 },
-  police: { engine: mxLucha, title: 'Задержание на рынке', hint: 'Воришка — бывший лучадор! Смотри, какой приём он готовит, и отвечай: удар — блок, подсечка — прыжок, захват — уклон', foe: '🥷', me: '👮', target: 14 },
+  police: { engine: mxLucha, title: 'Задержание на рынке', hint: 'Воришка — бывший лучадор! Смотри, какой приём он готовит, и отвечай: удар — блок, подсечка — прыжок, захват — уклон. На ответ от 1,5 до 0,8 секунды', foe: '🥷', me: '👮', window:1500, minWindow:800, target: 14 },
   teacher: { engine: mxWords, title: 'Русский для гринго', hint: 'Слово падает — выбери перевод на русский, пока не упало', target: 14 },
   clerk: { engine: mxJudge, title: 'Печати муниципалитета', hint: 'Правило сверху меняется! «Одобрено» — если документ по правилу, иначе «Отказано»', limit: 3000, target: 16,
     buttons: [['✅<small>Одобрено</small>', 'y'], ['❌<small>Отказано</small>', 'n']],

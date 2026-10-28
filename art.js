@@ -221,10 +221,7 @@ function valeraSVG(eq, look = {}) {
   ${b.extra}
   <g class="bottle-arm">
     <rect x="110" y="100" width="20" height="50" rx="10" fill="${b.jacket}" transform="rotate(-25 120 104)"/>
-    <rect x="132" y="108" width="14" height="36" rx="4" fill="#5FA05A"/>
-    <rect x="135" y="97" width="8" height="13" rx="2" fill="#5FA05A"/>
-    <rect x="134" y="118" width="10" height="10" fill="#F2E6B8"/>
-    <rect x="135" y="93" width="8" height="5" rx="1" fill="#C9A23A"/>
+    ${typeof bottleHandSVG==='function'?bottleHandSVG(look.bottle):'<rect x="132" y="108" width="14" height="36" rx="4" fill="#5FA05A"/><rect x="135" y="97" width="8" height="13" rx="2" fill="#5FA05A"/><rect x="134" y="118" width="10" height="10" fill="#F2E6B8"/><rect x="135" y="93" width="8" height="5" rx="1" fill="#C9A23A"/>'}
     <circle cx="139" cy="146" r="9" fill="${SKIN}"/>
   </g>
   <rect x="72" y="84" width="16" height="14" fill="${SKIN_DARK}"/>
