@@ -70,9 +70,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { sav
 // Приглашение: ссылка t.me/бот?start=ref_код и история в Telegram
 // =====================================================================
 
-const STORY_REWARD = 5000;
 function refLink() { return REF && BOT_LINK ? `${BOT_LINK}?start=ref_${REF.code}` : BOT_LINK; }
-function storyImage() { return new URL('story.jpg', location.href).href; }
+function storyImage() { return new URL('assets/story-promo-446.png', document.baseURI).href; }
 function canStory() { return !!(tg && tg.shareToStory && tg.isVersionAtLeast && tg.isVersionAtLeast('7.8')); }
 
 // Друг пришёл по ссылке — код подставляется сам
@@ -97,22 +96,7 @@ ACTIONS.refShare = () => {
 
 Object.assign(ACTIONS, {
   refAccept: (code) => { closeModal(); useRefCode(code); },
-  storyShare: () => {
-    if (!REF) { toast('Код ещё загружается, попробуй через пару секунд'); return; }
-    if (!canStory()) { toast('Обнови Telegram — истории из игр доступны с версии 7.8', 'bad'); return; }
-    const premium = !!(tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.is_premium);
-    const text = `Поднимаюсь со дна в «Симуляторе бомжа» 🍾 Мой код ${REF.code.toUpperCase()} — +1000 ₽ на старте! ${refLink()}`.slice(0, 200);
-    try {
-      tg.shareToStory(storyImage(), premium ? { text, widget_link: { url: refLink(), name: 'Играть' } } : { text });
-    } catch (e) { toast('Не получилось открыть редактор истории', 'bad'); return; }
-    track('storyShare');
-    if (!S.storyRewarded) {
-      S.storyRewarded = true;
-      addMoney(STORY_REWARD);
-      save();
-      setTimeout(() => resultModal({ emoji: '📸', title: 'Спасибо за историю!', text: `+${fmt(STORY_REWARD)} ₽. Друзья увидят твой код и ссылку на игру.`, btn: 'Класс' }), 600);
-    }
-  },
+  storyShare: () => storyPromoShare(),
 });
 
 // Кнопка истории — в блоке «Пригласи друга» в настройках
@@ -120,7 +104,7 @@ const _refBoxHTML = refBoxHTML;
 refBoxHTML = () => {
   const html = _refBoxHTML();
   if (!REF) return html;
-  return html + `<button class="btn primary wide story-btn" data-act="storyShare">📸 Выложить историю${S.storyRewarded ? '' : ` · +${fmt(STORY_REWARD)} ₽`}</button>`;
+  return html + `<button class="btn primary wide story-btn" data-act="storyShare">📸 Поделиться историей</button>`;
 };
 
 // =====================================================================

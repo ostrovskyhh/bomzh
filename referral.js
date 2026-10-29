@@ -57,7 +57,7 @@ async function useRefCode(word) {
     save();
     confetti(60);
     sfx('levelup');
-    resultModal({ emoji: '🎁', title: 'Подарок от друга!', text: `Код друга${res.owner ? ` (${esc(res.owner)})` : ''} принят!<br><b style="color:var(--gold)">+${fmt(res.bonus)} ₽</b> и опыт ×${REF_BOOST_MULT} на ${REF_BOOST_MIN} минут.`, btn: 'Спасибо!' });
+    resultModal({ emoji: '🎁', title: 'Подарок от друга!', text: `Код друга${res.owner ? ` (${esc(res.owner)})` : ''} принят!<br><b style="color:var(--gold)">+${fmt(res.bonus)} ₽</b> и опыт ×${REF_BOOST_MULT} на ${REF_BOOST_MIN} минут.${res.level5Caps?'<br>🎯 Ещё <b>50 крышек</b> — при достижении 5-го уровня. Награда придёт подарком автоматически.':''}`, btn: 'Спасибо!' });
   } catch (e) { toast(refErrorText(e), 'bad'); }
 }
 

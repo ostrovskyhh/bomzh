@@ -24,7 +24,8 @@ async function giftClaim() {
     const pot = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍲'));
     const yard = gifts.length && gifts.every((g) => (g.note || '').startsWith('🏡'));
     const community = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍾 За вступление'));
-    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: yard ? 'Награда за общее дело!' : pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
+    const promo = gifts.length && gifts.every(g => (g.note||'').startsWith('📣 Первый новый')||(g.note||'').startsWith('🎁 Приглашение друга:'));
+    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: promo ? '📣' : yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: promo ? 'Награда за приглашение!' : yard ? 'Награда за общее дело!' : pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
   } catch (e) { /* сервер выключен — заберём позже */ }
 }
 // Команды админа для этой игры (3.1): деньги ±, уровни, VIP, лечение, долги, сообщение

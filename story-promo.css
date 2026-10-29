@@ -1,0 +1,10 @@
+.story-promo h3 { margin-bottom:8px; }
+.story-promo .story-reward { display:block; font-size:21px; font-weight:800; color:var(--gold); }
+.story-promo .story-poster { display:block; width:144px; height:256px; object-fit:contain; margin:14px auto; border-radius:14px; }
+.story-promo .story-copy { text-align:left; font-size:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.story-promo .story-variants { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0; }
+.story-promo .story-variants .btn { min-height:40px; font-size:11px; flex:1; }
+.story-promo details { text-align:left; margin:12px 0; font-size:13px; }
+.story-promo details p { margin:8px 0; }
+.story-promo .story-native-note { display:block; font-size:11px; line-height:1.4; margin:7px 0; color:var(--muted); }
+.story-promo .story-rule { font-weight:600; font-size:13px; }
