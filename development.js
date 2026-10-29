@@ -116,6 +116,7 @@ function assemblyLaws(){
   return names.map((title,i)=>({title,text:['Жители просят безопасную дорогу домой.','Транспорт нужен жителям и работникам.','Местные мастера хотят провести праздник.','Сеть износилась; откладывать ремонт рискованно.'][i],yes:[[-22,18],[-18,14],[-15,12],[-20,18]][i],no:[[3,-12],[5,-12],[8,-8],[0,-20]][i]}));
 }
 function assemblyGame(mg){
+  $('mgArena').classList.add('fr-arena','city-game-arena','assembly-arena');
   const laws=assemblyLaws(),log=[];let index=0,budget=75,support=55,answered=false;const began=performance.now();mg.limit=Infinity;
   const render=()=>{
     if(!mgAlive(mg))return;
