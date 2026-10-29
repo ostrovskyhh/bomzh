@@ -1465,7 +1465,7 @@ function renderShop() {
 
   if (tab === 'clothes') {
     html = `<div class="info-card">Приличная одежда открывает работу и девушек, но милостыню в ней почти не подают: в лохмотьях — 100%, в базовой — 40%, в приличной — 10%, в деловой — 0%.</div>` +
-      Object.keys(CLOTHES).map((slot) => `<div class="subhead">${SLOT_NAMES[slot]}</div>` + CLOTHES[slot].filter((it) => !it.season || S.owned[slot].includes(it.id)).map((it) => {
+      Object.keys(CLOTHES).map((slot) => `<div class="subhead">${SLOT_NAMES[slot]}</div>` + CLOTHES[slot].filter((it) => !it.caps && (!it.season || S.owned[slot].includes(it.id))).map((it) => {
       const owned = S.owned[slot].includes(it.id), worn = S.eq[slot] === it.id;
       const bonuses = joinFx([it.tap ? `+${it.tap} за тап` : '', it.energy ? `+${it.energy} энергии` : '', it.crit ? `+${Math.round(it.crit * 100)}% крит` : '', it.mood ? `+${it.mood} радости/мин` : '', it.pity ? `+${Math.round(it.pity * 100)}% милостыни` : '', it.ach ? '🏅 за достижение' : it.pvp ? '🏆 за драки' : it.season ? '🎃 сезонная' : '']) || 'Без бонусов';
       let btn;

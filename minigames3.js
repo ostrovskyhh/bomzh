@@ -426,13 +426,15 @@ function gameCatch(mg, cfg) {
     if (next <= 0) {
       next = Math.max(0.4, 0.8 - t * 0.02);
       const good = Math.random() < cfg.goodRate;
-      objs.push({ good, x: rand(0.08, 0.92), y: -0.08, v: rand(0.35, 0.5) + t * 0.01, el: mgEl(arena, 'ct-obj', pick(good ? cfg.good : cfg.bad)) });
+      const item = pick(good ? cfg.good : cfg.bad);
+      objs.push({ good, item, x: rand(0.08, 0.92), y: -0.08, v: rand(0.35, 0.5) + t * 0.01, el: mgEl(arena, 'ct-obj', item) });
     }
     for (let i = objs.length - 1; i >= 0; i--) {
       const o = objs[i];
       o.y += o.v * dt;
       o.el.style.left = o.x * 100 + '%'; o.el.style.top = o.y * 100 + '%';
       if (o.y > 0.8 && o.y < 0.92 && Math.abs(o.x - x) < 0.11) {
+        if (cfg.onCatch) cfg.onCatch(o.item, o.good);
         if (o.good) { mgScore(1); sfx('coin'); } else { mgScore(-1); sfx('error'); haptic('error'); shakeArena(); floatAt(bask, cfg.badText || 'Фу!', 'bad'); }
         o.el.remove(); objs.splice(i, 1);
       } else if (o.y > 1.05) { o.el.remove(); objs.splice(i, 1); }

@@ -98,7 +98,7 @@ function doCrime(id) {
   setCd('crime_' + c.id, c.cd);
   runGame({ title: `${c.emoji} ${c.game.title}`, hint: c.game.hint, duration: c.game.duration, setup: c.game.setup, finish: (score, mg) => {
     const perf = clamp(score / c.game.max - (mg.mistakes || 0) * 0.05, 0, 1.2);
-    const loot = perf > 0.15 ? c.reward(perf, mg) : 0;
+    const loot = c.quantityReward || perf > 0.15 ? c.reward(perf, mg) : 0;
     S.wanted = Math.min(WANTED_MAX, (S.wanted || 0) + c.wanted);
     S.wantedAt = Date.now();
     track('crime');
@@ -108,7 +108,7 @@ function doCrime(id) {
     if (typeof dropCollectible === 'function' && Math.random() < 0.25) dropCollectible('crime');
     track('crimeOk');
     resultModal({ emoji: c.id === 'car' && S.lastCar ? S.lastCar.emoji : '💰', title: c.id === 'car' && S.lastCar ? `Угнал ${S.lastCar.name}!` : 'Дело сделано',
-      text: `${c.id === 'car' ? 'Кривой перегнал тачку на разборку: ' : ''}+${fmt(loot)} ₽<br>Розыск: ${wantedStars()}`, btn: 'Тсс…' });
+      text: `${c.receipt ? c.receipt(mg,loot) : `${c.id === 'car' ? 'Кривой перегнал тачку на разборку: ' : ''}+${fmt(loot)} ₽`}<br>Розыск: ${wantedStars()}`, btn: 'Тсс…' });
     sfx('coin'); save();
   } });
 }
