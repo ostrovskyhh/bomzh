@@ -83,7 +83,7 @@ function bottleShopHTML(premium=false) {
     <div class="bottle-grid">${list.map(b=>`<button class="bottle-card ${bottleCurrent().id===b.id?'selected':''} ${bottleUnlocked(b)?'':'bt-locked'}" data-act="bottleInfo" data-id="${premium?'donate':'clothes'}:${b.id}">${bottlePreview(b)}<b>${b.name}</b><small>${bottleCurrent().id===b.id?'✓ Надето':bottleOwned(b)?'В коллекции':!bottleUnlocked(b)?'🔒 '+bottleUnlockText(b):bottlePrice(b)}</small><span>Посмотреть</span></button>`).join('')}</div>
     ${!premium?'<button class="btn wide" data-act="bottleDonate">✨ Анимированные бутылки · донат</button>':''}</section>`;
 }
-EXTRA_TABS.shop.clothes=(function(orig){return ()=>bottleShopHTML(false)+orig();})(EXTRA_TABS.shop.clothes);
+// Bottle skins have their own shop section; clothing remains clothing.
 EXTRA_TABS.shop.bottles=()=>bottleShopHTML(false);
 // An explicit tile keeps cash bottles discoverable alongside clothes and housing.
 BETA_HUBS.find(h=>h.id==='me').groups.find(([title])=>title==='Дом и вещи')[1].push({s:'shop',t:'bottles',act:'bottleShop',id:'bottles',e:'🍾',n:'Бутылки'});

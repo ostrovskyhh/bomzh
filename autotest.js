@@ -245,10 +245,12 @@
     await sl(5600); closeModal();
     // Админ-панель: все вкладки открываются без ошибок
     S.admin = true; let admOk = true;
-    for (const [id] of ADM4_TABS) { try { ADM_TAB = id; ADMP.card = null; openAdmin(); if (!document.querySelector(`.adm4[data-tab="${id}"]`)) admOk = false; } catch (e) { admOk = false; } }
-    ADMP.card = { uid: 1, name: 'Тест', seen: 0, stats: { level: 5 }, save: { money: 1, caps: 2, city: 'zas' }, bans: {} }; ADM_TAB = 'players';
-    try { openAdmin(); if (!document.querySelector('.adm4-card-sec')) admOk = false; } catch (e) { admOk = false; }
-    ADMP.card = null; closeModal();
+    A6.schema={groups:{wallet:'Деньги'},roots:{money:{group:'wallet',label:'Деньги'}},catalog:{cities:{zas:{name:'Засранск'}}}};
+    A6.list={players:[],total:0};A6.audit={operations:[],events:[],total:0};
+    for (const [id] of A6_TABS) { try { ADM_TAB=id;A6.card=null;openAdmin();if(!document.querySelector(`.adm4[data-tab="${id}"]`))admOk=false;} catch(e){admOk=false;} }
+    A6.card={player:{uid:1,name:'Тест',last_seen:0},rev:1,hasSave:true,values:{money:1},reports:[],log:[],pending:{},gang:{},bans:[]};ADM_TAB='players';A6.group='wallet';
+    try {openAdmin();if(!document.querySelector('.a6-player-head')||!document.querySelector('.a6-leaf'))admOk=false;}catch(e){admOk=false;}
+    A6.card=null;A6.schema=null;A6.list=null;A6.audit=null;closeModal();
     check('админ-панель: все вкладки и карточка игрока', admOk);
     // 4.5: «Что внутри» у наборов, VIP, пропуска и набора новичка; редактор рассылки
     let dniOk = true;
