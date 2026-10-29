@@ -83,3 +83,67 @@ managedOwnedAchievement.fn=(function(orig){return ()=>orig()+managedBusinesses()
 ACHS.push({id:'managedIncome',name:'Бизнес без границ',emoji:'🏢',fn:()=>S.stats.managedEarned||0,goals:[10000,100000,1000000,10000000],unit:'получено от управляющей компании'});
 // Managed property remains available in the existing divorce-property rules.
 divorceAssets=(function(orig){return ()=>[...orig(),...managedBusinesses().map(e=>({id:'managed:'+e.key,emoji:e.emoji,name:e.name+' · '+e.cityName,value:e.investment+(e.opening||0)+(e.pending||0)*.4}))].sort((a,b)=>b.value-a.value);})(divorceAssets);
+
+// A company call explains both new handoffs and evidence-backed legacy recovery.
+const COMPANY={entries:[],loaded:false,busy:false,queued:'',nextCheck:0};
+function companyEntries(){const seen=new Set(managedBusinesses().map(e=>e.key));return [...managedBusinesses(),...COMPANY.entries.filter(e=>!seen.has(e.key))];}
+function companySignature(){return companyEntries().map(e=>e.key).sort().join('|');}
+function companyEstimate(e,now=businessNow()){
+  if(now===null)return null;const r=managedSnapshot(e),profit=managedAccrual(r,now,now+MANAGED_PERIOD),fee=profit*MANAGED_FEE;
+  return {profit,fee,share:Math.floor(profit-fee+1e-8),pocket:businessPocket(Math.floor(profit-fee+1e-8))};
+}
+function companyInfo(){
+  const list=companyEntries(),pending=new Set(COMPANY.entries.map(e=>e.key)),now=businessNow();
+  const amounts=list.map(e=>companyEstimate(e,now)),total=amounts.every(Boolean)?amounts.reduce((s,a)=>s+a.pocket,0):null;
+  openModal(`<h3>🏢 Твои бизнесы под управлением</h3><p>Сначала вычитаются зарплаты и обычный налог 10%. Из оставшейся прибыли компания получает 60%, тебе — 40%. Алименты, если есть, удерживаются с твоей доли.</p>
+    <div class="info-card"><b>Ожидаемо за следующие 6 часов: ${total===null?'проверяем время сервера':incomeMoney(total)}</b><p>Это прогноз при нынешних бонусах. Окончание VIP внутри периода уже учтено; изменение бонусов или алиментов изменит сумму.</p></div>
+    ${list.map((e,i)=>{const a=amounts[i],restore=pending.has(e.key);return `<div class="info-card"><b>${esc(e.emoji)} ${esc(e.name)}</b><p>${esc(e.cityName)} · уровень ${e.lvl}/${BIZ_MAX_LVL}${restore?' · восстановление по сохранённым данным':''}</p>${a?`<p>Прибыль за 6 ч: ${incomeMoney(a.profit)}<br>Услуги компании (60%): ${incomeMoney(a.fee)}<br>Твоя доля (40%): ${incomeMoney(a.share)}${a.pocket!==a.share?`<br>После алиментов: ${incomeMoney(a.pocket)}`:''}</p>`:'<p>Расчёт появится после проверки времени сервера.</p>'}<small>${restore?'Первый платёж — через 6 часов после согласия. Старые кассы и доход до восстановления не начисляются.':`До ближайшей выплаты: ${managedDueText(e,now)}. Остаток старой кассы, если есть, учитывается отдельно.`}</small></div>`;}).join('')}
+    <p>За время отсутствия полные периоды накапливаются и выплачиваются при входе. Престиж сбрасывает все эти предприятия. Подробности всегда доступны: Деньги → Бизнес → Управляющая компания.</p>
+    <p id="companyError" role="status"></p><div class="btns">${COMPANY.entries.length?'<button class="btn primary wide" data-act="companyAccept">Передать компании и запустить доход</button><button class="btn wide" data-act="companyLater">Решу позже</button>':'<button class="btn primary wide" data-act="companyAcknowledge">Понятно</button>'}</div>`,{center:true});
+}
+function companyFrames(){return [
+    {bg:S.housing,actors:[{a:'valera',x:40,anim:'bounce',say:'Алло? Слушаю!'}],props:[{e:'📱',x:73,y:32,anim:'shake'}],text:'Валере звонят из управляющей компании «Твоё дело».'},
+    {bg:'gold',actors:[{a:'manager',x:35,anim:'in-right',say:'У вас остались предприятия в прежних городах.'},{a:'valera',x:77,anim:'in-left'}],props:[{e:'🏢',x:58,y:25,anim:'float'}],text:'Управляющий предлагает взять на себя ежедневные заботы о бизнесах.'},
+    {bg:'gold',actors:[{a:'manager',x:28,say:'Из прибыли 60% компании, 40% — вам.'},{a:'valera',x:77,mood:'happy',say:'А когда выплата?'}],props:[{e:'🧾',x:54,y:35,anim:'float'}],text:'Зарплаты и обычный налог учитываются до раздела прибыли. Владелец сохраняет свои предприятия и их уровни.'},
+    {bg:S.housing,actors:[{a:'valera',x:50,mood:'happy',anim:'bounce',say:'Покажите расчёт по каждому адресу!'}],props:[{e:'🕕',x:78,y:30,anim:'float'}],text:'Расчёт каждые шесть часов. После разговора — список предприятий, комиссия и твоя ожидаемая выплата.'},
+  ];}
+CUTS.company_business=companyFrames();CUT_TITLES.company_business='📱 Звонок управляющей компании';
+HOOKS.load.push(()=>{CUTS.company_business=companyFrames();});
+function companyCall(){
+  if(!companyEntries().length)return;S.companyLaterUntil=Date.now()+2*3600000;save();
+  CUTS.company_business=companyFrames();CUT_TITLES.company_business='📱 Звонок управляющей компании';playCutscene('company_business',companyInfo);
+}
+function companyAcknowledge(){S.companySeenKeys=[...new Set([...(S.companySeenKeys||[]),...companyEntries().map(e=>e.key)])];S.companyLaterUntil=0;save();closeModal();}
+function companyCheck(){
+  if(!LOADED||SAVE_LOCK||document.hidden||!(currentScreen==='game'||currentScreen==='life'&&TABS.life==='business'))return;
+  const list=companyEntries(),seen=new Set(S.companySeenKeys||[]),sig=companySignature();
+  if(!list.some(e=>!seen.has(e.key))||(S.companyLaterUntil||0)>Date.now()||COMPANY.queued===sig)return;
+  COMPANY.queued=sig;queuePopup('company-call',2,()=>{COMPANY.queued='';if(companyEntries().some(e=>!(S.companySeenKeys||[]).includes(e.key)))companyCall();});
+}
+async function companyLoad(){
+  if(!onlineOn()||SAVE_LOCK||COMPANY.busy)return;
+  try{const r=await apiPost('business/recovery');COMPANY.entries=(Array.isArray(r.entries)?r.entries:[]).filter(e=>!managedBusinesses().some(x=>x.city===e.city&&x.id===e.id));COMPANY.loaded=true;if(currentScreen==='life'&&TABS.life==='business')renderCurrent(false);companyCheck();}catch(e){/* Offer is durable; retry when the player returns. */}
+}
+async function companyAccept(){
+  if(COMPANY.busy||!COMPANY.entries.length)return;COMPANY.busy=true;let locked=false;
+  const button=document.querySelector('[data-act="companyAccept"]');if(button)button.disabled=true;
+  try{
+    if(!onlineOn()||!serverReady||SAVE_LOCK)throw Error('Нужно подключение к серверу игры. Попробуй ещё раз.');
+    save();for(let i=0;i<5;i++){await serverWrite();if(!srvBusy&&serverBase>=(S.rev||0))break;await wait(300);}
+    if(srvBusy||serverBase<(S.rev||0)||SAVE_LOCK)throw Error('Не удалось сохранить прогресс. Попробуй ещё раз через несколько секунд.');
+    SAVE_LOCK=true;locked=true;
+    const r=await apiPost('business/recover',{base:serverBase,device:DEVICE_ID});if(!r.ok)throw Error(r.error||'Предложение обновилось. Перезайди в раздел бизнеса.');
+    for(const e of r.entries||[])if(!managedBusinesses().some(x=>x.key===e.key))managedBusinesses().push(e);
+    S.companyRecoveryClaims=[...new Set([...(S.companyRecoveryClaims||[]),r.plan])];serverBase=Math.max(serverBase,r.rev||0);S.rev=Math.max(S.rev||0,r.rev||0);REV_FLOOR=Math.max(REV_FLOOR,r.rev||0);
+    COMPANY.entries=[];SAVE_LOCK=false;locked=false;save(true);companyInfo();toast('Предприятия переданы компании. Первый платёж — через 6 часов.','good');
+  }catch(e){COMPANY.loaded=false;const el=$('companyError');if(el)el.textContent=String(e.message||'Не удалось связаться с компанией. Попробуй ещё раз.');}
+  finally{if(locked)SAVE_LOCK=false;COMPANY.busy=false;const b=document.querySelector('[data-act="companyAccept"]');if(b)b.disabled=false;}
+}
+ACTIONS.companyAccept=companyAccept;ACTIONS.companyAcknowledge=companyAcknowledge;ACTIONS.companyCall=companyCall;ACTIONS.companyInfo=companyInfo;
+ACTIONS.companyLater=()=>{S.companyLaterUntil=Date.now()+2*3600000;save();closeModal();};
+const companyBusinessDashboard=EXTRA_TABS.life.business;
+EXTRA_TABS.life.business=()=>`${companyEntries().length?'<div class="info-card"><b>🏢 Управляющая компания «Твоё дело»</b><p>Твои предприятия прежних городов и расчёт выплат.</p><button class="btn primary" data-act="companyInfo">Условия и мои выплаты</button><button class="btn" data-act="companyCall">📱 Пересмотреть звонок</button></div>':''}${companyBusinessDashboard()}`;
+HOOKS.init.push(()=>{setTimeout(companyLoad,5000);setInterval(()=>{if(!document.hidden&&!COMPANY.loaded)companyLoad();},60000);});
+HOOKS.tick.push(()=>{if(Date.now()<COMPANY.nextCheck)return;COMPANY.nextCheck=Date.now()+3000;companyCheck();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)companyLoad();});
+performPrestige=(function(orig){return function(){const before=S.prestige;const result=orig.apply(this,arguments);if(S.prestige!==before){COMPANY.entries=[];COMPANY.loaded=false;COMPANY.queued='';}return result;};})(performPrestige);

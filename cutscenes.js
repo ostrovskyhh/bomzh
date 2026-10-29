@@ -174,13 +174,14 @@ function actorHTML(ac, i) {
   const sets = {
     valera: () => valeraSVG(S.eq, look),
     edik: () => valeraSVG({ hat: 'cilinder', body: 'kostum', shoes: 'boots' }, { mood: ac.mood || 'happy' }),
+    manager: () => valeraSVG({ hat: 'none', body: 'kostum', shoes: 'boots' }, { mood: ac.mood || 'happy' }),
     mihalych: () => valeraSVG({ hat: 'ushanka', body: 'telnyashka', shoes: 'tapki' }, { mood: ac.mood || 'happy' }),
     shnyr: () => valeraSVG({ hat: 'kepka', body: 'rvan', shoes: 'kedy' }, { mood: ac.mood || 'ok' }),
     barsik: () => PET_ART.cat,
     girl: () => `<div class="cs-emoji">${S.girlfriend ? GIRLS.find((g) => g.id === S.girlfriend).emoji : '👰'}</div>`,
     zinka: () => '<div class="cs-emoji">👩‍🦰</div>',
   };
-  const names = { edik: 'Эдик', mihalych: 'Михалыч', shnyr: 'Шнырь', zinka: 'Зинка' };
+  const names = { edik: 'Эдик', mihalych: 'Михалыч', shnyr: 'Шнырь', zinka: 'Зинка', manager: 'Управляющий' };
   const body = sets[who] ? sets[who]() : `<div class="cs-emoji">${who}</div>`;
   const small = who === 'barsik' ? ' small' : '';
   const flip = ac.x > 55 && who !== 'barsik' && sets[who] && who !== 'girl' && who !== 'zinka';
