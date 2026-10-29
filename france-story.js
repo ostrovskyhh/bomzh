@@ -129,19 +129,21 @@ function frStartModal(){
   const total=Math.max(0,S.money)+(S.frozen?.city==='mex'?Math.max(0,S.frozen.left||0):0),start=Math.min(total,NEW_CITY_CASH.fr),frozen=total-start;
   openModal(`<h3>🇫🇷 IV глава · След ведёт в Париж</h3><p>Колл-центр в Мексике закрыт, но его заказчик во Франции. Пока остатки картеля ищут свидетеля, Рамирес помогает уехать, а юристка Ава ждёт в Париже.</p>
     <div class="move-box keep"><b>Сохраняется</b>Все крышки, VIP и усилители, уровень, сила, навыки, престиж, достижения, коллекции, купленная косметика и бутылка, уникальная одежда и премиум-питомцы. Семья едет с тобой. Друзья и банда сохраняются.</div>
-    <div class="move-box lose"><b>Новая жизнь с низов</b>Мексиканское жильё, бизнесы и клуб, обычная одежда и питомцы, транспорт, дипломы, работа и обычный инвентарь останутся в Мексике. Новые местные вещи придётся заработать заново.</div>
+    <div class="move-box lose"><b>Новая жизнь с низов</b>Мексиканское жильё, обычная одежда и питомцы, транспорт, дипломы, работа и обычный инвентарь останутся в Мексике. Новые местные вещи придётся заработать заново.</div>
+    ${managedMoveInfo()}
     <div class="move-box fam"><b>Деньги не исчезнут</b>${cityMoney(total,'mex')} превратятся в ${cityMoney(total,'fr')} по игровому обмену без дополнительного штрафа. На руках: <b>${cityMoney(start,'fr')}</b>. ${frozen>0?`Остальные <b>${cityMoney(frozen,'fr')}</b> проверяет бюро; каждая из 15 глав вернёт 7%, к концу истории вернут всё.`:'Замораживать нечего.'} За первые задания можно взяться даже без денег.</div>
     <p>Это переезд в следующую главу, а не престиж. Вернуться в прежнее жильё нельзя.</p><button class="btn primary wide" id="frMoveConfirm" data-act="frGo">Понимаю условия · Во Францию</button><button class="btn wide" data-act="close">Остаться в Мексике</button>`,{center:true});
 }
 function doMoveFrance(){
-  if(!frCanMove())return false;
+  if(!frCanMove()||!managedTransferReady())return false;
   const base={hat:'none',body:'rvan',shoes:'none'},owned={},eq={};
   for(const slot of Object.keys(base)){owned[slot]=[...new Set([base[slot],...(S.owned[slot]||[]).filter(id=>moveKeepsItem(slot,id))])];eq[slot]=owned[slot].includes(S.eq[slot])?S.eq[slot]:base[slot];}
   const pets=(S.pets||[]).filter(id=>PETS.find(p=>p.id===id)?.premium),petNames=Object.fromEntries(pets.filter(id=>S.petNames?.[id]).map(id=>[id,S.petNames[id]]));
   const money=Math.max(0,S.money)+(S.frozen?.city==='mex'?Math.max(0,S.frozen.left||0):0),partner=S.girlfriend,keepGirl=partner?{[partner]:girlState(partner)}:{};
   if(typeof sideState==='function'){const st=sideState();SIDE.filter(q=>q.city==='mex').forEach(q=>delete st.active[q.id]);}
+  managedTransferCurrent();
   Object.assign(S,{city:'fr',moves:(S.moves||0)+1,movedAt:Date.now(),money,frozen:null,owned,eq,pets,pet:pets.includes(S.pet)?S.pet:pets[0]||null,petNames,
-    housing:0,ownedHousing:0,housingMode:'own',billDue:0,debt:0,missed:0,breakdowns:[],biz:{},club:null,transport:0,fuel:100,transportBroken:false,garages:[],
+    housing:0,ownedHousing:0,housingMode:'own',billDue:0,debt:0,missed:0,breakdowns:[],biz:{},clubStaff:{},club:null,transport:0,fuel:100,transportBroken:false,garages:[],
     jobs:{},jobPos:{},hired:{},edu:0,study:null,busy:null,shelter:[],inv:{},bottles:0,wanted:0,girls:keepGirl,gfDates:0,france:{cd:{},egg:0},
     health:Math.max(S.health,70),energy:100,food:90,mood:Math.max(S.mood,60),chapterIntro:null,
     quest:{idx:0,path:S.quest.path,base:{...(S.counters||{})},bossCd:0,v2:true}});

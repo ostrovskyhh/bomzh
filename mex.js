@@ -519,13 +519,14 @@ function mexStartModal() {
     <h3>Теплоход «Ла Палома» уходит через час</h3>
     <p>Мошенники втянули тебя в обман бабушки, полиция ищет «курьера». Остаётся бежать — за океан, в Мексику.</p>
     <div class="move-box lose"><b>💱 Барыга у порта меняет рубли</b>По <b>300 ₽ за $1</b> (честный курс — 80). Из ${fmt(total)} ₽ получится <b>$${usdGot.toLocaleString('ru-RU')}</b> — а могло бы быть $${usdFair.toLocaleString('ru-RU')}. Грустно, но не оставлять же всё на родине. В Мексике рублей нет: всё в долларах.</div>
-    <div class="move-box lose"><b>Останется в Москвабаде</b>Жильё, бизнесы, транспорт, обычная одежда, хлам, питомцы (Гульнара присмотрит), работа и дипломы</div>
+    <div class="move-box lose"><b>Останется в Москвабаде</b>Жильё, транспорт, обычная одежда, хлам, питомцы (Гульнара присмотрит), работа и дипломы</div>
+    ${managedMoveInfo()}
     <div class="move-box keep"><b>Поплывёт с тобой</b>Доллары, все крышки, уровень, форма и сила, престиж, достижения${keepWear ? `, ${keepWear} уник. вещ.` : ''}${premium ? `, премиум-питомцы (${premium})` : ''}. Друзья и банда — с тобой</div>
     ${p ? `<div class="move-box fam"><b>${married ? '👰' : '💑'} ${p.name}${kids ? ` и дети (${kids})` : ''}</b>${married ? `Взять семью с собой или развестись${kids ? `. При разводе ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% дохода — алименты` : ''}.` : 'Позвать её в Мексику или расстаться.'}
       <div class="move-opts">${opt('partner', 'take', married ? '👨‍👩‍👧 Плывём вместе' : '💑 Плывём вместе')}${opt('partner', 'leave', married ? `💔 Развод${kids ? ' и алименты' : ''}` : '💔 Расстаться', 'dark-path')}</div></div>` : ''}
     ${club ? `<div class="move-box fam"><b>🪩 Руфтоп-клуб</b>Можно успеть продать перекупщику за 20% цены — <b>${fmt(club)} ₽</b> (тоже поменяешь у барыги).
       <div class="move-opts">${opt('club', 'sell', `💰 Продать за ${fmt(club)} ₽`)}${opt('club', 'leave', '🏚️ Бросить', 'dark-path')}</div></div>` : ''}
-    <div class="btns"><button class="btn primary wide" data-act="mexGo" ${ready ? '' : 'disabled data-why="Сначала реши, что делать с семьёй и клубом"'}>🚢 Бежать в Мексику</button>
+    <div class="btns"><button class="btn primary wide" data-act="mexGo" ${ready ? '' : 'disabled data-why="Сначала выбери, едет ли семья с тобой"'}>🚢 Бежать в Мексику</button>
       <button class="btn wide" data-act="close">Подожду ещё</button></div>`, { center: true });
 }
 function mexCut(opts) {
@@ -541,6 +542,7 @@ function mexCut(opts) {
   ];
 }
 function doMoveMex(opts) {
+  if(!managedTransferReady())return false;
   const p = partnerOf(), married = !!(p && S.married);
   const kids = married ? (S.kids || []).length : 0;
   const club = opts.club === 'sell' ? clubSellPrice() : 0;
@@ -560,11 +562,12 @@ function doMoveMex(opts) {
   const keptPets = (S.pets || []).filter((id) => (PETS.find((x) => x.id === id) || {}).premium);
   const st = typeof sideState === 'function' ? sideState() : null;
   if (st) SIDE.filter((q) => q.city === 'msk').forEach((q) => delete st.active[q.id]);
+  managedTransferCurrent();
   Object.assign(S, {
     owned, eq, pets: keptPets, pet: keptPets.includes(S.pet) ? S.pet : keptPets[0] || null,
     city: 'mex', moves: (S.moves || 0) + 1, movedAt: Date.now(),
     housing: 0, ownedHousing: 0, housingMode: 'own', billDue: 0, debt: 0, missed: 0, breakdowns: [],
-    biz: {}, transport: 0, fuel: 100, transportBroken: false, garages: [],
+    biz: {}, clubStaff: {}, transport: 0, fuel: 100, transportBroken: false, garages: [],
     jobs: {}, jobPos: {}, hired: {}, edu: 0, study: null, busy: null,
     shelter: [], petNames: {}, inv: {}, bottles: 0, wanted: 0, flea: S.flea || [],
     girls: keepGirl, gfDates: 0,

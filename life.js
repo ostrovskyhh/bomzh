@@ -492,6 +492,7 @@ function divorceGive(id) {
   if (!g) return;
   const [kind, a, b] = id.split(':');
   let name = '';
+  if (kind === 'managed') { const e=managedBusinesses().find(e=>e.key===a);if(!e)return;name=e.name+' · '+e.cityName;S.managedBusinesses=S.managedBusinesses.filter(e=>e.key!==a); }
   if (kind === 'biz') { name = BUSINESSES.find((x) => x.id === a).name; delete S.biz[a]; if(a==='club')S.clubStaff={}; }
   if (kind === 'car') { name = TRANSPORT[S.transport].name; S.transport = 0; S.transportBroken = false; }
   if (kind === 'house') {

@@ -268,7 +268,7 @@ EXTRA_TABS.tasks.story = () => {
 // Что поедет: только уникальные, сезонные и купленные за звёзды вещи (у них в игре флаг season) и премиум-питомцы
 const CLUB_SELL_SHARE = 0.2;
 function moveKeepsItem(slot, id) { const it = CLOTHES[slot].find((x) => x.id === id); return !!(it && it.season); }
-function clubSellPrice() { const b = BUSINESSES.find((x) => x.id === 'club'); return b && S.biz && S.biz.club ? Math.round(businessInvestment(b,S.biz.club) * CLUB_SELL_SHARE) : 0; }
+function clubSellPrice() { return 0; } // Enterprises transfer to management instead of being liquidated.
 function partnerOf() { return S.girlfriend ? GIRLS.find((g) => g.id === S.girlfriend) : null; }
 let MOVE_PICK = { partner: null, club: null };
 
@@ -285,15 +285,16 @@ function moveStartModal() {
   const ready = (!p || MOVE_PICK.partner) && (!club || MOVE_PICK.club);
   openModal(`<div class="big-art"><div class="rays bad"></div><div class="big-emoji">🧾</div></div>
     <h3>Налоговая объявила розыск</h3>
-    <p>Недоимка за особняк, бизнесы и машины. Арестуют всё — бежать надо этой ночью. В Москвабаде никто тебя не знает: начнёшь новую главу с нуля.</p>
-    <div class="move-box lose"><b>Останется в Засранске</b>Жильё, бизнесы, транспорт и гаражи, обычная одежда (даже надетая), хлам, питомцы (Михалыч присмотрит), работа и должности, засранские дипломы, 90% рублей</div>
+    <p>Недоимка за особняк и машины. Арестуют личное имущество — бежать надо этой ночью. В Москвабаде никто тебя не знает: начнёшь новую главу с нуля.</p>
+    <div class="move-box lose"><b>Останется в Засранске</b>Жильё, транспорт и гаражи, обычная одежда (даже надетая), хлам, питомцы (Михалыч присмотрит), работа и должности, засранские дипломы, 90% рублей</div>
+    ${managedMoveInfo()}
     <div class="move-box keep"><b>Поедет с тобой</b>${fmt(take)} ₽ (10%), все крышки, уровень и опыт, форма и сила, престиж и перки, достижения${keepWear ? `, ${keepWear} уник. вещ. (сезонные, за достижения и за звёзды)` : ''}${premium ? `, премиум-питомцы (${premium})` : ''}. Друзья и банда никуда не денутся</div>
     ${p ? `<div class="move-box fam"><b>${married ? '👰' : '💑'} ${p.name}${kids ? ` и дети (${kids})` : ''}</b>
       ${married ? `Взять семью с собой или развестись${kids ? `. При разводе ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% любого дохода уйдёт на алименты` : ''}.` : 'Позвать её с собой в новый город или расстаться.'}
       <div class="move-opts">${opt('partner', 'take', married ? '👨‍👩‍👧 Едем вместе' : '💑 Едем вместе')}${opt('partner', 'leave', married ? `💔 Развод${kids ? ' и алименты' : ''}` : '💔 Расстаться', 'dark-path')}</div></div>` : ''}
     ${club ? `<div class="move-box fam"><b>🪩 Ночной клуб «Золотая крышка»</b>Бизнесы с собой не увезёшь. Клуб можно успеть продать перекупщику за 20% стоимости с улучшениями и персоналом — <b>${fmt(club)} ₽</b> поедут с тобой целиком.
       <div class="move-opts">${opt('club', 'sell', `💰 Продать за ${fmt(club)} ₽`)}${opt('club', 'leave', '🏚️ Бросить', 'dark-path')}</div></div>` : ''}
-    <div class="btns"><button class="btn primary wide" data-act="moveGo" ${ready ? '' : 'disabled data-why="Сначала реши, что делать с семьёй и клубом"'}>🧳 Бежать в Москвабад</button>
+    <div class="btns"><button class="btn primary wide" data-act="moveGo" ${ready ? '' : 'disabled data-why="Сначала выбери, едет ли семья с тобой"'}>🧳 Бежать в Москвабад</button>
       <button class="btn wide" data-act="close">Подожду ещё</button></div>`, { center: true });
 }
 
@@ -315,6 +316,7 @@ function moveCut(opts) {
 
 function doMove(opts) {
   if (typeof opts !== 'object' || !opts) opts = { partner: opts === 'family' || opts === true ? 'take' : 'leave', club: 'leave' };
+  if(!managedTransferReady())return false;
   const p = partnerOf(), married = !!(p && S.married);
   const kids = married ? (S.kids || []).length : 0;
   const was = S.money;
@@ -340,11 +342,12 @@ function doMove(opts) {
   });
   const keptPets = (S.pets || []).filter((id) => (PETS.find((x) => x.id === id) || {}).premium);
   lines.push(`👕 Одежда: ${owned.hat.length + owned.body.length + owned.shoes.length - 3 ? 'с собой только уникальные вещи' : 'вся осталась — придётся одеться заново'}`);
+  managedTransferCurrent();
   Object.assign(S, {
     owned, eq, pets: keptPets, pet: keptPets.includes(S.pet) ? S.pet : keptPets[0] || null,
     city: 'msk', moves: (S.moves || 0) + 1, movedAt: Date.now(),
     housing: 0, ownedHousing: 0, housingMode: 'own', billDue: 0, debt: 0, missed: 0, breakdowns: [],
-    biz: {}, transport: 0, fuel: 100, transportBroken: false, garages: [],
+    biz: {}, clubStaff: {}, transport: 0, fuel: 100, transportBroken: false, garages: [],
     jobs: {}, jobPos: {}, hired: {}, edu: 0, study: null, busy: null,
     shelter: [], petNames: {}, inv: {}, bottles: 0, wanted: 0,
     girls: keepGirl, gfDates: 0,
