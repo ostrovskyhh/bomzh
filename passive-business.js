@@ -1,4 +1,23 @@
 // One set of calculations for all four city catalogues, UI and offline accrual.
+// Device wall-clock changes must not create business income. Re-anchor on each
+// launch/resume; performance.now measures elapsed time between server checks.
+const businessClock={epoch:null,mono:0,pending:null};
+let businessMono=()=>performance.now();
+function businessNow(){return businessClock.epoch===null?null:businessClock.epoch+Math.max(0,businessMono()-businessClock.mono);}
+function businessSync(){
+  if(businessClock.pending)return businessClock.pending;
+  businessClock.pending=(async()=>{
+    try{
+      const r=await fetch(`${REF_API}/api/health`,{cache:'no-store',headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.timeout(8000)});
+      if(!r.ok)return;const data=await r.json();
+      if(data.ok&&Number.isFinite(data.now)&&data.now>0){businessClock.epoch=data.now;businessClock.mono=businessMono();businessTick();}
+    }catch(e){/* Keep the session's monotonic anchor; retry without trusting device time. */}
+  })().finally(()=>{businessClock.pending=null;});
+  return businessClock.pending;
+}
+HOOKS.load.push(()=>{businessSync();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)businessSync();});
+setInterval(()=>{if(!document.hidden)businessSync();},60000);
 function businessRates(b, st={lvl:1}, vip=isVip()) {
   const lvl=Math.max(1,Math.min(BIZ_MAX_LVL,Number(st.lvl)||1));
   const prestige=prestigeMult(), gang=1+clanBonus(), boss=1+.05*perk('boss');
@@ -21,12 +40,14 @@ function businessPrepare(b,st,now) {
   if(st.version!==2){st.broken=false;delete st.eventAt;st.version=2;}
   if(!st.rates||!Number.isFinite(st.rates.plain)||!Number.isFinite(st.rates.vip))st.rates=businessSnapshot(b,st);
 }
-function businessTick(now=Date.now()) {
+function businessTick(now=businessNow()) {
+  if(now===null)return; // Pending first server contact: preserve the till and offline interval.
   if(!S.biz||typeof S.biz!=='object')S.biz={};
   if(!S.clubStaff||typeof S.clubStaff!=='object'||!S.biz.club)S.clubStaff={};
   for(const b of BUSINESSES){
     const st=S.biz[b.id];if(!st)continue;
     businessPrepare(b,st,now);
+    if(arguments.length===0&&st.last>now+60000)st.last=now; // Old saves made with a future device date.
     if(now<st.last)continue; // A clock rollback must not create a second accrual interval.
     const r=st.rates,split=Math.min(now,Math.max(st.last,r.vipUntil||0));
     const credit=(from,to,vip)=>{const rate=Math.max(0,vip?r.vip:r.plain),cap=rate*BIZ_CAP_HOURS*(vip?2:1);st.cash=Math.max(st.cash,Math.min(cap,st.cash+rate*Math.max(0,to-from)/3600000));};
@@ -55,7 +76,7 @@ function businessCollect(ids,btn){
 }
 Object.assign(ACTIONS,{
   bizBuy:(id)=>{const b=BUSINESSES.find(x=>x.id===id);if(!b||S.biz[id]||level()<b.level||S.money<b.price)return;
-    businessTick();S.money-=b.price;S.biz[id]={lvl:1,cash:0,last:Date.now(),started:Date.now(),version:2,broken:false};businessTick();track('bizBuy');sfx('buy');confetti(30);toast(`${b.emoji} ${b.name} открыт! Доход ${incomeMoney(businessNetRate(b))}/ч`,'good');},
+    businessTick();S.money-=b.price;S.biz[id]={lvl:1,cash:0,last:businessNow()||0,started:businessNow()||Date.now(),version:2,broken:false};businessTick();track('bizBuy');sfx('buy');confetti(30);toast(`${b.emoji} ${b.name} открыт! Доход ${incomeMoney(businessNetRate(b))}/ч`,'good');},
   bizCollect:(id,btn)=>{if(BUSINESSES.some(b=>b.id===id))businessCollect([id],btn);},
   bizCollectAll:(_,btn)=>businessCollect(BUSINESSES.map(b=>b.id),btn),
   bizUp:(id)=>{const b=BUSINESSES.find(x=>x.id===id),st=S.biz[id];if(!b||!st||st.lvl>=BIZ_MAX_LVL)return;const cost=bizUpgradeCost(b,st);if(S.money<cost)return;
