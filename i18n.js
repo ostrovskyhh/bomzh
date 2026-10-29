@@ -202,7 +202,8 @@ const I18N = (() => {
     if (!/(?:chat|online|duel|friends|gang|yard|district|case.*feed|dice)/.test(route)) return;
     const walk = (item, depth) => {
       if (!item || typeof item !== 'object' || depth > 7) return;
-      if (typeof item.name === 'string') names.add(item.name);
+      const person = item.uid != null || item.pid != null || item.me !== undefined || item.role !== undefined || item.members !== undefined || item.badge !== undefined || item.stats !== undefined;
+      if (person && typeof item.name === 'string') names.add(item.name);
       if (Array.isArray(item)) item.slice(0, 150).forEach(x => walk(x, depth + 1));
       else Object.values(item).forEach(x => walk(x, depth + 1));
     };

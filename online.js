@@ -234,7 +234,7 @@ async function obAnimate(e) {
   await wait(420);
   if (MOVES[e.op].mult) { lunge(opAva, -1); await wait(130); }
   snd(e.opHit, e.op); if (e.opHit.dmg) { flash(meAva); haptic('heavy'); } show(meAva, e.opHit);
-  const line = (who, move, h) => (h.dmg ? `${who}: ${MOVES[move].name.toLowerCase()} — ${h.dmg} урона${h.text ? ` (${h.text})` : ''}` : MOVES[move].mult ? `${who}: ${h.text || 'мимо'}` : `${who}: ${MOVES[move].name.toLowerCase()}`);
+  const line = (who, move, h) => { const label = who === 'Ты' ? 'Ты' : userLabel(who); return h.dmg ? `${label}: ${MOVES[move].name.toLowerCase()} — ${h.dmg} урона${h.text ? ` (${h.text})` : ''}` : MOVES[move].mult ? `${label}: ${h.text || 'мимо'}` : `${label}: ${MOVES[move].name.toLowerCase()}`; };
   if ($('obLog')) $('obLog').innerHTML = `${line('Ты', e.my, e.myHit)}<br>${line(OB.view.op.name, e.op, e.opHit)}`;
   await wait(500);
 }

@@ -19,7 +19,7 @@ ACTIONS.fleaConfirm=()=>{
   fleaSell(items.map((_,i)=>i));openFlea();save();
 };
 function caseDropFeedHTML(feed){
-  return '<div class="pc-sub">Недавно выпало игрокам</div>'+(feed?.length?`<div class="drop-ribbon" aria-label="Последние реальные дропы">${feed.map(d=>{const r=RARITY.find(r=>r.id===d.rar)||RARITY[0];return `<article class="drop-card" style="--drop-color:${r.color}"><small>${esc(r.name)}</small><span>${esc(d.e)}</span><b>${esc(d.item)}</b><small>${esc(d.name)} · ${new Date(d.ts*1000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</small></article>`;}).join('')}</div>`:'<small>Пока нет дропов за последние сутки. Здесь появятся настоящие находки игроков.</small>');
+  return '<div class="pc-sub">Недавно выпало игрокам</div>'+(feed?.length?`<div class="drop-ribbon" aria-label="Последние реальные дропы">${feed.map(d=>{const r=RARITY.find(r=>r.id===d.rar)||RARITY[0];return `<article class="drop-card" style="--drop-color:${r.color}"><small>${esc(r.name)}</small><span>${esc(d.e)}</span><b>${esc(d.item)}</b><small data-i18n-user>${esc(d.name)} · ${new Date(d.ts*1000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</small></article>`;}).join('')}</div>`:'<small>Пока нет дропов за последние сутки. Здесь появятся настоящие находки игроков.</small>');
 }
 
 // A first prestige starts with a working enterprise; all existing possessions stay intact.
