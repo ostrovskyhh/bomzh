@@ -29151,7 +29151,8 @@ function a6display(path,value){
   const map={pet:'pets',pets:'pets',shelter:'pets',girlfriend:'girls',cosm:'cosm',bottleSkin:'cosm',effects:'effects'}[root];
   if(c[map]?.[value])return c[map][value];
   if(['owned','eq'].includes(root)&&c.clothes?.[path[1]]?.[value])return c.clothes[path[1]][value];
-  if(A6_ENUM_RU[value])return A6_ENUM_RU[value];
+  if(root==='gymPlace')return GYMS.find(x=>x.id===value)?.name||'Место тренировки';
+  if(A6_ENUM_RU[value]&&(['housingMode','path'].includes(root)||['sex','path','rar','role','status','kind','language','lang','cityPanelMode','mainMusic'].includes(key)))return A6_ENUM_RU[value];
  }
  return typeof value==='number'?value.toLocaleString('ru-RU',{maximumFractionDigits:4}):String(value);
 }
