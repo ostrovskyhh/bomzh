@@ -103,8 +103,8 @@ function companyInfo(){
 }
 function companyFrames(){return [
     {bg:S.housing,actors:[{a:'valera',x:40,anim:'bounce',say:'Алло? Слушаю!'}],props:[{e:'📱',x:73,y:32,anim:'shake'}],text:'Валере звонят из управляющей компании «Твоё дело».'},
-    {bg:'gold',actors:[{a:'manager',x:35,anim:'in-right',say:'У вас остались предприятия в прежних городах.'},{a:'valera',x:77,anim:'in-left'}],props:[{e:'🏢',x:58,y:25,anim:'float'}],text:'Управляющий предлагает взять на себя ежедневные заботы о бизнесах.'},
-    {bg:'gold',actors:[{a:'manager',x:28,say:'Из прибыли 60% компании, 40% — вам.'},{a:'valera',x:77,mood:'happy',say:'А когда выплата?'}],props:[{e:'🧾',x:54,y:35,anim:'float'}],text:'Зарплаты и обычный налог учитываются до раздела прибыли. Владелец сохраняет свои предприятия и их уровни.'},
+    {bg:'gold',actors:[{a:'manager',x:45,anim:'in-right',say:'У вас остались предприятия в прежних городах.'},{a:'valera',x:77,anim:'in-left'}],props:[{e:'🏢',x:58,y:25,anim:'float'}],text:'Управляющий предлагает взять на себя ежедневные заботы о бизнесах.'},
+    {bg:'gold',actors:[{a:'manager',x:45,say:'Из прибыли 60% компании, 40% — вам.'},{a:'valera',x:80,mood:'happy'}],props:[{e:'🧾',x:54,y:35,anim:'float'}],text:'Зарплаты и обычный налог учитываются до раздела прибыли. Владелец сохраняет свои предприятия и их уровни.'},
     {bg:S.housing,actors:[{a:'valera',x:50,mood:'happy',anim:'bounce',say:'Покажите расчёт по каждому адресу!'}],props:[{e:'🕕',x:78,y:30,anim:'float'}],text:'Расчёт каждые шесть часов. После разговора — список предприятий, комиссия и твоя ожидаемая выплата.'},
   ];}
 CUTS.company_business=companyFrames();CUT_TITLES.company_business='📱 Звонок управляющей компании';
