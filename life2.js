@@ -191,7 +191,7 @@ HOOKS.tick.push(() => {
   if (now >= S.kidsDue && popupTurn(2)) {
     S.kidsDue = now + MONTH_MS;
     const cost = S.kids.reduce((a, k) => a + kidCost(k), 0);
-    const help = S.kids.filter((k) => kidStage(k) === 'adult').reduce((a, k) => a + Math.round(2000 * (1 + (k.smart || 0) * 0.4) * (1 + level() * 0.1)), 0);
+    const help = familyMonthlyHelp();
     if (cost) { S.money = Math.max(0, S.money - cost); }
     if (help) addMoney(help);
     toast(`👨‍👧 Семейный месяц: на детей −${fmt(cost)} ₽${help ? `, взрослые дети прислали +${fmt(help)} ₽` : ''}`, cost > help ? 'bad' : 'good');

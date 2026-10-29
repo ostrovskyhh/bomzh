@@ -43,6 +43,6 @@ let CASE_FEED_TIMER=null;
 openCases=(function(orig){return function(){const r=orig.apply(this,arguments);clearInterval(CASE_FEED_TIMER);const el=$('pcFeed');if(!el)return r;document.querySelector('.pc-top')?.after(el);
   el.classList.remove('hidden');el.innerHTML='<div class="pc-sub">Недавние дропы игроков</div><small>Загружаем…</small>';
   const poll=async()=>{if($('pcFeed')!==el){clearInterval(CASE_FEED_TIMER);return;}if(document.hidden||!onlineOn()){if(!onlineOn())el.innerHTML='<div class="pc-sub">Дропы игроков доступны внутри Telegram</div>';return;}
-    try{const data=await apiPost('cases/feed');if($('pcFeed')!==el)return;el.innerHTML='<div class="pc-sub">Недавние дропы игроков</div>'+(data.feed?.length?data.feed.map(d=>`<div>${esc(d.e)} <b>${esc(d.name)}</b> · ${esc(d.item)}<small>${new Date(d.ts*1000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join(''):'<small>Пока никто не поделился дропом. Здесь появятся реальные находки игроков.</small>');}catch(e){if($('pcFeed')===el)el.innerHTML='<small>Лента временно недоступна. Пробуем снова…</small>';}};
+    try{const data=await apiPost('cases/feed');if($('pcFeed')!==el)return;el.innerHTML=caseDropFeedHTML(data.feed);}catch(e){if($('pcFeed')===el)el.innerHTML='<small>Лента временно недоступна. Пробуем снова…</small>';}};
   poll();CASE_FEED_TIMER=setInterval(poll,7000);return r;
 };})(openCases);

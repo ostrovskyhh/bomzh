@@ -354,7 +354,7 @@ function openFlea() {
   const total = inv.reduce((a, it) => a + fleaPrice(it), 0);
   const cheap = inv.filter((it) => it.rar === 'common' || it.rar === 'uncommon');
   openModal(`<h3>🛍️ Барахолка</h3><p>Вещи из кейсов. Цена каждой зависит от редкости и качества и не меняется.</p>
-    ${inv.length ? `<div class="info-card">Всего вещей: <b>${inv.length}</b> на <b>${fmt(total)} ₽</b></div>
+    ${inv.length ? `<div class="flea-toolbar"><b>${inv.length} вещей · ${fmt(total)} ₽</b><div class="btns"><button class="btn primary wide" data-act="fleaSellAll">Продать всё</button>${cheap.length?`<button class="btn wide" data-act="fleaSellCheap">Продать обычные (${cheap.length})</button>`:''}</div></div>
       <div class="list">${inv.map((it, i) => { const rar = RARITY.find((r) => r.id === it.rar); const p = fleaPrice(it); return card({ thumb: it.e, title: `${it.name} <span class="rarity" style="background:${rar.color}33;color:${rar.color}">${rar.name}</span>`,
         desc: `${it.q ? qualityName(it) + ' · ' : ''}<b>${fmt(p)} ₽</b>`, btn: `<button class="btn primary small" data-act="fleaSell" data-id="${i}">Продать</button>` }); }).join('')}</div>
       <div class="btns">${cheap.length ? `<button class="btn wide" data-act="fleaSellCheap">Продать ширпотреб и ходовое (${cheap.length})</button>` : ''}<button class="btn primary wide" data-act="fleaSellAll">Продать всё за ${fmt(total)} ₽</button></div>`

@@ -1387,7 +1387,7 @@ function maybeEvent() {
   }
   if (now < nextEventAt || !$('screen-game').classList.contains('active') || S.busy) return;
   nextEventAt = now + rand(180, 320) * 1000;
-  const ev = pick(EVENTS);
+  const ev = pick(EVENTS.filter(e=>!e.cond||e.cond()));
   const back = openModal(`
     <div class="big-art" style="font-size:84px;height:110px">${ev.emoji}</div>
     <h3>${ev.title}</h3>

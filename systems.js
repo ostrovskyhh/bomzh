@@ -591,9 +591,9 @@ const PERKS = [
   { id: 'hustle', name: 'Хватка', emoji: '✊', desc: '+5% к тапам за уровень', max: 5 },
   { id: 'boss', name: 'Деловая жилка', emoji: '💼', desc: '+5% к оплате работы и доходу бизнесов за уровень', max: 5 },
   { id: 'lucky', name: 'Фартовый', emoji: '🍀', desc: '+1% к шансу крит-тапа за уровень', max: 5 },
-  { id: 'tough', name: 'Закалка', emoji: '🛡️', desc: '+0.1 здоровья в минуту за уровень', max: 5 },
-  { id: 'cheer', name: 'Оптимист', emoji: '😄', desc: '+0.2 радости в минуту за уровень', max: 5 },
-  { id: 'capital', name: 'Заначка', emoji: '💰', desc: '+3000 ₽ на старте нового круга за уровень', max: 5 },
+  { id: 'tough', name: 'Закалка', emoji: '🛡️', desc: '+0.4 здоровья в минуту за уровень', max: 5 },
+  { id: 'cheer', name: 'Оптимист', emoji: '😄', desc: '+0.6 радости в минуту за уровень', max: 5 },
+  { id: 'capital', name: 'Заначка', emoji: '💰', desc: '+10000 ₽ на старте нового круга за уровень', max: 5 },
 ];
 const PRESTIGE_REQ = { level: 20, housing: 6 };
 
@@ -608,8 +608,8 @@ HOOKS.mods.push((m) => {
   m.tap *= p * (1 + perk('hustle') * 0.05);
   m.work *= p * (1 + perk('boss') * 0.05);
   m.crit += perk('lucky') * 0.01;
-  m.hpm += perk('tough') * 0.1;
-  m.mpm += perk('cheer') * 0.2;
+  m.hpm += perk('tough') * 0.4;
+  m.mpm += perk('cheer') * 0.6;
 });
 
 EXTRA_TABS.tasks.prestige = () => `
@@ -657,9 +657,9 @@ function prestigeWizard() {
   if (!PRESTIGE_FLOW) return;
   const step = PRESTIGE_FLOW.step;
   const lost = `<ul><li>Игровые деньги и бутылки, включая замороженные средства.</li><li>Уровень, учёба, работа, сила и форма.</li><li>Жильё, обычная одежда, бизнесы и транспорт.</li><li>Обычный инвентарь и вещи на барахолке.</li><li>Текущий сюжет, криминальный прогресс, отношения и семья.</li></ul>`;
-  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, престиж и перки.</li></ul><p><b>Постоянная выгода:</b> доход от тапов и работы ×${(1 + 0.2 * ((S.prestige || 0) + 1)).toFixed(2)}, опыт ×${(1 + 0.1 * ((S.prestige || 0) + 1)).toFixed(2)}. Ещё +${prestigeGain()} очк. для перков. Начнёшь в Засранске.</p>`;
+  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Первый престиж: бесплатный первый бизнес; последующие круги без повторной выдачи.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, престиж и перки.</li></ul><p><b>Постоянная выгода:</b> доход от тапов и работы ×${(1 + 0.2 * ((S.prestige || 0) + 1)).toFixed(2)}, опыт ×${(1 + 0.1 * ((S.prestige || 0) + 1)).toFixed(2)}. Ещё +${prestigeGain()} очк. для перков. Начнёшь в Засранске.</p>`;
   const contents = step === 1
-    ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж вернёт тебя в первый город — Засранск — и сбросит прогресс этого круга. Отменить сброс нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(1000 + perk('capital') * 3000)} ₽</b>.</p>`
+    ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж вернёт тебя в первый город — Засранск — и сбросит прогресс этого круга. Отменить сброс нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(1000 + perk('capital') * 10000)} ₽</b>.</p>`
     : step === 2
       ? `<h3>Продолжить с этими условиями?</h3><div class="prestige-warning kept"><b>Останется у тебя</b>${kept}</div><p>Остальное развитие начнётся заново. За этот круг получишь <b>+${prestigeGain()} очк. престижа</b>.</p>`
       : `<h3>Последнее подтверждение</h3><p>Начать новый круг и сбросить прогресс?</p><div class="prestige-warning lost"><b>Потеряешь прогресс</b><small>Деньги, уровень, имущество, учёбу, работу, силу, форму, обычный инвентарь, сюжет и отношения.</small></div><div class="prestige-warning kept"><b>Сохранишь ценное</b><small>Крышки, VIP и покупки, батл-пасс, достижения, коллекции, питомцев, награды и перки.</small></div><label class="prestige-ack"><input type="checkbox" id="prestigeAck" data-act="prestigeAcknowledge"> Я понимаю, что прогресс сбросится без возможности отмены.</label>`;
@@ -681,7 +681,7 @@ function performPrestige() {
       S = { ...freshState(), ...sysDefaults(), ...keep };
       S.owned.hat.push(...seasonal.hat);
       S.city = 'zas'; S.moves = 0;
-      S.money = 1000 + perk('capital') * 3000;
+      S.money = 1000 + perk('capital') * 10000;
       track('prestigeDone');
       renderedHousing = -1; renderedLook = ''; renderedPet = '';
       if (typeof applyCity === 'function') applyCity();
