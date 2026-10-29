@@ -116,7 +116,13 @@ chatOpen = function (room = 'district') {
   });
   // Курсор запоминаем: смайл вставляется туда, где он стоял, а не в конец
   ['keyup', 'click', 'select', 'input'].forEach((ev) => inp.addEventListener(ev, () => { CHAT.caret = inp.selectionStart; }));
-  $('chatList').addEventListener('scroll', () => { const l = $('chatList'); if (l.scrollHeight - l.scrollTop - l.clientHeight < 40) $('chatDown').classList.add('hidden'); });
+  const list = $('chatList');
+  list.addEventListener('scroll', () => {
+    // A queued scroll may arrive after this room was closed or replaced.
+    if($('chatList')!==list)return;
+    const down=$('chatDown');
+    if(down&&list.scrollHeight-list.scrollTop-list.clientHeight<40)down.classList.add('hidden');
+  });
   chatPoll();
   CHAT.timer = setInterval(chatPoll, CHAT_POLL);
 };

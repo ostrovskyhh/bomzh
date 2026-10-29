@@ -31,6 +31,12 @@ function yardArt(buildings){
     <rect x="180" y="194" width="66" height="10" rx="3" fill="#b3946b"/><path d="M190 204v11m46-11v11" stroke="#392e28" stroke-width="4"/>
   </svg>`;
 }
+function yardTaskReason(state,task,busy=false){
+  if(busy)return 'Отправляем вклад. Дождись ответа сервера.';
+  if(!state.left)return `Все ${state.dailyLimit||6} поручений на сегодня использованы. Это общий лимит двора, подготовки, районов и поставок. Новые доступны после 00:00 МСК; накопленные действия сохраняются.`;
+  if(!task?.available)return task?.hint||'Сначала выполни новое действие для этого поручения.';
+  return '';
+}
 function yardEpisode(e,y){
   if(e.state==='completed')return `<article class="yard-episode"><h3>${esc(e.emoji)} ${esc(e.name)}</h3><p>${esc(e.ending)}</p><small>${e.kind==='story'?`Следующая история — через ${leftText((e.completed+86400)*1000-Date.now())}.`:'Двор полностью обустроен! Совместные истории продолжаются по своему расписанию.'} Заработанные подарки сохраняются даже после выхода из банды.</small></article>`;
   const voting=e.state==='planning'||e.state==='decision';
@@ -42,7 +48,7 @@ function yardEpisode(e,y){
       ['materials','tools','contacts'].map(lane=>{
         const tasks=y.tasks.filter(t=>t.lane===lane),progress=e.progress[lane],done=progress>=e.target;
         return `<div class="yard-lane"><b>${esc({materials:'Материалы',tools:'Инструменты',contacts:'Полезные вещи'}[lane])} <span>${progress}/${e.target}</span></b><div class="progress"><div style="width:${Math.min(100,progress/e.target*100)}%"></div></div>
-          ${done?'<small>✅ Эта часть готова</small>':tasks.map(t=>`<div class="yard-task"><small>${esc(t.hint)} · готово к сдаче: ${t.available}</small><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(t.go)}">Выполнить</button><button class="btn small primary" data-act="yardHelp" data-id="${e.id}:${t.id}" ${!t.available||!y.left||YARD.busy?'disabled':''}>Засчитать вклад</button></div></div>`).join('')}</div>`;
+          ${done?'<small>✅ Эта часть готова</small>':tasks.map(t=>`<div class="yard-task"><small>${esc(t.hint)} · готово к сдаче: ${t.available}</small><div class="btn-row"><button class="btn small" data-act="yardGo" data-id="${esc(t.go)}">Выполнить</button><button class="btn small primary" data-act="yardHelp" data-id="${e.id}:${t.id}" ${!t.available||!y.left||YARD.busy?'disabled':''} data-why="${esc(yardTaskReason(y,t,YARD.busy))}">Засчитать вклад</button></div></div>`).join('')}</div>`;
       }).join('')}
     ${e.kind==='story'&&e.state==='active'?`<details><summary>Возможные финалы и награды</summary>${e.options.map(o=>`<p><b>${esc(o.name)}</b><br>${esc(o.text)}</p>`).join('')}</details>`:''}
     <p class="yard-own">Твой вклад: ${e.mine} поручений. За каждое — 3 репутации. ${e.kind==='story'?'За финал участникам — 10 репутации, деньги и 1 крышка (крышка не чаще раза в сутки на аккаунт, вместе с наградами за командные победы).':'За открытие объекта участникам — 200 ₽ и 10 репутации.'}</p>
