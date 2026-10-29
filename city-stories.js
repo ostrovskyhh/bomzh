@@ -74,7 +74,7 @@ Object.assign(ACTIONS,{
     (q.daily?s.daily:s.done).push(q.id);const before=S.xp;addXp(q.xp);addMoney(q.money);addMood(8);
     record('claimed',{id:q.id,baseXP:q.xp,earnedXP:S.xp-before,daily:!!q.daily});track('sideDone');track(c.counter+'Done');if(!q.daily&&s.done.length===c.stories.length)track(c.counter+'Chain');
     save();updateHud();sfx('quest');
-    resultModal({emoji:q.who,title:q.title+' — выполнено',text:`${q.outro||'Спасибо, что снова помог району!'}<br><br>Награда: <b>${fmt(S.xp-before)} XP · ${fmt(q.money)} ₽ · +8 радости</b><br><button class="btn primary wide" data-act="board">К делам района</button>`,btn:'Отлично'});
+    resultModal({emoji:q.who,title:q.title+' — выполнено',text:`${q.outro||'Спасибо, что снова помог району!'}<br><br>Награда: <b>${fmt(S.xp-before)} XP · ${fmt(q.money)} ₽ · +8 радости</b><br><button class="btn primary wide" data-act="${c.prefix}Board">К делам района</button>`,btn:'Отлично'});
   },
 });
 for(const tab of ['story','side'])EXTRA_TABS.tasks[tab]=(function(orig){return function(){const html=orig.apply(this,arguments);return entry()+(tab==='side'?html.replace('Выполнено: <b>','Обычных поручений выполнено: <b>'):html);};})(EXTRA_TABS.tasks[tab]);
