@@ -52,13 +52,13 @@ function yardEpisode(e,y){
       }).join('')}
     ${e.kind==='story'&&e.state==='active'?`<details><summary>Возможные финалы и награды</summary>${e.options.map(o=>`<p><b>${esc(o.name)}</b><br>${esc(o.text)}</p>`).join('')}</details>`:''}
     <p class="yard-own">Твой вклад: ${e.mine} поручений. За каждое — 3 репутации. ${e.kind==='story'?'За финал участникам — 10 репутации, деньги и 1 крышка (крышка не чаще раза в сутки на аккаунт, вместе с наградами за командные победы).':'За открытие объекта участникам — 200 ₽ и 10 репутации.'}</p>
-    ${e.contributors.length?`<details><summary>Кто помог · ${e.contributors.length}</summary>${e.contributors.map(p=>`<div class="yard-person">${esc(p.name)} <b>${p.n}</b></div>`).join('')}</details>`:''}</article>`;
+    ${e.contributors.length?`<details><summary>Кто помог · ${e.contributors.length}</summary>${e.contributors.map(p=>`<div class="yard-person">${userLabel(p.name)} <b>${p.n}</b></div>`).join('')}</details>`:''}</article>`;
 }
 function yardHTML(c){
   const r=YARD.data,y=r?.yard;
   if(!y||y.clanId!==c.id){setTimeout(()=>yardLoad(),0);return `<div class="info-card">${YARD.error||'🏡 Загружаем общий двор…'}<button class="btn small" data-act="yardRefresh">Обновить</button></div>`;}
   const rep=r.stats.reputation,title=rep>=250?'Душа команды':rep>=100?'Надёжный':rep>=25?'Свой':'Новичок двора';
-  return `<section class="yard"><div class="yard-heading"><div><small>НАШ РАЙОН</small><h2>🏡 Двор «${esc(c.name)}»</h2></div><button class="btn small" data-act="yardRefresh" ${YARD.loading?'disabled':''}>↻</button></div>
+  return `<section class="yard"><div class="yard-heading"><div><small>НАШ РАЙОН</small><h2>🏡 Двор «${userLabel(c.name)}»</h2></div><button class="btn small" data-act="yardRefresh" ${YARD.loading?'disabled':''}>↻</button></div>
     ${yardArt(y.buildings)}<div class="yard-profile"><b>${title} · ${rep} репутации</b><small>Сегодня можно помочь ещё ${y.left}/${y.dailyLimit} раз. Лимит общий для двора, подготовки, районов и поставок во всех бандах. Пропуски дней ничего не отнимают.</small></div>
     <div class="yard-buildings">${y.buildings.map(b=>`<details class="${b.built?'built':''}"><summary>${b.emoji} ${esc(b.name)} ${b.built?'✓':'🔒'}</summary><small>${esc(b.benefit)}</small></details>`).join('')}</div>
     ${y.episodes.map(e=>yardEpisode(e,y)).join('')}

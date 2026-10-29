@@ -7,7 +7,7 @@
 gangListHTML = function (list, me) {
   if (!list || !list.length) return '<div class="info-card">Банд пока нет — основай первую!</div>';
   return list.map((g) => card({ cls: 'gang-card', thumb: `<div class="gang-place p${g.place}">${g.place}</div>`,
-    title: `${g.emoji} ${esc(g.name)} <span class="rarity rare">ур. ${g.level}</span>${g.mine ? ' <small>(твоя)</small>' : ''}`,
+    title: `${g.emoji} ${userLabel(g.name)} <span class="rarity rare">ур. ${g.level}</span>${g.mine ? ' <small>(твоя)</small>' : ''}`,
     desc: `${modeTag(g.mode)} · ${g.members}/${g.max} бойцов<br>⚔️ ${fmt(g.week)} очков войны · ${fmt(g.score)} баллов${g.wins ? ` · 🏆×${g.wins}` : ''}<br><span class="gang-more">👁 Нажми, чтобы посмотреть состав</span>`,
     btn: me === false && !g.mine ? (g.mode === 'invite' ? '<button class="btn small" disabled data-why="Нужна ссылка-приглашение от бойцов банды">🔒</button>'
       : `<button class="btn ${g.members < g.max ? 'primary' : ''}" data-act="clanJoin" data-id="${g.id}" ${g.members < g.max ? '' : 'disabled data-why="Банда заполнена"'}>Вступить</button>`) : '' })
@@ -31,7 +31,7 @@ async function gangView(id) {
           : `<button class="btn primary wide" data-act="clanJoin" data-id="${g.id}">🏴 Вступить в банду</button>`;
   $('modalRoot').querySelector('.gv').innerHTML = `
     <div class="gv-hero"><div class="gv-emoji">${g.emoji}</div>
-      <div class="gv-title"><b>${esc(g.name)}</b><small>ур. ${g.level} · ${modeTag(g.mode)}</small></div></div>
+      <div class="gv-title"><b>${userLabel(g.name)}</b><small>ур. ${g.level} · ${modeTag(g.mode)}</small></div></div>
     <div class="gv-stats">
       <div><b>${g.place}</b><small>место в войне</small></div>
       <div><b>${fmt(g.week)}</b><small>очков за неделю</small></div>
@@ -43,7 +43,7 @@ async function gangView(id) {
     <small class="gv-sub">👑 Главарь: <b>${boss ? esc(boss.name) : '—'}</b>${g.created ? ` · основана ${new Date(g.created * 1000).toLocaleDateString('ru-RU')}` : ''}</small>
     <div class="gv-list">${g.members.map((m) => `<div class="gv-m ${m.me ? 'me' : ''}">
         <div class="top-ava frame-${esc(m.frame || 'none')}">${avaFace(m.name, m.avatar)}${m.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
-        <div class="gv-mb"><b>${m.role === 'boss' ? '👑 ' : ''}${esc(m.name)}${m.me ? ' (ты)' : ''}</b>
+        <div class="gv-mb"><b>${m.role === 'boss' ? '👑 ' : ''}${userLabel(m.name)}${m.me ? ' (ты)' : ''}</b>
           <small>ур. ${m.level} · 🥊 ${m.rating} · ⚔️ ${m.week} за неделю${m.online ? ' · <b class="online-txt">в игре</b>' : ''}</small>
           ${!m.me && m.pid && typeof duelBtns === 'function' ? duelBtns(m.pid, m.name) : ''}</div></div>`).join('')}</div>
     ${join}
@@ -152,7 +152,7 @@ chatPoll = async function () {
         const jumbo = chatJumbo(m.text);
         html += `<div class="chat-msg c2-msg ${m.me ? 'me' : ''} ${cont ? 'cont' : ''}">
           <div class="chat-ava frame-${esc(b.frame || 'none')}" ${m.pid && !m.me ? `data-act="chatUser" data-id="${esc(m.pid)}"` : ''}>${cont ? '' : avaFace(m.name, b.avatar)}</div>
-          <div class="chat-bubble c2-bubble ${jumbo ? `jumbo j${jumbo}` : ''}">${cont || m.me ? '' : `<b style="color:${chatColor(m.name)}">${esc(m.name)}<small class="c2-lvl">${b.lvl || 1}</small></b>`}
+          <div class="chat-bubble c2-bubble ${jumbo ? `jumbo j${jumbo}` : ''}">${cont || m.me ? '' : `<b style="color:${chatColor(m.name)}">${userLabel(m.name)}<small class="c2-lvl">${b.lvl || 1}</small></b>`}
             <span class="c2-text">${esc(m.text)}</span><small class="c2-time">${time}${c.admin ? ` <i data-act="chatDel" data-id="${m.id}">🗑</i>` : ''}</small></div></div>`;
         c.prev = { name: m.name, ts: m.ts, day };
       }
@@ -219,7 +219,7 @@ Object.assign(ACTIONS, {
     document.querySelectorAll('#modalRoot .c2-user').forEach((x) => x.remove());
     const box = document.createElement('div');
     box.className = 'c2-user';
-    box.innerHTML = `<div class="top-ava frame-${esc(u.frame || 'none')}">${avaFace(u.name, u.avatar)}</div><div><b>${esc(u.name)}</b><small>ур. ${u.lvl}</small>
+    box.innerHTML = `<div class="top-ava frame-${esc(u.frame || 'none')}">${avaFace(u.name, u.avatar)}</div><div><b>${userLabel(u.name)}</b><small>ур. ${u.lvl}</small>
       ${typeof duelBtns === 'function' ? duelBtns(pid, u.name) : ''}</div><button class="c2-x" data-act="chatUserClose">✕</button>`;
     document.querySelector('#modalRoot .chat2').appendChild(box);
   },
@@ -273,7 +273,7 @@ openSettings = (function (orig) {
     const sec = document.querySelector('#modalRoot [data-sec="profile"]');
     if (!sec) return;
     sec.innerHTML = `<div class="set-profile"><div class="top-ava frame-${esc(S.frame || 'none')}">${avaFace(playerName(), S.avatar)}</div>
-      <div><small>Имя персонажа</small><b>${esc(playerName())}</b><span id="nameNext" class="set-name-next">${S.name ? '' : 'Ещё не выбрано — придумай!'}</span></div></div>
+      <div><small>Имя персонажа</small><b>${userLabel(playerName())}</b><span id="nameNext" class="set-name-next">${S.name ? '' : 'Ещё не выбрано — придумай!'}</span></div></div>
       <div class="info-card warn-soft">⚠️ ${NAME_WARN}</div>
       <button class="btn primary wide" data-act="nameEdit">🏷️ ${S.name ? 'Сменить имя' : 'Придумать имя'}</button>`;
     if (onlineOn()) apiPost('name/get').then((r) => {

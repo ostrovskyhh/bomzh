@@ -87,7 +87,7 @@ EXTRA_TABS.tasks.top = function topTab() {
   const rows = d.top.map((p, i) => `<details class="top-row ${p.me ? 'me' : ''}"><summary>
       <div class="rank r${i + 1}">${i + 1}</div>
       <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}</div>
-      <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
+      <div class="card-body"><div class="card-title">${userLabel(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
         <div class="card-desc"><span class="top-city">📍 ${esc(p.stats.city_name || 'Засранск')}</span> Ур. ${p.stats.level} · ${esc(p.stats.house_name || HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>${topStatsHTML(p.stats)}</details>`).join('');
   return head + `<div class="subhead">Лучшие игроки · нажми, чтобы сравнить</div>${rows || '<div class="info-card">Пока никого нет — будь первым!</div>'}`;
@@ -156,10 +156,10 @@ function obBattleModal() {
       <div class="f-round" id="obRound">Раунд ${v.round} из ${v.rounds}</div>
       <div class="ob-timer"><div id="obTimer"></div></div>
       <div class="f-arena">
-        <div class="f-side"><div class="f-name">${esc(v.me.name)}</div><div class="f-ava" id="obMeAva">${valeraSVG(S.eq, lookState())}</div>
+        <div class="f-side"><div class="f-name">${userLabel(v.me.name)}</div><div class="f-ava" id="obMeAva">${valeraSVG(S.eq, lookState())}</div>
           <div class="f-bar hp"><div id="obMeHp"></div><span id="obMeHpT"></span></div><div class="f-bar st"><div id="obMeSt"></div></div><div class="f-move" id="obMeMove"></div></div>
         <div class="f-vs">VS</div>
-        <div class="f-side"><div class="f-name">${esc(v.op.name)} <small>ур. ${v.op.level}</small></div><div class="f-ava flip" id="obOpAva">${valeraSVG(v.op.eq.body ? v.op.eq : { hat: 'none', body: 'rvan', shoes: 'none' }, { mood: 'ok' })}</div>
+        <div class="f-side"><div class="f-name">${userLabel(v.op.name)} <small>ур. ${v.op.level}</small></div><div class="f-ava flip" id="obOpAva">${valeraSVG(v.op.eq.body ? v.op.eq : { hat: 'none', body: 'rvan', shoes: 'none' }, { mood: 'ok' })}</div>
           <div class="f-bar hp"><div id="obOpHp"></div><span id="obOpHpT"></span></div><div class="f-bar st"><div id="obOpSt"></div></div><div class="f-move" id="obOpMove"></div></div>
       </div>
       <div class="f-log" id="obLog">Бой с живым игроком! Выбирай приём — у вас ${OB_ROUND_TIME} секунд.</div>
@@ -254,12 +254,12 @@ function obFinish(v) {
     S.onlineWins = (S.onlineWins || 0) + 1;
     track('onlineWin');
     emoji = '🏆'; title = 'Победа над живым игроком!'; good = true;
-    text = `${v.reason === 'Нокаут' ? `${esc(v.op.name)} повержен! Нокаут` : `${esc(v.op.name)} проиграл. ${v.reason}`}<br>+${fmt(m)} ₽, +25 опыта, +15 😊`;
+    text = `${v.reason === 'Нокаут' ? `${userLabel(v.op.name)} повержен! Нокаут` : `${userLabel(v.op.name)} проиграл. ${v.reason}`}<br>+${fmt(m)} ₽, +25 опыта, +15 😊`;
     confetti(70); sfx('win');
   } else if (v.winner === 'op') {
     addMood(-8); addXp(6);
     emoji = '🤕'; title = 'Поражение';
-    text = `${esc(v.op.name)} оказался сильнее. ${v.reason}<br>−8 😊. Реванш?`;
+    text = `${userLabel(v.op.name)} оказался сильнее. ${v.reason}<br>−8 😊. Реванш?`;
     sfx('lose');
   } else {
     addXp(10);

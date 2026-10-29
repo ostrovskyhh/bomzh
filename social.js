@@ -71,7 +71,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { sav
 // =====================================================================
 
 function refLink() { return REF && BOT_LINK ? `${BOT_LINK}?start=ref_${REF.code}` : BOT_LINK; }
-function storyImage() { return new URL('assets/story-promo-446.png', document.baseURI).href; }
+function storyImage() { return new URL(typeof I18N !== 'undefined' && I18N.lang === 'en' ? 'assets/story-promo-en-450.png' : 'assets/story-promo-446.png', document.baseURI).href; }
 function canStory() { return !!(tg && tg.shareToStory && tg.isVersionAtLeast && tg.isVersionAtLeast('7.8')); }
 
 // Друг пришёл по ссылке — код подставляется сам
@@ -145,7 +145,7 @@ async function chatPoll() {
       const b = (() => { try { return JSON.parse(m.badge || '{}'); } catch (e) { return {}; } })();
       list.insertAdjacentHTML('beforeend', m.sys ? `<div class="chat-sys">${esc(m.text)}</div>`
         : `<div class="chat-msg ${m.me ? 'me' : ''}"><div class="chat-ava frame-${esc(b.frame || 'none')}">${avaFace(m.name, b.avatar)}</div><div class="chat-bubble">
-          <b>${esc(m.name)}<small> · ур. ${b.lvl || 1} · ${new Date(m.ts * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</small>${c.admin ? `<i data-act="chatDel" data-id="${m.id}">🗑</i>` : ''}</b>${esc(m.text)}</div></div>`);
+          <b>${userLabel(m.name)}<small> · ур. ${b.lvl || 1} · ${new Date(m.ts * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</small>${c.admin ? `<i data-act="chatDel" data-id="${m.id}">🗑</i>` : ''}</b>${esc(m.text)}</div></div>`);
       c.last = Math.max(c.last, m.id);
     }
     if (atBottom || r.messages.length) list.scrollTop = list.scrollHeight;
@@ -234,11 +234,11 @@ EXTRA_TABS.fun.clan = () => {
         <div class="code-row"><input id="clanName" maxlength="20" placeholder="Название банды"><select id="clanEmoji">${CLAN_EMOJI.map((e) => `<option>${e}</option>`).join('')}</select></div>
         ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE, `Основать · ${fmt(CLAN_PRICE)} ₽`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 С ${CLAN_LEVEL_REQ} уровня</button>`}</div>
       <div class="subhead">Топ банд · вступай в любую</div>
-      ${others.length ? others.map((x, i) => card({ thumb: x.emoji, title: `${i + 1}. ${esc(x.name)} <span class="rarity rare">ур. ${x.level}</span>`, desc: `${x.members}/20 бойцов · ${fmt(x.score)} баллов`,
+      ${others.length ? others.map((x, i) => card({ thumb: x.emoji, title: `${i + 1}. ${userLabel(x.name)} <span class="rarity rare">ур. ${x.level}</span>`, desc: `${x.members}/20 бойцов · ${fmt(x.score)} баллов`,
         btn: `<button class="btn ${x.members < 20 ? 'primary' : ''}" data-act="clanJoin" data-id="${x.id}" ${x.members < 20 ? '' : 'disabled data-why="Банда заполнена"'}>Вступить</button>` })).join('') : '<div class="info-card">Банд пока нет — основай первую!</div>'}`;
   }
   const bonus = Math.round(clanBonus() * 100);
-  return `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>
+  return `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${userLabel(c.name)} · ур. ${c.level}</b>
       <p>Общак: <b>${fmt(c.treasury)} ₽</b> · сила ${fmt(c.power)} · ${fmt(c.score)} баллов${bonus ? ` · бонус +${bonus}% к доходу` : ''}</p></div></div>
     <div class="btn-row"><button class="btn wide" data-act="chatRoom" data-id="clan">💬 Чат банды</button></div>
     <div class="subhead">Скинуться в общак</div>
@@ -246,7 +246,7 @@ EXTRA_TABS.fun.clan = () => {
     ${c.nextCost ? `<div class="info-card">Уровень ${c.level + 1}: бонус +${CLAN_BONUS * 100 * c.level}% ко всем доходам банды. Стоит <b>${fmt(c.nextCost)} ₽</b> из общака.
       ${c.isOwner ? `<button class="btn ${c.treasury >= c.nextCost ? 'primary' : ''} wide" data-act="clanUpgrade" ${c.treasury >= c.nextCost ? '' : `disabled data-why="В общаке не хватает ${fmt(c.nextCost - c.treasury)} ₽"`}>⬆️ Прокачать банду</button>` : '<small>Прокачивает главарь.</small>'}</div>` : '<div class="info-card">👑 Банда максимального уровня!</div>'}
     <div class="subhead">Бойцы · ${c.members.length}/20</div>
-    ${c.members.map((m) => card({ thumb: m.role === 'boss' ? '👑' : '👤', title: `${esc(m.name)}${m.me ? ' (ты)' : ''}`, desc: `${fmt(m.score)} баллов · вложил ${fmt(m.donated)} ₽`,
+    ${c.members.map((m) => card({ thumb: m.role === 'boss' ? '👑' : '👤', title: `${userLabel(m.name)}${m.me ? ' (ты)' : ''}`, desc: `${fmt(m.score)} баллов · вложил ${fmt(m.donated)} ₽`,
       btn: c.isOwner && !m.me ? `<button class="btn small" data-act="clanKick" data-id="${m.uid}">Выгнать</button>` : '' })).join('')}
     <div class="subhead">Набеги · раз в 12 часов, победа = 10% чужого общака</div>
     ${c.raidLeft ? `<div class="info-card">⏳ Бойцы отдыхают: следующий набег через ${fmtTime(c.raidLeft)}</div>` : ''}

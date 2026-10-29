@@ -168,7 +168,7 @@ ACTIONS.refShare = () => {
 };
 ACTIONS.refSend = () => {
   const text = `Залетай в «Симулятор бомжа»! 🍾 По моей ссылке — +1000 ₽ и опыт ×1.5 на старте. Код: ${REF.code.toUpperCase()}`;
-  const url = `https://t.me/share/url?url=${encodeURIComponent(refLink())}&text=${encodeURIComponent(text)}`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent(refLink())}&text=${encodeURIComponent(typeof I18N !== 'undefined' ? I18N.t(text) : text)}`;
   closeModal();
   if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
   track('refShare');

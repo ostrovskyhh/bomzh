@@ -47,16 +47,16 @@ EXTRA_TABS.fun.friends = () => {
     <div class="code-row"><input id="frCode" placeholder="Код друга (6 букв)" maxlength="6" autocomplete="off"><button class="btn" data-act="frAddCode">Добавить</button></div>
     ${code ? `<div class="info-card">Твой код: <b>${code}</b> — <a data-act="refShare">отправить другу</a></div>` : ''}`;
   if (!d) return head + `<div class="info-card">${FR.error || '⏳ Загружаем друзей…'}</div>`;
-  const inc = d.incoming.map((f) => card({ thumb: frAva(f), title: `${esc(f.name)} <small>ур. ${f.level}</small>`, desc: 'Хочет дружить',
+  const inc = d.incoming.map((f) => card({ thumb: frAva(f), title: `${userLabel(f.name)} <small>ур. ${f.level}</small>`, desc: 'Хочет дружить',
     btn: `<div class="btn-col"><button class="btn green small" data-act="frAnswer" data-id="1:${f.pid}">Принять</button><button class="btn small" data-act="frAnswer" data-id="0:${f.pid}">Нет</button></div>` })).join('');
-  const list = d.friends.map((f) => card({ thumb: frAva(f), title: `${esc(f.name)} <small>ур. ${f.level}</small>`,
+  const list = d.friends.map((f) => card({ thumb: frAva(f), title: `${userLabel(f.name)} <small>ур. ${f.level}</small>`,
     desc: `${f.online ? '<b class="online-txt">в игре</b>' : f.seen ? `был ${frAgo(f.seen)}` : ''}${f.house ? ` · ${esc(f.house)}` : ''}`,
     extra: `<div class="duel-btns">
       <button class="btn small ${f.sent ? '' : 'primary'}" data-act="frGiftMenu" data-id="${f.pid}" data-name="${esc(f.name)}" ${f.sent ? 'disabled data-why="Сегодня уже дарил — завтра снова"' : ''}>${f.sent ? '🎁 ✓' : '🎁 Подарок'}</button>
       <button class="btn small" data-act="frVisit" data-id="${f.pid}">🏠 В гости</button>
       <button class="btn small" data-act="duelFight" data-id="${f.pid}">🥊</button>
       <button class="btn small" data-act="duelRpsMenu" data-id="${f.pid}" data-name="${esc(f.name)}">✊</button></div>` })).join('');
-  const out = d.outgoing.length ? `<div class="subhead">Ждут ответа</div>${d.outgoing.map((f) => `<div class="fr-out">${frAva(f)}<span>${esc(f.name)}</span></div>`).join('')}` : '';
+  const out = d.outgoing.length ? `<div class="subhead">Ждут ответа</div>${d.outgoing.map((f) => `<div class="fr-out">${frAva(f)}<span>${userLabel(f.name)}</span></div>`).join('')}` : '';
   const giftsLeft = d.friends.filter((f) => !f.sent).length;
   return head + (inc ? `<div class="subhead">Заявки в друзья</div>${inc}` : '')
     + `<div class="subhead">Мои друзья${giftsLeft ? ` · подарков можно отправить: ${giftsLeft}` : ''}</div>`
@@ -87,7 +87,7 @@ Object.assign(ACTIONS, {
     } catch (e) { toast(refErrorText(e), 'bad'); }
   },
   frGiftMenu: (pid, btn) => {
-    openModal(`<h3 style="margin-top:0">🎁 Подарок для ${esc(btn.dataset.name || 'друга')}</h3><p>Бесплатно, раз в день каждому другу. Друг получит его при входе в игру.</p>
+    openModal(`<h3 style="margin-top:0">🎁 Подарок для ${userLabel(btn.dataset.name || 'друга')}</h3><p>Бесплатно, раз в день каждому другу. Друг получит его при входе в игру.</p>
       <div class="pr-acts">${Object.entries(FRIEND_GIFTS).map(([k, g]) => `<button class="pr-act" data-act="frGift" data-id="${k}:${pid}"><span>${g.emoji}</span><b>${g.name}</b></button>`).join('')}</div>
       <div class="btns"><button class="btn wide" data-act="close">Отмена</button></div>`, { center: true });
   },
@@ -111,7 +111,7 @@ Object.assign(ACTIONS, {
       const st = r.stats;
       track('friendVisit');
       openModal(`<div class="fr-visit"><div class="fv-scene"><div class="fv-house">${['🪑', '📦', '⛺', '🏚️', '🏠', '🏢', '🏰'][Math.round(st.housing || 0)] || '🏠'}</div></div>
-        <h3>В гостях у ${esc(r.name)}</h3><p>${fmt(r.score)} баллов в топе</p>${topStatsHTML(st)}
+        <h3>В гостях у ${userLabel(r.name)}</h3><p>${fmt(r.score)} баллов в топе</p>${topStatsHTML(st)}
         <div class="btns" style="flex-direction:column;gap:8px"><button class="btn wide" data-act="frRemove" data-id="${pid}" data-name="${esc(r.name)}">Удалить из друзей</button>
         <button class="btn primary wide" data-act="close">Уйти домой</button></div></div>`, { center: true });
     } catch (e) { toast(refErrorText(e), 'bad'); }

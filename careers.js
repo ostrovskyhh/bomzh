@@ -237,7 +237,7 @@ function jobCeremony({ kind, j, from, to, mult, text, onOk }) {
       <div class="cer-badge"><div class="rays"></div><span>${j.emoji}</span></div>
       <div class="cer-doc">
         <div class="cer-head">${hire ? 'ТРУДОВОЙ ДОГОВОР' : 'ПРИКАЗ'} № ${Math.floor(rand(100, 999))}</div>
-        <div class="cer-line">${hire ? `${esc(playerName())} принят на работу` : `${esc(playerName())} переводится на должность`}</div>
+        <div class="cer-line">${hire ? `${userLabel(playerName())} принят на работу` : `${userLabel(playerName())} переводится на должность`}</div>
         <div class="cer-pos">${from ? `<s>${from}</s><i>➜</i>` : ''}<b>${to}</b></div>
         <div class="cer-job">${j.name}</div>
         <div class="cer-sign">Директор: <i>✍️ Подпись</i></div>

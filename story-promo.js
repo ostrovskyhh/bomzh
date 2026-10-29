@@ -10,10 +10,11 @@ function storyPromoReady(){return !!(STORY_PROMO.data?.active&&STORY_PROMO.data?
 function storyPromoLink(){return storyPromoReady()?`${BOT_LINK}?start=story_${STORY_PROMO.data.token}`:'';}
 function storyPromoText(variant=STORY_PROMO.variant){
   if(!storyPromoReady())return '';
-  return STORY_COPY[variant%STORY_COPY.length].replace('{code}',STORY_PROMO.data.code.toUpperCase())+' '+storyPromoLink();
+  const source=STORY_COPY[variant%STORY_COPY.length],copy=typeof I18N!=='undefined'?I18N.t(source):source;
+  return copy.replace('{code}',STORY_PROMO.data.code.toUpperCase())+' '+storyPromoLink();
 }
 function storyPromoParams(premium){
-  const params={text:storyPromoText()};if(premium)params.widget_link={url:storyPromoLink(),name:'Играть · подарок новичку'};return params;
+  const params={text:storyPromoText()};if(premium)params.widget_link={url:storyPromoLink(),name:typeof I18N!=='undefined'?I18N.t('Играть · подарок новичку'):'Играть · подарок новичку'};return params;
 }
 function storyNativeShare(media,params){tg.shareToStory(media,params);}
 function storyPromoButtons(){

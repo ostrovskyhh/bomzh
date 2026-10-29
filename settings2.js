@@ -79,7 +79,8 @@ openSettings = (function (orig) {
     const lv = typeof level === 'function' ? level() : 1;
     wrap.innerHTML = `<div class="set2-home ${page ? 'hidden' : ''}">
         <div class="set2-me"><div class="avatar frame-${typeof currentFrame === 'function' ? currentFrame() : 'none'}">${typeof avaFace === 'function' ? avaFace(playerName(), S.avatar) : esc(playerName()[0])}</div>
-          <div><b>${esc(playerName())}</b><small>${lv} уровень · ${typeof cityName === 'function' ? cityName() : ''}</small></div></div>
+          <div><b>${userLabel(playerName())}</b><small>${lv} уровень · ${typeof cityName === 'function' ? cityName() : ''}</small></div></div>
+        ${typeof I18N !== 'undefined' ? I18N.languageCard() : ''}
         <div class="set2-grid">${list.map((p) => `<button class="set2-tile" data-act="setGo" data-id="${p.id}"><span>${p.e}</span><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</div>
         <div class="set2-quick"><small>Быстро</small>${['sfx', 'music', 'vibro'].map((k) => `<button class="chip ${S.settings[k] ? 'on' : ''}" data-act="toggleSet" data-id="${k}">${{ sfx: '🔊 Звуки', music: '🎵 Музыка', vibro: '📳 Вибрация' }[k]}</button>`).join('')}</div>
       </div>

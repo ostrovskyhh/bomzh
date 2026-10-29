@@ -4,6 +4,13 @@
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// Keep player-written names intact when the surrounding interface is translated.
+function userLabel(value) {
+  const user = tg?.initDataUnsafe?.user;
+  const fallback = value === 'Валера' && !S.name && !(user?.first_name || user?.username);
+  const display = fallback && typeof I18N !== 'undefined' && I18N.lang === 'en' ? 'Valera' : value;
+  return `<span data-i18n-user${fallback ? ' data-i18n-default-name' : ''}>${esc(display)}</span>`;
+}
 
 // Точки расширения для модулей (systems.js, fights.js, casino.js, minigames.js, quests.js)
 const HOOKS = { tick: [], hud: [], init: [], load: [], track: [], screen: [], mods: [] };
@@ -818,7 +825,8 @@ function netVisible() {
 }
 async function netPost(url, body) {
   const rid = body.rid || Math.random().toString(36).slice(2) + Date.now().toString(36);
-  const payload = JSON.stringify({ ...body, rid });
+  const uiLanguage = typeof I18N !== 'undefined' && typeof LOADED !== 'undefined' && LOADED ? I18N.lang : undefined;
+  const payload = JSON.stringify({ ...body, uiLanguage, rid });
   const route = String(url).split('?')[0].replace(/^https?:\/\/[^/]+/, '');
   let last;
   for (let i = 0; i <= NET_DELAYS.length; i++) {
@@ -830,6 +838,7 @@ async function netPost(url, body) {
       const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: payload, signal: ctl && ctl.signal });
       if (r.ok) {
         const result = await r.json();
+        if (typeof I18N !== 'undefined') I18N.rememberUsers(route, result);
         if (typeof BugReport !== 'undefined' && (result.error || Date.now() - sentAt > 3000 || !/(?:\/(?:state|health|latest|feed|get|presence)|\/save\/put)$/.test(route))) BugReport.record('api',
           { route, rid, attempt: i + 1, status: r.status, durationMs: Date.now() - sentAt, error: BugReport.clean(result.error || '', 300) });
         return result;
@@ -2698,7 +2707,7 @@ function openProfile() {
   const li = levelInfo();
   openModal(`
     <div class="story-art">${sceneThumbSVG(S.housing)}<div class="valera-mini">${valeraSVG(S.eq, lookState())}</div></div>
-    <h3>${playerName()} ${isVip() ? '👑' : ''}</h3>
+    <h3>${userLabel(playerName())} ${isVip() ? '👑' : ''}</h3>
     <p>Уровень ${li.level} · опыт ${Math.floor(li.cur)}/${li.need}</p>
     <div class="stat-grid" style="margin-bottom:12px;text-align:left">
       <div>Жильё<b>${HOUSING[S.housing].name}</b></div>

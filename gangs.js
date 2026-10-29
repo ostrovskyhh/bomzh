@@ -34,7 +34,7 @@ function modeTag(mode) { return mode === 'invite' ? '<span class="gang-mode invi
 function gangListHTML(list, me) {
   if (!list || !list.length) return '<div class="info-card">Банд пока нет — основай первую!</div>';
   return list.map((g) => card({ thumb: `<div class="gang-place p${g.place}">${g.place}</div>`,
-    title: `${g.emoji} ${esc(g.name)} <span class="rarity rare">ур. ${g.level}</span>${g.mine ? ' <small>(твоя)</small>' : ''}`,
+    title: `${g.emoji} ${userLabel(g.name)} <span class="rarity rare">ур. ${g.level}</span>${g.mine ? ' <small>(твоя)</small>' : ''}`,
     desc: `${modeTag(g.mode)} · ${g.members}/${g.max} бойцов<br>⚔️ ${fmt(g.week)} очков войны · ${fmt(g.score)} баллов${g.wins ? ` · 🏆×${g.wins}` : ''}`,
     btn: me === false && !g.mine ? (g.mode === 'invite' ? '<button class="btn small" disabled data-why="Нужна ссылка-приглашение от бойцов банды">🔒</button>'
       : `<button class="btn ${g.members < g.max ? 'primary' : ''}" data-act="clanJoin" data-id="${g.id}" ${g.members < g.max ? '' : 'disabled data-why="Банда заполнена"'}>Вступить</button>`) : '' })).join('');
@@ -59,7 +59,7 @@ EXTRA_TABS.fun.clan = () => {
         ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE && S.caps >= CLAN_CAPS, `Основать · ${fmtShort(CLAN_PRICE)} ₽ + ${CLAN_CAPS} 🟡`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 Основать можно с ${CLAN_LEVEL_REQ} уровня</button>`}</div>`;
   }
   const bonus = Math.round(clanBonus() * 100);
-  const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${esc(c.name)} · ур. ${c.level}</b>${g && g.motto ? `<i class="g-motto">«${esc(g.motto)}»</i>` : ''}
+  const head = `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${userLabel(c.name)} · ур. ${c.level}</b>${g && g.motto ? `<i class="g-motto">«${esc(g.motto)}»</i>` : ''}
       <p>${g ? modeTag(g.mode) + ' · ' : ''}Общак <b>${fmt(c.treasury)} ₽</b>${bonus ? ` · +${bonus}% к доходу` : ''}<br>${g ? `⚔️ Неделя: <b>${g.place} место</b>, ${fmt(g.week)} очков` : ''}</p></div></div>
     <div class="seg-mini gang-tabs">${[['main', '🏡 Двор'], ['games', '🎲 Игры'], ['crew', `👥 Бойцы ${c.members.length}`]].map(([id, t]) => `<button class="${GANG.tab === id ? 'on' : ''}" data-act="gangTab" data-id="${id}">${t}</button>`).join('')}</div>`;
   if (!g) return head + '<div class="info-card">⏳ Загружаем…</div>';
@@ -117,7 +117,7 @@ function gangCrewHTML(c, g) {
         boss && !m.me ? `<button class="btn small" data-act="gangTransfer" data-id="${m.uid}" data-name="${esc(m.name)}">👑 Передать</button>` : '',
       ].join('');
       return card({ thumb: `<div class="top-ava frame-${esc(m.frame || 'none')}">${avaFace(m.name, m.avatar)}${m.online ? '<i class="online-dot on-ava"></i>' : ''}</div>`,
-        title: `${GANG_ROLE[m.role] ? `<span class="g-role ${m.role}">${GANG_ROLE[m.role]}</span> ` : ''}${esc(m.name)}${m.me ? ' (ты)' : ''} <small>ур. ${m.level}</small>`,
+        title: `${GANG_ROLE[m.role] ? `<span class="g-role ${m.role}">${GANG_ROLE[m.role]}</span> ` : ''}${userLabel(m.name)}${m.me ? ' (ты)' : ''} <small>ур. ${m.level}</small>`,
         desc: `⚔️ ${m.week} очков за неделю · ${m.online ? '<b class="online-txt">в игре</b>' : `был ${gangAgo(m.seen)}`}<br><small>в банде ${days} дн.${m.donated ? ` · в общак ${fmtShort(m.donated)} ₽` : ''}</small>`,
         extra: duel || manage ? `<div class="duel-btns">${duel}${manage}</div>` : '' });
     }).join('');
@@ -186,7 +186,7 @@ HOOKS.load.push(() => {
       const x = r.gang;
       closeModal();
       openModal(`<div class="duel-call"><div class="dc-glow"></div><div class="dc-icon">${x.emoji}</div>
-        <h3>Приглашение в банду «${esc(x.name)}»</h3>
+        <h3>Приглашение в банду «${userLabel(x.name)}»</h3>
         <p>ур. ${x.level} · ${x.members}/${x.max} бойцов · ⚔️ ${fmt(x.week)} очков войны за неделю</p>
         ${r.same ? '<p class="test-note">Ты уже в этой банде 😉</p><div class="btns"><button class="btn wide" data-act="close">Ок</button></div>'
           : `${r.already ? '<p class="test-note">Чтобы вступить, сначала выйди из своей банды</p>' : ''}
@@ -260,7 +260,7 @@ Object.assign(ACTIONS, {
       if (r.error) { toast(r.error, 'bad'); return; }
       track('gangWall');
       const rows = r.bouts.map((b, i) => `<div class="wall-bout ${b.win}" style="animation-delay:${i * 0.35}s"><span>${esc(b.a)}</span><b>${b.win === 'a' ? '✅' : '❌'}</b><span>${esc(b.b)}</span></div>`).join('');
-      openModal(`<div class="wall"><h3>🧱 Стенка: ${esc(S.clan ? S.clan.name : '')} vs ${r.enemy.emoji} ${esc(r.enemy.name)}</h3>
+      openModal(`<div class="wall"><h3>🧱 Стенка: ${userLabel(S.clan ? S.clan.name : '')} vs ${r.enemy.emoji} ${userLabel(r.enemy.name)}</h3>
         <div class="wall-bouts">${rows}</div>
         <div class="wall-result ${r.win ? 'win' : 'lose'}" style="animation-delay:${r.bouts.length * 0.35 + 0.2}s">${r.win ? '🏆 Победа' : '🤕 Поражение'} ${r.score[0]}:${r.score[1]}${r.stake ? `<br><small>${r.win ? '+' : '−'}${fmt(r.stake)} ₽ ${r.win ? 'в общак' : 'из общака'}</small>` : ''}</div>
         <div class="btns"><button class="btn primary wide" data-act="close">Ок</button></div></div>`, { center: true });

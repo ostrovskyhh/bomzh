@@ -120,7 +120,7 @@ contractSign = function () {
   const no = 1000 + counter('contractSign') + 1;
   openModal(`<div class="ct-wrap">${ctSteps(3)}
     <div class="ct-doc"><div class="ct-doc-h"><small>ДОГОВОР МЕНЫ</small><b>№ ${no}</b><small>${new Date().toLocaleDateString('ru-RU')} · барахолка Шныря</small></div>
-      <p>1. ${esc(playerName())} передаёт <b>${items.length}</b> ${items.length < 5 ? 'вещи' : 'вещей'} «${RARITY[ctRarIdx(CT.rar)].name}» общей стоимостью <b>${fmt(stake)} ₽</b>:</p>
+      <p>1. ${userLabel(playerName())} передаёт <b>${items.length}</b> ${items.length < 5 ? 'вещи' : 'вещей'} «${RARITY[ctRarIdx(CT.rar)].name}» общей стоимостью <b>${fmt(stake)} ₽</b>:</p>
       <div class="ct-give">${items.map((it) => `<span title="${esc(it.name)}">${it.e}</span>`).join('')}</div>
       <p>2. Взамен получает <b>одну</b> вещь из списка ниже. Износ ≈ <b>${ctWear(items).toFixed(3)}</b> (${q.name}) — средний у вложенных.</p>
       <div class="ct-table">${rows}</div>
@@ -128,7 +128,7 @@ contractSign = function () {
         <span class="${ev >= stake ? 'good' : 'bad'}">${ev >= stake ? '▲ выгоднее вложенного' : `▼ в среднем −${Math.round((1 - ev / stake) * 100)}%`}</span></p>
       <p>3. Вложенные вещи пропадают. Сделка окончательная.</p>
       <div class="ct-sign"><small>✍️ Распишись пальцем в рамке</small><canvas id="ctPad" width="600" height="180"></canvas>
-        <button class="ct-clear" data-act="ctClear">Стереть</button><div class="ct-line">Подпись: ${esc(playerName())}</div></div>
+        <button class="ct-clear" data-act="ctClear">Стереть</button><div class="ct-line">Подпись: ${userLabel(playerName())}</div></div>
       <div class="ct-seal" id="ctSeal">ПОДПИСАНО</div></div>
     <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" id="ctGo" data-act="ctSignGo" disabled data-why="Сначала распишись в рамке">🖋️ Подписать договор</button>
       <button class="btn wide" data-act="contracts">⬅️ Изменить вещи</button></div></div>`, { center: true });

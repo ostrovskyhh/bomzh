@@ -82,7 +82,8 @@ HOOKS.hud.push(() => {
   if (!el) return;
   const t = tapPower();
   const txt = ` · 🍾 за тап: ${t % 1 ? t.toFixed(1) : t}`;
-  if (!el.textContent.includes('за тап')) el.textContent += txt;
+  const original = typeof I18N !== 'undefined' ? I18N.originalText(el) : el.textContent;
+  if (!original.includes('за тап')) el.textContent += txt;
 });
 // В магазине одежды — итог по надетому
 const _shopClothesTap = EXTRA_TABS.shop.clothes;

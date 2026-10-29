@@ -91,7 +91,7 @@ async function duelChallenge(kind, pid, stake = 0) {
 function duelWaitHTML(vs, kind, cancelAct) {
   return `<div class="duel-wait">
       <div class="dw-radar"><span></span><span></span><span></span><div class="dw-icon">${kind === 'fight' ? '🥊' : '✊'}</div></div>
-      <h3>Вызов: ${esc(vs.name)}</h3>
+      <h3>Вызов: ${userLabel(vs.name)}</h3>
       <div class="dw-steps">
         <div class="ok">✅ Вызов отправлен</div>
         <div class="${vs.notify === 'ok' || vs.notify === 'gap' ? 'ok' : 'warn'}" id="dwNotify">${vs.online ? '🟢 Игрок сейчас в игре — увидит вызов через пару секунд' : NOTIFY_TEXT[vs.notify] || NOTIFY_TEXT.error}</div>
@@ -149,7 +149,7 @@ function duelListHTML() {
   if (!l) return '<div class="info-card">⏳ Смотрим, кто в игре…</div>';
   if (!l.length) return '<div class="info-card">Сейчас в игре никого, кроме тебя. Вызови игрока из топа — бот пришлёт ему уведомление.</div>';
   return l.map((p) => card({ thumb: `<div class="top-ava frame-${esc(p.frame || 'none')}">${avaFace(p.name, p.avatar)}</div>`,
-    title: `<span class="online-dot"></span>${esc(p.name)}`, desc: `Ур. ${p.level} · рейтинг ${p.rating}${p.busy ? ' · занят' : ''}`, extra: duelBtns(p.pid, p.name) })).join('');
+    title: `<span class="online-dot"></span>${userLabel(p.name)}`, desc: `Ур. ${p.level} · рейтинг ${p.rating}${p.busy ? ' · занят' : ''}`, extra: duelBtns(p.pid, p.name) })).join('');
 }
 function openOnlineList() {
   openModal(`<h3 style="margin-top:0">🟢 Сейчас в игре</h3><div id="duelList">${duelListHTML()}</div>
@@ -175,7 +175,7 @@ EXTRA_TABS.tasks.top = function topWithDuels() {
   const rows = d.top.map((p, i) => `<details class="top-row ${p.me ? 'me' : ''}"><summary>
       <div class="rank r${i + 1}">${i + 1}</div>
       <div class="top-ava frame-${esc(p.stats.frame || 'none')}">${avaFace(p.name, p.stats.avatar)}${p.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
-      <div class="card-body"><div class="card-title">${esc(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
+      <div class="card-body"><div class="card-title">${userLabel(p.name)}${p.stats.vip ? ' 👑' : ''}${p.me ? ' (ты)' : ''}</div>
         <div class="card-desc">${p.online && !p.me ? '<b class="online-txt">в игре</b> · ' : ''}<span class="top-city">📍 ${esc(p.stats.city_name || 'Засранск')}</span> Ур. ${p.stats.level} · ${esc(p.stats.house_name || HOUSING[Math.round(p.stats.housing || 0)].name)}${p.stats.job_name ? ` · ${esc(p.stats.job_name.split(' · ')[0])}` : ''}</div></div>
       <div class="top-score">${fmt(p.score)}<small>баллов</small></div></summary>
       ${!p.me && p.pid ? duelBtns(p.pid, p.name) : ''}${topStatsHTML(p.stats)}</details>`).join('');
@@ -238,8 +238,8 @@ function rpGameModal() {
   openModal(`<div class="rps2">
       <div class="r2-head"><span id="rpRound">Раунд ${v.round}</span>${v.stake ? `<span class="r2-pot">🏆 ${fmt(Math.round(v.stake * 2 * (1 - RPS_FEE)))} ₽</span>` : ''}</div>
       <div class="r2-score">
-        <div class="r2-pl me"><div class="top-ava">${esc((playerName() || 'Я')[0].toUpperCase())}</div><b>Ты</b><div class="r2-pips" id="rpMeS">${rpPips(v.me.score, v.win)}</div></div>
-        <div class="r2-pl op"><div class="top-ava">${esc((v.op.name || '?')[0].toUpperCase())}</div><b>${esc(v.op.name)}</b><div class="r2-pips" id="rpOpS">${rpPips(v.op.score, v.win)}</div></div>
+        <div class="r2-pl me"><div class="top-ava">${userLabel((playerName() || 'Я')[0].toUpperCase())}</div><b>Ты</b><div class="r2-pips" id="rpMeS">${rpPips(v.me.score, v.win)}</div></div>
+        <div class="r2-pl op"><div class="top-ava">${userLabel((v.op.name || '?')[0].toUpperCase())}</div><b>${userLabel(v.op.name)}</b><div class="r2-pips" id="rpOpS">${rpPips(v.op.score, v.win)}</div></div>
       </div>
       <div class="r2-arena">
         <div class="r2-hand me" id="rpMe">❔</div>
@@ -363,11 +363,11 @@ function rpFinish(v) {
     S.rpsWins = (S.rpsWins || 0) + 1;
     track('rpsWin');
     emoji = '👑'; title = 'Победа!'; good = true;
-    text = `${v.reason}. ${esc(v.op.name)} повержен!${prize ? `<br><b class="gold">+${fmt(prize)} ₽</b>` : ''}<br>+12 опыта, +10 😊`;
+    text = `${v.reason}. ${userLabel(v.op.name)} повержен!${prize ? `<br><b class="gold">+${fmt(prize)} ₽</b>` : ''}<br>+12 опыта, +10 😊`;
     confetti(80); sfx('win');
   } else if (v.winner === 'op') {
     addMood(-4); addXp(4);
-    emoji = '😤'; title = 'Поражение'; text = `${v.reason}. ${esc(v.op.name)} оказался хитрее.${v.stake ? `<br>Ставка ${fmt(v.stake)} ₽ ушла сопернику` : ''}`;
+    emoji = '😤'; title = 'Поражение'; text = `${v.reason}. ${userLabel(v.op.name)} оказался хитрее.${v.stake ? `<br>Ставка ${fmt(v.stake)} ₽ ушла сопернику` : ''}`;
     sfx('lose');
   } else {
     if (v.stake) rpClaim(v.code, '↩️ Ставка вернулась'); addXp(5);
@@ -411,7 +411,7 @@ Object.assign(ACTIONS, {
   },
   duelShareLink: () => {
     const text = 'Вызываю тебя в «Симуляторе бомжа»! ⚔️ Запусти бота и открой игру — вызов ждёт 5 минут';
-    const url = `https://t.me/share/url?url=${encodeURIComponent(BOT_LINK || 'https://t.me')}&text=${encodeURIComponent(text)}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(BOT_LINK || 'https://t.me')}&text=${encodeURIComponent(typeof I18N !== 'undefined' ? I18N.t(text) : text)}`;
     if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
   },
   duelAccept: async (id) => {
