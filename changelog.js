@@ -3,12 +3,15 @@
 // поменяй ?v= в index.html на тот же номер и загрузи файлы на GitHub.
 
 const CHANGELOG = [
+  { v: '4.63', title: 'Админка: подтверждение без ручного номера', items: [
+    '🛠️ Убран ручной ввод номера игрока: остаются проверка правок и повторное подтверждение. VIP показан понятным статусом и датой. Административные версии исключены из общих уведомлений'
+  ], adminOnly: true },
   { v: '4.62', title: 'Понятная админка на русском', items: [
     '🛠️ Русские названия и пояснения ко всем параметрам, понятный выбор раздела, примеры начисления и списания, читаемая история. Служебные коды вынесены в отдельный режим'
-  ] },
+  ], adminOnly: true },
   { v: '4.61', title: 'Админка: комментарий по желанию', items: [
     '🛠️ Комментарий к правке и откату теперь необязателен. Короткий текст тоже принимается; вместо HTTP 400 показаны понятные сообщения проверки. История и подтверждение сохраняются'
-  ] },
+  ], adminOnly: true },
   { v: '4.60', title: 'Депутат: все законы доступны на телефоне', items: [
     '🎖️ Исправлено обрезанное окно заседания: законы и кнопки голосования можно прокрутить и нажать даже на небольшом экране. Исправление действует во всех городах'
   ] },
@@ -555,8 +558,10 @@ const QUIET_RELEASES = new Set(['4.27','4.33','4.40','4.41','4.53']);
 function newsForVersion(fromVersion) {
   const idx = CHANGELOG.findIndex((c) => c.v === fromVersion);
   const list = fromVersion === 'all' ? CHANGELOG : idx > 0 ? CHANGELOG.slice(0, idx) : CHANGELOG.slice(0, 1);
-  return fromVersion === 'all' ? list : list.filter((c) => !QUIET_RELEASES.has(c.v));
+  return list.filter(c=>!c.adminOnly&&(fromVersion==='all'||!QUIET_RELEASES.has(c.v)));
 }
+
+function isAdminRelease(version){return !!CHANGELOG.find(c=>c.v===version)?.adminOnly;}
 
 function openNews(fromVersion) {
   const list = newsForVersion(fromVersion);
@@ -578,12 +583,13 @@ function checkReleaseNews() {
   if (S.seenVersion === CURRENT_VERSION) return;
   if (!S.storySeen) return;
   if (!S.seenVersion && (S.stats.taps || 0) < 30) { S.seenVersion = CURRENT_VERSION; return; }
-  if (!newsForVersion(S.seenVersion).length) { S.seenVersion = CURRENT_VERSION; save(); return; }
+  const eligible=newsForVersion(S.seenVersion);
+  if (!eligible.length) { S.seenVersion = CURRENT_VERSION; save(); return; }
   if (!popupTurn(3) || S.busy || (S.tut && !S.tut.done)) return;
   const from = S.seenVersion;
   S.seenVersion = CURRENT_VERSION;
   save();
-  if(typeof returnNotice==='function')returnNotice({key:'release:'+CURRENT_VERSION,kind:'news',title:'Что нового · '+CURRENT_VERSION,body:CHANGELOG[0].title,action:'release',arg:from});else openNews(from);
+  if(typeof returnNotice==='function')returnNotice({key:'release:'+eligible[0].v,kind:'news',title:'Что нового · '+eligible[0].v,body:eligible[0].title,action:'release',arg:from});else openNews(from);
 }
 HOOKS.tick.push(checkReleaseNews);
 

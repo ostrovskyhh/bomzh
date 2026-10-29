@@ -1,6 +1,20 @@
 // Notifications contain receipts, never deferred balance mutations. Closing cannot lose a reward.
 let RETURN_ARRIVAL=null,RETURN_CAPTURE='',RETURN_EXPLICIT=false,RETURN_COLLECTING=false;
-function returnState(){S.returnInbox||={items:[],away:0};if(!Array.isArray(S.returnInbox.items))S.returnInbox.items=[];return S.returnInbox;}
+function returnState(){
+ S.returnInbox||={items:[],away:0};if(!Array.isArray(S.returnInbox.items))S.returnInbox.items=[];
+ const clean=[],releases=new Map();
+ for(const note of S.returnInbox.items){
+  if(note.action!=='release'){clean.push(note);continue;}
+  if(isAdminRelease(String(note.key).replace(/^release:/,''))){
+   const publicNews=newsForVersion(note.arg);if(!publicNews.length)continue;
+   note.key='release:'+publicNews[0].v;note.title='Что нового · '+publicNews[0].v;note.body=publicNews[0].title;
+  }
+  const previous=releases.get(note.key);
+  if(previous){previous.read=!!previous.read&&!!note.read;if(CHANGELOG.findIndex(c=>c.v===note.arg)>CHANGELOG.findIndex(c=>c.v===previous.arg))previous.arg=note.arg;continue;}
+  releases.set(note.key,note);clean.push(note);
+ }
+ S.returnInbox.items=clean;return S.returnInbox;
+}
 function returnPlain(html){const t=document.createElement('template');t.innerHTML=String(html||'').replace(/<br\s*\/?>/gi,'\n');return (t.content.textContent||'').trim();}
 function returnIsArriving(){return !!RETURN_ARRIVAL?.active&&Date.now()<RETURN_ARRIVAL.until;}
 function returnPrepare(from){
