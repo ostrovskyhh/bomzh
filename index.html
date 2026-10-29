@@ -25803,7 +25803,7 @@ function bottleShopHTML(premium=false) {
 EXTRA_TABS.shop.clothes=(function(orig){return ()=>bottleShopHTML(false)+orig();})(EXTRA_TABS.shop.clothes);
 EXTRA_TABS.shop.bottles=()=>bottleShopHTML(false);
 // An explicit tile keeps cash bottles discoverable alongside clothes and housing.
-BETA_HUBS.find(h=>h.id==='me').groups[0][1].push({s:'shop',t:'bottles',act:'bottleShop',id:'bottles',e:'🍾',n:'Бутылки'});
+BETA_HUBS.find(h=>h.id==='me').groups.find(([title])=>title==='Дом и вещи')[1].push({s:'shop',t:'bottles',act:'bottleShop',id:'bottles',e:'🍾',n:'Бутылки'});
 function bottleBack() { if(BOTTLE_BACK_DONATE){DN_TAB='bottles';openDonate();}else{closeModal();renderCurrent(false);} }
 Object.assign(ACTIONS,{
   bottleShop:()=>showScreen('shop','bottles'),
