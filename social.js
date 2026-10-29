@@ -114,10 +114,27 @@ refBoxHTML = () => {
 const CHAT_POLL = 2500;
 let CHAT = null; // { room, last, timer, admin }
 
+function chatDistrictChannel() {
+  const language = typeof I18N !== 'undefined' ? I18N.lang : (S.settings?.language || 'ru');
+  S.settings ||= {};
+  if (S.settings.chatLanguage !== language || !['ru', 'worldwide'].includes(S.settings.chatChannel)) {
+    S.settings.chatLanguage = language;
+    S.settings.chatChannel = language === 'en' ? 'worldwide' : 'ru';
+  }
+  return S.settings.chatChannel;
+}
+function chatSeenKey(c) { return c.room === 'district' && c.channel === 'worldwide' ? 'district:worldwide' : c.room; }
+const CHAT_DRAFTS = {};
+document.addEventListener('game-language-change', () => {
+  chatDistrictChannel();
+  if (CHAT?.room === 'district' && $('chatList')) chatOpen('district');
+  if (onlineOn()) chatCheck();
+});
+
 function chatOpen(room = 'district') {
   if (!onlineOn()) { toast('Чат работает в игре внутри Telegram', 'bad'); return; }
   if (CHAT && CHAT.timer) clearInterval(CHAT.timer);
-  CHAT = { room, last: 0, timer: null, admin: false };
+  CHAT = { room, channel: chatDistrictChannel(), last: 0, timer: null, admin: false };
   openModal(`<div class="chat">
       <div class="seg seg2 chat-tabs"><button class="${room === 'district' ? 'on' : ''}" data-act="chatRoom" data-id="district">🏙️ Район</button>
         <button class="${room === 'clan' ? 'on' : ''}" data-act="chatRoom" data-id="clan">🏴 Банда</button></div>
@@ -134,7 +151,7 @@ async function chatPoll() {
   const c = CHAT;
   if (!c || !$('chatList')) { if (c && c.timer) clearInterval(c.timer); CHAT = null; return; }
   try {
-    const r = await apiPost('chat/list', { room: c.room, after: c.last });
+    const r = await apiPost('chat/list', { room: c.room, channel: c.channel, after: c.last });
     if (CHAT !== c || !$('chatList')) return;
     c.admin = r.admin;
     const list = $('chatList');
@@ -150,7 +167,7 @@ async function chatPoll() {
     }
     if (atBottom || r.messages.length) list.scrollTop = list.scrollHeight;
     if (!S.chatSeen) S.chatSeen = {};
-    S.chatSeen[c.room] = Math.max(S.chatSeen[c.room] || 0, c.last);
+    S.chatSeen[chatSeenKey(c)] = Math.max(S.chatSeen[chatSeenKey(c)] || 0, c.last);
     chatBadge();
   } catch (e) { /* сеть моргнула */ }
 }
@@ -161,13 +178,14 @@ function chatBadge() {
   const b = $('chatBadge');
   if (!b) return;
   const seen = S.chatSeen || {};
-  const n = (CHAT_LAST.district > (seen.district || 0) ? 1 : 0) + (CHAT_LAST.clan > (seen.clan || 0) ? 1 : 0);
+  const channel = chatDistrictChannel(), key = channel === 'worldwide' ? 'district:worldwide' : 'district';
+  const n = ((CHAT_LAST.channels?.[channel] || 0) > (seen[key] || 0) ? 1 : 0) + (CHAT_LAST.clan > (seen.clan || 0) ? 1 : 0);
   b.classList.toggle('hidden', !n);
   $('chatBtn').classList.toggle('hidden', !onlineOn() || !S.storySeen);
 }
 async function chatCheck() {
   if (!onlineOn()) { chatBadge(); return; }
-  try { CHAT_LAST = await apiPost('chat/last'); } catch (e) { /* молчим */ }
+  try { CHAT_LAST = await apiPost('chat/last', {channel: chatDistrictChannel()}); } catch (e) { /* молчим */ }
   chatBadge();
 }
 HOOKS.init.push(() => { setTimeout(chatCheck, 3000); setInterval(chatCheck, 60000); });
@@ -175,18 +193,24 @@ HOOKS.init.push(() => { setTimeout(chatCheck, 3000); setInterval(chatCheck, 6000
 Object.assign(ACTIONS, {
   openChat: () => chatOpen('district'),
   chatRoom: (room) => chatOpen(room),
+  chatChannel: (channel) => {
+    if (!['ru', 'worldwide'].includes(channel)) return;
+    chatDistrictChannel(); S.settings.chatChannel = channel;
+    saveSoon(); chatOpen('district'); chatCheck();
+  },
   chatSend: async () => {
     const inp = $('chatText');
     if (!inp || !CHAT) return;
+    const c = CHAT;
     const text = inp.value.trim();
     if (!text) return;
     inp.value = '';
     try {
-      const r = await apiPost('chat/send', { room: CHAT.room, text });
-      if (r.error) { toast(r.error, 'bad'); inp.value = text; return; }
+      const r = await apiPost('chat/send', { room: c.room, channel: c.channel, text });
+      if (r.error) { toast(r.error, 'bad'); if (CHAT === c && $('chatText') === inp && !inp.value) inp.value = text; return; }
       track('chatMsg');
-      chatPoll();
-    } catch (e) { toast(refErrorText(e), 'bad'); inp.value = text; }
+      if (CHAT === c) chatPoll();
+    } catch (e) { toast(refErrorText(e), 'bad'); if (CHAT === c && $('chatText') === inp && !inp.value) inp.value = text; }
   },
   chatDel: async (id) => { try { await apiPost('chat/delete', { id: +id }); const el = document.querySelector(`[data-act="chatDel"][data-id="${id}"]`); if (el) el.closest('.chat-msg').remove(); } catch (e) { toast('Не удалось удалить', 'bad'); } },
 });

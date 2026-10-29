@@ -84,12 +84,14 @@ function chatDay(ts) {
 
 chatOpen = function (room = 'district') {
   if (!onlineOn()) { toast('Чат работает в игре внутри Telegram', 'bad'); return; }
+  if (CHAT && $('chatText')) CHAT_DRAFTS[chatSeenKey(CHAT)] = $('chatText').value;
   if (CHAT && CHAT.timer) clearInterval(CHAT.timer);
-  CHAT = { room, last: 0, timer: null, admin: false, prev: null, users: {} };
+  CHAT = { room, channel: chatDistrictChannel(), last: 0, timer: null, admin: false, prev: null, users: {} };
   const tab = (id, e, t) => `<button class="${room === id ? 'on' : ''}" data-act="chatRoom" data-id="${id}"><span>${e}</span>${t}</button>`;
   openModal(`<div class="chat chat2">
       <div class="c2-head"><div class="c2-tabs">${tab('district', '🏙️', 'Район')}${tab('clan', '🏴', 'Банда')}</div>
         <span class="c2-online" id="chatOnline"></span><button class="c2-x" data-act="close">✕</button></div>
+      ${room === 'district' ? `<div class="c2-channels" role="group" aria-label="Канал чата">${[['ru','RU'],['worldwide','Worldwide']].map(([id,label])=>`<button data-act="chatChannel" data-id="${id}" aria-pressed="${CHAT.channel===id}" class="${CHAT.channel===id?'on':''}">${label}</button>`).join('')}</div>` : ''}
       <div class="chat-list c2-list" id="chatList"><div class="chat-empty">Загружаем…</div></div>
       <button class="c2-down hidden" id="chatDown" data-act="chatDown">⬇ Новые</button>
       <div class="c2-emoji hidden" id="chatEmoji">
@@ -105,6 +107,7 @@ chatOpen = function (room = 'district') {
   const sheet = $('chatList').closest('.sheet');
   if (sheet) sheet.classList.add('chat-sheet');
   const inp = $('chatText');
+  inp.value = CHAT_DRAFTS[chatSeenKey(CHAT)] || '';
   inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') ACTIONS.chatSend(); });
   // Лимит считаем по видимым символам: смайл — это один символ, даже если внутри несколько кодов
   inp.addEventListener('input', () => {
@@ -131,7 +134,7 @@ chatPoll = async function () {
   const c = CHAT;
   if (!c || !$('chatList')) { if (c && c.timer) clearInterval(c.timer); CHAT = null; return; }
   try {
-    const r = await apiPost('chat/list', { room: c.room, after: c.last });
+    const r = await apiPost('chat/list', { room: c.room, channel: c.channel, after: c.last });
     if (CHAT !== c || !$('chatList')) return;
     c.admin = r.admin;
     const list = $('chatList');
@@ -164,7 +167,7 @@ chatPoll = async function () {
       else $('chatDown').classList.remove('hidden');
     }
     if (!S.chatSeen) S.chatSeen = {};
-    S.chatSeen[c.room] = Math.max(S.chatSeen[c.room] || 0, c.last);
+    S.chatSeen[chatSeenKey(c)] = Math.max(S.chatSeen[chatSeenKey(c)] || 0, c.last);
     chatBadge();
   } catch (e) { /* сеть моргнула */ }
 };
@@ -210,7 +213,7 @@ Object.assign(ACTIONS, {
     document.querySelectorAll('#chatEmoji .c2-etabs button').forEach((b) => b.classList.toggle('on', b === btn));
   },
   chatEmo: (e) => chatInsert(e),
-  chatQuick: (i) => { const i2 = $('chatText'); if (i2) { i2.value = CHAT_QUICK[+i]; ACTIONS.chatSend(); } },
+  chatQuick: (i) => { const i2 = $('chatText'); if (i2) { i2.value = I18N.lang === 'en' ? I18N.t(CHAT_QUICK[+i]) : CHAT_QUICK[+i]; ACTIONS.chatSend(); } },
   chatDown: () => { const l = $('chatList'); if (l) l.scrollTop = l.scrollHeight; $('chatDown').classList.add('hidden'); },
   // Нажатие на аватарку — мини-карточка игрока с вызовом на бой, КНБ и «в друзья»
   chatUser: (pid) => {

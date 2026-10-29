@@ -15,7 +15,7 @@ runGame=(function(orig){return function(options){
 };})(runGame);
 
 ACTIONS.chatReadAll=async()=>{
-  try{const last=await apiPost('chat/last');S.chatSeen=S.chatSeen||{};for(const room of ['district','clan'])S.chatSeen[room]=Math.max(S.chatSeen[room]||0,Number(last[room])||0);CHAT_LAST=last;save();chatBadge();toast('Все текущие сообщения отмечены прочитанными','good');}
+  try{const last=await apiPost('chat/last',{channel:chatDistrictChannel()});S.chatSeen=S.chatSeen||{};for(const [key,n] of [['district',last.channels?.ru],['district:worldwide',last.channels?.worldwide],['clan',last.clan]])S.chatSeen[key]=Math.max(S.chatSeen[key]||0,Number(n)||0);CHAT_LAST=last;save();chatBadge();toast('Все текущие сообщения отмечены прочитанными','good');}
   catch(e){toast(refErrorText(e),'bad');}
 };
 chatOpen=(function(orig){return function(){const r=orig.apply(this,arguments);const tabs=document.querySelector('.chat-tabs,.c2-head');if(tabs&&!document.querySelector('[data-act="chatReadAll"]'))tabs.insertAdjacentHTML('afterend','<button class="btn small" data-act="chatReadAll">✓ Прочитать всё в районе и банде</button>');return r;};})(chatOpen);

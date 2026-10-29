@@ -2631,3 +2631,11 @@ body.city-mex .res { box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
 .scene-hud .inv-pin b, .scene-hud .inv-pin small { overflow:hidden; text-overflow:ellipsis; }
 .scene-hud .quest-pin.ready, .scene-hud .debt-pin, .scene-hud .boost-badge { animation-name:sceneHudPulse; }
 @keyframes sceneHudPulse { 50% { filter:brightness(1.16); } }
+
+/* District chat language channels */
+.c2-channels{display:flex;gap:4px;padding:3px;background:#111c2e;border-radius:12px;flex-shrink:0}
+.c2-channels button{flex:1;min-height:34px;border:0;border-radius:9px;background:transparent;color:#b6c7dd;font-weight:700}
+.c2-channels button.on{background:#64d4df;color:#10242c}
+.chat-sheet .chat2{max-height:calc(100dvh - 80px)}
+.chat-sheet .c2-list{min-height:80px;flex:1 1 58vh}
+.chat-sheet .c2-input,.chat-sheet .c2-head,.chat-sheet .chat-rules{flex-shrink:0}

@@ -182,6 +182,7 @@ const I18N = (() => {
   }
   function setLanguage(value, options = {}) {
     if (value !== 'en' && value !== 'ru') return false;
+    const previousLanguage = lang;
     lang = value; cache.clear();
     document.documentElement.lang = lang;
     document.title = lang === 'en' ? 'Hobo Simulator' : 'Бомж';
@@ -196,6 +197,7 @@ const I18N = (() => {
       if (typeof saveSoon === 'function') saveSoon();
       if (typeof apiPost === 'function' && typeof tg !== 'undefined' && tg?.initData) apiPost('language/set', { language: lang }).catch(() => {});
     }
+    if (previousLanguage !== lang) document.dispatchEvent(new CustomEvent('game-language-change', {detail:{language:lang}}));
     return true;
   }
   function rememberUsers(route, value) {
