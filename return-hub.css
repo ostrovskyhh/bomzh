@@ -3,3 +3,5 @@
 .rh-items{max-height:28vh;overflow-y:auto;overscroll-behavior:contain}.rh-items::-webkit-scrollbar{width:4px}.rh-items::-webkit-scrollbar-thumb{background:#9a7946;border-radius:4px}@media(max-height:760px){.rh-head h2{font-size:19px}.rh-avatar{height:65px}.rh-head p{margin:4px 0}.rh-income,.rh-till{padding:9px;margin:8px 0;gap:4px}.rh-income>b{font-size:25px}.rh-items{max-height:22vh}.rh-safe{margin:7px 0;font-size:10px}.rh-bottom{margin-top:5px}}
 
 @media(max-height:760px){.rh-items{max-height:17vh}.rh-item{padding:9px;margin:7px 0}.rh-till small{font-size:11px}.rh-head{gap:8px}.rh-bottom .btn{padding:8px 5px}}
+
+#familyRecovery{text-align:center}#familyRecovery .btns{display:grid;gap:8px}#familyRecovery p{font-size:14px;line-height:1.5}#familyRecovery small{font-size:11px;color:var(--muted)}#familyRecoveryError{color:var(--red)}
