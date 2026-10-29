@@ -121,9 +121,10 @@ function applyFranceCity(){
   BUSINESSES.forEach(b=>{const a=biz[b.id];if(a)frSet(b,{name:a[0],emoji:a[1],price:Math.round(b.price*5.2),income:b.income*5.2});});
   frReskin(MEDS,{});frReskin(CLINICS,{polyclinic:'Муниципальный медпункт',private:'Клиника «Сен-Мартен»'});
   frReskin(GYMS,{bar:'Турники у канала',basement:'Боксёрский зал Бельвиля',fitness:'Парижский спортивный клуб'});
-  const pets={pigeon:'Голубь Гастон',rat:'Хорёк Анри',dog:'Бульдог Бриош',hedgehog:'Ёж Марсель',parrot:'Какаду Франсуа',cat:'Кот Месье Камамбер'};
-  PETS.forEach(p=>{if(!pets[p.id]||p.premium)return;frSet(p,{baseName:pets[p.id],price:eur({pigeon:5,rat:35,dog:90,hedgehog:65,parrot:200,cat:140}[p.id]),quest:false,level:1});
-    const fields=FR_RESTORE.get(p);if(!fields.has('name'))fields.set('name',Object.getOwnPropertyDescriptor(p,'name'));Object.defineProperty(p,'name',{configurable:true,enumerable:true,get:()=>S.petNames?.[p.id]||pets[p.id]});frSet(PET_ART,{[p.id]:frPetArt(p.id)});});
+  const petPrices={pigeon:5,rat:35,dog:90,hedgehog:65,parrot:200,cat:140};
+  PETS.forEach(p=>{if(!FR_PET_NAMES[p.id])return;const art='fr_'+p.id;
+    frSet(p,{baseName:FR_PET_NAMES[p.id],art,...(petPrices[p.id]!==undefined&&!p.premium?{price:eur(petPrices[p.id]),quest:false,level:1}:{})});
+    const fields=FR_RESTORE.get(p);if(!fields.has('name'))fields.set('name',Object.getOwnPropertyDescriptor(p,'name'));Object.defineProperty(p,'name',{configurable:true,enumerable:true,get:()=>S.petNames?.[p.id]||FR_PET_NAMES[p.id]});frSet(PET_ART,{[art]:frPetArt(p.id)});});
   for(let i=1;i<7;i++)frSet(CHAPTERS,{[i]:FR_HOUSING[i].name+'. Париж понемногу становится твоим домом.'});
   const girls=FR_GIRLS.slice();if(S.girlfriend&&!girls.some(g=>g.id===S.girlfriend)){const p=allGirls().find(g=>g.id===S.girlfriend);if(p)girls.push(p);}
   GIRLS.splice(0,GIRLS.length,...girls);RINGS.splice(0,RINGS.length,...girls.map(g=>RING_OF[g.id]||eur(100)));ALLOWANCE.splice(0,ALLOWANCE.length,...girls.map(g=>ALLOW_OF[g.id]||eur(20)));
@@ -146,7 +147,7 @@ function applyFranceCity(){
   FR_ON=true;renderedHousing=-1;renderedLook='';setTimeout(()=>frConvertNode(document.body),0);
 }
 applyCity=(function(orig){return function(c=city()){
-  if(FR_ON)frRestore();orig(c);document.body.classList.toggle('city-fr',c==='fr');
+  if(FR_ON)frRestore();orig(c);renderedPet='';document.body.classList.toggle('city-fr',c==='fr');
   if(c==='fr')applyFranceCity();
 };})(applyCity);
 const startLessonBeforeFrance=startLessonGame;
