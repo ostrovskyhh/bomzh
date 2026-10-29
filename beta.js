@@ -11,8 +11,9 @@ function beta() { return true; } // Имя оставлено для совме�
 const BETA_HUBS = [
   { id: 'home', e: '🏠', n: 'Дом' },
   { id: 'me', e: '🧔', n: 'Валера', sub: 'всё для себя', groups: [
+    ['Здоровье и спорт', [{ s: 'life', t: 'gym', e: '💪', n: 'Спортзал' }, { s: 'life', t: 'health', e: '🏥', n: 'Врачи и аптека' }]],
     ['Дом и вещи', [{ s: 'shop', t: 'housing' }, { s: 'shop', t: 'clothes' }, { s: 'shop', t: 'transport' }, { s: 'shop', t: 'pets' }]],
-    ['Забота о себе', [{ s: 'shop', t: 'food' }, { s: 'life', t: 'health', e: '❤️‍🩹', n: 'Здоровье', alt: [['health', '🏥 Врачи'], ['gym', '💪 Спорт']] }, { s: 'life', t: 'gym', hide: 1 }, { s: 'life', t: 'skills' }]],
+    ['Забота о себе', [{ s: 'shop', t: 'food' }, { s: 'life', t: 'skills' }]],
     ['Сезон', [{ s: 'shop', t: 'season', wide: 1 }]],
   ] },
   { id: 'money', e: '💼', n: 'Деньги', sub: 'где заработать', groups: [
@@ -66,7 +67,8 @@ const BETA_STATUS = {
   'shop:pets': () => { const p = activePet(); return p ? `${(S.petNames && S.petNames[p.id]) || p.name}${S.petSick ? ' болеет' : S.petFood <= 20 ? ' голоден' : ''}` : 'нет питомца'; },
   'shop:food': () => `сытость ${Math.round(S.food)}%`,
   'shop:season': () => 'ивент идёт',
-  'life:health': () => `здоровье ${Math.round(S.health)} · форма ${Math.round(S.form || 0)}`,
+  'life:health': () => `здоровье ${Math.round(S.health)}`,
+  'life:gym': () => `форма ${Math.round(S.form || 0)} · сила ${Math.round(S.strength || 0)}`,
   'life:skills': () => 'временные бонусы',
   'life:work': () => (S.busy && S.busy.type !== 'sleep' ? 'ты занят' : 'можно на смену'),
   'life:business': () => { const n = Object.keys(S.biz || {}).length; return n ? `${n} шт. · ${incomeMoney(businessTotals().cash)} в кассах` : 'пока нет'; },
