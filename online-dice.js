@@ -1,28 +1,32 @@
 // No house opponent or fabricated players: tables, dice and stakes come from the server.
-const DICE_UI={open:false,table:0,state:null,busy:false,timer:null};
+const DICE_UI={open:false,table:0,state:null,busy:false,action:false,timer:null};
 function diceReceipts(results){
-  S.diceSeen=S.diceSeen||[];
+  S.diceSeen=S.diceSeen||[];let changed=false;
   for(const r of [...(results||[])].reverse()){
     if(S.diceSeen.includes(r.round_id))continue;
-    S.diceSeen.push(r.round_id);if(S.diceSeen.length>100)S.diceSeen.shift();
+    changed=true;S.diceSeen.push(r.round_id);if(S.diceSeen.length>100)S.diceSeen.shift();
     if(r.refund)continue;
     S.stats.earned+=Math.max(0,r.payout);const stat=cst(),before=stat.games.dice||0,old=CASINO_TRACK_EVENT;
     try{CASINO_TRACK_EVENT={kind:'dice',bet:r.bet};track('casino');}finally{CASINO_TRACK_EVENT=old;}
     if((stat.games.dice||0)===before){stat.games.dice=before+1;stat.bet+=r.bet;}
     stat.won+=r.payout;stat.best=Math.max(stat.best,r.payout);if(r.payout>r.bet)track('diceWin');
   }
+  return changed;
 }
+function diceErrorText(e){const text=String(e?.message||'');if(text.includes('http 401')||text==='notg')return 'Сессия Telegram устарела. Закрой и заново открой игру через бота.';if(/^http 5/.test(text))return 'Сервер временно не отвечает. Проверяем стол повторно; принятая ставка сохранена.';if(text.includes('http 429'))return 'Слишком много запросов. Подожди несколько секунд.';if(!text||/fetch|network|net$|abort|timeout/i.test(text))return 'Нет связи. Проверяем стол повторно; принятая ставка сохранена.';return text;}
 async function diceRequest(op='state',extra={}){
-  if(DICE_UI.busy||SAVE_LOCK)return;
+  if(DICE_UI.busy||SAVE_LOCK||(op==='state'&&DICE_UI.action))return;
   DICE_UI.busy=true;const before=S.money;
   try{
     const data=await apiPost('dice/'+op,{...extra,device:DEVICE_ID,base:serverBase});
     if(data.error)throw Error(data.error);
+    const walletRev=S.bjWalletRev||0,active=!!S.diceActive;
     if(!bjWallet(data.wallet,S.money-before)){const remote=await serverGet();if(remote)adoptOrAsk(remote);throw Error('Профиль обновлён на другом устройстве');}
-    S.diceActive=!!data.active;S.diceTable=data.active||0;diceReceipts(data.results);DICE_UI.state=data;
+    S.diceActive=!!data.active;S.diceTable=data.active||0;const received=diceReceipts(data.results);DICE_UI.state=data;
     if(data.active&&(op==='create'||op==='join'))DICE_UI.table=data.active;
-    save();if(DICE_UI.open&&$('diceOnline')&&document.activeElement?.id!=='diceStake')renderDiceOnline();return data;
-  }catch(e){if(DICE_UI.open&&$('diceOnline')){const el=$('diceError');if(el)el.textContent=e.message||'Нет связи. Проверяем стол при повторном подключении.';}if(op!=='state')toast(e.message||'Проверяем результат на сервере','bad');}
+    if(op!=='state'||received||walletRev!==(S.bjWalletRev||0)||active!==S.diceActive)save();
+    if(DICE_UI.open&&$('diceOnline')&&document.activeElement?.id!=='diceStake')renderDiceOnline();return data;
+  }catch(e){const message=diceErrorText(e);if(typeof BugReport!=='undefined')BugReport.record('dice-error',{operation:op,error:message});if(DICE_UI.open&&$('diceOnline')){const el=$('diceError');if(el)el.textContent=message;}if(op!=='state')toast(message,'bad');}
   finally{DICE_UI.busy=false;}
 }
 function renderDiceOnline(){
@@ -49,12 +53,16 @@ function openDiceOnline(){
   clearInterval(DICE_UI.timer);DICE_UI.timer=setInterval(()=>{if(!$('diceOnline')){DICE_UI.open=false;clearInterval(DICE_UI.timer);return;}if(!document.hidden)diceRequest();},1500);
 }
 async function diceAction(op,extra={}){
-  if(DICE_UI.busy||SAVE_LOCK)return;
-  if(op==='create'||op==='join'){
-    save();await serverWrite();if(SAVE_LOCK||serverBase<(S.rev||0)){toast('Дождись синхронизации сохранения и попробуй снова','bad');return;}
-  }
-  const t=DICE_UI.state?.tables.find(t=>t.id===DICE_UI.table);
-  return diceRequest(op,{table:t?.id,round:t?.round,throw:t?.throw,rid:'dice-'+crypto.randomUUID(),...extra});
+  if(DICE_UI.busy||DICE_UI.action||SAVE_LOCK)return;
+  DICE_UI.action=true;
+  try{
+    if(op==='create'||op==='join'){
+      save();for(let i=0;i<3&&!SAVE_LOCK&&serverBase<(S.rev||0);i++){if(srvBusy)await wait(150);await serverWrite();}
+      if(SAVE_LOCK||serverBase<(S.rev||0)){toast('Сохранение ещё синхронизируется. Подожди секунду и повтори. Деньги не списаны.','bad');return;}
+    }
+    const t=DICE_UI.state?.tables.find(t=>t.id===DICE_UI.table);
+    return await diceRequest(op,{table:t?.id,round:t?.round,throw:t?.throw,rid:'dice-'+crypto.randomUUID(),...extra});
+  }finally{DICE_UI.action=false;}
 }
 ACTIONS.dice=openDiceOnline;
 ACTIONS.diceCreate=()=>{const stake=Number($('diceStake')?.value);if(!Number.isInteger(stake)||stake<10||stake>1000000){toast('Ставка: целое число от 10 до 1 000 000 ₽','bad');return;}return diceAction('create',{stake});};
@@ -64,6 +72,6 @@ ACTIONS.diceJoin=()=>diceAction('join');ACTIONS.diceLeave=()=>diceAction('leave'
 const diceLobbyEntry=CASINO_GAMES.find(g=>g.act==='dice');if(diceLobbyEntry)Object.assign(diceLobbyEntry,{name:'Кости с игроками',desc:'Онлайн-столы на 2–5 игроков. Видимые ставки, общий банк, серверный бросок'});
 prestigeProfile=(function(orig){return function(){return {...orig(),diceSeen:[...(S.diceSeen||[])]};};})(prestigeProfile);
 for(const action of ['doMove','doMoveMex','doMoveFrance','performPrestige']){
-  const orig=window[action];window[action]=function(){if(S.diceActive||DICE_UI.busy){toast('Сначала дождись расчёта стола с костями','bad');return;}return orig.apply(this,arguments);};
+  const orig=window[action];window[action]=function(){if(S.diceActive||DICE_UI.busy||DICE_UI.action){toast('Сначала дождись расчёта стола с костями','bad');return;}return orig.apply(this,arguments);};
 }
 HOOKS.init.push(()=>{setTimeout(()=>{if(onlineOn())diceRequest();},3500);setInterval(()=>{if(S.diceActive&&!DICE_UI.open&&!document.hidden)diceRequest();},5000);});
