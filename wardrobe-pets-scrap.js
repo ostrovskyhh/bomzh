@@ -85,29 +85,32 @@ petSectionHTML=(function(orig){return id=>orig(id).replace(`<div class="ps-art">
 petModalHTML=(function(orig){return ()=>{const p=activePet();return (p?orig().replace(PET_ART[p.art],petAccessoryArt(PET_ART[p.art],p.id)):orig())+petDevelopmentHTML(S.pet);};})(petModalHTML);
 HOOKS.hud.push(()=>{const el=document.querySelector('#petSlot .pet');if(el&&S.pet&&petDevelopment(S.pet).accessory!=='none'&&!el.querySelector('.pet-dressed')){const art=petAccessoryArt(el.innerHTML,S.pet);if(art!==el.innerHTML)el.innerHTML=art;}});
 
-// Each caught good object has a stable type; bricks/dogs affect performance and arrest risk,
-// but cannot silently delete already collected scrap. The existing crime rank multiplier runs once.
+// Every caught item is recorded. Approved idea 64 adds explicit penalties and a three-strike limit.
 const SCRAP_TYPES=[
   {e:'🔩',name:'Железо',value:5000},{e:'🥉',name:'Латунь',value:8000},
   {e:'🔌',name:'Кабель',value:11000},{e:'🟠',name:'Медь',value:14000}
 ];
 function scrapUnit(it){return Math.round(it.value*(1+level()*.04));}
 function scrapTotal(mg){return SCRAP_TYPES.reduce((sum,it)=>sum+(mg.scrap?.[it.e]||0)*(mg.scrapPrices?.[it.e]??scrapUnit(it)),0);}
+function scrapPenalty(mg){return Math.min(3,Math.max(0,mg.scrapHits||0))*.15;}
+function scrapNet(mg){return Math.round(scrapTotal(mg)*(1-scrapPenalty(mg)));}
 function scrapReceipt(mg,loot){
-  return `<div class="scrap-receipt">${SCRAP_TYPES.map(it=>`<div>${it.e} ${it.name}: ${mg.scrap?.[it.e]||0} × ${fmt(mg.scrapPrices?.[it.e]??scrapUnit(it))} ₽</div>`).join('')}<p>Сумма добычи: ${fmt(scrapTotal(mg))} ₽<br>Бонус ранга: +${Math.round((mg.scrapRank||0)*CRIME_RANK_MONEY*100)}%<br><b>К выплате: ${fmt(loot)} ₽</b></p><small>При задержании добычу изымают. На счёт поступит сумма с учётом общих удержаний.</small></div>`;
+  return `<div class="scrap-receipt">${SCRAP_TYPES.map(it=>`<div>${it.e} ${it.name}: ${mg.scrap?.[it.e]||0} × ${fmt(mg.scrapPrices?.[it.e]??scrapUnit(it))} ₽</div>`).join('')}<p>Сумма добычи: ${fmt(scrapTotal(mg))} ₽<br>Штраф за ошибки: ${Math.round(scrapPenalty(mg)*100)}% · −${fmt(scrapTotal(mg)-scrapNet(mg))} ₽<br>После штрафа: ${fmt(scrapNet(mg))} ₽<br>Бонус ранга: +${Math.round((mg.scrapRank||0)*CRIME_RANK_MONEY*100)}%<br><b>К выплате: ${fmt(loot)} ₽</b></p><small>При задержании добычу изымают. На счёт поступит сумма с учётом общих удержаний.</small></div>`;
 }
 const scrapCrime=CRIMES.find(c=>c.id==='metal');
 if(scrapCrime){
-  scrapCrime.desc='Каждый пойманный металл оплачивается отдельно. Цена видна до дела и во время сбора. Опасности повышают риск задержания.';
+  scrapCrime.desc='Каждый металл оплачивается отдельно. Кирпич или собака: −15% итоговой добычи. Третья ошибка завершает сбор. Риск задержания сохраняется.';
+  scrapCrime.game.hint='Лови металл, избегай кирпичей и собак. Каждая ошибка: −15% добычи; третья завершает сбор. Смотри счётчик 0/3.';
   scrapCrime.quantityReward=true;
   scrapCrime.game.setup=mg=>{
-    mg.scrap={};mg.scrapPrices=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));gameCatch(mg,{basket:'🛍️',good:SCRAP_TYPES.map(it=>it.e),bad:['🧱','🐕'],goodRate:.68,badText:'Ай!',onCatch:(e,good)=>{
-      if(good)mg.scrap[e]=(mg.scrap[e]||0)+1;
-      const el=$('scrapBag');if(el)el.textContent=SCRAP_TYPES.map(it=>`${it.e} ×${mg.scrap[it.e]||0}`).join(' · ')+` · ${fmt(scrapTotal(mg))} ₽`;
+    mg.scrap={};mg.scrapHits=0;mg.scrapPrices=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));gameCatch(mg,{basket:'🛍️',good:SCRAP_TYPES.map(it=>it.e),bad:['🧱','🐕'],goodRate:.68,badText:'Ай!',onCatch:(e,good)=>{
+      if(good)mg.scrap[e]=(mg.scrap[e]||0)+1;else mg.scrapHits++;
+      const el=$('scrapBag');if(el)el.innerHTML=`<span>${SCRAP_TYPES.map(it=>`${it.e} ×${mg.scrap[it.e]||0}`).join(' · ')} · ${fmt(scrapNet(mg))} ₽</span><br><b>Ошибки: ${mg.scrapHits}/3 · Штраф: ${Math.round(scrapPenalty(mg)*100)}%</b>`;
+      if(mg.scrapHits>=3)mgEnd();
     }});
-    $('mgArena').insertAdjacentHTML('beforeend',`<div class="scrap-bag" id="scrapBag">${SCRAP_TYPES.map(it=>`${it.e} ${fmt(scrapUnit(it))} ₽`).join(' · ')}</div>`);
+    $('mgArena').insertAdjacentHTML('beforeend',`<div class="scrap-bag" id="scrapBag">${SCRAP_TYPES.map(it=>`${it.e} ${fmt(scrapUnit(it))} ₽`).join(' · ')}<br><b>Ошибки: 0/3 · Штраф: 0%</b></div>`);
   };
-  scrapCrime.reward=(perf,mg)=>{mg.scrapRank=crimeRank();mg.scrapPrices||=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));return scrapTotal(mg);};
+  scrapCrime.reward=(perf,mg)=>{mg.scrapRank=crimeRank();mg.scrapPrices||=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));return scrapNet(mg);};
   scrapCrime.receipt=scrapReceipt;
   const crimeTabBeforeIdeas=EXTRA_TABS.fun.crime;
   EXTRA_TABS.fun.crime=()=>crimeTabBeforeIdeas()+(city()==='zas'&&crimeOpen()?`<section class="idea-panel"><h3>🔩 Прайс приёмки цветмета</h3>${SCRAP_TYPES.map(it=>`<p>${it.e} ${it.name}: <b>${fmt(scrapUnit(it))} ₽</b></p>`).join('')}<p>Каждый предмет считается отдельно. Бонус криминального ранга прибавляется к сумме добычи. Энергия: 30 · Перерыв: 15 мин · Розыск: 2</p></section>`:'');

@@ -434,9 +434,10 @@ function gameCatch(mg, cfg) {
       o.y += o.v * dt;
       o.el.style.left = o.x * 100 + '%'; o.el.style.top = o.y * 100 + '%';
       if (o.y > 0.8 && o.y < 0.92 && Math.abs(o.x - x) < 0.11) {
-        if (cfg.onCatch) cfg.onCatch(o.item, o.good);
         if (o.good) { mgScore(1); sfx('coin'); } else { mgScore(-1); sfx('error'); haptic('error'); shakeArena(); floatAt(bask, cfg.badText || 'Фу!', 'bad'); }
         o.el.remove(); objs.splice(i, 1);
+        if (cfg.onCatch) cfg.onCatch(o.item, o.good);
+        if (mg.over) return;
       } else if (o.y > 1.05) { o.el.remove(); objs.splice(i, 1); }
     }
   });

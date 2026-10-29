@@ -255,6 +255,7 @@ const I18N = (() => {
     }
   }
   document.documentElement.lang = lang;
-  return { get lang() { return lang; }, t: translate, apply: tree, setLanguage, languageCard, originalText, rememberUsers, messages, ignored };
+  function inLanguage(text, language) { const previous=lang;try{lang=language==='en'?'en':'ru';return translate(text);}finally{lang=previous;} }
+  return { get lang() { return lang; }, t: translate, inLanguage, apply: tree, setLanguage, languageCard, originalText, rememberUsers, messages, ignored };
 })();
 

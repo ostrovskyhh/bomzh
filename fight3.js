@@ -89,7 +89,7 @@ function f3Round(id) {
   if (!f3Alive(id)) return;
   f.round++;
   if (f.round > F3_ROUNDS) { f3Finish(id, f.me.hp / f.me.max > f.en.hp / f.en.max, false); return; }
-  const sty = F3_STYLE[f.en.style] || F3_STYLE.tactic;
+  const sty = f.en.botStyle || F3_STYLE[f.en.style] || F3_STYLE.tactic;
   f.enBlock = Math.random() < sty.block + (f.en.hp < f.en.max * 0.3 ? 0.15 : 0);
   $('f3Stance').innerHTML = f.enBlock ? '<span class="st-block">🛡️ Держит блок</span>' : '<span class="st-open">👊 Открыт</span>';
   f3Bars();
@@ -187,7 +187,7 @@ async function f3Hit(id, kind, q) {
 function f3Defend(id) {
   const f = FIGHT;
   if (!f3Alive(id)) return;
-  const sty = F3_STYLE[f.en.style] || F3_STYLE.tactic;
+  const sty = f.en.botStyle || F3_STYLE[f.en.style] || F3_STYLE.tactic;
   const heavy = f.en.st >= 22 && Math.random() < sty.heavy + (f.me.hp < f.me.max * 0.25 ? 0.15 : 0);
   const feint = !heavy && !f.feinted && Math.random() < sty.feint; // два финта подряд не бывает
   f.en.st = clamp(f.en.st - (heavy ? 22 : 8), 0, 100);

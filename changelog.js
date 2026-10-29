@@ -3,6 +3,11 @@
 // поменяй ?v= в index.html на тот же номер и загрузи файлы на GitHub.
 
 const CHANGELOG = [
+  { v: '4.54', title: 'Честная сложность и понятные риски', items: [
+    '🥊 Обычные боты подбираются по боевой мощи: лёгкий, равный и опасный. Видны характеристики обеих сторон; опасные соперники действуют разнообразнее и дают повышенную награду. Тренировки сохраняют преимущество между обновлениями базы подбора',
+    '🔩 Цветмет: каждое столкновение с кирпичом или собакой отнимает 15% итоговой добычи. Третья ошибка завершает сбор. Счётчик ошибок и штраф видны на экране, расчёт — в квитанции',
+    '🌐 Обновления в игре и Telegram: русский для языка Telegram ru и uk, английский для остальных. Выбор языка интерфейса сохраняется отдельно'
+  ] },
   { v: '4.53', title: 'Наборы для хорошего старта', items: [
     '🎒 Пять новых предложений за Telegram Stars: три набора с гарантированными наградами, ускоритель опыта на полчаса и запас энергетиков',
     '⚡ Энергетики хранятся до использования и полностью восстанавливают энергию. Запас сохраняется при переезде и престиже',
@@ -522,11 +527,16 @@ function newsForVersion(fromVersion) {
 function openNews(fromVersion) {
   const list = newsForVersion(fromVersion);
   if (!list.length) return;
-  openModal(`<div class="big-art" style="height:90px"><div class="rays"></div><div class="big-emoji" style="line-height:90px">📰</div></div>
-    <h3>Что нового</h3>
-    <div class="news-list">${list.map((c) => `<h4>Версия ${c.v} · ${c.title}</h4><ul>${c.items.map((i) => `<li>${i}</li>`).join('')}</ul>`).join('')}</div>
-    <div class="btns"><button class="btn primary wide" data-act="close">Круто, играть!</button></div>`, { center: true });
+  const language=releaseLanguage(),t=text=>typeof I18N!=='undefined'?I18N.inLanguage(text,language):text;
+  openModal(`<section class="release-copy" data-i18n-ignore lang="${language}"><div class="big-art" style="height:90px"><div class="rays"></div><div class="big-emoji" style="line-height:90px">📰</div></div>
+    <h3>${t('Что нового')}</h3>
+    <div class="news-list">${list.map((c) => `<h4>${t('Версия')} ${c.v} · ${t(c.title)}</h4><ul>${c.items.map((i) => `<li>${t(i)}</li>`).join('')}</ul>`).join('')}</div>
+    <div class="btns"><button class="btn primary wide" data-act="close">${t('Круто, играть!')}</button></div></section>`, { center: true });
   sfx('notify');
+}
+
+function releaseLanguage(code=window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code||navigator.language||'en') {
+  return ['ru','uk'].includes(String(code).toLowerCase().split(/[-_]/)[0])?'ru':'en';
 }
 
 // Показываем один раз после обновления. Новичкам (ещё не видели интро) — не показываем
