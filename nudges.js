@@ -92,16 +92,7 @@ HOOKS.hud.push(() => {
   if (pin.dataset.html !== html) { pin.innerHTML = html; pin.dataset.html = html; }
   pin.classList.remove('hidden');
 });
-// Все плашки слева на главном экране — столбиком по порядку, без наложений: сюжет → турнир → хлам → долг
-HOOKS.hud.push(() => {
-  let top = 58;
-  ['questPin', 'tourPin', 'invPin', 'debtPin'].forEach((id) => {
-    const el = $(id);
-    if (!el || el.classList.contains('hidden')) return;
-    el.style.top = top + 'px';
-    top += el.offsetHeight + 6 || 42;
-  });
-});
+// Scene HUD cards now flow in CSS columns; their positions follow the header height.
 ACTIONS.debtOpen = () => {
   if (!(S.debt > 0)) return;
   const rent = S.housingMode === 'rent';

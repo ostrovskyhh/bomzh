@@ -2615,3 +2615,19 @@ body.city-mex .res { box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
 .bc input:focus, .bc textarea:focus { outline: none; box-shadow: inset 0 0 0 1.5px #3A8DFF; }
 .bc textarea { min-height: 96px; resize: vertical; }
 .gang-guide{max-width:640px;margin:auto}.gang-guide-head{display:flex;align-items:center;gap:12px}.gang-guide-head>span{font-size:32px}.gang-guide-head small{color:var(--gold);font-size:10px;letter-spacing:.07em}.gang-guide h3{font-size:21px;margin:14px 0}.gang-guide p,.gang-guide li{font-size:14px;line-height:1.6;overflow-wrap:anywhere}.gang-guide-intro{color:var(--muted)}.gang-guide ul{padding-left:21px}.gang-guide li{margin:13px 0}.gang-guide .info-card{font-size:13px;line-height:1.55}.gang-guide-nav{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:6px;margin:13px 0}.gang-guide-nav .btn{padding:11px 4px;font-size:12px}.gang-guide-contents{display:grid;gap:8px;margin:16px 0}.gang-guide-contents .btn{text-align:left;white-space:normal;line-height:1.4}.gang-guide-entry{margin:4px 0 13px}.gang-guide-entry .btn{border:1px solid #a98b5255;color:var(--gold);background:#b38d4b12}
+/* The header and its two card columns share normal flow, including font/viewport changes. */
+.scene-hud { position:absolute; left:10px; right:10px; top:10px; z-index:6; display:grid; grid-template-columns:minmax(0,58fr) minmax(0,42fr); gap:8px; align-items:start; pointer-events:none; }
+.scene-hud .scene-info { position:static; grid-column:1 / -1; min-width:0; overflow-wrap:anywhere; }
+.scene-hud .loc-name, .scene-hud .passive { line-height:1.35; }
+.scene-hud-left { min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+.scene-hud .scene-right { position:static; min-width:0; max-width:100%; }
+.scene-hud .effects { max-width:100%; }
+.scene-hud .chip, .scene-hud .boost-badge { max-width:100%; overflow-wrap:anywhere; pointer-events:auto; }
+.scene-hud .chip span { flex-shrink:0; }
+.scene-hud .chip b { min-width:0; }
+.scene-hud .quest-pin, .scene-hud .inv-pin { position:static; max-width:100%; pointer-events:auto; }
+.scene-hud .quest-pin > div, .scene-hud .inv-pin > div { min-width:0; flex:1; }
+.scene-hud .quest-pin > span, .scene-hud .quest-pin em, .scene-hud .inv-pin > span { flex-shrink:0; }
+.scene-hud .inv-pin b, .scene-hud .inv-pin small { overflow:hidden; text-overflow:ellipsis; }
+.scene-hud .quest-pin.ready, .scene-hud .debt-pin, .scene-hud .boost-badge { animation-name:sceneHudPulse; }
+@keyframes sceneHudPulse { 50% { filter:brightness(1.16); } }
