@@ -34,7 +34,7 @@ const _payClaim = payClaim;
 payClaim = async function () {
   if (!onlineOn()) return;
   try {
-    const { items } = await apiPost('pay/claim');
+    const { items } = await apiPost('pay/claim', {products:Object.keys(PREM_GIVE)});
     if (!items || !items.length) return;
     const got = items.map((it) => {
       const id = typeof it === 'string' ? it : it.product;

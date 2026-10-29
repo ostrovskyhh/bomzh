@@ -57,7 +57,9 @@
     for (const st of [1, 2, 3, 4, 5]) if (LESSON_GAMES[st] || cityId !== 'zas') await play(`${tag} урок ${st}`, () => startLessonGame(st), 60);
     if (cityId === 'msk') return;
     const pre = cityId === 'mex' ? 'МЕКС ' : cityId === 'fr' ? 'ФР ' : '';
-    for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`${pre}досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), (g.duration || 40) + 15);
+    // Mexican loteria can use all 26 calls: 0.8 + 26*2.2 + 0.4 = 58.4 s without a winning line.
+    // The former generic 55 s budget cut off a valid low-score game. Rules/timings stay unchanged.
+    for (const [id, g] of Object.entries(LEISURE_GAMES)) await play(`${pre}досуг: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: (mg) => g.run(mg), finish: () => {} }), cityId === 'mex' && id === 'thimbles' ? 65 : (g.duration || 40) + 15);
     for (const [id, g] of Object.entries(DATE_GAMES)) await play(`${pre}свидание: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
     for (const [id, g] of Object.entries(KID_GAMES)) await play(`${pre}дети: ${id}`, () => runGame({ title: g.title, hint: g.hint, duration: g.duration, setup: g.setup, finish: () => {} }), (g.duration || 40) + 15);
     for (const c of CRIMES) if (c.game) await play(`${pre}криминал: ${c.id}`, () => runGame({ title: c.game.title, hint: c.game.hint, duration: c.game.duration, setup: c.game.setup, finish: () => {} }), (c.game.duration || 40) + 15);
