@@ -12,14 +12,14 @@ function dnLook(id) {
 const cosmLine = (id, d) => { const c = cosmById(id); return { look: dnLook(id), t: `${cosmKindName(c)} «${c.name}»`, d, ex: c.src === 'bundle' }; };
 const capsLine = (n) => ({ e: '🟡', t: `${n} золотых крышек`, d: `По курсу обменника — ${fmt(n * capRate())} ₽. Крышки тратятся на кейсы, стиль и ускорения` });
 const vipLine = (days) => ({ e: '👑', t: `VIP «Авторитет» на ${days} дн.`, d: 'Доход ×2, копилка 24 ч вместо 8, касса бизнеса 48 ч, корона в топе, рамка и аватарка VIP' });
-const keyLine = (id, n) => { const c = DCASES.find((x) => x.id === id); return { e: c.emoji, t: `${c.name}${n > 1 ? ` ×${n}` : ''}`, d: `Донат-кейс: крышки, VIP, ускорения или косметика, которой нет на витрине. Обычно ${c.caps} 🟡 за штуку` }; };
+const keyLine = (id, n) => { const c = DCASES.find((x) => x.id === id); return { e: c.emoji, t: `${c.name}${n > 1 ? ` ×${n}` : ''}`, d: `Коллекционный кейс за крышки: VIP, ускорения, крышки или косметика. Открывается в «Кейсы → Коллекционные кейсы». Обычно ${c.caps} 🟡 за штуку` }; };
 
 const DN_INFO = {
   b_week: { lead: 'Неделя «большой жизни»: VIP, крышки на мелочи и кейс на удачу', lines: () => [vipLine(7), capsLine(25), keyLine('dc1', 1)] },
   b_style: { lead: 'Полный образ «Неон». Эти вещи есть только в наборе — в кейсах и на витрине их нет', lines: () => [
     cosmLine('fx_neon', 'Из Валеры летят неоновые сердечки при каждом тапе'), cosmLine('au_neon', 'Розово-фиолетовое свечение вокруг Валеры'),
     cosmLine('fr_cyber', 'Рамка аватара в топе, чате и банде'), cosmLine('av_cyber', 'Аватарка вместо буквы имени'), capsLine(20)] },
-  b_cases: { lead: 'Четыре донат-кейса сразу — дешевле, чем покупать по одному за крышки', lines: () => [keyLine('dc2', 2), keyLine('dc1', 2)] },
+  b_cases: { lead: 'Четыре коллекционных кейса сразу — дешевле, чем покупать по одному за крышки', lines: () => [keyLine('dc2', 2), keyLine('dc1', 2)] },
   b_mex: { lead: 'Мексиканский образ. Вещи только в наборе', lines: () => [
     cosmLine('fx_taco', 'При тапе летят тако и перцы'), cosmLine('au_fiesta', 'Праздничное сияние вокруг Валеры'),
     cosmLine('fr_fiesta', 'Переливающаяся рамка-фиеста'), cosmLine('av_pinata', 'Аватарка-пиньята'), capsLine(60)] },
