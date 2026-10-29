@@ -22,6 +22,7 @@ function refNextGoal() { return REF_GOALS.find((n) => n > (S.refInvited || 0)); 
 refSync = (function (orig) {
   return async function () {
     while (!LOADED) await wait(500);
+    if(document.hidden)return null;
     const r = await orig();
     if (r && typeof r.invited === 'number') {
       S.refInvited = Math.max(S.refInvited || 0, r.invited);
@@ -30,6 +31,7 @@ refSync = (function (orig) {
         S.refCapsFor = S.refInvited;
         addCaps(REF_CAPS * fresh);
         save(true);
+        if(typeof returnNotice==='function'){returnNotice({key:'ref:'+S.refCapsFor,kind:'gift',title:'Награда за приглашённых друзей',body:`Приглашено новых друзей: ${fresh}. Крышки уже начислены.`,caps:REF_CAPS*fresh});return r;}
         queuePopup('ref', 1, () => {
           confetti(60); sfx('jackpot');
           resultModal({ emoji: '🟡', title: `+${REF_CAPS * fresh} золотых крышек!`, text: `За ${fresh === 1 ? 'приглашённого друга' : `${fresh} приглашённых друзей`} — по ${REF_CAPS} крышек.<br>Всего приглашено: <b>${S.refInvited}</b>${refNextGoal() ? `<br>Следующая награда — рамка или аватарка за ${refNextGoal()}` : ''}`, btn: 'Класс!' });

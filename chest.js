@@ -15,11 +15,12 @@ function chestTier(h) { return [...CHEST_TIERS].reverse().find((t) => h >= t.fro
 // Перед начислением «Пока тебя не было…» запоминаем, сколько игрока не было
 applyOffline = (function (orig) {
   return function () {
-    const away = Date.now() - (S.lastSeen || Date.now());
+    const away = Date.now() - (GAME_AWAY_AT || S.lastSeen || Date.now());
     if (away >= CHEST_MIN && S.storySeen) {
       const capH = isVip() ? OFFLINE_HOURS_VIP : OFFLINE_HOURS;
       const h = Math.min(capH, away / 3600000) + ((S.chest && S.chest.h) || 0);
       S.chest = { h: Math.min(capH, h), at: Date.now() };
+      if(typeof returnNotice==='function')returnNotice({key:'chest:'+S.chest.at,kind:'gift',title:'Сундук с находками готов',body:'Открой сундук, когда будет удобно. Находки сохраняются до открытия.',action:'chest'});
     }
     orig();
   };

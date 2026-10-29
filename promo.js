@@ -32,7 +32,7 @@ function promoPrice(item) { const p = promoFor(item.id); return p && p.discount 
 // Покупки начисляются с учётом акции, которая шла в момент оплаты (бонус считает сервер)
 const _payClaim = payClaim;
 payClaim = async function () {
-  if (!onlineOn()) return;
+  if (document.hidden || !onlineOn()) return;
   try {
     const { items } = await apiPost('pay/claim', {products:Object.keys(PREM_GIVE)});
     if (!items || !items.length) return;
@@ -47,7 +47,8 @@ payClaim = async function () {
     track('purchase', items.length);
     save(true);
     confetti(80); sfx('jackpot');
-    resultModal({ emoji: '⭐', title: 'Покупка зачислена!', text: `${got.join('<br>')}<br><br>Спасибо, что поддерживаешь игру!`, btn: 'Ура!' });
+    const receipt={ emoji: '⭐', title: 'Покупка зачислена!', text: `${got.join('<br>')}<br><br>Спасибо, что поддерживаешь игру!`, btn: 'Ура!' };
+    if(typeof returnIsArriving==='function'&&returnIsArriving())returnNotice({key:'purchase:'+Date.now(),kind:'gift',title:receipt.title,body:receipt.text});else resultModal(receipt);
   } catch (e) { /* сервер выключен — заберём при следующем входе */ }
 };
 

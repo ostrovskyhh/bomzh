@@ -39,6 +39,7 @@ function popupBusy() {
 }
 // Можно ли сейчас показать автоматическое окно с таким приоритетом (нет более важного в очереди)
 function popupTurn(prio) {
+  if (document.hidden || prio >= 5) return false;
   if (popupBusy() || POPUP_Q.some((q) => q.prio < prio)) return false;
   return !(prio > 1 && typeof pendingLevelUp !== 'undefined' && pendingLevelUp);
 }
@@ -49,11 +50,13 @@ function queuePopup(key, prio, fn) {
   flushPopups();
 }
 function flushPopups() {
+  if (document.hidden) return;
   if (!POPUP_Q.length || popupBusy() || (typeof LOADED !== 'undefined' && !LOADED)) return;
   const q = POPUP_Q.shift();
   try { q.fn(); } catch (e) { if (typeof BugReport !== 'undefined') BugReport.error('popup', e, { key: q.key }); console.warn('popup', q.key, e); }
 }
 function flushModalQueue() {
+  if (document.hidden) return;
   if (MG || modalOpen() || !MODAL_QUEUE.length) return;
   const q = MODAL_QUEUE.shift();
   openModal(q.html, q.opts);

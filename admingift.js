@@ -6,11 +6,11 @@ let GIFT = { players: [], pick: null, busy: false };
 function giftLevels(n) { for (let i = 0; i < n; i++) addXp(xpNeed(level()) - levelInfo().cur); }
 
 async function giftClaim() {
-  if (!onlineOn() || !S.storySeen || !LOADED) return;
+  if (document.hidden || !onlineOn() || !S.storySeen || !LOADED) return;
   try {
     const { gifts = [], cmds = [] } = await apiPost('gift/claim');
     if (!gifts.length && !cmds.length) return;
-    const lines = [];
+    const lines = [],balanceBefore=S.money,capsBefore=S.caps;
     if (cmds.some((c) => c.type === 'wipe')) { adminWipe(); return; }
     cmds.forEach((c) => adminApply(c, lines));
     gifts.forEach((g) => {
@@ -25,6 +25,9 @@ async function giftClaim() {
     const yard = gifts.length && gifts.every((g) => (g.note || '').startsWith('🏡'));
     const community = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍾 За вступление'));
     const promo = gifts.length && gifts.every(g => (g.note||'').startsWith('📣 Первый новый')||(g.note||'').startsWith('🎁 Приглашение друга:'));
+    if(typeof returnNotice==='function'){
+      returnNotice({key:'gift:'+gifts.map(g=>g.id).join(',')+':'+cmds.map(c=>c.id||c.type+':'+c.n+':'+c.text).join('|'),kind:'gift',title:gifts.length?'Подарки и награды':'Сообщение администрации',body:lines.join('<br>'),money:Math.max(0,S.money-balanceBefore),caps:Math.max(0,S.caps-capsBefore)});return;
+    }
     queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: promo ? '📣' : yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: promo ? 'Награда за приглашение!' : yard ? 'Награда за общее дело!' : pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
   } catch (e) { /* сервер выключен — заберём позже */ }
 }

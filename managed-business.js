@@ -53,6 +53,7 @@ function managedTick(now=businessNow(),force=false){
   }
   if(receipts.length){
     S.managedLog=[...receipts,...(S.managedLog||[])].slice(0,24);
+    if(typeof returnManagedIncome==='function')returnManagedIncome(receipts);
     if(LOADED){save();const total=receipts.reduce((n,r)=>n+r.received,0);if(total>0)toast(`🏢 Выплата компании: +${incomeMoney(total)} · комиссия 60% с новой прибыли учтена`,'good');if(currentScreen==='life'&&TABS.life==='business')renderCurrent(false);}
   }
 }

@@ -170,7 +170,7 @@
     const th = tourHTML();
     check('турнир: экран с рейтингом, боями и зачётом', th.includes('рейтинг 1036') && th.includes('доступно 1') && th.includes('до зачёта ещё 3'), th.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 120));
     (0, eval)("onlineOn = () => false");
-    // Очередь окон: пока открыто окно, три новых ждут; потом идут по одному и по важности (1 → 3 → 5)
+    // Important windows retain priority; automatic advertising (priority 5) is discarded.
     pendingLevelUp = null;
     openModal('<p>занято</p>');
     const shown = [];
@@ -181,7 +181,7 @@
     let maxOpen = 1;
     for (let i = 0; i < 3; i++) { POPUP_CLOSED = 0; flushPopups(); maxOpen = Math.max(maxOpen, $('modalRoot').children.length); closeModal(); }
     check('очередь окон: пауза после закрытия', busyRightAfterClose);
-    check('очередь окон: по одному, по важности', maxOpen === 1 && shown.join() === '1,3,5', shown.join());
+    check('очередь окон: важные по очереди, реклама не копится', maxOpen === 1 && shown.join() === '1,3', shown.join());
     // 4.1 Донат: один курс крышки, витрина, кейсы
     closeModal();
     check('донат: 1 крышка = 2 ⭐ во всех наборах', PREMIUM.every((p) => p.stars === p.caps * CAP_STARS), PREMIUM.map((p) => `${p.caps}:${p.stars}`).join(' '));

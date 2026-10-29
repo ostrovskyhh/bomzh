@@ -20,7 +20,7 @@ async function frLoad() {
 
 // Подарки от друзей и новые заявки — при входе и раз в минуту
 async function frClaim() {
-  if (!onlineOn() || !LOADED || !S.storySeen) return;
+  if (document.hidden || !onlineOn() || !LOADED || !S.storySeen) return;
   try {
     const r = await apiPost('friends/claim');
     FR.requests = r.requests || 0;

@@ -119,7 +119,7 @@ ACTIONS.feedbackSend = async (kind, button) => {
 // Рассылки от админа: всплывающее окно у всех игроков
 // =====================================================================
 async function broadcastCheck() {
-  if (!onlineOn() || !LOADED || !S.storySeen) return;
+  if (document.hidden || !onlineOn() || !LOADED || !S.storySeen) return;
   try {
     const r = await apiPost('broadcast/latest', { after: S.bcSeen || 0, communityButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.community, gangGuideButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.gangGuide });
     (r.items || []).forEach((b) => {
@@ -128,7 +128,7 @@ async function broadcastCheck() {
       const go = typeof BC_BTNS !== 'undefined' && b.btn && BC_BTNS[b.btn];
       const show = () => { sfx('notify'); openModal(`<div class="bc-pop"><div class="bc-e">${esc(b.emoji || '📢')}</div><h3>${esc(b.title)}</h3><p>${esc(b.text).replace(/\n/g, '<br>')}</p>
         <small class="fb-note">Сообщение от администрации · ${timeStr(b.ts * 1000)}</small><div class="btns" style="flex-direction:column;gap:8px">${go ? `<button class="btn primary wide" data-act="bcGo" data-id="${esc(b.btn)}">${go[0]} ${go[1]}</button><button class="btn wide" data-act="close">Позже</button>` : '<button class="btn primary wide" data-act="close">Понятно</button>'}</div></div>`, { center: true }); };
-      queuePopup('bc' + b.id, 2, show);
+      if(typeof returnNotice==='function')returnNotice({key:'broadcast:'+b.id,kind:'news',title:b.title,body:esc(b.text).replace(/\n/g,'<br>'),action:go?'broadcast':'',arg:b.btn});else queuePopup('bc' + b.id, 2, show);
     });
     if (r.items && r.items.length) save();
   } catch (e) { /* сервер выключен */ }

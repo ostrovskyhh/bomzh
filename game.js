@@ -2,6 +2,7 @@
 // Весь прогресс хранится на клиенте (localStorage + Telegram CloudStorage).
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
+let GAME_AWAY_AT = 0;
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 // Keep player-written names intact when the surrounding interface is translated.
@@ -929,7 +930,7 @@ function serverSeen(remote) {
 // now — сохранить везде сразу (важное действие или игру сворачивают); final — игру закрывают
 function save(now, final) {
   if (SAVE_LOCK || !LOADED) return;
-  S.lastSeen = Date.now();
+  S.lastSeen = document.hidden && GAME_AWAY_AT ? GAME_AWAY_AT : Date.now();
   S.savedAt = Date.now();
   // Счётчик не идёт назад, даже если S собрали заново (престиж, сброс, выбор другого сохранения)
   S.rev = Math.max(S.rev || 0, REV_FLOOR, serverBase) + 1;
@@ -1056,12 +1057,14 @@ function bump(id) {
 }
 
 function toast(text, kind = '') {
+  if (typeof logEvent === 'function') logEvent(text, kind);
+  if (document.hidden) return;
+  while ($('toastRoot').children.length >= 2) $('toastRoot').firstElementChild.remove();
   const el = document.createElement('div');
   el.className = 'toast ' + kind;
   el.textContent = text;
   $('toastRoot').appendChild(el);
   setTimeout(() => el.remove(), 2800);
-  if (typeof logEvent === 'function') logEvent(text, kind);
   if (kind.includes('bad')) sfx('bad'); else if (kind.includes('good')) sfx('good');
 }
 
@@ -1379,6 +1382,7 @@ let nextEventAt = Date.now() + rand(140, 220) * 1000;
 let nextMiniAt = Date.now() + rand(50, 90) * 1000;
 
 function maybeEvent() {
+  if (document.hidden || GAME_AWAY_AT) return;
   if (!S.storySeen || !popupTurn(2)) return;
   const now = Date.now();
   if (now >= nextMiniAt && !(S.busy && S.busy.type === 'sleep')) {
@@ -2743,8 +2747,13 @@ function showStory(i) {
 }
 
 function applyOffline() {
-  const sec = (Date.now() - S.lastSeen) / 1000;
-  if (sec < 60) return;
+  const awayFrom = GAME_AWAY_AT || S.lastSeen;
+  const sec = Math.max(0,(Date.now() - awayFrom) / 1000);
+  GAME_AWAY_AT = 0;
+  nextMiniAt = Date.now() + rand(70,140)*1000;
+  nextEventAt = Date.now() + rand(180,320)*1000;
+  if (sec <= 0) return;
+  if (typeof returnPrepare === 'function') returnPrepare(awayFrom);
   const capH = isVip() ? OFFLINE_HOURS_VIP : OFFLINE_HOURS;
   const eff = Math.min(sec, capH * 3600);
   const mins = sec / 60;
@@ -2760,8 +2769,11 @@ function applyOffline() {
   S.health = clamp(S.health + healthDelta() * Math.min(mins, 120), Math.min(S.health, 20), maxHealth());
   const m = Math.floor(pityPerSec() * eff);
   S.lastSeen = Date.now();
+  if(document.hidden)GAME_AWAY_AT=S.lastSeen;
   if (m <= 0) return;
+  const before = S.money;
   addMoney(m);
+  if (typeof returnOfflineIncome === 'function') { returnOfflineIncome(awayFrom,sec,S.money-before); save(); return; }
   const hours = Math.floor(sec / 3600), minsLeft = Math.floor((sec % 3600) / 60);
   resultModal({
     art: ITEM_ART.coins, title: 'Пока тебя не было…', btn: 'Забрать',
@@ -2904,6 +2916,7 @@ let zzzTimer = 0;
 
 function tick() {
   const now = Date.now();
+  if (document.hidden) { lastTick=now; return; }
   const dt = Math.min(5, (now - lastTick) / 1000);
   lastTick = now;
   const dm = dt / 60;
@@ -2992,15 +3005,17 @@ function init() {
   HOOKS.init.forEach((f) => f());
 
   load(() => {
+    GAME_AWAY_AT = S.lastSeen || Date.now();
+    if (typeof returnPrepare === 'function') returnPrepare(GAME_AWAY_AT);
     HOOKS.load.forEach((f) => f());
     renderScene();
-    if (!S.storySeen) showStory(0);
+    if (!S.storySeen) { GAME_AWAY_AT=0; showStory(0); }
     else applyOffline();
     if (S.stats.taps > 0 && $('tapHint')) $('tapHint').remove();
     updateHud();
     lastTick = Date.now();
     setInterval(tick, 250);
-    setInterval(save, 5000);
+    setInterval(() => { if (!document.hidden) save(); }, 5000);
   });
 }
 // init() вызывается в boot.js — после загрузки всех модулей
