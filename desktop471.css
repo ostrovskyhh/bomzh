@@ -1,0 +1,10 @@
+.fc-quick471{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px}.fc-quick471 .btn{white-space:normal;min-height:46px}
+/* All desktop presentation is opt-in through the input-device gate. */
+.pc471 .screen.active,.pc471 .sheet,.pc471 .list,.pc471 .report-json{scrollbar-width:auto;scrollbar-color:#a6a0a0 #20252e;scrollbar-gutter:stable}
+.pc471 .sheet{max-width:min(860px,calc(100vw - 32px));width:min(860px,calc(100vw - 32px));max-height:90dvh;overflow-y:auto}
+.pc471 .sheet:focus{outline:1px solid #8b9fa755;outline-offset:-1px}
+.pc471 .screen.active::-webkit-scrollbar,.pc471 .sheet::-webkit-scrollbar,.pc471 .list::-webkit-scrollbar{width:12px;height:12px}
+.pc471 .screen.active::-webkit-scrollbar-thumb,.pc471 .sheet::-webkit-scrollbar-thumb,.pc471 .list::-webkit-scrollbar-thumb{background:#8d929e;border:3px solid #252b35;border-radius:9px}
+@media(min-width:1000px){.pc471 #app{max-width:920px}.pc471 #screen-game{max-width:520px;width:100%;margin-inline:auto}.pc471 #tabbar{max-width:920px;margin-inline:auto;width:100%}.pc471 .bh-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.pc471 .sheet:has(#mgArena),.pc471 .sheet:has(.fight-arena){max-width:min(520px,calc(100vw - 32px));width:min(520px,calc(100vw - 32px))}

@@ -283,8 +283,7 @@ EXTRA_TABS.shop.pets = () => {
 Object.assign(ACTIONS, {
   petBuy: (id) => {
     const p = PETS.find((x) => x.id === id);
-    if (S.money < p.price || S.pets.includes(id)) return;
-    S.money -= p.price;
+    if (!p || p.quest || p.premium || level() < (p.level||1) || S.pets.includes(id) || !shopPay(p)) return;
     S.pets.push(id);
     S.pet = id;
     S.petFood = 80; S.petFedAt = Date.now();

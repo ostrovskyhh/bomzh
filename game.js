@@ -1873,9 +1873,8 @@ const ACTIONS = {
   },
   cloth: (id) => {
     const [slot, itemId] = id.split(':');
-    const it = CLOTHES[slot].find((x) => x.id === itemId);
-    if (S.money < it.price || S.owned[slot].includes(itemId)) return;
-    S.money -= it.price;
+    const it = CLOTHES[slot]?.find((x) => x.id === itemId);
+    if (!it || S.owned[slot].includes(itemId) || !shopPay(it)) return;
     S.owned[slot].push(itemId);
     S.eq[slot] = itemId;
     taskProgress('bought');

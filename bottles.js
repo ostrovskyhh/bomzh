@@ -79,7 +79,7 @@ lookState=(function(orig){return ()=>({...orig(),bottle:bottleCurrent().id});})(
 function bottleShopHTML(premium=false) {
   const list=BOTTLE_SKINS.filter(b=>!!b.caps===premium);
   return `<section class="bottle-shop"><div class="subhead">🍾 ${premium?'Анимированные бутылки':'Бутылки · внешний вид'}</div>
-    <p class="test-note">${premium?'Переливы, пузырьки и свечение — в руке Валеры. Покупка навсегда за крышки.':'Покупка за игровые деньги: рубли, доллары или евро — по городу. Каждый переезд открывает новые виды; уже купленные можно носить везде.'} Только внешний вид: без бонусов к доходу и топу. Сохраняется при престиже.</p>
+    <p class="test-note">${premium?'Переливы, пузырьки и свечение — в руке Валеры. Покупка навсегда за крышки.':'На карточках указана валюта: игровые деньги по городу или бутылки. Каждый переезд открывает новые виды; уже купленные можно носить везде.'} Только внешний вид: без бонусов к доходу и топу. Сохраняется при престиже.</p>
     <div class="bottle-grid">${list.map(b=>`<button class="bottle-card ${bottleCurrent().id===b.id?'selected':''} ${bottleUnlocked(b)?'':'bt-locked'}" data-act="bottleInfo" data-id="${premium?'donate':'clothes'}:${b.id}">${bottlePreview(b)}<b>${b.name}</b><small>${bottleCurrent().id===b.id?'✓ Надето':bottleOwned(b)?'В коллекции':!bottleUnlocked(b)?'🔒 '+bottleUnlockText(b):bottlePrice(b)}</small><span>Посмотреть</span></button>`).join('')}</div>
     ${!premium?'<button class="btn wide" data-act="bottleDonate">✨ Анимированные бутылки · донат</button>':''}</section>`;
 }
@@ -93,15 +93,15 @@ Object.assign(ACTIONS,{
   bottleDonate:()=>{DN_TAB='bottles';openDonate();},
   bottleInfo:(arg)=>{
     const [from,id]=arg.split(':');const b=bottleById(id);if(!b)return;
-    BOTTLE_BACK_DONATE=from==='donate';const owned=bottleOwned(b),price=bottlePrice(b),enough=b.caps?S.caps>=b.caps:S.money>=b.price;
+    BOTTLE_BACK_DONATE=from==='donate';const owned=bottleOwned(b),price=bottlePrice(b),enough=b.caps?S.caps>=b.caps:shopCanPay(b);
     openModal(`<div class="bottle-detail">${bottlePreview(b)}<h3>${b.name}</h3><p>${b.effect?'Анимированная':'Обычная'} бутылка в руке Валеры. Без бонусов к заработку и рейтингу.</p><p>Покупка навсегда. Не пропадает при престиже.</p>
-      ${owned?`<button class="btn primary wide" data-act="bottleWear" data-id="${id}">${bottleCurrent().id===id?'Уже надето':'Надеть'}</button>`:!bottleUnlocked(b)?`<p class="test-note">🔒 ${bottleUnlockText(b)}</p>`:`<button class="btn primary wide" data-act="bottleBuy" data-id="${id}" ${enough?'':'disabled'}>Купить и надеть · ${price}</button>${enough?'':`<p class="test-note">Недостаточно ${b.caps?'крышек':'игровых денег'}.</p>`}`}
+      ${owned?`<button class="btn primary wide" data-act="bottleWear" data-id="${id}">${bottleCurrent().id===id?'Уже надето':'Надеть'}</button>`:!bottleUnlocked(b)?`<p class="test-note">🔒 ${bottleUnlockText(b)}</p>`:`<button class="btn primary wide" data-act="bottleBuy" data-id="${id}" ${enough?'':'disabled'}>Купить и надеть · ${price}</button>${enough?'':`<p class="test-note">Недостаточно ${b.caps?'крышек':b.payBottles?'бутылок':'игровых денег'}.</p>`}`}
       <button class="btn wide" data-act="bottleBack">Назад</button></div>`);
   },
   bottleWear:(id)=>{const b=bottleById(id);if(!b||!bottleOwned(b))return;S.bottleSkin=id;renderScene();save();bottleBack();},
   bottleBuy:(id)=>{
     const b=bottleById(id);if(!b||bottleOwned(b)||!bottleUnlocked(b)||b.rewardOnly)return;
-    if(b.caps){if(S.caps<b.caps)return;S.caps-=b.caps;}else{if(S.money<b.price)return;S.money-=b.price;}
+    if(b.caps){if(S.caps<b.caps)return;S.caps-=b.caps;}else{if(!shopPay(b))return;}
     giveCosm(id);S.bottleSkin=id;renderScene();save();toast(`🍾 ${b.name} — надето!`,'good');bottleBack();
   },
   bottleBack,
