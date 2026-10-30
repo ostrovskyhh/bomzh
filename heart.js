@@ -22,7 +22,7 @@ eat = (function (orig) {
   return function (id) {
     if (id !== 'energetik') { orig(id); return; }
     const f = FOOD.find((x) => x.id === id);
-    if (S.money < f.price) return;
+    if (!shopCanPay(f)) return;
     const now = Date.now();
     S.edLog = (S.edLog || []).filter((t) => now - t < ED_WINDOW);
     S.edLog.push(now);

@@ -33,7 +33,7 @@ const HOUSING = [
   { name: 'Квартира', price: 150000, level: 13, energy: 270, regen: 10, hpm: 0.15, rob: 0, rent: 5000, util: 1500, desc: 'Почти как раньше' },
   { name: 'Особняк', price: 1500000, level: 18, energy: 330, regen: 13, hpm: 0.3, rob: 0, rent: 50000, util: 15000, desc: 'Месть подаётся с бассейном' },
 ];
-const SLEEP_SPEED = 10; // во сне энергия идёт в 10 раз быстрее
+const SLEEP_SPEED = 5; // во сне энергия восстанавливается вдвое дольше, чем до 4.77
 const FOOD_PER_TAP = 0.15;
 
 // tier: 0 — лохмотья, 1 — базовая, 2 — приличная, 3 — деловая (нужно для работы и свиданий)
@@ -1263,7 +1263,7 @@ function startSleep() {
   if (S.busy) { toast('Валера занят', 'bad'); return; }
   const missing = maxEnergy() - S.energy;
   if (missing < 5) { toast('Валера бодр, спать не хочется', 'bad'); return; }
-  const minutes = clamp(missing / (regenPerMin() * SLEEP_SPEED), 0.25, 3);
+  const minutes = clamp(missing / (regenPerMin() * SLEEP_SPEED), 0.5, 6);
   S.busy = { type: 'sleep', start: Date.now(), end: Date.now() + minutes * 60000, from: S.energy };
   toast(`💤 Валера уснул. ${S.housing < 3 ? 'На улице могут обчистить…' : 'Тут безопасно'}`);
   sfx('sleep');
