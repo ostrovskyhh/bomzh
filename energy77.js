@@ -35,6 +35,7 @@ async function adsBenefits77(){
     for(const r of benefits){if(S.adClaims77.includes(r.id))continue;
       if(r.purpose==='energy'){S.energy=maxEnergy();if(S.busy?.type==='sleep')S.busy=null;if(document.querySelector('[data-act="adEnergy77"]'))closeModal();}
       else if(r.purpose==='skill'&&EFFECTS[r.skill]){if(r.until_at<=adsNow())continue;const prior=S.effects.find(e=>e.id===r.skill)?.until||0,localUntil=Date.now()+r.until_at-adsNow();S.effects=S.effects.filter(e=>e.id!==r.skill);S.effects.push({id:r.skill,until:Math.max(prior,localUntil)});const sk=TRICKS.find(t=>t.id===r.skill);if(sk)S.cd[r.skill]=Math.max(S.cd[r.skill]||0,Date.now()+r.starts+trickCdMin(sk)*60000-adsNow());track('trick');}
+      else if(typeof applyAdBenefit78==='function'&&applyAdBenefit78(r)){}
       else continue;
       S.adClaims77.push(r.id);changed=true;
     }
