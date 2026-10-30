@@ -30,7 +30,7 @@ function admDevHTML(c) {
     <div class="admin-grid">
       <button class="btn" data-act="admSetQuick" data-id="path:honest">😇 Честный путь</button><button class="btn" data-act="admSetQuick" data-id="path:dark">😈 Тёмный путь</button>
       <button class="btn" data-act="admSetQuick" data-id="jail:0">🔓 Из тюрьмы</button><button class="btn" data-act="admSetQuick" data-id="wanted:0">🚨 Снять розыск</button></div>
-    <div class="adm-row"><select id="admCity">${opts([['zas', '🏚️ Засранск'], ['msk', '🏙️ Москвабад'], ['mex', '🌵 Мексика']])}</select><button class="btn" data-act="admSetCity">📍 Перенести в город</button></div>
+    <div class="adm-row"><select id="admCity">${opts(Object.entries(CITIES).map(([id,c])=>[id,c.emoji+' '+c.name]))}</select><button class="btn" data-act="admSetCity">📍 Перенести в город</button></div>
     <div class="subhead">🎁 Выдать</div>
     <div class="adm-row"><select id="admGK">${Object.entries(ADM_GIVE).map(([k, [t]]) => `<option value="${k}" ${k === ADM_GK ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <select id="admGI">${opts(ADM_GIVE[ADM_GK][1]())}</select></div>

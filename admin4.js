@@ -63,7 +63,7 @@ function adm4Card(c) {
   const sv = c.save || {}, st = c.stats || {}, bans = c.bans || {};
   const banTxt = (k) => (bans[k] ? (bans[k] > 2e9 ? 'навсегда' : `до ${new Date(bans[k] * 1000).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`) : '');
   const sec = (id, title, html, open) => `<details class="adm4-card-sec" ${open ? 'open' : ''}><summary>${title}</summary><div>${html}</div></details>`;
-  const city = { zas: 'Засранск', msk: 'Москвабад', mex: 'Мексика', fr:'Франция' }[sv.city] || st.city_name || '—';
+  const city = { zas: 'Засранск', msk: 'Москвабад', mex: 'Мексика', fr:'Франция',it:'Италия',cn:'Китай' }[sv.city] || st.city_name || '—';
   const online = Date.now() / 1000 - (c.seen || 0) < 120;
   const opts = (list) => list.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join('');
   return `<button class="adm4-back" data-act="adm4Back">‹ Все игроки</button>
