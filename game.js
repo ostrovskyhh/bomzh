@@ -2760,7 +2760,7 @@ function applyOffline() {
   nextEventAt = Date.now() + rand(180,320)*1000;
   if (sec <= 0) return;
   if (typeof returnPrepare === 'function') returnPrepare(awayFrom);
-  const capH = isVip() ? OFFLINE_HOURS_VIP : OFFLINE_HOURS;
+  const capH = typeof membershipHours75==='function'?membershipHours75():(isVip() ? OFFLINE_HOURS_VIP : OFFLINE_HOURS);
   const eff = Math.min(sec, capH * 3600);
   const mins = sec / 60;
   S.energy = Math.min(maxEnergy(), S.energy + regenPerMin() * eff / 60);

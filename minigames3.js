@@ -73,14 +73,16 @@ function gameConveyor(mg, cfg) {
   const arena = $('mgArena');
   arena.innerHTML = '<div class="cv-belt"><i></i></div><div class="cv-scan">РЕНТГЕН</div>';
   const items = [];
-  let next = 0;
+  let next = 0, targets = [];
   mgLoop(mg, (dt) => {
     const t = mgElapsed(mg);
     const speed = 0.22 + t * 0.006;
     next -= dt;
     if (next <= 0) {
       next = Math.max(0.55, 1.15 - t * 0.02);
-      const bad = Math.random() < cfg.badRate;
+      // A sorting shift always offers enough targets, with random order in each bag.
+      if(cfg.fairTargets && !targets.length) targets=shuffle([true,true,true,false,false]);
+      const bad = cfg.fairTargets ? targets.pop() : Math.random() < cfg.badRate;
       const it = { x: 1.1, bad, el: mgEl(arena, 'cv-item', pick(bad ? cfg.bad : cfg.good)) };
       it.el.onpointerdown = (e) => {
         e.preventDefault();
