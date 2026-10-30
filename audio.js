@@ -344,9 +344,14 @@ const Sound = (() => {
     if(e===3||e===7)tone({...m,t:at,f:N(FR_MUSIC.tune[(s+2)%16]),type:'triangle',dur:beat*1.7,vol:.025,vibrato:3,rv:.3});
     if(e%2===1)noise({...m,t:at,dur:.06,vol:.015,type:'highpass',f:6000});
   }
+  // Original plucked motifs, generated locally with Web Audio.
+  const WORLD_TUNES50={mandolin50:[72,76,79,76,74,77,81,77,76,79,84,81,79,76,74,72],teahouse50:[72,74,76,79,81,79,76,74,67,72,74,76,79,76,74,72]};
+  function scheduleWorld50(t,s,key){const it=key==='mandolin50',beat=60/(it?112:86)/2,at=t-ctx.currentTime,m={bus:musicBus},tune=WORLD_TUNES50[key];tone({...m,t:at,f:N(tune[s%16]),type:it?'triangle':'sine',dur:beat*(it?1.2:2),vol:.055,filter:{f:it?2600:1800},rv:.22});if(s%4===0)tone({...m,t:at,f:N((it?[48,53,55,48]:[48,55,57,53])[Math.floor(s/4)%4]),type:'triangle',dur:beat*3,vol:.07,filter:{f:500}});if(it&&s%2===1)tone({...m,t:at+.035,f:N(tune[s%16]+12),type:'sine',dur:.13,vol:.018});}
   const pickN = (arr) => arr[Math.floor(Math.random() * arr.length)];
   // Каждой мелодии — свой «шаг» сетки и планировщик
   const TRACKS = {
+    mandolin50:{step:()=>60/112/2,play:(t,s)=>scheduleWorld50(t,s,'mandolin50')},
+    teahouse50:{step:()=>60/86/2,play:(t,s)=>scheduleWorld50(t,s,'teahouse50')},
     musette:{step:()=>60/126,play:scheduleMusette},
     frjazz:{step:()=>60/102/2,play:scheduleFrJazz},
     lounge: { step: () => 60 / LOUNGE.bpm / 2, play: scheduleLounge },
