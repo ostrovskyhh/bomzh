@@ -36,6 +36,8 @@ function returnItemHTML(n){
   return `<article class="rh-item ${n.read?'read':''}" ${language?`data-i18n-ignore lang="${language}"`:''}><div><span>${{income:'💰',gift:'🎁',news:'📰',event:'🔔'}[n.kind]||'🔔'}</span><b>${esc(t(n.title))}</b>${n.money>0?`<strong>+${incomeMoney(n.money)}</strong>`:''}${n.caps>0?`<strong>+${fmt(n.caps)} крышек</strong>`:''}</div><p>${esc(t(n.body)).replace(/\n/g,'<br>')}</p>${n.action?`<button class="btn small" data-act="returnOpen" data-id="${esc(n.key)}">${t('Подробнее ›')}</button>`:''}</article>`;
 }
 function returnBody(all=false){
+  // Settle with the same trusted clock used by collection before showing the till.
+  if(typeof businessTick==='function')businessTick();
   const st=returnState(),items=all?st.items:returnUnread(),money=items.reduce((n,x)=>n+x.money,0),cash=typeof businessTotals==='function'?businessTotals().cash:0;
   return `<header class="rh-head"><div class="rh-avatar">${valeraSVG(S.eq,lookState())}</div><div><small>С ВОЗВРАЩЕНИЕМ</small><h2>Вот что произошло, пока ты отходил</h2><p>${st.away?`Тебя не было ${playFmt(st.away*1000)}`:'Все важные события в одном месте'}</p></div></header>
     ${money>0?`<section class="rh-income"><small>Уже начислено на баланс</small><b>+${incomeMoney(money)}</b></section>`:''}
@@ -44,7 +46,7 @@ function returnBody(all=false){
     <p class="rh-safe">Подарки и награды уже сохранены. Повторное открытие не начисляет их заново.</p>
     <button class="btn primary wide" data-act="returnCollect">Забрать всё и играть</button><div class="rh-bottom"><button class="btn" data-act="returnLater">Позже</button><button class="btn" data-act="returnHistory">История событий</button></div>`;
 }
-function returnRefresh(){const el=$('returnSummary');if(el){const cash=businessTotals().cash,sig=returnState().items.map(n=>n.key+':'+n.read).join('|')+':'+(cash>=1)+':'+returnState().away;if(el.dataset.signature!==sig){el.innerHTML=returnBody(el.dataset.all==='1');el.dataset.signature=sig;}const value=el.querySelector('[data-return-cash]');if(value&&value.textContent!==incomeMoney(cash))value.textContent=incomeMoney(cash);}const bell=$('returnBell');if(bell){const n=returnUnread().length;bell.querySelector('b').textContent=n>99?'99+':String(n);bell.classList.toggle('unread',n>0);bell.setAttribute('aria-label','Уведомления: '+n);}}
+function returnRefresh(){const el=$('returnSummary');if(el){if(typeof businessTick==='function')businessTick();const cash=businessTotals().cash,sig=returnState().items.map(n=>n.key+':'+n.read).join('|')+':'+(cash>=1)+':'+returnState().away;if(el.dataset.signature!==sig){el.innerHTML=returnBody(el.dataset.all==='1');el.dataset.signature=sig;}const value=el.querySelector('[data-return-cash]');if(value&&value.textContent!==incomeMoney(cash))value.textContent=incomeMoney(cash);}const bell=$('returnBell');if(bell){const n=returnUnread().length;bell.querySelector('b').textContent=n>99?'99+':String(n);bell.classList.toggle('unread',n>0);bell.setAttribute('aria-label','Уведомления: '+n);}}
 function openReturnSummary(all=false){if(!LOADED)return;RETURN_EXPLICIT=true;try{openModal(`<section id="returnSummary" class="return-summary" data-all="${all?'1':'0'}">${returnBody(all)}</section>`,{center:true});}finally{RETURN_EXPLICIT=false;}if(RETURN_ARRIVAL)RETURN_ARRIVAL.shown=true;returnRefresh();}
 ACTIONS.returnSummary=()=>openReturnSummary();ACTIONS.returnHistory=()=>openReturnSummary(true);
 ACTIONS.returnLater=()=>{if(RETURN_ARRIVAL){RETURN_ARRIVAL.shown=true;RETURN_ARRIVAL.active=false;}closeModal();};

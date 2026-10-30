@@ -36069,5 +36069,8 @@
   "Миссии: до 10 рекламных удвоений в сутки, один раз за каждую выполненную миссию. Общий предел — 25 наград в сутки, пауза 30 секунд. Дополнительная награда доступна 24 часа.": "Missions: up to 10 ad doubles per day, once per completed mission. The shared limit is 25 rewards per day with a 30 second gap. Extra mission rewards are available for 24 hours.",
   "Сбрасывается только текущее ожидание. До 5 сбросов в сутки; между наградами 30 секунд, общий предел 25 в сутки.": "Only the current cooldown is reset. Up to 5 resets per day; all rewards share a 30 second gap and a limit of 25 per day.",
   "🎬 Подтверждённая реклама: +3 крышки": "🎬 Confirmed ad reward: +3 caps",
-  "Рекламная платформа не подтвердила награду. Лимит не потрачен.": "The ad platform did not confirm a reward. Your limit was not used."
+  "Рекламная платформа не подтвердила награду. Лимит не потрачен.": "The ad platform did not confirm a reward. Your limit was not used.",
+  "Точная касса в итогах возвращения": "Accurate business tills when you return",
+  "🏪 При возвращении сумма в кассах бизнесов сразу учитывает накопленный доход. Показанная сумма и сбор прибыли используют один расчёт": "🏪 On your return, business tills immediately include accrued income. The displayed amount and collection use the same calculation",
+  "Исправили отображение денег в кассах бизнесов в окне возвращения. Сумма сразу учитывает накопленный доход и обновляется, пока окно открыто. Кнопка «Забрать всё и играть» собирает прибыль по тому же расчёту, с учётом удержаний.": "Fixed the business till amount in the return summary. It immediately includes accrued income and updates while the window is open. The “Collect everything and play” button collects profit using the same calculation, including deductions."
 }
