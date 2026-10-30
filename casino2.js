@@ -39,6 +39,7 @@ ACTIONS.betCustomOk = () => {
 // 2. Общая «Ракета»: одна на всех, 15 секунд на ставки после взрыва
 // =====================================================================
 let CR2 = null; // { timer, view, dt (сервер − телефон), raf, lastId, claimed }
+let CRASH_ACTION_PENDING = false;
 const CRASH_AUTO_DEFAULT = 2;
 
 function crashOnline() { return onlineOn(); }
@@ -101,9 +102,12 @@ async function crash2Poll() {
 
 function crash2Apply(v) {
   const c = CR2;
-  if (!c || !v || v.error) return;
-  c.dt = v.now - Date.now();
+  if (!c || !v || !Number.isFinite(v.now) || !v.phase) return;
   const prev = c.view;
+  // A slow poll must not undo a more recent cashout/round response. Errors can
+  // still carry the authoritative round snapshot (for example an already crashed round).
+  if (prev && (v.now < prev.now || (v.now === prev.now && prev.id === v.id && prev.me?.cashed && !v.me?.cashed))) return;
+  c.dt = v.now - Date.now();
   c.view = v;
   if (prev && prev.id !== v.id) { c.pts = []; sfx('bell'); }
   if (prev && prev.phase === 'flying' && v.phase === 'crashed') { sfx('boom'); haptic('heavy'); $('crashBox').classList.add('boom'); if (v.me && !v.me.cashed) toast(`🚀 Взорвалась на ${v.crash.toFixed(2)}x. Ставка сгорела`, 'bad'); }
@@ -114,19 +118,23 @@ function crash2Apply(v) {
   crash2Btn();
 }
 
+function crash2Now() {
+  const synced = businessNow();
+  return synced === null ? Date.now() + (CR2?.dt || 0) : synced;
+}
 function crash2Mult() {
   const v = CR2 && CR2.view;
   if (!v) return 1;
   if (v.phase === 'crashed') return v.crash;
   if (v.phase !== 'flying') return 1;
-  const t = (Date.now() + CR2.dt - v.start) / 1000;
+  const t = (crash2Now() - v.start) / 1000;
   return Math.max(1, Math.floor(Math.exp(v.growth * t) * 100) / 100);
 }
 
 function crash2Draw() {
   const v = CR2.view;
   if (!v) return;
-  const now = Date.now() + CR2.dt;
+  const now = crash2Now();
   if (v.phase === 'betting' || (v.phase === 'flying' && now < v.start)) {
     const left = Math.max(0, (v.betUntil - now) / 1000);
     $('crashMult').textContent = `${left.toFixed(1)} с`;
@@ -142,6 +150,7 @@ function crash2Draw() {
   // Предсказываем взрыв не можем — сервер скажет; пока летим, рисуем по формуле
   $('crashMult').textContent = m.toFixed(2) + 'x';
   $('crashPhase').textContent = v.me && v.me.cashed ? `✅ Ты забрал на ${v.me.cashed.toFixed(2)}x` : '🚀 Летим!';
+  if (!v.me?.cashed && now - v.now > 3000) $('crashPhase').textContent = 'Задержка связи: вывод подтверждает сервер';
   const x = Math.min(290, t * 22), y = Math.max(10, 155 - Math.log(m) * 60);
   CR2.pts = CR2.pts || [];
   CR2.pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
@@ -154,9 +163,11 @@ function crash2Draw() {
 function crash2Btn() {
   const v = CR2 && CR2.view, b = $('crashBtn');
   if (!v || !b) return;
+  if (CRASH_ACTION_PENDING) { b.textContent = 'Ждём ответа сервера…'; b.disabled = true; b.dataset.why = 'Запрос уже отправлен. Дождись ответа сервера.'; return; }
   let text, on = false, cls = 'primary';
   if (v.phase === 'betting') {
     if (v.me) text = `✅ Ставка ${fmt(v.me.amount)} ₽${v.me.auto ? ` · авто ${v.me.auto}x` : ''}`;
+    else if (crash2Now() >= v.betUntil) text = 'Ждём подтверждения старта…';
     else { text = `Поставить ${fmt(S.bet)} ₽`; on = S.money >= S.bet; }
   } else if (v.phase === 'flying' && v.me && !v.me.cashed) {
     text = `💰 Забрать ${fmt(Math.floor(v.me.amount * crash2Mult()))} ₽`; on = true; cls = 'green';
@@ -164,6 +175,7 @@ function crash2Btn() {
   if (b.textContent !== text) b.textContent = text;
   b.disabled = !on;
   b.className = `btn wide ${cls}`;
+  if (on) delete b.dataset.why;
   if (!on && !b.dataset.why) b.dataset.why = 'Сейчас нельзя: ставки принимаются 15 секунд перед стартом';
 }
 
@@ -178,7 +190,10 @@ async function crash2Claim() {
 
 ACTIONS.crash2Btn = async () => {
   const v = CR2 && CR2.view;
-  if (!v) return;
+  if (!v || CRASH_ACTION_PENDING) return;
+  if (!(v.phase === 'betting' && !v.me && crash2Now() < v.betUntil) && !(v.phase === 'flying' && v.me && !v.me.cashed)) return;
+  CRASH_ACTION_PENDING = true;
+  crash2Btn();
   try {
     if (v.phase === 'betting' && !v.me) {
       const amount = S.bet;
@@ -187,13 +202,16 @@ ACTIONS.crash2Btn = async () => {
       const r = await apiPost('crash/bet', { amount, auto: S.crashAuto || 0 });
       if (r.error) { toast(r.error, 'bad'); return; }
       S.money -= amount; track('casino'); sfx('chip'); saveSoon();
+      S.crashBet = { id: r.id, at: Date.now() };
       crash2Apply(r);
     } else if (v.phase === 'flying' && v.me && !v.me.cashed) {
       const r = await apiPost('crash/cashout');
       crash2Apply(r);
+      if (r.error) toast(r.error, 'bad');
       if (r.ok) { addMood(3); crash2Claim(); }
     }
   } catch (e) { toast(refErrorText(e), 'bad'); }
+  finally { CRASH_ACTION_PENDING = false; crash2Btn(); }
 };
 // Автовывод мог сработать, пока окно было закрыто: забираем при запуске игры
 HOOKS.init.push(() => setTimeout(() => { if (crashOnline()) apiPost('crash/claim').then((r) => { if (r.amount > 0) { addMoney(r.amount); toast(`🚀 Автовывод ракеты: +${fmt(r.amount)} ₽`, 'good'); saveSoon(); } }).catch(() => {}); }, 7000));
@@ -214,8 +232,9 @@ HOOKS.tick.push(() => {
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.crashBet) CRASH_BG = 0; });
 crash2Apply = (function (orig) {
   return function (v) {
-    if (v && v.me && v.phase !== 'crashed') S.crashBet = { id: v.id, at: S.crashBet && S.crashBet.id === v.id ? S.crashBet.at : Date.now() };
-    return orig(v);
+    const result = orig(v);
+    if (v && CR2?.view === v && v.me && v.phase !== 'crashed') S.crashBet = { id: v.id, at: S.crashBet && S.crashBet.id === v.id ? S.crashBet.at : Date.now() };
+    return result;
   };
 })(crash2Apply);
 

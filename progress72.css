@@ -8,3 +8,8 @@
 .card.skill-card72 .card-body .btn{width:100%;min-width:0;white-space:normal;font-size:13px;padding:10px}
 .card.skill-card72 .card-body p{margin:9px 0;font-size:12px;line-height:1.4}.card.skill-card72 .card-title{font-size:16px}.card.skill-card72 .card-desc{font-size:13px}
 .frame-market72{border:3px solid #ecba54!important;box-shadow:0 0 14px #ecba5470}.frame-scholar72{border:3px solid #8bc8ef!important;box-shadow:0 0 14px #8bc8ef70}
+.card.purchase-card72{display:grid;grid-template-columns:54px minmax(0,1fr);gap:10px;align-items:start}
+.card.purchase-card72>.thumb{width:54px;height:54px;grid-column:1;grid-row:1}
+.card.purchase-card72>.card-body{grid-column:2;grid-row:1;min-width:0}
+.card.purchase-card72>.btn,.card.purchase-card72>.btn-col{grid-column:1/-1;width:100%;min-width:0;white-space:normal}
+.card.purchase-card72 .btn{white-space:normal;overflow-wrap:anywhere;min-width:0;line-height:1.35}
