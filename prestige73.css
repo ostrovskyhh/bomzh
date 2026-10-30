@@ -1,0 +1,10 @@
+.prestige-promo73 h2{font-size:25px;margin:8px 0 15px}.prestige-promo73 p,.prestige-guide73 p{font-size:14px;line-height:1.5}
+.prestige-promo73>small{color:var(--gold);font-weight:800}.prestige-promo73>.btn{margin-top:12px;white-space:normal;min-height:48px}
+.prestige-benefits73{padding:15px;border:1px solid #f2c74488;border-radius:14px;background:linear-gradient(145deg,#755b2029,#5d315c29);margin:12px 0}
+.prestige-benefits73 li{margin:10px 0;line-height:1.45}.prestige-benefits73 ul{padding-left:20px;font-size:14px}.prestige-benefits73 p{font-size:12px;color:var(--muted)}
+.prestige-rewards73{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}.prestige-rewards73 article{display:flex;align-items:center;text-align:center;flex-direction:column;gap:9px;padding:14px 8px;background:var(--card);border-radius:14px;min-width:0}.prestige-rewards73 .btns{flex-direction:column;width:100%;gap:6px}.prestige-preview73{width:72px;height:72px;border-radius:24px}.prestige-rewards73 small{color:var(--muted)}
+.prestige-face73 svg,.avatar svg[data-prestige-avatar73]{display:block;width:100%;height:100%}.prestige-face73{padding:0!important}
+.frame-pr73_spark{box-shadow:0 0 0 3px #ffc15b,0 0 0 5px #542842,0 0 14px #ffc15b88!important}
+.frame-pr73_rise{box-shadow:0 0 0 3px #83dcff,0 0 0 6px #153d6d,0 0 18px #83dcff88!important}
+.frame-pr73_phoenix{box-shadow:0 0 0 3px #ff977a,0 0 0 6px #742640,0 0 20px #ff977aaa!important}
+.frame-pr73_legend{box-shadow:0 0 0 3px #e4b4ff,0 0 0 6px #432778,0 0 0 8px #e4b4ff66,0 0 20px #e4b4ffaa!important}

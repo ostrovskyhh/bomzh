@@ -2021,7 +2021,8 @@ const ACTIONS = {
   story: () => showStory(0),
   reset: () => {
     const doReset = () => {
-      S = freshState(); save();
+      const campaign73 = typeof prestigeIdentity73 === 'function' ? prestigeIdentity73() : {};
+      S = { ...freshState(), ...campaign73 }; save();
       SAVE_LOCK = true;
       // Стираем облачную копию и перезаписываем серверную, иначе после перезапуска старый прогресс «вернётся»
       const wipeCloud = () => {

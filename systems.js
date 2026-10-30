@@ -633,7 +633,7 @@ function prestigeProfile() {
     'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial', 'xpCapsUntil', 'xpStarsUntil', 'helpVerified', 'bjWalletRev', 'bjInRound', 'bjTable', 'bjSeenRounds', 'bjEarningsSeen',
     'cosm', 'bottleSkin', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
     'pass', 'passFrame', 'frame', 'avatar', 'aura', 'tapFx', 'avatarsSeen',
-    'ach', 'achNotified', 'achProgress', 'achRewards72', 'crimeSaleCities72', 'trickLvl', 'coll', 'counters', 'stats', 'casinoStats',
+    'ach', 'achNotified', 'achProgress', 'achRewards72', 'crimeSaleCities72', 'trickLvl', 'prestigeOffer73', 'prestigeGift73', 'coll', 'counters', 'stats', 'casinoStats',
     'settings', 'name', 'log', 'play', 'daily', 'tasks', 'weekly', 'seasonCur',
     'pets', 'pet', 'petBond', 'petNames', 'petPantry', 'petFood', 'petFedAt',
     'petHp', 'petHpAt', 'petSick', 'petCd', 'petPetAt', 'petFindAt', 'petFind2At', 'petFind3At', 'shelter',
@@ -656,7 +656,7 @@ function prestigeWizard() {
   if (!PRESTIGE_FLOW) return;
   const step = PRESTIGE_FLOW.step;
   const lost = `<ul><li>Игровые деньги и бутылки, включая замороженные средства.</li><li>Уровень, учёба, работа, сила и форма.</li><li>Жильё, обычная одежда, транспорт и все бизнесы, включая управляемые в прежних городах.</li><li>Обычный инвентарь и вещи на барахолке.</li><li>Текущий сюжет, криминальный прогресс, отношения и семья.</li></ul>`;
-  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Первый престиж: бесплатный первый бизнес; последующие круги без повторной выдачи.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, престиж и перки.</li></ul><p><b>Постоянная выгода:</b> доход от тапов и работы ×${(1 + 0.2 * ((S.prestige || 0) + 1)).toFixed(2)}, опыт ×${(1 + 0.1 * ((S.prestige || 0) + 1)).toFixed(2)}. Ещё +${prestigeGain()} очк. для перков. Начнёшь в Засранске.</p>`;
+  const kept = `<ul><li><b>${fmt(S.caps || 0)} крышек</b> — весь баланс.</li><li>VIP, оплаченные бонусы, косметика и ключи кейсов.</li><li>Батл-пасс, достижения и их прогресс, коллекции.</li><li>Первый престиж: бесплатный первый бизнес; последующие круги без повторной выдачи.</li><li>Питомцы, дружба с ними, имена и корм.</li><li>Наградные шапки, открытые рамки и аватарки.</li><li>Статистика, настройки, престиж и перки.</li></ul><p><b>Постоянная выгода:</b> доход от тапов и работы ×${(1 + 0.2 * ((S.prestige || 0) + 1)).toFixed(2)}, опыт ×${((1 + 0.1 * ((S.prestige || 0) + 1)) * (S.prestigeGift73 ? 1.5 : 1)).toFixed(2)}. Ещё +${prestigeGain()} очк. для перков. Начнёшь в Засранске.</p>`;
   const contents = step === 1
     ? `<h3>Ты уверен, что хочешь начать заново?</h3><p>Престиж вернёт тебя в первый город — Засранск — и сбросит прогресс этого круга. Отменить сброс нельзя.</p><div class="prestige-warning lost"><b>Будет сброшено</b>${lost}</div><p>Сейчас: уровень <b>${level()}</b>, деньги <b>${fmt(S.money)} ₽</b>. Старт нового круга — <b>${fmt(1000 + perk('capital') * 10000)} ₽</b>.</p>`
     : step === 2
@@ -668,6 +668,7 @@ function prestigeWizard() {
     ${step > 1 ? '<button class="btn wide" data-act="prestigePrevious">← Ещё раз проверить</button>' : ''}<button class="btn wide" data-act="prestigeCancel">Отмена — сохранить прогресс</button></div></div>`, { center: true, locked: true });
 }
 function performPrestige() {
+      const promo73 = typeof prestigePromoAuthorized73 === 'function' && prestigePromoAuthorized73();
       const keep = {
         ...prestigeProfile(),
         prestige: (S.prestige || 0) + 1, pp: (S.pp || 0) + prestigeGain(), perks: S.perks, ach: S.ach, achNotified: S.achNotified,
@@ -675,19 +676,21 @@ function performPrestige() {
         tut: { step: 99, done: true }, storySeen: true, questHistory: [...(S.questHistory || []), S.quest && S.quest.path].filter(Boolean),
         quest: { idx: 0, path: null, base: { ...(S.counters || {}) }, bossCd: 0, v2: true }, xpV2: true, cutSeen: S.cutSeen || {},
         onlineWins: S.onlineWins || 0, admin: S.admin,
+        ...(promo73 ? {prestigeGift73:true,prestigeOffer73:{seen:true,claimed:true,claimedAt:Date.now()}} : {}),
       };
       const seasonal = { hat: S.owned.hat.filter((id) => (CLOTHES.hat.find((h) => h.id === id) || {}).season) };
       S = { ...freshState(), ...sysDefaults(), ...keep };
       S.owned.hat.push(...seasonal.hat);
       S.city = 'zas'; S.moves = 0;
-      S.money = 1000 + perk('capital') * 10000;
+      S.money = (promo73 ? 100000 : 1000) + perk('capital') * 10000;
+      if (promo73) addCaps(150);
       track('prestigeDone');
       renderedHousing = -1; renderedLook = ''; renderedPet = '';
       if (typeof applyCity === 'function') applyCity();
       save();
       confetti(120);
       sfx('jackpot');
-      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Ты снова в Засранске. Постоянные бонусы: тапы, работа и бизнес +${S.prestige * 20}%, опыт +${S.prestige * 10}%. Стартовый капитал ${fmt(S.money)} ₽. Очков для постоянных перков: ${S.pp}`, btn: 'Погнали!' });
+      resultModal({ emoji: '⭐', title: `Престиж ${S.prestige}!`, text: `Ты снова в Засранске. Постоянные бонусы: тапы, работа и бизнес +${S.prestige * 20}%, опыт +${S.prestige * 10}%. Стартовый капитал ${fmt(S.money)} ₽. Очков для постоянных перков: ${S.pp}${promo73 ? '<br><b>Разовое предложение получено: +150 крышек, постоянный бонус опыта ×1,5 и базовый курс бутылок 1,5 ₽.</b>' : ''}`, btn: 'Погнали!' });
 }
 function prestigeFlowValid() {
   return PRESTIGE_FLOW && $('prestigeWizard') && canPrestige() && PRESTIGE_FLOW.prestige === (S.prestige || 0);

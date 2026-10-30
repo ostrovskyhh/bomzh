@@ -33,7 +33,7 @@ HOOKS.load.push(prestigeStarter);
 performPrestige=(function(orig){return function(){const before=S.prestige||0;const r=orig.apply(this,arguments);if((S.prestige||0)>before){prestigeStarter();save();}return r;};})(performPrestige);
 prestigeProfile=(function(orig){return function(){return {...orig(),prestigeStarterGranted:!!S.prestigeStarterGranted};};})(prestigeProfile);
 const prestigeTabDevelopment=EXTRA_TABS.tasks.prestige;
-EXTRA_TABS.tasks.prestige=()=>`<div class="info-card"><b>Выгода следующего круга</b><p>Тапы, работа, бизнес: ×${prestigeMult().toFixed(2)} → ×${(prestigeMult()+.2).toFixed(2)}.<br>Опыт: ×${(1+.1*(S.prestige||0)).toFixed(2)} → ×${(1+.1*((S.prestige||0)+1)).toFixed(2)}.</p><p>${S.prestigeStarterGranted?'Первый стартовый бизнес уже получен.':'При первом престиже — первый бизнес бесплатно, сразу приносит доход.'} Заначка: ${incomeMoney(1000+perk('capital')*10000)} на старте.</p></div>`+prestigeTabDevelopment();
+EXTRA_TABS.tasks.prestige=()=>`<div class="info-card"><b>Выгода следующего круга</b><p>Тапы, работа, бизнес: ×${prestigeMult().toFixed(2)} → ×${(prestigeMult()+.2).toFixed(2)}.<br>Опыт: ×${((1+.1*(S.prestige||0))*(S.prestigeGift73?1.5:1)).toFixed(2)} → ×${((1+.1*((S.prestige||0)+1))*(S.prestigeGift73?1.5:1)).toFixed(2)}.</p><p>${S.prestigeStarterGranted?'Первый стартовый бизнес уже получен.':'При первом престиже — первый бизнес бесплатно, сразу приносит доход.'} Заначка: ${incomeMoney(1000+perk('capital')*10000)} на старте.</p></div>`+prestigeTabDevelopment();
 
 // Transport contracts are signed for a known fee and payout, settled once after travel.
 function transportOffer(){
