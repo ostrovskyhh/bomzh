@@ -49,6 +49,6 @@ revealLoot=function(){
  resultModal({emoji:r.emoji,title:r.title,text,badge:rar?`<span class="rarity ${tier}">${esc(rar.name)}</span>`:'',rays:it?tier:'',btn:'Понятно'});trashAdState80();
  haptic(bad?'error':'success');sfx(bad?'lootBad':'loot');if(['epic','legend'].includes(tier))confetti(60);
 };
-function trashResetHTML80(){return cdLeft('trash')>0?`<section class="trash-reset80"><button class="btn primary wide" data-act="trashAd80" ${adChoice77()?'disabled':''}>🎬 Сбросить таймер за рекламу</button><small>Сбрасывается только текущее ожидание. Общий лимит — 5 рекламных наград в сутки, пауза 10 минут.</small></section>`:'';}
-function trashAdState80(){adsState().then(()=>{const b=document.querySelector('[data-act="trashAd80"]');if(b)b.disabled=adChoice77()||cdLeft('trash')<=0;});}
+function trashResetHTML80(){return cdLeft('trash')>0?`<section class="trash-reset80"><button class="btn primary wide" data-act="trashAd80" ${adChoice77('trash')?'disabled':''}>🎬 Сбросить таймер за рекламу</button><small>Сбрасывается только текущее ожидание. До 5 сбросов в сутки; между наградами 30 секунд, общий предел 25 в сутки.</small>${adStatus81('trash')}</section>`:'';}
+function trashAdState80(){adsState().then(()=>{const b=document.querySelector('[data-act="trashAd80"]');if(b)b.disabled=adChoice77('trash')||cdLeft('trash')<=0;});}
 ACTIONS.trashAd80=async()=>{if(cdLeft('trash')<=0||TRASH_RUN)return;if(!await persistForAds78()){toast('Сначала сохраним таймер на сервере. Попробуй через несколько секунд.');return;}rewardedWatch('trash');};
