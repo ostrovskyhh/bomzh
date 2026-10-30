@@ -637,6 +637,12 @@ function healthDelta() {
 function bottleRate(t = Date.now()) {
   return 0.8 * (1 + 0.3 * Math.sin(t / 420000) + 0.12 * Math.sin(t / 97000 + 1)) * mods().rate;
 }
+// Unit prices need sub-cent precision; normal wallet/payout amounts still use cents.
+function bottleRateLabel(value = bottleRate()) {
+  if (typeof isFrance === 'function' && isFrance()) return (value / EUR_RATE).toLocaleString('ru-RU', {minimumFractionDigits:4,maximumFractionDigits:4}) + ' €';
+  if (typeof isMex === 'function' && isMex()) return '$' + (value / USD_RATE).toLocaleString('ru-RU', {minimumFractionDigits:4,maximumFractionDigits:4});
+  return value.toFixed(2) + ' ₽';
+}
 function capRate() { return Math.round(40 * scale()); }
 const EXCHANGE_FEE = 0.05;
 
@@ -1314,7 +1320,7 @@ function renderExchange() {
   body.innerHTML = `
     <div class="rate-box">
       <div style="font-size:12px;color:var(--muted)">Курс стеклотары (за 30 мин)</div>
-      <div class="rate">🍾 1 = ${rate.toFixed(2)} ₽
+      <div class="rate">🍾 1 = ${bottleRateLabel(rate)}
         <span class="${trend >= 0 ? 'up' : 'down'}">${trend >= 0 ? '▲' : '▼'} ${Math.abs(trend / rate * 100).toFixed(1)}%</span></div>
       ${sparkline()}
     </div>
@@ -2866,7 +2872,7 @@ function updateHud() {
   if (S.mood < 20) notes.push('депрессия');
   else if (S.mood >= 80) notes.push('кураж!');
   $('passive').textContent = `Милостыня: ${fmt(pityPerSec() * 3600)} ₽/ч${notes.length ? ' · ' + notes.join(', ') : ''}`;
-  $('exchangeInfo').textContent = `${bottleRate().toFixed(2)} ₽`;
+  $('exchangeInfo').textContent = bottleRateLabel();
   const tLeft = cdLeft('trash');
   $('trashInfo').textContent = tLeft > 0 ? fmtTime(tLeft) : 'готово!';
   $('trashBtn').classList.toggle('primary', tLeft <= 0 && !S.busy);
