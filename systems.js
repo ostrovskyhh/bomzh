@@ -323,7 +323,7 @@ const BUSINESSES = [
   { id: 'cafe', name: 'Кафе «У Михалыча»', emoji: '☕', price: 600000, level: 15, income: 40000 },
   { id: 'shops', name: 'Сеть магазинов «Валерыч»', emoji: '🏬', price: 3000000, level: 20, income: 200000 },
 ];
-const BIZ_MAX_LVL = 5, BIZ_TAX = 0.1, BIZ_CAP_HOURS = 24;
+const BIZ_MAX_LVL = 5, BIZ_TAX = 0.1, BIZ_CAP_HOURS = 6;
 function bizIncome(b, st) { return businessRates(b, st).operating; }
 function bizCap(b, st) { return bizIncome(b, st) * BIZ_CAP_HOURS * (isVip() ? 2 : 1); }
 function bizUpgradeCost(b, st) { return Math.round(b.price * (.3 + .15 * (st.lvl - 1))); }

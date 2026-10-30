@@ -199,7 +199,7 @@ goDate = function (arg) {
   setCd('date', DATE_CD);
   addXp(XP.date);
   const gm = DATE_GAMES[d.id];
-  runGame({ title: gm.title, hint: gm.hint, duration: gm.duration, setup: gm.setup, scoreLabel: ' ❤️',
+  runGame({ title: gm.title, hint: gm.hint, duration: gm.duration, setup: gm.setup, countdown: 0, scoreLabel: ' ❤️',
     finish: (score) => finishDate(g, d, clamp(score / gm.max, 0, 1)) });
 };
 

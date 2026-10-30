@@ -55,7 +55,7 @@ const MEMORY_TOOLS = ['🔧', '🔨', '🪛', '⚙️'];
 let MG = null;
 let MG_SEQUENCE = 0;
 
-function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
+function runGame({ title, hint, duration, setup, finish, scoreLabel = '', countdown = 3 }) {
   const id = ++MG_SEQUENCE;
   MG = { id, title, score: 0, over: false, timers: [], raf: null, finish };
   if (typeof BugReport !== 'undefined') BugReport.record('minigame-start', { id, title, duration });
@@ -64,22 +64,16 @@ function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
       <div class="mg-time"><div id="mgTime"></div></div>
       <div class="mg-arena" id="mgArena"><div class="mg-count" id="mgCount">3</div></div>
       <p class="mg-hint">${hint}</p></div>`, { center: true, locked: true });
-  let c = 3;
-  sfx('tick');
-  const cd = setInterval(() => {
-    if (!MG || MG.id !== id) { clearInterval(cd); return; }
-    c--;
-    if (c > 0) { $('mgCount').textContent = c; sfx('tick'); return; }
-    clearInterval(cd);
-    $('mgCount').remove();
-    sfx('bell');
+  const begin = () => {
+    if (!MG || MG.id !== id) return;
+    $('mgCount')?.remove();
     MG.start = Date.now();
     try { setup(MG); }
     catch (err) {
       if (typeof BugReport !== 'undefined') BugReport.error('minigame-setup', err, { title });
       throw err;
     }
-    if (duration) {
+    if (duration && MG && MG.id === id) {
       const t = setInterval(() => {
         if (!MG || MG.id !== id || !$('mgTime')) { clearInterval(t); return; }
         const left = 1 - (Date.now() - MG.start) / (duration * 1000);
@@ -89,6 +83,15 @@ function runGame({ title, hint, duration, setup, finish, scoreLabel = '' }) {
       }, 100);
       MG.timers.push(t);
     }
+  };
+  if (countdown === 0) { begin(); return; }
+  let c = 3;
+  sfx('tick');
+  const cd = setInterval(() => {
+    if (!MG || MG.id !== id) { clearInterval(cd); return; }
+    c--;
+    if (c > 0) { $('mgCount').textContent = c; sfx('tick'); return; }
+    clearInterval(cd); sfx('bell'); begin();
   }, 700);
   MG.timers.push(cd);
 }
