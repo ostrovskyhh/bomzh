@@ -1,0 +1,33 @@
+/* City art lives inside existing slots; no extra vertical panels on mobile. */
+.city-art510{display:inline-block;width:100%;height:100%;max-width:100%;vertical-align:middle;pointer-events:none}
+[data-city-decor510]{display:inline-flex;align-items:center;justify-content:center;line-height:1}
+#tabbar [data-city-decor510]{width:34px;height:32px;margin:0 auto 2px}
+.bh-e[data-city-decor510]{width:46px;height:42px;flex:0 0 46px}
+.act-emoji[data-city-decor510]{width:30px;height:28px}
+.business-emblem[data-city-decor510]{overflow:hidden;padding:4px;box-sizing:border-box}
+.city-person510{width:100%;height:100%;display:flex;justify-content:center;overflow:hidden}
+.city-person510 svg{height:100%;width:auto;max-width:100%}
+body.city-it{--city510-accent:#deba7c;--city510-line:#977652;--city510-panel:#2e3029;--city510-motif:radial-gradient(ellipse at 105% 0%,#697b5633,transparent 55%)}
+body.city-cn{--city510-accent:#e0bd76;--city510-line:#4c887a;--city510-panel:#193735;--city510-motif:radial-gradient(ellipse at 100% 0%,#a3434033,transparent 55%)}
+body:is(.city-it,.city-cn) .bh-head{background:var(--city510-motif),var(--city510-panel);border:1px solid var(--city510-line);border-radius:18px;padding:16px}
+body:is(.city-it,.city-cn) .bh-tile{background:var(--city510-motif),var(--city510-panel);border-color:var(--city510-line)}
+body:is(.city-it,.city-cn) .business-emblem{background:var(--city510-motif),var(--city510-panel);border-color:var(--city510-line)}
+body.city-it .w50-town,body.city-it .w50-story{border-color:#aa8560;background:linear-gradient(140deg,#394238,#272b28)}
+body.city-cn .w50-town,body.city-cn .w50-story{border-color:#4d8b7b;background:linear-gradient(135deg,#244e48,#20323a)}
+body.city-it .w50-dialogue{border-left-color:#dca668}
+body.city-cn .w50-dialogue{border-left-color:#b65148}
+#mgArena.w50-arena.it{background:radial-gradient(circle at 0 0,#d3ad6c25,transparent 65%),#303a33!important}
+#mgArena.w50-arena.cn{background:repeating-linear-gradient(45deg,#4773650b 0 2px,transparent 2px 24px),#193b38!important}
+.city-activity510{width:28px;height:26px;margin-right:6px;vertical-align:middle}
+.w50-egg[data-city-decor510]{padding:5px}
+.w50-arena.it .w50-game{border-color:#b69565}
+.w50-arena.cn .w50-game{border-color:#4c8b7e}
+.w50-arena.it .w50-paper{border:2px solid #bd9b6b;border-radius:4px;background:#f0dfb9;color:#493e32}
+.w50-arena.cn .w50-paper{border:4px double #b45446;border-radius:0;background:#d9cea8;color:#294a44}
+.w50-arena.cn .w50-circuit .lit{background:#b14d44;border-color:#e0bc72;color:#fff2c8}
+.w50-arena.it .w50-circuit .lit{background:#568d83;border-color:#d6b881}
+.w50-order .city-art510{width:40px;height:36px}
+.w50-inputs button:has(.city-art510){min-height:64px;min-width:52px;padding:5px}
+.w50-inputs button>.city-art510{width:54px;height:46px}
+.w50-parcel strong>.city-art510{width:62px;height:52px}
+@media(max-width:380px){.bh-e[data-city-decor510]{width:38px;flex-basis:38px}.w50-inputs button>.city-art510{width:43px;height:40px}.w50-inputs button:has(.city-art510){min-width:44px}}
