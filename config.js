@@ -5,9 +5,10 @@
 // 4.3: свой HTTPS на VPS (Caddy + sslip.io) вместо ngrok — у бесплатного ngrok кончался месячный лимит запросов
 const REF_API = 'https://178-236-248-87.sslip.io';
 
-// Both HTTPS names terminate at the same Caddy/API process and SQLite database.
-const API_GATEWAYS504=Object.freeze([REF_API,'https://178-236-248-87.nip.io']);
-let API_GATEWAY504=new URLSearchParams(location.search).get('gateway')==='backup'?1:0;
+// Standard gateways share one API/SQLite. The temporary relay is opt-in support only.
+const API_GATEWAYS504=Object.freeze([REF_API,'https://178-236-248-87.nip.io','https://girls-punk-friendly-savannah.trycloudflare.com']);
+const API_SUPPORT505=new URLSearchParams(location.search).get('gateway')==='support';
+let API_GATEWAY504=API_SUPPORT505?2:new URLSearchParams(location.search).get('gateway')==='backup'?1:0;
 function apiGatewayUrl504(url,index=API_GATEWAY504){
  const parsed=new URL(url,location.href);
  if(!API_GATEWAYS504.includes(parsed.origin)||!parsed.pathname.startsWith('/api/'))return null;
@@ -15,7 +16,7 @@ function apiGatewayUrl504(url,index=API_GATEWAY504){
 }
 async function apiFetch504(url,options={}){
  if(!apiGatewayUrl504(url))return fetch(url,options);
- const order=[API_GATEWAY504,1-API_GATEWAY504];let lastError,lastResponse;
+ const available=API_SUPPORT505?[0,1,2]:[0,1],order=[API_GATEWAY504,...available.filter(i=>i!==API_GATEWAY504)];let lastError,lastResponse;
  for(const index of order){
   if(options.signal?.aborted)throw new DOMException('Request aborted','AbortError');
   const control=new AbortController(),abort=()=>control.abort();
@@ -23,10 +24,10 @@ async function apiFetch504(url,options={}){
   const timer=setTimeout(abort,index===order[0]?4000:9000);
   try{
    const response=await fetch(apiGatewayUrl504(url,index),{...options,signal:control.signal});
-   if(response.status>=500){lastResponse=response;API_GATEWAY504=1-index;continue;}
+   if(response.status>=500){lastResponse=response;API_GATEWAY504=order[(order.indexOf(index)+1)%order.length];continue;}
    // Auth failures and rate limits must be returned, never bypassed through another name.
    API_GATEWAY504=index;return response;
-  }catch(e){lastError=e;if(options.signal?.aborted)throw e;API_GATEWAY504=1-index;}
+  }catch(e){lastError=e;if(options.signal?.aborted)throw e;API_GATEWAY504=order[(order.indexOf(index)+1)%order.length];}
   finally{clearTimeout(timer);options.signal?.removeEventListener('abort',abort);}
  }
  if(lastResponse)return lastResponse;
