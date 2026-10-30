@@ -310,6 +310,7 @@ function dnStyleTab() {
       : c.kind === 'avatar' ? `<div class="avatar emoji-ava" style="background:${avaBg(cosmAva(c))}">${c.face}</div>` : `<span>${c.emoji}</span>`;
     const btn = own ? `<button class="btn small ${on ? '' : 'green'}" data-act="cosmUse" data-id="${c.id}">${on ? 'Надето' : 'Надеть'}</button>`
       : c.src === 'case' ? `<small class="cosm-src r-${c.r}">🎰 ${RAR_NAME[c.r]} · кейс</small>`
+      : c.src === 'reward' ? '<small class="cosm-src">🎃 Награда сезонной истории</small>'
       : c.src === 'bundle' ? '<small class="cosm-src">🎁 в наборе</small>'
       : `<button class="btn primary small" data-act="cosmBuy" data-id="${c.id}" ${S.caps >= cosmPrice(c) ? '' : `data-why="Нужно ${cosmPrice(c)} 🟡"`}>${deal ? `<s>${c.caps}</s> ` : ''}🟡 ${cosmPrice(c)}</button>`;
     return `<div class="cosm ${own ? 'own' : ''} ${on ? 'on' : ''} ${deal && !own ? 'deal' : ''}">${deal && !own ? '<i class="cosm-deal">−40%</i>' : ''}${preview}<b>${c.name}</b>${btn}</div>`;

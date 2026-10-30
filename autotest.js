@@ -324,8 +324,8 @@
       check('мексика: 6 своих криминальных дел', CRIMES.length === 6 && CRIMES.every((c) => c.id.startsWith('x_')), CRIMES.map((c) => c.id).join());
       check('мексика: сюжет про картель и бандитов', ['x_bandits', 'x_scorpions', 'x_kidnap', 'x_plaza', 'x_jefe'].every((id) => questList().some((q) => q.id === id)), questList().length);
       check('мексика: свои игры свиданий и зала', DATE_GAMES.walk.title === 'Переулок поцелуев · Callejón del Beso' && GYM_GAMES.power.title === 'Камень ацтеков');
-      await allGames('fr');
-      check('франция: четвёртый город с отдельным сюжетом и криминалом', CITIES.fr.idx===3&&questList().length===15&&CRIMES.length===5&&CRIMES.every(c=>c.id.startsWith('f_'))&&JOBS.every(j=>FR_JOBS[j.id]));
+      await allGames('fr'); story30Migrate();
+      check('франция: четвёртый город с отдельным сюжетом и криминалом', CITIES.fr.idx===3&&questList().length===30&&CRIMES.length===5&&CRIMES.every(c=>c.id.startsWith('f_'))&&JOBS.every(j=>FR_JOBS[j.id]));
       S.city = 'zas'; applyCity('zas');
       check('мексика: в Засранске свои игры вернулись', CRIMES[0].id === 'pocket' && !DATE_GAMES.walk.title.includes('Callejón del Beso') && GYM_GAMES.power.title !== 'Камень ацтеков', `${CRIMES[0].id} ${DATE_GAMES.walk.title}`);
     } catch (e) { check('мексика: ошибка теста', false, e.message); }
