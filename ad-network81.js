@@ -3,17 +3,22 @@ const AD_TERMS81={caps:[5,600],energy:[5,300],skill:[6,0],business:[4,0],mission
 function adQuota81(purpose='caps'){const d=REWARDED_ADS.data;if(!d)return null;return d.byPurpose?.[purpose]||{limit:d.limit,used:d.used,remaining:d.remaining,nextAt:d.nextAt};}
 adChoice77=function(purpose='caps'){const d=REWARDED_ADS.data,q=adQuota81(purpose);return REWARDED_ADS.busy||!onlineOn()||!d?.enabled||!d.remaining||!q?.remaining||!!d.pending||adsNow()<Math.max(d.nextAt||0,q.nextAt||0);};
 function adText81(purpose='caps'){
- const d=REWARDED_ADS.data,q=adQuota81(purpose);if(!onlineOn())return 'Открой игру в Telegram и подключись к интернету.';if(!d)return 'Проверяем доступность рекламы…';if(!d.enabled)return 'Реклама пока недоступна.';
+ const d=REWARDED_ADS.data,q=adQuota81(purpose);if(!onlineOn())return 'Открой игру в Telegram и подключись к интернету.';if(REWARDED_ADS.stateError)return 'Не удалось проверить рекламу. Проверь подключение и повтори проверку.';if(!d)return 'Проверяем доступность рекламы…';if(!d.enabled)return 'Реклама пока недоступна.';
  if(d.pending)return 'Есть незавершённая проверка просмотра. Повторный запуск пока недоступен.';
  if(!d.remaining)return 'Общий дневной лимит рекламных наград исчерпан.';
  if(!q?.remaining)return 'Дневной лимит этой награды исчерпан. Другие виды наград могут оставаться доступны.';
  const left=Math.ceil((Math.max(d.nextAt||0,q.nextAt||0)-adsNow())/1000);
  return `Сегодня: ${q.used}/${q.limit} · всего: ${d.used}/${d.limit}`+(left>0?` · ожидание ${fmtTime(left)}`:'');
 }
-function adStatus81(purpose){return `<small class="ad-status81" data-ad-purpose="${purpose}">${esc(adText81(purpose))}</small>`;}
-adsHTML=function(){const d=REWARDED_ADS.data,q=adQuota81('caps');return `<section class="rewarded-ads" aria-label="${adsText('Реклама за крышки')}"><div class="ad-reward-heading"><span>🎬</span><div><b>Реклама за крышки</b><small>3 крышки за подтверждённую рекламу · до 5 раз в сутки</small></div></div>${adStatus81('caps')}<div class="ad-reward-count"><span>${adsText('Получено сегодня:')} ${q?.used||0} / ${q?.limit||5}</span><span>${adsText('До')} 15 🟡 ${adsText('в сутки')}</span></div><button class="btn primary wide" data-act="rewardedWatch" ${adChoice77('caps')?'disabled':''}>${REWARDED_ADS.busy?'Проверяем просмотр…':'Смотреть рекламу · +3 крышки'}</button><small>Крышки: 5 наград в сутки, пауза 10 минут. Другие награды имеют отдельные лимиты. Между любыми наградами — 30 секунд, общий предел — 25 в сутки.</small><small>Один просмотр даёт только выбранную награду. Ошибка, пропуск и отсутствие рекламы не расходуют лимит. Новый день — в 00:00 по Москве.</small>${d?.pending?'<button class="btn wide" data-act="rewardedCheck">Проверить награду</button>':''}</section>`;};
+function adStatus81(purpose){return `<small class="ad-status81" data-ad-purpose="${purpose}">${esc(adText81(purpose))}</small><button class="btn wide" data-act="rewardedRecover84" data-ad-recovery84 ${!REWARDED_ADS.data?.pending&&!REWARDED_ADS.stateError&&!REWARDED_ADS.recoverBenefit84?'hidden':''}>Проверить незавершённый просмотр</button>`;}
+function adReason84(reason,purpose){
+ if(['cooldown','limit','purpose_limit','pending','unavailable'].includes(reason))return adText81(purpose);
+ return ({unclaimed:'Предыдущая награда ждёт получения. Нажми «Проверить награду».',skill_unavailable:'Навык уже действует, ещё восстанавливается или требует другого уровня.',business_unavailable:'Проверь, что бизнес куплен, а предыдущее усиление уже закончилось.',mission_unavailable:'Дополнительная награда миссии уже получена или срок предложения закончился.',trash_ready:'Таймер мусорки уже закончился. Можно искать без рекламы.',invalid:'Не удалось подготовить эту награду. Закрой окно и открой снова.'})[reason]||'Не удалось подготовить награду. Проверь подключение и повтори попытку.';
+}
+adsHTML=function(){const d=REWARDED_ADS.data,q=adQuota81('caps');return `<section class="rewarded-ads" aria-label="${adsText('Реклама за крышки')}"><div class="ad-reward-heading"><span>🎬</span><div><b>Реклама за крышки</b><small>3 крышки за подтверждённую рекламу · до 5 раз в сутки</small></div></div>${adStatus81('caps')}<div class="ad-reward-count"><span>${adsText('Получено сегодня:')} ${q?.used||0} / ${q?.limit||5}</span><span>${adsText('До')} 15 🟡 ${adsText('в сутки')}</span></div><button class="btn primary wide" data-act="rewardedWatch" ${adChoice77('caps')?'disabled':''}>${REWARDED_ADS.busy?'Проверяем просмотр…':'Смотреть рекламу · +3 крышки'}</button><small>Крышки: 5 наград в сутки, пауза 10 минут. Другие награды имеют отдельные лимиты. Между любыми наградами — 30 секунд, общий предел — 25 в сутки.</small><small>Один просмотр даёт только выбранную награду. Ошибка, пропуск и отсутствие рекламы не расходуют лимит. Новый день — в 00:00 по Москве.</small></section>`;};
 function adsRefreshContext81(){
  for(const el of document.querySelectorAll('[data-ad-purpose]')){const text=adText81(el.dataset.adPurpose);if(el.textContent!==text){el.textContent=text;if(typeof I18N!=='undefined')I18N.apply(el);}}
+ for(const b of document.querySelectorAll('[data-ad-recovery84]')){b.hidden=!(REWARDED_ADS.data?.pending||REWARDED_ADS.stateError||REWARDED_ADS.recoverBenefit84);b.disabled=REWARDED_ADS.busy;const text=REWARDED_ADS.stateError?'Повторить проверку рекламы':REWARDED_ADS.recoverBenefit84?'Проверить награду':'Проверить незавершённый просмотр';if((typeof I18N==='undefined'?b.textContent:I18N.originalText(b))!==text){b.textContent=text;if(typeof I18N!=='undefined')I18N.apply(b);}}
  const purposes={rewardedWatch:'caps',adEnergy77:'energy',adSkill77:'skill',businessAd78:'business',missionAd78:'mission',trashAd80:'trash'};
  for(const [act,p] of Object.entries(purposes))for(const b of document.querySelectorAll(`[data-act="${act}"]`)){
   let disabled=!!adChoice77(p);if(p==='energy')disabled||=S.energy>=maxEnergy();if(p==='business')disabled||=!businessOwnedCount()||businessBoost78();if(p==='trash')disabled||=cdLeft('trash')<=0||!!TRASH_RUN;
@@ -45,8 +50,8 @@ rewardedWatch=async function(purpose='caps',skill=''){
  if(!adsCanWatch(purpose)){toast('Сначала закончи текущее дело или дождись подключения.');return;}
  REWARDED_ADS.busy=true;adsRefresh();adsRefreshContext81();let attempt='',provider='adsgram',completed=false;
  try{
-  await adsState();const d=REWARDED_ADS.data,q=adQuota81(purpose);if(!d?.enabled||!d.remaining||!q?.remaining||d.pending||adsNow()<Math.max(d.nextAt||0,q.nextAt||0))return;
-  const begin=await apiPost('ads/begin',{purpose,skill});adsAccept(begin);if(!begin.ok){toast('Эта награда пока недоступна. Проверь условия и оставшиеся просмотры.');return;}attempt=begin.attempt;provider=begin.provider||'adsgram';let config=begin.providerData,result;
+  const d=await adsState(),q=adQuota81(purpose);if(!d){toast('Не удалось проверить рекламу. Проверь подключение и повтори проверку.');return;}if(!d.enabled||!d.remaining||!q?.remaining||d.pending||adsNow()<Math.max(d.nextAt||0,q.nextAt||0)){toast(adText81(purpose));return;}
+  const begin=await apiPost('ads/begin',{purpose,skill});adsAccept(begin);if(!begin.ok){REWARDED_ADS.recoverBenefit84=begin.reason==='unclaimed';if(typeof BugReport!=='undefined')BugReport.record('ad-eligibility',{purpose,reason:Object.prototype.hasOwnProperty.call(AD_TERMS81,purpose)?String(begin.reason||'unknown').replace(/[^a-z_]/g,'').slice(0,30):'invalid'});toast(adReason84(begin.reason,purpose));return;}attempt=begin.attempt;provider=begin.provider||'adsgram';let config=begin.providerData,result;
   if(provider==='adsgram'){
    let phase='sdk';try{const c=await adsSDK();phase='show';result=await adsShow83(c);}
    catch(error){
@@ -63,7 +68,21 @@ rewardedWatch=async function(purpose='caps',skill=''){
   if(finish.rewarded){try{sessionStorage.removeItem('adCompleted');}catch(_){}await adsReward(finish);}
   else if(completed){toast('Ждём подтверждение рекламной платформы. Награда придёт после проверки.');for(let i=0;i<6;i++){await wait(2000);if((await adsCheck(attempt))?.rewarded)break;}}
   else toast('Рекламная платформа не подтвердила награду. Лимит не потрачен.');
- }catch(error){adsDiagnostic83(provider,'failed',error);if(attempt&&!completed)try{adsAccept(await apiPost('ads/finish',{attempt,provider,completed:false}));}catch(_){}toast(completed?'Просмотр завершён. Проверь награду после восстановления связи.':error?.adSkipped83?'Просмотр закрыт. Дневной лимит не потрачен.':'Не удалось загрузить рекламу. Попробуй позже. Дневной лимит не потрачен.');}
+ }catch(error){adsDiagnostic83(provider,'failed',error);if(attempt&&!completed)try{adsAccept(await apiPost('ads/finish',{attempt,provider,completed:false}));}catch(_){}toast(completed?'Просмотр завершён. Проверь награду после восстановления связи.':error?.adSkipped83?'Просмотр закрыт. Дневной лимит не потрачен.':'Ролик не загрузился. Можно повторить попытку — дневной лимит сохранён.');}
  finally{REWARDED_ADS.busy=false;await adsState();adsRefresh();adsRefreshContext81();}
 };
 ACTIONS.rewardedWatch=()=>rewardedWatch('caps','');
+ACTIONS.rewardedRecover84=async()=>{
+ if(REWARDED_ADS.busy||!onlineOn())return;REWARDED_ADS.busy=true;adsRefresh();adsRefreshContext81();
+ try{
+  if(!await adsState()){toast('Не удалось проверить рекламу. Проверь подключение и повтори проверку.');return;}
+  const pending=REWARDED_ADS.data?.pending;
+  if(pending){let completed=!!pending.finished;try{completed||=sessionStorage.getItem('adCompleted')===pending.id;}catch(_){}
+   const checked=await adsCheck(pending.id);if(checked?.rewarded)return;
+   if(completed||REWARDED_ADS.data?.pending?.finished){toast('Ждём подтверждение рекламной платформы. Награда придёт после проверки.');return;}
+   if(REWARDED_ADS.data?.pending?.id===pending.id){const closed=await apiPost('ads/finish',{attempt:pending.id,completed:false,provider:pending.provider});adsAccept(closed);if(closed.rewarded){await adsReward(closed);return;}toast('Незавершённая попытка закрыта. Можно запустить рекламу снова.');}
+  }
+  if(REWARDED_ADS.recoverBenefit84){await adsBenefits77();if(!await persistForAds78()){toast('Не удалось сохранить прогресс. Проверь подключение и повтори попытку.');return;}REWARDED_ADS.recoverBenefit84=false;}
+ }catch(_){toast('Не удалось проверить рекламу. Проверь подключение и повтори проверку.');}
+ finally{REWARDED_ADS.busy=false;await adsState();adsRefresh();adsRefreshContext81();}
+};

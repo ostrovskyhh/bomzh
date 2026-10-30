@@ -10,7 +10,7 @@ function adsHTML(){
 }
 function adsRefresh(){const el=document.querySelector('.rewarded-ads');if(el){el.outerHTML=adsHTML();if(typeof I18N!=='undefined')I18N.apply(document.querySelector('.rewarded-ads'));}}
 function adsAccept(data){if(data?.blockId){REWARDED_ADS.data=data;REWARDED_ADS.sync=data.serverNow-Date.now();adsRefresh();}}
-async function adsState(){if(!onlineOn())return;try{adsAccept(await apiPost('ads/state'));}catch(e){/* Placement remains disabled until server state is known. */}}
+async function adsState(){if(!onlineOn())return null;try{const data=await apiPost('ads/state');REWARDED_ADS.stateError=false;adsAccept(data);return data;}catch(e){REWARDED_ADS.stateError=true;return null;}}
 function adsSDK(){
   if(REWARDED_ADS.controller)return Promise.resolve(REWARDED_ADS.controller);
   if(REWARDED_ADS.loading)return REWARDED_ADS.loading;

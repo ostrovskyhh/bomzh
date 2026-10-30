@@ -21,7 +21,7 @@ EXTRA_TABS.life.skills=()=>{
   return t.innerHTML;
 };
 const showBefore77=showScreen;showScreen=function(name,tab){showBefore77(name,tab);if(name==='life'&&(tab||TABS.life)==='skills')adsState().then(()=>{if(currentScreen==='life'&&TABS.life==='skills')renderCurrent(false);});};
-ACTIONS.adSkill77=id=>{const t=TRICKS.find(t=>t.id===id);if(!t||level()<t.level||hasEffect(id)||cdLeft(id)>0)return;save(true);rewardedWatch('skill',id);};
+ACTIONS.adSkill77=async id=>{const t=TRICKS.find(t=>t.id===id);if(!t||level()<t.level||hasEffect(id)||cdLeft(id)>0)return;if(!await persistForAds78()){toast('Не удалось сохранить прогресс. Проверь подключение и повтори попытку.');return;}return rewardedWatch('skill',id);};
 ACTIONS.adEnergy77=()=>{if(S.energy>=maxEnergy()){toast('Энергия уже полная.');return;}rewardedWatch('energy');};
 energyOffer=function(){
   energyOfferedAt=Date.now();adsState();const coffee=FOOD.find(f=>f.id==='coffee');
