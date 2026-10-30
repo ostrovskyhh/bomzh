@@ -8,7 +8,7 @@ function businessSync(){
   if(businessClock.pending)return businessClock.pending;
   businessClock.pending=(async()=>{
     try{
-      const r=await apiFetch504(`${REF_API}/api/health`,{cache:'no-store',headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.timeout(8000)});
+      const r=await apiFetch504(`${REF_API}/api/health`,{cache:'no-store',headers:{'ngrok-skip-browser-warning':'1'},signal:AbortSignal.timeout(15000)});
       if(!r.ok)return;const data=await r.json();
       if(data.ok&&Number.isFinite(data.now)&&data.now>0){businessClock.epoch=data.now;businessClock.mono=businessMono();businessTick();if(typeof incomeRefresh==='function')incomeRefresh();}
     }catch(e){/* Keep the session's monotonic anchor; retry without trusting device time. */}

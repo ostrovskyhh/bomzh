@@ -20,7 +20,7 @@ async function apiFetch504(url,options={}){
   if(options.signal?.aborted)throw new DOMException('Request aborted','AbortError');
   const control=new AbortController(),abort=()=>control.abort();
   options.signal?.addEventListener('abort',abort,{once:true});
-  const timer=setTimeout(abort,4000);
+  const timer=setTimeout(abort,index===order[0]?4000:9000);
   try{
    const response=await fetch(apiGatewayUrl504(url,index),{...options,signal:control.signal});
    if(response.status>=500){lastResponse=response;API_GATEWAY504=1-index;continue;}
