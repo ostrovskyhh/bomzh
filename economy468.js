@@ -7,7 +7,7 @@ for(const table of [FOOD,MEDS,HOUSING,EDU,TRANSPORT,LEISURE,DATES,GIFTS,WEDDINGS
 for(const list of Object.values(CLOTHES))rememberCityPrices(list);
 rememberCityPrices(STAFF,['price','salary']);rememberCityPrices(Object.values(PET_SICK));rememberCityPrices(TRANSPORT.map(t=>t.garage).filter(Boolean));
 const CITY_RING_BASE_468={...RING_OF},CITY_ALLOW_BASE_468={...ALLOW_OF};
-function cityPrices468(){const k=CITY_PRICE_FACTOR();for(const row of CITY_PRICE_BASE_468)row.item[row.field]=row.value===0?0:Math.max(1,Math.round(row.value*k));
+function cityPrices468(){const k=CITY_PRICE_FACTOR();for(const row of CITY_PRICE_BASE_468)row.item[row.field]=(row.value===0?0:Math.max(1,Math.round(row.value*k)))*(row.afterRounding||1);
  GIRLS.forEach((g,i)=>{RINGS[i]=Math.round((CITY_RING_BASE_468[g.id]||10000)*k);ALLOWANCE[i]=Math.round((CITY_ALLOW_BASE_468[g.id]||1000)*k);});}
 const cityPriceApplyBefore=applyCity;applyCity=function(...args){const out=cityPriceApplyBefore.apply(this,args);cityPrices468();return out;};
 HOOKS.load.push(cityPrices468);

@@ -1,5 +1,5 @@
 // Sleep, retail and optional ad rewards. Purchased skill levels stay intact.
-for(const row of CITY_PRICE_BASE_468)if(row.item.id==='coffee'&&row.field==='price')row.value*=2;
+for(const row of CITY_PRICE_BASE_468)if(row.item.id==='coffee'&&row.field==='price'){row.value*=2;row.afterRounding=2;}
 cityPrices468();
 const canPayBefore77=shopCanPay,payBefore77=shopPay;
 shopCanPay=(item,n=1)=>item?.id==='energetik'?Number.isSafeInteger(n)&&n>0&&S.caps>=3*n:canPayBefore77(item,n);

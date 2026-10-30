@@ -20,6 +20,7 @@ async function persistForAds78(){
 ACTIONS.missionAd78=async key=>{const offer=missionOffers78()[key];if(!offer||offer.claimed)return;if(!await persistForAds78()){toast('Сначала сохраним миссию на сервере. Попробуй через несколько секунд.');return;}rewardedWatch('mission',key);};
 ACTIONS.businessAd78=async()=>{if(businessBoost78()||!businessOwnedCount())return;if(!await persistForAds78()){toast('Сначала сохраним бизнесы на сервере. Попробуй через несколько секунд.');return;}rewardedWatch('business');};
 function applyAdBenefit78(r){
+ if(r.purpose==='trash'){if(Number(r.payload?.trashUntil)===Number(S.cd.trash)){S.cd.trash=0;if(document.querySelector('[data-act="trashAd80"]'))closeModal();}return true;}
  if(r.purpose==='business'){
   const now=businessNow();if(now===null||r.until_at<=now)return false;
   businessTick();managedTick(now,true);S.businessBoostUntil78=Math.max(S.businessBoostUntil78||0,r.until_at);

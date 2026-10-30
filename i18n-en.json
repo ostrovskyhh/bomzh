@@ -36027,5 +36027,18 @@
   "Активация навыка стоит 10 крышек. Добровольный просмотр рекламы остаётся альтернативой. Длительность действия и уже купленные уровни сохранены.": "Activating a skill costs 10 caps. Watching an optional ad remains an alternative. Effect duration and purchased skill levels are kept.",
   "Навык активирован за 10 крышек": "Skill activated for 10 caps",
   "Активировать · 10 🟡": "Activate · 10 🟡",
-  "Активация — полный просмотр рекламы или 10 крышек. Действие всех навыков увеличено вдвое: прежние 20 минут стали 40. Уже купленные уровни и их бонусы сохранены; постоянные улучшения по-прежнему покупаются за деньги.": "Activation requires a full ad view or 10 caps. All skill durations are doubled: the previous 20 minutes are now 40. Purchased levels and bonuses are kept; permanent upgrades still cost money."
+  "Активация — полный просмотр рекламы или 10 крышек. Действие всех навыков увеличено вдвое: прежние 20 минут стали 40. Уже купленные уровни и их бонусы сохранены; постоянные улучшения по-прежнему покупаются за деньги.": "Activation requires a full ad view or 10 caps. All skill durations are doubled: the previous 20 minutes are now 40. Purchased levels and bonuses are kept; permanent upgrades still cost money.",
+  "Кофе и находки в мусорке": "Coffee and dumpster finds",
+  "☕ Текущая цена кофе удвоена во всех городах": "☕ The current coffee price is doubled in every city",
+  "Текущая цена кофе удвоена во всех городах.": "The current coffee price is doubled in every city.",
+  "🗑️ Шанс вещи за 500 000–1 000 000 ₽ — 3,5% за попытку, дороже 1 000 000 ₽ — 2,5%. Пустые попытки и урон сохраняются": "🗑️ Items worth 500 000–1 000 000 ₽ have a 3,5% chance per search; items above 1 000 000 ₽ have a 2,5% chance. Empty searches and damage remain",
+  "🗑️ Шанс предмета стоимостью 500 000–1 000 000 ₽ — 3,5% за попытку, дороже 1 000 000 ₽ — 2,5%. Пустые попытки и урон сохраняются.": "🗑️ Items worth 500 000–1 000 000 ₽ have a 3,5% chance per search; items above 1 000 000 ₽ have a 2,5% chance. Empty searches and damage remain.",
+  "🎬 Текущее ожидание мусорки можно сбросить за подтверждённый просмотр рекламы": "🎬 Reset the current dumpster cooldown with a confirmed ad view",
+  "🎬 Текущее ожидание мусорки можно сбросить за подтверждённый просмотр рекламы.": "🎬 Reset the current dumpster cooldown with a confirmed ad view.",
+  "Пусто — 30% · урон — 20% · предмет дешевле 500 000 ₽ — 44% · от 500 000 до 1 000 000 ₽ включительно — 3,5% · дороже 1 000 000 ₽ — 2,5%.": "Empty — 30% · damage — 20% · an item under 500 000 ₽ — 44% · from 500 000 to 1 000 000 ₽ inclusive — 3,5% · above 1 000 000 ₽ — 2,5%.",
+  "Шансы считаются за одну попытку по окончательной цене предмета в рублях, с учётом качества. Уровень, город и VIP не меняют шансы. Вещи обычных кейсов хранятся на барахолке; эксклюзивы за Stars остаются в донатных кейсах.": "Chances apply per search to the final item value in rubles, including quality. Level, city and VIP do not change these chances. Regular case items go to the flea market; Stars exclusives stay in paid cases.",
+  "🎬 Сбросить таймер за рекламу": "🎬 Reset cooldown with an ad",
+  "Сбрасывается только текущее ожидание. Общий лимит — 5 рекламных наград в сутки, пауза 10 минут.": "Only the current cooldown is reset. All ad rewards share a limit of 5 per day and a 10 minute cooldown.",
+  "Сначала сохраним таймер на сервере. Попробуй через несколько секунд.": "Saving the cooldown to the server first. Try again in a few seconds.",
+  "Крышки, энергия, навыки, бизнесы, миссии и мусорка используют общий лимит — 5 наград в сутки. Один просмотр даёт только выбранную награду, без дополнительных крышек.": "Caps, energy, skills, businesses, missions and dumpster resets share a limit of 5 ad rewards per day. One view grants only the selected reward, without extra caps."
 }
