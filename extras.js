@@ -451,6 +451,7 @@ EXTRA_TABS.life.skills = () => `<div class="info-card">Навыки работа
 Object.assign(ACTIONS, {
   trick: (id) => {
     const t = TRICKS.find((x) => x.id === id);
+    if (!t) return;
     const price = trickPrice(t);
     if (level() < t.level || S.money < price || cdLeft(id) > 0 || hasEffect(id)) return;
     S.money -= price;
@@ -463,6 +464,7 @@ Object.assign(ACTIONS, {
   },
   trickUp: (id) => {
     const t = TRICKS.find((x) => x.id === id);
+    if (!t) return;
     const price = trickUpPrice(t);
     if (level() < t.level || trickLvl(id) >= TRICK_MAX || S.money < price) return;
     S.money -= price;

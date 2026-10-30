@@ -511,7 +511,7 @@ EXTRA_TABS.shop.housing = () => {
     const lvlOk = level() >= h.level;
     const owned = i <= S.ownedHousing;
     let btn = '';
-    if (here) btn = `<button class="btn" disabled>${S.housingMode === 'rent' ? 'Снимаю' : 'Живу тут'}</button>`;
+    if (here) btn = S.housingMode === 'rent' && !owned ? priceBtn('house',i,h.price,S.money>=h.price,`Выкупить ${fmt(h.price)} ₽`) : '<button class="btn" disabled>Живу тут</button>';
     else if (owned) btn = `<button class="btn green" data-act="moveHouse" data-id="${i}">Переехать</button>`;
     else if (!lvlOk) btn = lockBtn;
     else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)} ₽`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, `Снять ${fmt(h.rent)}/мес`) : ''}</div>`;
@@ -524,8 +524,8 @@ EXTRA_TABS.shop.housing = () => {
 Object.assign(ACTIONS, {
   house: (id) => {
     const i = +id, h = HOUSING[i];
-    if (i <= S.ownedHousing || S.money < h.price || level() < h.level) return;
-    S.money -= h.price;
+    if (!h || i <= S.ownedHousing || !purchaseAllowed72('home',i) || !shopCanPay(h) || level() < h.level) return;
+    if (!shopPay(h)) return;
     S.housing = i;
     S.energy = maxEnergy();
     S.housingMode = 'own';
@@ -543,7 +543,7 @@ Object.assign(ACTIONS, {
   },
   rentHouse: (id) => {
     const i = +id, h = HOUSING[i];
-    if (!h.rent || S.money < h.rent || level() < h.level || i === S.housing) return;
+    if (!h || !purchaseAllowed72('home',i) || !h.rent || S.money < h.rent || level() < h.level || i === S.housing) return;
     S.money -= h.rent;
     S.housing = i;
     S.housingMode = 'rent';
@@ -633,7 +633,7 @@ function prestigeProfile() {
     'caps', 'vipUntil', 'boostUntil', 'autopayUntil', 'vipTrial', 'xpCapsUntil', 'xpStarsUntil', 'helpVerified', 'bjWalletRev', 'bjInRound', 'bjTable', 'bjSeenRounds', 'bjEarningsSeen',
     'cosm', 'bottleSkin', 'dkeys', 'cases', 'starterBought', 'starterOffered', 'startAt',
     'pass', 'passFrame', 'frame', 'avatar', 'aura', 'tapFx', 'avatarsSeen',
-    'ach', 'achNotified', 'achProgress', 'coll', 'counters', 'stats', 'casinoStats',
+    'ach', 'achNotified', 'achProgress', 'achRewards72', 'crimeSaleCities72', 'trickLvl', 'coll', 'counters', 'stats', 'casinoStats',
     'settings', 'name', 'log', 'play', 'daily', 'tasks', 'weekly', 'seasonCur',
     'pets', 'pet', 'petBond', 'petNames', 'petPantry', 'petFood', 'petFedAt',
     'petHp', 'petHpAt', 'petSick', 'petCd', 'petPetAt', 'petFindAt', 'petFind2At', 'petFind3At', 'shelter',
@@ -769,12 +769,12 @@ HOOKS.tick.push(() => {
 
 EXTRA_TABS.tasks.ach = () => {
   const done = ACHS.reduce((s, a) => s + achTier(a), 0), total = ACHS.reduce((s, a) => s + a.goals.length, 0);
-  return `<div class="info-card">Открыто <b>${done} из ${total}</b> уровней достижений. Награда растёт с уровнем: ${ACH_REWARDS.join(' → ')} крышек.</div>` +
+  return `<div class="info-card">Открыто <b>${done} из ${total}</b> уровней достижений. У каждого достижения своя награда: крышки, опыт, бутылки или косметика. Награда указана в карточке.</div>` +
     ACHS.map((a) => {
       const t = achTier(a), v = achValue(a), max = t >= a.goals.length;
       const goal = a.goals[Math.min(t, a.goals.length - 1)];
       return card({ thumb: a.emoji, title: `${a.name} ${max ? '✓' : ACH_TIERS[t]}`, cls: max ? 'current' : '',
-        desc: max ? `Все уровни открыты · ${fmt(v)} ${a.unit}` : `${fmt(Math.min(v, goal))} / ${fmt(goal)} ${a.unit} · награда ${ACH_REWARDS[t]} кр.`,
+        desc: max ? `Все уровни открыты · ${fmt(v)} ${a.unit}` : `${fmt(Math.min(v, goal))} / ${fmt(goal)} ${a.unit} · ${a.rewards72 ? achRewardLabel72(a.rewards72[t]) : `награда ${ACH_REWARDS[t]} кр.`}`,
         extra: `<div class="lvl-pips">${a.goals.map((_, i) => `<i class="${i < t ? 'on' : ''}"></i>`).join('')}</div>${max ? '' : `<div class="progress"><div style="width:${Math.min(1, v / goal) * 100}%"></div></div>`}`,
         btn: achReady(a) ? `<button class="btn green" data-act="achClaim" data-id="${a.id}">Забрать</button>` : '' });
     }).join('');
@@ -782,7 +782,7 @@ EXTRA_TABS.tasks.ach = () => {
 
 ACTIONS.achClaim = (id, btn) => {
   const a = ACHS.find((x) => x.id === id);
-  if (!achReady(a)) return;
+  if (!a || !achReady(a)) return;
   const t = achTier(a);
   S.ach[id] = t + 1;
   addCaps(ACH_REWARDS[t]);

@@ -92,11 +92,15 @@ function caught(c, perf) { return Math.random() < clamp(c.risk + (S.wanted || 0)
 
 function doCrime(id) {
   const c = CRIMES.find((x) => x.id === id);
+  if (!c) return;
   const why = crimeCan(c);
   if (why) { toast(why, 'bad'); return; }
   S.energy -= c.energy;
   setCd('crime_' + c.id, c.cd);
+  const origin = city(); let settled = false;
   runGame({ title: `${c.emoji} ${c.game.title}`, hint: c.game.hint, duration: c.game.duration, setup: c.game.setup, finish: (score, mg) => {
+    if (settled || city() !== origin) return;
+    settled = true;
     const perf = clamp(score / c.game.max - (mg.mistakes || 0) * 0.05, 0, 1.2);
     const loot = c.quantityReward || perf > 0.15 ? c.reward(perf, mg) : 0;
     S.wanted = Math.min(WANTED_MAX, (S.wanted || 0) + c.wanted);
@@ -104,11 +108,11 @@ function doCrime(id) {
     track('crime');
     if (caught(c, perf) || (c.id === 'car' && (mg.mistakes || 0) >= 3 && Math.random() < 0.6)) { police(c, loot); return; }
     if (!loot) { resultModal({ emoji: '😬', rays: 'bad', title: 'Не вышло', text: `Ушёл ни с чем. Розыск: ${wantedStars()}`, btn: 'Эх' }); sfx('lose'); save(); return; }
-    addMoney(loot); addXp(10);
+    const receipt = crimeAward72(c, loot, mg, origin); addXp(10);
     if (typeof dropCollectible === 'function' && Math.random() < 0.25) dropCollectible('crime');
     track('crimeOk');
     resultModal({ emoji: c.id === 'car' && S.lastCar ? S.lastCar.emoji : '💰', title: c.id === 'car' && S.lastCar ? `Угнал ${S.lastCar.name}!` : 'Дело сделано',
-      text: `${c.receipt ? c.receipt(mg,loot) : `${c.id === 'car' ? 'Кривой перегнал тачку на разборку: ' : ''}+${fmt(loot)} ₽`}<br>Розыск: ${wantedStars()}`, btn: 'Тсс…' });
+      text: `${receipt}<br>Розыск: ${wantedStars()}`, btn: 'Тсс…' });
     sfx('coin'); save();
   } });
 }
@@ -121,7 +125,7 @@ function police(c, loot) {
   ARREST = { bribe, mins };
   sfx('bad'); haptic('error');
   openModal(`<div class="big-art"><div class="rays bad"></div><div class="big-emoji">🚓</div></div>
-    <h3>Попался!</h3><p>Полиция взяла с поличным${loot ? ` — добыча ${fmt(loot)} ₽ изъята` : ''}. Розыск ${wantedStars()}.</p>
+    <h3>Попался!</h3><p>Полиция взяла с поличным${loot ? ' — добыча этой попытки изъята. Склад сохранён' : ''}. Розыск ${wantedStars()}.</p>
     <div class="btns" style="flex-direction:column;gap:8px">
       ${priceBtn('arrestBribe', '', bribe, S.money >= bribe, `💼 Договориться · ${fmt(bribe)} ₽`).replace('class="btn', 'class="btn wide')}
       <button class="btn wide" data-act="arrestJail">⛓️ Отсидеть срок · ${mins} мин</button></div>`, { center: true, locked: true });

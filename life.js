@@ -73,8 +73,8 @@ function overeat(extra) {
 
 eat = function (id) {
   const f = FOOD.find((x) => x.id === id);
-  if (!reqOk(f.req) || S.money < f.price) return;
-  S.money -= f.price;
+  if (!f || !reqOk(f.req) || !shopCanPay(f)) return;
+  if (!shopPay(f)) return;
   const extra = Math.max(0, f.food - (maxFood() - S.food));
   feed(f.food);
   if (f.health) { if (f.health > 0) heal(f.health); else hurt(-f.health); }

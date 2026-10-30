@@ -1,0 +1,10 @@
+.crime-market72{border:1px solid #d8ac53;border-radius:16px;padding:14px;margin:12px 0;background:linear-gradient(140deg,#253646,#17212d)}
+.crime-market72 p,.crime-market72 small{line-height:1.45}.market-tabs72{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.crime-good72{padding:12px 0;border-top:1px solid #ffffff20}.crime-good72>p{margin:5px 0}.crime-good72>button{margin-top:10px;width:100%;white-space:normal}
+.skill-purpose72{display:block;color:var(--cyan,#75d6df);margin-bottom:6px}.skill-power72{display:block;padding:8px;border-radius:8px;background:#ffffff09;margin:7px 0}
+.card.skill-card72{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:start;gap:10px}
+.card.skill-card72>.card-body{grid-column:2;grid-row:1;min-width:0}.card.skill-card72>.thumb{grid-column:1;grid-row:1;width:44px;height:44px}
+.card.skill-card72>.btn{grid-column:1/-1;width:100%;min-width:0;white-space:normal}
+.card.skill-card72 .card-body .btn{width:100%;min-width:0;white-space:normal;font-size:13px;padding:10px}
+.card.skill-card72 .card-body p{margin:9px 0;font-size:12px;line-height:1.4}.card.skill-card72 .card-title{font-size:16px}.card.skill-card72 .card-desc{font-size:13px}
+.frame-market72{border:3px solid #ecba54!important;box-shadow:0 0 14px #ecba5470}.frame-scholar72{border:3px solid #8bc8ef!important;box-shadow:0 0 14px #8bc8ef70}

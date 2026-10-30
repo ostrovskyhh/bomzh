@@ -2071,9 +2071,9 @@ document.addEventListener('click', (e) => {
 
 function eat(id) {
   const f = FOOD.find((x) => x.id === id);
-  if (!reqOk(f.req) || S.money < f.price) return;
+  if (!f || !reqOk(f.req) || !shopCanPay(f)) return;
   if (S.food >= maxFood() - 2 && !f.energy) { toast('Валера уже объелся', 'bad'); return; }
-  S.money -= f.price;
+  if (!shopPay(f)) return;
   feed(f.food);
   if (f.health) { if (f.health > 0) heal(f.health); else hurt(-f.health); }
   addMood(f.mood || 0);

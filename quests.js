@@ -229,7 +229,7 @@ HOOKS.hud.push(() => {
 // Счётчики, которых не было в game.js
 HOOKS.init.push(() => {
   const _eat = eat;
-  eat = (id) => { const before = S.money; _eat(id); if (S.money < before) track('eat'); };
+  eat = (id) => { const before = S.money, bottles = S.bottles; _eat(id); if (S.money < before || S.bottles < bottles) track('eat'); };
   const _startSleep = startSleep;
   startSleep = () => { _startSleep(); if (S.busy && S.busy.type === 'sleep') track('sleep'); };
   const _useMed = useMed;

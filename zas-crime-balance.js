@@ -13,7 +13,7 @@ for(const c of CRIMES.filter(c=>ZAS_CRIME_BASE[c.id])){
   c.reward=(perf,mg)=>{
     if(c.id==='car'){
       if((mg?.mistakes||0)>=3)return 0;
-      const index=rand(0,CARS.length-1);S.lastCar=CARS[index];return zasCrimeBase(c.id,perf,level(),[.85,1,1.15][index]);
+      const index=Math.floor(Math.random()*CARS.length);S.lastCar=CARS[index];return zasCrimeBase(c.id,perf,level(),[.85,1,1.15][index]);
     }
     return zasCrimeBase(c.id,perf);
   };

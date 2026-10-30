@@ -331,13 +331,13 @@ ACTIONS.bossFight = () => {
 const _houseCut = ACTIONS.house, _rentCut = ACTIONS.rentHouse;
 ACTIONS.house = (id) => {
   const i = +id, h = HOUSING[i];
-  if (i <= S.ownedHousing || S.money < h.price || level() < h.level) return;
+  if (!h || i <= S.ownedHousing || !purchaseAllowed72('home',i) || !shopCanPay(h) || level() < h.level) return;
   if (CUTS['house_' + i] && cutOnce('house_' + i)) playCutscene('house_' + i, () => _houseCut(id));
   else _houseCut(id);
 };
 ACTIONS.rentHouse = (id) => {
   const i = +id, h = HOUSING[i];
-  if (!h.rent || S.money < h.rent || level() < h.level || i === S.housing) return;
+  if (!h || !purchaseAllowed72('home',i) || !h.rent || S.money < h.rent || level() < h.level || i === S.housing) return;
   if (CUTS['house_' + i] && cutOnce('house_' + i)) playCutscene('house_' + i, () => { _rentCut(id); refresh(); });
   else _rentCut(id);
 };

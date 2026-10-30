@@ -99,16 +99,16 @@ function scrapReceipt(mg,loot){
 }
 const scrapCrime=CRIMES.find(c=>c.id==='metal');
 if(scrapCrime){
-  scrapCrime.desc='Каждый металл оплачивается отдельно. Кирпич или собака: −15% итоговой добычи. Третья ошибка завершает сбор. Риск задержания сохраняется.';
+  scrapCrime.desc='Каждый металл хранится отдельно на складе и продаётся в обменнике. Кирпич или собака: −15% итоговой добычи. Третья ошибка завершает сбор. Риск задержания сохраняется.';
   scrapCrime.game.hint='Лови металл, избегай кирпичей и собак. Каждая ошибка: −15% добычи; третья завершает сбор. Смотри счётчик 0/3.';
   scrapCrime.quantityReward=true;
   scrapCrime.game.setup=mg=>{
     mg.scrap={};mg.scrapHits=0;mg.scrapPrices=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));gameCatch(mg,{basket:'🛍️',good:SCRAP_TYPES.map(it=>it.e),bad:['🧱','🐕'],goodRate:.68,badText:'Ай!',onCatch:(e,good)=>{
       if(good)mg.scrap[e]=(mg.scrap[e]||0)+1;else mg.scrapHits++;
-      const el=$('scrapBag');if(el)el.innerHTML=`<span>${SCRAP_TYPES.map(it=>`${it.e} ×${mg.scrap[it.e]||0}`).join(' · ')} · ${fmt(scrapNet(mg))} ₽</span><br><b>Ошибки: ${mg.scrapHits}/3 · Штраф: ${Math.round(scrapPenalty(mg)*100)}%</b>`;
+      const el=$('scrapBag');if(el)el.innerHTML=`<span>${SCRAP_TYPES.map(it=>`${it.e} ×${mg.scrap[it.e]||0}`).join(' · ')} · добыча на склад</span><br><b>Ошибки: ${mg.scrapHits}/3 · Штраф: ${Math.round(scrapPenalty(mg)*100)}%</b>`;
       if(mg.scrapHits>=3)mgEnd();
     }});
-    $('mgArena').insertAdjacentHTML('beforeend',`<div class="scrap-bag" id="scrapBag">${SCRAP_TYPES.map(it=>`${it.e} ${fmt(scrapUnit(it))} ₽`).join(' · ')}<br><b>Ошибки: 0/3 · Штраф: 0%</b></div>`);
+    $('mgArena').insertAdjacentHTML('beforeend',`<div class="scrap-bag" id="scrapBag">${SCRAP_TYPES.map(it=>`${it.e} ×0`).join(' · ')}<br><b>Ошибки: 0/3 · Штраф: 0%</b></div>`);
   };
   scrapCrime.reward=(perf,mg)=>{mg.scrapRank=crimeRank();mg.scrapPrices||=Object.fromEntries(SCRAP_TYPES.map(it=>[it.e,scrapUnit(it)]));return scrapNet(mg);};
   scrapCrime.receipt=scrapReceipt;

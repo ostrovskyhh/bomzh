@@ -59,8 +59,8 @@ EXTRA_TABS.shop.transport = () => {
 Object.assign(ACTIONS, {
   buyTransport: (id) => {
     const i = +id, t = TRANSPORT[i];
-    if (!t || ownsTransport(i) || S.money < t.price || level() < t.level) return;
-    S.money -= t.price;
+    if (!t || ownsTransport(i) || !purchaseAllowed72('car',i) || !shopCanPay(t) || level() < t.level) return;
+    if (!shopPay(t)) return;
     const old = S.transport;
     if (old) fleetPark(old);
     S.transport = i;
