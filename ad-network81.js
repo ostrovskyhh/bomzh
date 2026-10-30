@@ -29,6 +29,18 @@ async function monetagSdk81(config){
  const name='show_'+zone;if(typeof window[name]==='function')return window[name];if(MONETAG81.loading&&MONETAG81.zone===zone)return MONETAG81.loading;
  MONETAG81.zone=zone;MONETAG81.loading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=url;script.async=true;script.dataset.zone=zone;script.dataset.sdk=name;const timer=setTimeout(()=>{script.remove();reject(Error('SDK timeout'));},12000);script.onload=()=>{clearTimeout(timer);typeof window[name]==='function'?resolve(window[name]):reject(Error('SDK unavailable'));};script.onerror=()=>{clearTimeout(timer);script.remove();reject(Error('SDK unavailable'));};document.head.appendChild(script);}).catch(e=>{MONETAG81.loading=null;throw e;});return MONETAG81.loading;
 }
+function adsDiagnostic83(provider,stage,error){if(typeof BugReport!=='undefined')BugReport.record('ad-status',{provider,stage,state:['load','render','playing','destroy'].includes(error?.state)?error.state:'unknown',started:!!error?.adStarted83,skipped:!!error?.adSkipped83});}
+async function adsShow83(controller){
+ let started=false,skipped=false;const handlers={onStart:()=>{started=true;},onSkip:()=>{skipped=true;},onBannerNotFound:()=>{},onTooLongSession:()=>{},onNonStopShow:()=>{}};
+ // These handlers suppress the SDK's blocking default alerts. The rejected show
+ // promise below controls the fallback, and onStart prevents a second impression.
+ const registered=[];
+ try{
+  if(typeof controller.addEventListener==='function'&&typeof controller.removeEventListener==='function')for(const [name,fn] of Object.entries(handlers)){controller.addEventListener(name,fn);registered.push([name,fn]);}
+  const result=await controller.show();if(result?.error&&(result.state==='load'||result.state==='render'))throw result;return result;
+ }catch(error){throw {state:error?.state,error:error?.error,done:error?.done,adStarted83:started,adSkipped83:skipped};}
+ finally{for(const [name,fn] of registered)controller.removeEventListener(name,fn);}
+}
 rewardedWatch=async function(purpose='caps',skill=''){
  if(!adsCanWatch(purpose)){toast('Сначала закончи текущее дело или дождись подключения.');return;}
  REWARDED_ADS.busy=true;adsRefresh();adsRefreshContext81();let attempt='',provider='adsgram',completed=false;
@@ -36,9 +48,10 @@ rewardedWatch=async function(purpose='caps',skill=''){
   await adsState();const d=REWARDED_ADS.data,q=adQuota81(purpose);if(!d?.enabled||!d.remaining||!q?.remaining||d.pending||adsNow()<Math.max(d.nextAt||0,q.nextAt||0))return;
   const begin=await apiPost('ads/begin',{purpose,skill});adsAccept(begin);if(!begin.ok){toast('Эта награда пока недоступна. Проверь условия и оставшиеся просмотры.');return;}attempt=begin.attempt;provider=begin.provider||'adsgram';let config=begin.providerData,result;
   if(provider==='adsgram'){
-   let phase='sdk';try{const c=await adsSDK();phase='show';result=await c.show();if(result?.error&&result.state==='load')throw result;}
+   let phase='sdk';try{const c=await adsSDK();phase='show';result=await adsShow83(c);}
    catch(error){
-    const noShow=phase==='sdk'||error?.state==='load';if(!noShow||!REWARDED_ADS.data?.providers?.some(p=>p.id==='monetag'))throw error;
+    adsDiagnostic83('adsgram',phase,error);
+    const noShow=!error?.adStarted83&&!error?.adSkipped83&&(phase==='sdk'||error?.state==='load'||error?.state==='render'&&error?.error===true);if(!noShow||!REWARDED_ADS.data?.providers?.some(p=>p.id==='monetag'))throw error;
     const alternate=await apiPost('ads/fallback',{attempt});adsAccept(alternate);if(alternate.rewarded){await adsReward(alternate);return;}if(!alternate.ok)throw error;
     provider=alternate.provider;config=alternate.providerData;
    }
@@ -50,7 +63,7 @@ rewardedWatch=async function(purpose='caps',skill=''){
   if(finish.rewarded){try{sessionStorage.removeItem('adCompleted');}catch(_){}await adsReward(finish);}
   else if(completed){toast('Ждём подтверждение рекламной платформы. Награда придёт после проверки.');for(let i=0;i<6;i++){await wait(2000);if((await adsCheck(attempt))?.rewarded)break;}}
   else toast('Рекламная платформа не подтвердила награду. Лимит не потрачен.');
- }catch(error){if(attempt&&!completed)try{adsAccept(await apiPost('ads/finish',{attempt,provider,completed:false}));}catch(_){}toast(completed?'Просмотр завершён. Проверь награду после восстановления связи.':'Реклама недоступна или закрыта раньше времени. Дневной лимит не потрачен.');}
+ }catch(error){adsDiagnostic83(provider,'failed',error);if(attempt&&!completed)try{adsAccept(await apiPost('ads/finish',{attempt,provider,completed:false}));}catch(_){}toast(completed?'Просмотр завершён. Проверь награду после восстановления связи.':error?.adSkipped83?'Просмотр закрыт. Дневной лимит не потрачен.':'Не удалось загрузить рекламу. Попробуй позже. Дневной лимит не потрачен.');}
  finally{REWARDED_ADS.busy=false;await adsState();adsRefresh();adsRefreshContext81();}
 };
-ACTIONS.rewardedWatch=rewardedWatch;
+ACTIONS.rewardedWatch=()=>rewardedWatch('caps','');
