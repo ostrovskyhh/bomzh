@@ -53,7 +53,7 @@ function casinoStatsHTML() {
       <div class="${net >= 0 ? 'plus' : 'minus'}"><small>${net >= 0 ? 'Итог: в плюсе' : 'Итог: проиграно'}</small><b>${net >= 0 ? '+' : '−'}${fmt(Math.abs(net))} ₽</b></div>
       <div><small>Крупнейший выигрыш</small><b>${fmt(st.best)} ₽</b></div>
     </div>
-    <small class="sr-note">Считается с версии 2.7. Джекпотов 777: ${counter('jackpot')}. Казино всегда в плюсе — играй на то, что не жалко 😉</small></details>`;
+    <small class="sr-note">Считается с версии 2.7. Джекпотов 777: ${counter('jackpot')}. Отдельная серия может закончиться проигрышем — играй на то, что не жалко 😉</small></details>`;
 }
 ACTIONS.casinoStatsToggle = () => { S.casinoStatsOpen = !S.casinoStatsOpen; };
 const _casinoTabStats = EXTRA_TABS.fun.casino;

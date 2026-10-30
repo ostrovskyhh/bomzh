@@ -94,10 +94,11 @@ const WISH_ACC = { rose: 'букет роз', candy: 'конфеты', book: 'к
   bag: 'сумочку', phone: 'новый смартфон', earrings: 'серьги с бриллиантами', fur: 'шубу', car: 'машину с бантом' };
 HOOKS.tick.push(() => {
   if (!S.girlfriend || !LOADED || !S.storySeen) { if (!S.girlfriend) S.gfWish = null; return; }
+  const g = (typeof allGirls==='function'?allGirls():GIRLS).find(x=>x.id===S.girlfriend);
+  if(!g)return; // Preserve unknown legacy partners; never abort later tick hooks.
   const now = Date.now();
   if (S.gfWish && S.gfWish.gid !== S.girlfriend) S.gfWish = null;
   if (S.gfWish && now > S.gfWish.until) {
-    const g = GIRLS.find((x) => x.id === S.girlfriend);
     S.gfWish = null;
     S.gfWishNext = now + rand(10, 18) * GAME_DAY;
     addLove(-10);
@@ -108,8 +109,9 @@ HOOKS.tick.push(() => {
   if (S.gfWish || !popupTurn(2) || S.busy || MG) return;
   if (!S.gfWishNext) { S.gfWishNext = now + 6 * GAME_DAY; return; }
   if (now < S.gfWishNext) return;
-  const g = GIRLS.find((x) => x.id === S.girlfriend), t = girlTier(g.id);
+  const t = girlTier(g.id);
   const x = GIFTS.find((y) => y.id === pick(t.wish));
+  if(!x)return;
   S.gfWish = { id: x.id, gid: g.id, until: now + WISH_TIME };
   sfx('notify');
   openModal(`<div class="romance"><div class="big-art" style="height:100px"><div class="big-emoji" style="line-height:100px">${g.emoji}</div></div>

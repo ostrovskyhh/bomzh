@@ -265,8 +265,11 @@ const DATES = [
 ];
 const DATE_CD = 0;
 
-// Слоты: символ, вес, множитель за три в ряд. 777 выпадает примерно раз на 125 000 прокрутов. RTP ≈ 91%
-const SLOT_SYMS = [['🍾', 32, 2], ['🥖', 26, 3], ['🐀', 20, 5], ['🍒', 14, 8], ['💰', 6, 15], ['7️⃣', 2, 100]];
+// Per-reel seven probability is cube-root adjusted: P(777) = 0.0025.
+// This is 0.25% per spin (about 1 in 400); a jackpot still pays x100.
+const SLOT_SEVEN_PROB501=Math.cbrt(.0025);
+const SLOT_SEVEN_WEIGHT501=98*SLOT_SEVEN_PROB501/(1-SLOT_SEVEN_PROB501);
+const SLOT_SYMS = [['🍾', 32, 2], ['🥖', 26, 3], ['🐀', 20, 5], ['🍒', 14, 8], ['💰', 6, 15], ['7️⃣', SLOT_SEVEN_WEIGHT501, 100]];
 const SLOT_PAIR = 1.4;
 const BETS = [10, 50, 200, 1000, 5000, 25000];
 
