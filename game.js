@@ -845,7 +845,7 @@ async function netPost(url, body) {
     const timer = ctl && setTimeout(() => ctl.abort(), 15000);
     try {
       const sentAt = Date.now();
-      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: payload, signal: ctl && ctl.signal });
+      const r = await apiFetch504(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: payload, signal: ctl && ctl.signal });
       if (r.ok) {
         const result = await r.json();
         if (typeof I18N !== 'undefined') I18N.rememberUsers(route, result);
@@ -898,7 +898,7 @@ function serverFinal() {
   const body = JSON.stringify({ initData: tg.initData, device: DEVICE_ID, data: JSON.stringify(S), savedAt: S.savedAt, rev: S.rev || 0, base: serverBase });
   if (body.length > 63000) { serverWrite(); return; } // keepalive берёт не больше 64 КБ
   try {
-    fetch(`${REF_API}/api/save/put`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body })
+    apiFetch504(`${REF_API}/api/save/put`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body })
       .then((r) => r.json()).then((j) => { if (j && j.ok) serverBase = Math.max(serverBase, j.rev || 0); }).catch(() => {});
   } catch (e) { serverWrite(); }
 }

@@ -14,7 +14,7 @@ async function rateSync() {
   RATE_SYNC_AT = Date.now();
   try {
     const t0 = Date.now();
-    const r = await fetch(`${REF_API}/api/rate`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: '{}' });
+    const r = await apiFetch504(`${REF_API}/api/rate`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: '{}' });
     const j = await r.json();
     const t1 = Date.now();
     if (j && j.now && t1 - t0 < 5000) RATE_DT = j.now - (t0 + t1) / 2;
