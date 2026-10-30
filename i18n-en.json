@@ -36769,5 +36769,16 @@
   "🎨 Версия 5.10 — Два города, два характера": "🎨 Version 5.10 — Two cities, two distinct styles",
   "🇮🇹 Италия: приморские площади, пекарня, лоджии, террасы и вилла; собственные рисунки еды, транспорта и предприятий.": "🇮🇹 Italy: seaside squares, a bakery, loggias, terraces and a villa, with original food, transport and business illustrations.",
   "🇨🇳 Китай: чайные дворы, рынок фонарей, мастерские и нефритовый сад; отдельные рисунки блюд, электротранспорта и чайных лавок.": "🇨🇳 China: tea courtyards, a lantern market, workshops and a jade garden, with original dishes, electric vehicles and tea shop illustrations.",
-  "У городов разные значки разделов, одежда, детали образов героинь и оформление мини-игр. Цены, бонусы и прогресс не меняются.": "Each city has its own menu icons, clothing, character details and mini-game style. Prices, bonuses and progress stay the same."
+  "У городов разные значки разделов, одежда, детали образов героинь и оформление мини-игр. Цены, бонусы и прогресс не меняются.": "Each city has its own menu icons, clothing, character details and mini-game style. Prices, bonuses and progress stay the same.",
+  "Понятные валюты и цены": "Clear currencies and prices",
+  "💱 У денег каждого города правильное обозначение: ₽, $, € или ¥. Цены на кнопках показываются в валюте текущего города": "💱 Each city uses the correct money symbol: ₽, $, € or ¥. Purchase buttons show prices in the current city currency",
+  "🍾 У крышек отдельный значок; на покупках, энергетиках и активации навыков прямо написано, что оплата крышками. Цены и списания не изменились": "🍾 Caps have a distinct icon. Purchase, energy drink and skill activation buttons explicitly say when you pay with caps. Prices and deductions stay the same",
+  "Оплата крышками": "Pay with caps",
+  "💱 Версия 5.11 — Понятные валюты и цены": "💱 Version 5.11 — Clear currencies and prices",
+  "У денег каждого города правильное обозначение: ₽, $, € или ¥. Цены на кнопках показываются в валюте текущего города.": "Each city uses the correct money symbol: ₽, $, € or ¥. Purchase buttons show prices in the current city currency.",
+  "У крышек отдельный значок. На покупках, энергетиках и активации навыков прямо написано, что оплата крышками.": "Caps have a distinct icon. Purchase, energy drink and skill activation buttons explicitly say when you pay with caps.",
+  "Цены, балансы и правила списания не изменились.": "Prices, balances and payment rules stay the same.",
+  "☕ Кофе · {0}": "☕ Coffee · {0}",
+  "Не хватает {0} на вход": "You need {0} more to enter",
+  "Не хватает {0}": "Missing {0}"
 }

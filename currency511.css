@@ -1,0 +1,6 @@
+.money-price511{white-space:nowrap;font-variant-numeric:tabular-nums}
+.currency-name511{font-size:.85em;font-weight:650;white-space:nowrap}
+button[data-currency="caps"] .ic{display:inline-block;width:20px;height:20px;vertical-align:middle;flex-shrink:0}
+button[data-currency="caps"] .energy77-price{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center}
+button[data-currency="caps"] .case-total{white-space:normal}
+button[data-currency="caps"] .currency-name511{color:inherit}

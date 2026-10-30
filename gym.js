@@ -68,7 +68,7 @@ function gymCheck(ex, g) {
   if (!reqOk(g.req)) return `Этот зал пока закрыт: ${reqList(g.req).filter((r) => !r.ok).map((r) => r.text).join(', ')}`;
   if (S.busy) return 'Валера сейчас занят';
   if (hasEffect('backpain')) return 'Сорвана спина — сначала купи мазь «Звёздочка» в аптеке';
-  if (S.money < g.price) return `Не хватает ${fmt(g.price - S.money)} ₽ на вход`;
+  if (S.money < g.price) return `Не хватает ${incomeMoney(g.price - S.money)} на вход`;
   if (S.energy < ex.energy) return `Не хватает энергии: нужно ${ex.energy} ⚡, есть ${Math.floor(S.energy)}. Поспи или выпей кофе`;
   if (S.food < ex.food) return `Голодный: нужно ${ex.food} 🍞 сытости. Поешь`;
   return '';
@@ -76,6 +76,7 @@ function gymCheck(ex, g) {
 
 EXTRA_TABS.life.gym = () => {
   const g = GYMS.find((x) => x.id === S.gymPlace) || GYMS[0];
+  const coffee=FOOD.find(f=>f.id==='coffee');
   const resting = Date.now() - S.lastGym > 10 * 60000 && (S.form > 0 || S.strength > 0);
   const low = S.energy < Math.min(...EXERCISES.map((e) => e.energy));
   return `<div class="info-card">
@@ -87,10 +88,10 @@ EXTRA_TABS.life.gym = () => {
       ${resting ? '<br><b style="color:var(--red)">Давно не тренировался — форма и сила понемногу уходят.</b>' : ''} Усталость спадает на 2 в минуту.</div>
     </div>
     ${low ? `<div class="info-card warn">⚡ <b>Энергия кончилась</b> — тренироваться не на что. Поспи или выпей кофе.
-      <div class="btn-row" style="margin-top:8px"><button class="btn primary small" data-act="energyFix" data-id="sleep">💤 Спать</button>${priceBtn('energyFix', 'coffee', 40, S.money >= 40, '☕ Кофе 40 ₽').replace('class="btn', 'class="btn small')}</div></div>` : ''}
+      <div class="btn-row" style="margin-top:8px"><button class="btn primary small" data-act="energyFix" data-id="sleep">💤 Спать</button>${priceBtn('energyFix', 'coffee', coffee.price, shopCanPay(coffee), '☕ Кофе · '+incomeMoney(coffee.price)).replace('class="btn', 'class="btn small')}</div></div>` : ''}
     <div class="subhead">Где заниматься</div>
     <div class="places">${GYMS.map((x) => `<button class="${x.id === g.id ? 'on' : ''}" data-act="gymPlace" data-id="${x.id}" ${reqOk(x.req) ? '' : `disabled data-why="Нужно: ${reqList(x.req).filter((r) => !r.ok).map((r) => r.text).join(', ')}"`}>
-      <span>${x.emoji}</span>${x.name}<small>${x.price ? fmt(x.price) + ' ₽' : 'бесплатно'} · до ${x.cap}</small></button>`).join('')}</div>
+      <span>${x.emoji}</span>${x.name}<small>${x.price ? incomeMoney(x.price) : 'бесплатно'} · до ${x.cap}</small></button>`).join('')}</div>
     <div class="info-card">${g.emoji} <b>${g.name}</b>: ${g.desc}. Прирост ×${g.gain}, потолок формы и силы — ${g.cap}.${hasEffect('protein') ? ' 🥛 Протеин: прирост +50%!' : ''}
       <br>🎮 Подход — 6 повторов секунд на 10: жми в зелёной зоне, в золотой — идеально (до ×1.4). Некогда — ⚡ «Быстро»: без игры, ×${GYM_QUICK}.</div>
     ${EXERCISES.map((ex) => {
@@ -98,7 +99,7 @@ EXTRA_TABS.life.gym = () => {
       const gains = joinFx([ex.form ? `до +${(ex.form * g.gain * 1.4).toFixed(1)} формы` : '', ex.strength ? `до +${(ex.strength * g.gain * 1.4).toFixed(1)} силы` : '', plus(ex.health, '❤️'), plus(ex.mood, '😊')]);
       return card({ thumb: ex.emoji, title: `${ex.name} <span class="tag-line">🎮 ${GYM_GAMES[ex.id].title}</span>`,
         desc: `${ex.desc}<br><b>${gains}</b><br>−${ex.energy} ⚡ · −${ex.food} 🍞 · усталость ${ex.fatigue > 0 ? '+' : ''}${ex.fatigue}`,
-        btn: `<div class="btn-col"><button class="btn ${why ? '' : 'primary'}" data-act="gym" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>${g.price ? `<i class="ic" data-ic="coin"></i>${fmt(g.price)}` : '🎮 Подход'}</button>
+        btn: `<div class="btn-col"><button class="btn ${why ? '' : 'primary'}" data-act="gym" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>${g.price ? incomeMoney(g.price) : '🎮 Подход'}</button>
           <button class="btn small" data-act="gymQuick" data-id="${ex.id}" ${why ? `disabled data-why="${why}"` : ''}>⚡ Быстро</button></div>` });
     }).join('')}
     ${hasEffect('backpain') ? '<div class="info-card warn">🦴 Сорвана спина — в зал нельзя. Купи мазь в аптеке.</div>' : ''}`;

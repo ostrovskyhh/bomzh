@@ -1438,7 +1438,8 @@ let currentScreen = 'game';
 
 function priceBtn(act, id, price, can, label) {
   // data-why — подсказка при нажатии на недоступную кнопку (см. ux.js)
-  const why = !can && price > S.money ? ` data-why="Не хватает ${fmt(Math.ceil(price - S.money))} ₽"` : '';
+  const missing=Math.ceil(price-S.money);
+  const why = !can && price > S.money ? ` data-why="Не хватает ${typeof cityMoney==='function'?cityMoney(missing):fmt(missing)+' ₽'}"` : '';
   return `<button class="btn ${can ? 'primary' : ''}" data-act="${act}" data-id="${id}" ${can ? '' : 'disabled'}${why}>${label || (price ? `<i class="ic" data-ic="coin"></i>${fmt(price)}` : 'Бесплатно')}</button>`;
 }
 function card({ thumb, title, desc = '', extra = '', btn = '', cls = '' }) {
