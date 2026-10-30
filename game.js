@@ -1823,20 +1823,7 @@ const ACTIONS = {
   close: () => closeModal(),
 
   // --- главный экран ---
-  exchange: (part) => {
-    const n = Math.floor(S.bottles * +part);
-    if (n < 10) return;
-    const m = Math.floor(n * bottleRate() * (1 - EXCHANGE_FEE));
-    S.bottles -= n;
-    S.stats.sold += n;
-    taskProgress('sold', n);
-    addMoney(m);
-    addXp(n * XP.bottles);
-    flyCoins(document.querySelector('[data-act="exchange"]'), $('resMoney'), Math.min(12, 3 + Math.floor(Math.log10(m + 1) * 2)));
-    toast(`Обменял ${fmt(n)} бут. → +${fmt(m)} ₽`, 'good');
-    haptic('success');
-    renderExchange();
-  },
+  exchange: (part, button) => exchangeTrade509(Math.floor(S.bottles * +part), button),
   sellCap: () => {
     if (S.caps < 1) return;
     S.caps -= 1;
