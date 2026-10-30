@@ -15,7 +15,7 @@ function newcomerShopHTML(){return `<section class="nc-shop"><header><small>ГА
   <div class="nc-wallet"><b>⚡ Энергетики в запасе: ${S.energyDrinks||0}</b><small>Один полностью восстанавливает энергию. Используй, когда удобно.</small><button class="btn green wide" data-act="newcomerEnergy" ${newcomerEnergyWhy()?'disabled':''}>Восстановить энергию · 1 шт.</button></div>
   <div class="nc-grid">${NEWCOMER_PACKS.map(newcomerCard).join('')}</div>
   <div class="info-card"><p>Повторная покупка добавляет крышки и энергетики, продлевает VIP и ускорение опыта. Таймеры включаются при зачислении покупки и идут в реальном времени, включая время вне игры.</p><p>VIP удваивает доход от тапов, милостыни и работы. Ускорение опыта не складывается с другим платным ускорителем: действует более сильный.</p><p>Энергетик нельзя использовать во время сна, работы, мини-игры или боя. При полной энергии он не тратится.</p></div>
-  <button class="btn wide" data-act="newcomerReminders">${S.settings.newcomerOffers===false?'Включить предложения новичку':'Отключить предложения новичку'}</button></section>`;}
+  <button class="btn wide" data-act="newcomerReminders">${S.settings.newcomerOffers===false?'Включить предложения наборов':'Отключить предложения наборов'}</button></section>`;}
 NEWCOMER_PACKS.forEach(p=>{PREM_GIVE[p.id]=()=>{
   if(p.caps)addCaps(p.caps);if(p.vip)dnVip(p.vip);
   if(p.xp)S.xpStarsUntil=Math.max(Date.now(),S.xpStarsUntil||0)+p.xp*60000;
