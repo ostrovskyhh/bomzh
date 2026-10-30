@@ -29765,7 +29765,7 @@ function desktop471Enabled(platform=tg?.platform){const p=String(platform||'').t
 function desktop471Apply(){document.body.classList.toggle('pc471',desktop471Enabled());}
 for(const q of ['(pointer:fine)','(hover:hover)'])matchMedia(q).addEventListener('change',desktop471Apply);
 desktop471Apply();
-function desktop471Scroller(target){if(modalOpen()){const sheet=document.querySelector('#modalRoot .sheet');if(!sheet)return null;for(let p=target;p&&sheet.contains(p);p=p.parentElement){if(p.scrollHeight>p.clientHeight+2&&/auto|scroll/.test(getComputedStyle(p).overflowY))return p;}return sheet;}
+function desktop471Scroller(target){if(modalOpen()){const sheet=document.querySelector('#modalRoot .sheet');if(!sheet)return null;for(let p=target;p&&sheet.contains(p);p=p.parentElement){if(p.scrollHeight>p.clientHeight+2&&/auto|scroll/.test(getComputedStyle(p).overflowY))return p;}if(sheet.scrollHeight>sheet.clientHeight+2)return sheet;for(const el of sheet.querySelectorAll('*')){if(el.clientHeight>0&&el.scrollHeight>el.clientHeight+2&&/auto|scroll/.test(getComputedStyle(el).overflowY))return el;}return sheet;}
  const list=document.querySelector('.screen.active .list');return list?.scrollHeight>list?.clientHeight?list:document.querySelector('.screen.active');}
 document.addEventListener('keydown',e=>{if(!desktop471Enabled()||e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||MG||MG_PENDING||FIGHT||CUT)return;
  if(e.target.closest?.('input,textarea,select,[contenteditable=true],[role=slider],[role=grid]'))return;
