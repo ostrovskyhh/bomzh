@@ -8,16 +8,16 @@ const priceBefore77=priceBtn;
 priceBtn=function(act,id,price,can,label){if((act==='eat'||act==='energyFix')&&id==='energetik'){const f=FOOD.find(x=>x.id===id),allowed=!!f&&reqOk(f.req)&&shopCanPay(f);return `<button class="btn ${allowed?'primary':''}" data-act="${act}" data-id="energetik" data-currency="caps" ${allowed?'':'disabled'}>${act==='energyFix'?'<span>🥤 Энергетик · +'+f.energy+' ⚡</span>':'🥤'} <span class="energy77-price">3 🟡</span></button>`;}return priceBefore77(act,id,price,can,label);};
 const minutesBefore77=trickMinutes;trickMinutes=t=>minutesBefore77(t)*2;
 function activateSkill77(id){
-  const t=TRICKS.find(t=>t.id===id);if(!t||level()<t.level||cdLeft(id)>0||hasEffect(id)||S.caps<3)return;
-  S.caps-=3;addEffect(id,trickMinutes(t));setCd(id,trickCdMin(t)*60);track('trick');save(true);refresh();toast('Навык активирован за 3 крышки','good');sfx('good');haptic('success');
+  const t=TRICKS.find(t=>t.id===id);if(!t||level()<t.level||cdLeft(id)>0||hasEffect(id)||S.caps<10)return;
+  S.caps-=10;addEffect(id,trickMinutes(t));setCd(id,trickCdMin(t)*60);track('trick');save(true);refresh();toast('Навык активирован за 10 крышек','good');sfx('good');haptic('success');
 }
 ACTIONS.trick=activateSkill77;
 function adChoice77(){const d=REWARDED_ADS.data;return REWARDED_ADS.busy||!onlineOn()||!d?.enabled||!d.remaining||!!d.pending||adsNow()<d.nextAt;}
 const skillsBefore77=EXTRA_TABS.life.skills;
 EXTRA_TABS.life.skills=()=>{
   const t=document.createElement('template');t.innerHTML=skillsBefore77();
-  const intro=t.content.querySelector('.info-card');if(intro)intro.innerHTML='<b>Навыки: реклама или крышки</b><p>Активация — полный просмотр рекламы или 3 крышки. Действие всех навыков увеличено вдвое: прежние 20 минут стали 40. Уже купленные уровни и их бонусы сохранены; постоянные улучшения по-прежнему покупаются за деньги.</p><p>Все рекламные награды используют общий лимит: 5 просмотров в сутки и пауза 10 минут. За рекламу навыка крышки отдельно не выдаются.</p>';
-  for(const b of t.content.querySelectorAll('[data-act="trick"]')){const id=b.dataset.id,sk=TRICKS.find(t=>t.id===id);b.textContent='Активировать · 3 🟡';b.disabled=S.caps<3;b.classList.toggle('primary',!b.disabled);b.removeAttribute('data-why');b.dataset.currency='caps';const ad=document.createElement('button');ad.className='btn wide';ad.dataset.act='adSkill77';ad.dataset.id=id;ad.textContent='🎬 Активировать за рекламу';ad.disabled=adChoice77()||!sk;b.insertAdjacentElement('afterend',ad);}
+  const intro=t.content.querySelector('.info-card');if(intro)intro.innerHTML='<b>Навыки: реклама или крышки</b><p>Активация — полный просмотр рекламы или 10 крышек. Действие всех навыков увеличено вдвое: прежние 20 минут стали 40. Уже купленные уровни и их бонусы сохранены; постоянные улучшения по-прежнему покупаются за деньги.</p><p>Все рекламные награды используют общий лимит: 5 просмотров в сутки и пауза 10 минут. За рекламу навыка крышки отдельно не выдаются.</p>';
+  for(const b of t.content.querySelectorAll('[data-act="trick"]')){const id=b.dataset.id,sk=TRICKS.find(t=>t.id===id);b.textContent='Активировать · 10 🟡';b.disabled=S.caps<10;b.classList.toggle('primary',!b.disabled);b.removeAttribute('data-why');b.dataset.currency='caps';const ad=document.createElement('button');ad.className='btn wide';ad.dataset.act='adSkill77';ad.dataset.id=id;ad.textContent='🎬 Активировать за рекламу';ad.disabled=adChoice77()||!sk;b.insertAdjacentElement('afterend',ad);}
   return t.innerHTML;
 };
 const showBefore77=showScreen;showScreen=function(name,tab){showBefore77(name,tab);if(name==='life'&&(tab||TABS.life)==='skills')adsState().then(()=>{if(currentScreen==='life'&&TABS.life==='skills')renderCurrent(false);});};
