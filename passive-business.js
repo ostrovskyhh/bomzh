@@ -18,6 +18,10 @@ function businessSync(){
 HOOKS.load.push(()=>{businessSync();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)businessSync();});
 setInterval(()=>{if(!document.hidden)businessSync();},60000);
+// A single ownership rate applies to local and managed enterprises; levels are not businesses.
+function businessOwnedCount(){return Object.keys(S.biz||{}).length+new Set((S.managedBusinesses||[]).map(e=>e.key)).size;}
+function businessTaxRate(){return (Math.round(BIZ_TAX*100)+Math.min(10,Math.max(0,businessOwnedCount()-3)*2))/100;}
+function businessTaxLabel(){return Math.round(businessTaxRate()*100)+'%';}
 function businessRates(b, st={lvl:1}, vip=isVip()) {
   const lvl=Math.max(1,Math.min(BIZ_MAX_LVL,Number(st.lvl)||1));
   const prestige=prestigeMult(), gang=1+clanBonus(), boss=1+.05*perk('boss');
@@ -25,11 +29,11 @@ function businessRates(b, st={lvl:1}, vip=isVip()) {
   const staff=b.id==='club'?clubMult():1;
   const turnover=base*prestige*gang*boss*(vip?2:1)*staff;
   const wages=b.id==='club'?clubSalary():0, operating=Math.max(0,turnover-wages);
-  return {base,turnover,wages,operating,tax:operating*BIZ_TAX,net:operating*(1-BIZ_TAX),prestige,gang,boss,staff,vip};
+  return {base,turnover,wages,operating,tax:operating*businessTaxRate(),net:operating*(1-businessTaxRate()),prestige,gang,boss,staff,vip};
 }
 function businessPocket(amount) { return amount-(alimonyOn()?Math.round(amount*ALIMONY_SHARE):0); }
 function businessNetRate(b,st=incomeBusiness(b)) { const n=businessRates(b,st).net; return n*(alimonyOn()?1-ALIMONY_SHARE:1); }
-function businessPayout(st) { const beforeAlimony=Math.floor(Math.max(0,st.cash||0)*(1-BIZ_TAX)+1e-8); return {beforeAlimony,net:businessPocket(beforeAlimony)}; }
+function businessPayout(st) { const beforeAlimony=Math.floor(Math.max(0,st.cash||0)*(1-businessTaxRate())+1e-8); return {beforeAlimony,net:businessPocket(beforeAlimony)}; }
 function businessSnapshot(b,st) {
   return {plain:businessRates(b,st,false).operating,vip:businessRates(b,st,true).operating,vipUntil:Math.max(0,Number(S.vipUntil)||0)};
 }
@@ -61,12 +65,12 @@ function businessTotals(){
   return BUSINESSES.reduce((a,b)=>{const st=S.biz[b.id];if(st){a.owned++;a.rate+=businessNetRate(b,st);a.cash+=businessPayout(st).net;if(st.cash>=bizCap(b,st))a.full++;}return a;},{owned:0,rate:0,cash:0,full:0});
 }
 function businessStaffCost(s){const club=BUSINESSES.find(b=>b.id==='club');return Math.round(s.price*(staffLvl(s.id)+1)*club.price/12000000);}
-function businessStaffGain(s){const club=BUSINESSES.find(b=>b.id==='club'),r=businessRates(club,S.biz.club),scale=club.price/12000000;return (r.turnover/r.staff*s.boost-s.salary*scale)*(1-BIZ_TAX)*(alimonyOn()?1-ALIMONY_SHARE:1);}
+function businessStaffGain(s){const club=BUSINESSES.find(b=>b.id==='club'),r=businessRates(club,S.biz.club),scale=club.price/12000000;return (r.turnover/r.staff*s.boost-s.salary*scale)*(1-businessTaxRate())*(alimonyOn()?1-ALIMONY_SHARE:1);}
 function businessInvestment(b,st){const staff=b.id==='club'?STAFF.reduce((sum,s)=>{const n=staffLvl(s.id);return sum+s.price*n*(n+1)/2*b.price/12000000;},0):0;return b.price+staff+Array.from({length:Math.max(0,st.lvl-1)},(_,i)=>bizUpgradeCost(b,{lvl:i+1})).reduce((a,n)=>a+n,0);}
 function businessCollect(ids,btn){
   businessTick();let collected=0,count=0;
   for(const id of ids){const st=S.biz[id];if(!st)continue;const p=businessPayout(st);if(p.beforeAlimony<1)continue;
-    st.cash=Math.max(0,st.cash-p.beforeAlimony/(1-BIZ_TAX));
+    st.cash=Math.max(0,st.cash-p.beforeAlimony/(1-businessTaxRate()));
     const before=S.money;addMoney(p.beforeAlimony);const paid=S.money-before;collected+=paid;count++;
     S.stats.bizEarned=(S.stats.bizEarned||0)+paid;track('bizCollect');
   }
@@ -86,13 +90,13 @@ Object.assign(ACTIONS,{
   hireStaff:(id)=>{const s=STAFF.find(x=>x.id===id);if(!s||!S.biz.club||staffLvl(id)>=STAFF_MAX)return;const cost=businessStaffCost(s);if(S.money<cost)return;
     businessTick();S.money-=cost;S.clubStaff[id]=staffLvl(id)+1;S.biz.club.rates=businessSnapshot(BUSINESSES.find(b=>b.id==='club'),S.biz.club);track('staff');sfx('buy');toast(`${s.emoji} ${s.name}: уровень ${staffLvl(id)}. Зарплата уже учтена в прибыли`,'good');},
   clubParty:()=>{businessTick();const st=S.biz.club;if(!st||!staffLvl('dj')||cdLeft('clubParty')>0)return;const m=incomePartyGain();if(m<=0){toast('Сначала освободи кассу клуба','bad');return;}
-    st.cash+=m;setCd('clubParty',PARTY_CD);track('clubParty');confetti(60);sfx('jackpot');resultModal({emoji:'🎉',title:'Аншлаг!',text:`В кассу поступило ${incomeMoney(m)}. К получению после всех удержаний: ${incomeMoney(businessPocket(Math.floor(m*(1-BIZ_TAX))))}.`,btn:'Отлично'});},
+    st.cash+=m;setCd('clubParty',PARTY_CD);track('clubParty');confetti(60);sfx('jackpot');resultModal({emoji:'🎉',title:'Аншлаг!',text:`В кассу поступило ${incomeMoney(m)}. К получению после всех удержаний: ${incomeMoney(businessPocket(Math.floor(m*(1-businessTaxRate()))))}.`,btn:'Отлично'});},
   bizDetails:(id)=>businessDetails(id),
 });
 function businessDetails(id){
   const b=BUSINESSES.find(x=>x.id===id);if(!b)return;businessTick();const st=incomeBusiness(b),r=businessRates(b,st),up=incomeUpgradeGain(b);
   openModal(`<div class="business-detail"><div class="business-emblem">${b.emoji}</div><h3>${esc(b.name)}</h3><p>Расчёт для тебя прямо сейчас · ${st.lvl}/${BIZ_MAX_LVL}</p>
-    <dl><dt>База с уровнем бизнеса</dt><dd>${incomeMoney(r.base)}/ч</dd><dt>Престиж</dt><dd>×${r.prestige.toFixed(2)}</dd><dt>Деловая жилка</dt><dd>×${r.boss.toFixed(2)}</dd><dt>Банда</dt><dd>×${r.gang.toFixed(2)}</dd><dt>VIP</dt><dd>×${r.vip?2:1}</dd>${b.id==='club'?`<dt>Персонал</dt><dd>×${r.staff.toFixed(2)}</dd>`:''}<dt>Выручка</dt><dd>${incomeMoney(r.turnover)}/ч</dd><dt>Зарплаты</dt><dd>−${incomeMoney(r.wages)}/ч</dd><dt>Налог 10%</dt><dd>−${incomeMoney(r.tax)}/ч</dd>${alimonyOn()?`<dt>Алименты ${ALIMONY_SHARE*100}%</dt><dd>−${incomeMoney(r.net*ALIMONY_SHARE)}/ч</dd>`:''}<dt><b>Твоя чистая прибыль</b></dt><dd><b>${incomeMoney(businessNetRate(b,st))}/ч</b></dd></dl>
+    <dl><dt>База с уровнем бизнеса</dt><dd>${incomeMoney(r.base)}/ч</dd><dt>Престиж</dt><dd>×${r.prestige.toFixed(2)}</dd><dt>Деловая жилка</dt><dd>×${r.boss.toFixed(2)}</dd><dt>Банда</dt><dd>×${r.gang.toFixed(2)}</dd><dt>VIP</dt><dd>×${r.vip?2:1}</dd>${b.id==='club'?`<dt>Персонал</dt><dd>×${r.staff.toFixed(2)}</dd>`:''}<dt>Выручка</dt><dd>${incomeMoney(r.turnover)}/ч</dd><dt>Зарплаты</dt><dd>−${incomeMoney(r.wages)}/ч</dd><dt>Налог ${businessTaxLabel()}</dt><dd>−${incomeMoney(r.tax)}/ч</dd>${alimonyOn()?`<dt>Алименты ${ALIMONY_SHARE*100}%</dt><dd>−${incomeMoney(r.net*ALIMONY_SHARE)}/ч</dd>`:''}<dt><b>Твоя чистая прибыль</b></dt><dd><b>${incomeMoney(businessNetRate(b,st))}/ч</b></dd></dl>
     <p>+50% базового дохода за каждый уровень. ${st.lvl<BIZ_MAX_LVL?`Следующий уровень: +${incomeMoney(up)}/ч за ${incomeMoney(bizUpgradeCost(b,st))}.`:'Предприятие полностью развито.'}</p><p>Случайных поломок и потерь кассы больше нет. Платить за ремонт не нужно. Бонусы к работе, тапам и опыту не умножают бизнес — здесь перечислены именно его бонусы.</p><button class="btn primary wide" data-act="close">Понятно</button></div>`);
 }
 function businessCard(b){
@@ -111,8 +115,8 @@ function businessStaffHTML(){
 }
 function businessDashboard(){
   businessTick();const t=businessTotals(),owned=BUSINESSES.filter(b=>S.biz[b.id]),available=BUSINESSES.filter(b=>!S.biz[b.id]);
-  return `<div class="business-dashboard" data-business-city="${city()}"><header class="business-hero"><small>ПАССИВНЫЙ ДОХОД · ${esc({zas:'Засранск',msk:'Москвабад',mex:'Мексика',fr:'Франция'}[city()])}</small><h2>Твоё дело</h2><p>Открой. Развивай. Забирай прибыль.</p><div class="business-metrics"><div><small>Предприятия этого города / час</small><b>${incomeHTML('biz-total')}</b></div><div><small>Готово к получению</small><b>${incomeHTML('biz-allcash')}</b></div></div><button class="btn primary wide" data-business-all="1" data-act="bizCollectAll" ${t.cash>=1?'':'disabled'}>Забрать с касс этого города</button><p>Касса на <b>${incomeHTML('biz-hours')} ч</b> · работает и без тебя</p><p>Получено с обновления 4.35: <b>${incomeHTML('biz-lifetime')}</b></p></header>
-    <details class="business-how"><summary>Как зарабатывать на бизнесе</summary><p>1. Открой доступное предприятие. Деньги автоматически копятся в его кассе, даже когда игра закрыта.</p><p>2. Забирай прибыль одной кнопкой. При полной кассе доход приостанавливается, деньги не теряются.</p><p>3. Развивай предприятие: каждый из 5 уровней даёт +50% базовой выручки. На карточке — прирост чистой прибыли и время окупаемости.</p><p>Обычная касса — 24 часа, с VIP — 48 часов и двойная выручка. При окончании VIP уже заработанные деньги сохраняются. Временный бонус учитывается только пока он действует.</p><p>Налог 10%, зарплаты клуба и действующие алименты уже вычтены из показанной прибыли. Престиж, «Деловая жилка» и бонус банды учтены. Проверок со штрафами и случайных поломок больше нет.</p><p>При переезде предприятия сохраняются под управлением компании: выплата раз в 6 часов, 60% комиссии с новой прибыли. Остаток прежней кассы входит в первую выплату без новой комиссии. При престиже сбрасываются все предприятия, включая переданные компании; достижения и статистика сохраняются.</p></details>
+  return `<div class="business-dashboard" data-business-city="${city()}"><header class="business-hero"><small>ПАССИВНЫЙ ДОХОД · ${esc({zas:'Засранск',msk:'Москвабад',mex:'Мексика',fr:'Франция'}[city()])}</small><h2>Твоё дело</h2><p>Открой. Развивай. Забирай прибыль.</p><p><span>Налог:</span> <b>${businessTaxLabel()}</b> · <span>Бизнесов во всех городах:</span> ${businessOwnedCount()}</p><div class="business-metrics"><div><small>Предприятия этого города / час</small><b>${incomeHTML('biz-total')}</b></div><div><small>Готово к получению</small><b>${incomeHTML('biz-allcash')}</b></div></div><button class="btn primary wide" data-business-all="1" data-act="bizCollectAll" ${t.cash>=1?'':'disabled'}>Забрать с касс этого города</button><p>Касса на <b>${incomeHTML('biz-hours')} ч</b> · работает и без тебя</p><p>Получено с обновления 4.35: <b>${incomeHTML('biz-lifetime')}</b></p></header>
+    <details class="business-how"><summary>Как зарабатывать на бизнесе</summary><p>Налог удерживается автоматически при получении прибыли. База — 10%. За каждый бизнес сверх трёх: +2 процентных пункта, максимум 20%. Считаются предприятия всех городов, а не уровни.</p><p>1. Открой доступное предприятие. Деньги автоматически копятся в его кассе, даже когда игра закрыта.</p><p>2. Забирай прибыль одной кнопкой. При полной кассе доход приостанавливается, деньги не теряются.</p><p>3. Развивай предприятие: каждый из 5 уровней даёт +50% базовой выручки. На карточке — прирост чистой прибыли и время окупаемости.</p><p>Обычная касса — 6 часов, с VIP — 12 часов и двойная выручка. При окончании VIP уже заработанные деньги сохраняются. Временный бонус учитывается только пока он действует.</p><p>Налог ${businessTaxLabel()}, зарплаты клуба и действующие алименты уже вычтены из показанной прибыли. Престиж, «Деловая жилка» и бонус банды учтены. Проверок со штрафами и случайных поломок больше нет.</p><p>При переезде предприятия сохраняются под управлением компании: выплата в 00:00 и 12:00 по Москве, общий лимит 300 000 ₽ после комиссии и налога за период; комиссия компании — 60% с новой прибыли. Остаток прежней кассы входит в первую выплату без новой комиссии. При престиже сбрасываются все предприятия, включая переданные компании; достижения и статистика сохраняются.</p></details>
     ${owned.length?`<div class="subhead">Мои предприятия · ${owned.length}/${BUSINESSES.length}</div>${owned.map(businessCard).join('')}`:'<div class="business-empty">🏪 <b>Первое дело — первый стабильный доход</b><p>Выбери доступный бизнес ниже. Базовая покупка окупается примерно за 15–17 часов работы, с бонусами — быстрее.</p></div>'}
     ${available.length?`<div class="subhead">Расширить дело</div>${available.map(businessCard).join('')}`:''}${businessStaffHTML()}</div>`;
 }

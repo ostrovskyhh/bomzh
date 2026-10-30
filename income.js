@@ -11,7 +11,7 @@ function incomeMoney(value){
   return (mexican?'$':'')+(mexican?value/USD_RATE:value).toLocaleString('ru-RU',{maximumFractionDigits:2})+(mexican?'':' ₽');
 }
 function incomeBusiness(b){return S.biz[b.id]||{lvl:1,broken:false};}
-function incomeAfterTax(amount){return amount*(1-BIZ_TAX);}
+function incomeAfterTax(amount){return amount*(1-businessTaxRate());}
 function incomeUpgradeGain(b){const st=incomeBusiness(b);return businessNetRate(b,{...st,lvl:st.lvl+1})-businessNetRate(b,st);}
 function incomePartyGain(){const b=BUSINESSES.find(b=>b.id==='club'),st=S.biz.club;return b&&st?Math.max(0,Math.min(Math.round(bizIncome(b,st)*4),bizCap(b,st)-st.cash)):0;}
 function incomeHours(hours){if(!Number.isFinite(hours)||hours<0)return '— (нет дохода)';if(hours<1)return Math.max(1,Math.ceil(hours*60))+' мин';return hoursText(hours);}
