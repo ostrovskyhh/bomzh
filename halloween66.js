@@ -58,7 +58,9 @@ const halloweenDateBefore=openDateMenu;openDateMenu=function(id){halloweenDateBe
 ACTIONS.halloweenDate=arg=>{const [id,type]=String(arg).split(':'),g=GIRLS.find(g=>g.id===id);if(!halloweenActive()||!g||!['lantern','ghost'].includes(type)||S.busy||MG||MG_PENDING||S.energy<10||cdLeft('date'))return;
  if(S.girlfriend&&S.girlfriend!==id){toast('Пригласи свою партнёршу или сначала разберись в отношениях.','bad');return;}
  S.energy-=10;setCd('date',DATE_CD);save();runGame({countdown:0,title:type==='lantern'?'Фонари на двоих':'Прогулка с призраками',hint:'Решите задачу вместе. Спешить не нужно.',duration:0,setup:type==='lantern'?halloweenEngineLantern:halloweenEngineGhost,finish:(score,mg)=>{
- if(mg.hwSolved&&halloweenActive()){const st=girlState(id);st.rel=Math.min(100,(st.rel||0)+12);if(S.girlfriend===id)S.love=Math.min(100,(S.love||0)+8);addMood(10);addXp(XP.date);track('date');halloweenTrack('hwCelebrate');track('hwDate');save();}closeModal();showScreen('fun','dates');}});
+ const ok=mg.hwSolved&&halloweenActive();
+ if(ok){const st=girlState(id);st.rel=Math.min(100,(st.rel||0)+12);if(S.girlfriend===id){addLove(8);S.gfDates=(S.gfDates||0)+1;}addMood(10);addXp(XP.date);track('date');halloweenTrack('hwCelebrate');track('hwDate');save();}
+ closeModal();showScreen('fun','dates');if(ok)toast('Сезонное свидание засчитано','good');}});
 };
 
 prestigeProfile=(function(orig){return ()=>({...orig(),halloweenEvents:S.halloweenEvents||{}});})(prestigeProfile);

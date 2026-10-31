@@ -36801,5 +36801,12 @@
   "Переход открывает именно «Двор», даже если раньше ты смотрел «Районы» или «Сходки».": "The link opens the Yard tab, even if you last visited Districts or Meetups.",
   "Для «Своими руками» выполни новое действие для активной стройки или общей истории, вернись и нажми «Засчитать вклад». Отдельные дела «Районов» не заменяют этот вклад.": "For Helping Hands, complete a new action for an active building project or shared story, return and press Credit contribution. Separate District missions do not count as that contribution.",
   "Для «Есть что вспомнить» нужен личный вклад и завершение всей общей истории.": "For A Story to Remember, you need to make a personal contribution and finish the whole shared story.",
-  "Если поручение ещё нельзя сдать, кнопка объяснит оставшиеся цели. Правила зачёта, лимиты и награды не менялись.": "If you cannot claim a task yet, its button explains the remaining objectives. Completion rules, limits and rewards stay the same."
+  "Если поручение ещё нельзя сдать, кнопка объяснит оставшиеся цели. Правила зачёта, лимиты и награды не менялись.": "If you cannot claim a task yet, its button explains the remaining objectives. Completion rules, limits and rewards stay the same.",
+  "Сезонное свидание засчитано": "Seasonal date counted",
+  "Свидания и семейный портрет": "Dates and family portraits",
+  "🎃 Завершённые свидания Хеллоуина учитываются в числе свиданий с партнёршей, в том числе для предложения руки и сердца": "🎃 Completed Halloween dates count toward dates with your partner, including the marriage proposal requirement",
+  "🏡 На главном экране супруга отображается целиком и в правильном масштабе; подписи больше не обрезают головы членов семьи": "🏡 Your wife appears in full at the correct scale on the home screen; labels no longer crop family members’ heads",
+  "💘 Версия 5.14 — Свидания и семейный портрет": "💘 Version 5.14 — Dates and family portraits",
+  "Успешные свидания Хеллоуина теперь увеличивают число свиданий с твоей партнёршей. Они учитываются в требованиях к предложению руки и сердца. После завершения появляется подтверждение зачёта.": "Successful Halloween dates now increase your date count with your partner and count toward the marriage proposal requirement. A confirmation appears after completion.",
+  "Исправлен семейный портрет на главном экране: супруга стала соразмерна Валере, её голова видна целиком. Изображения детей и подписи также помещаются в отведённую область.": "The home-screen family portrait is fixed: your wife is now sized appropriately beside Valera, with her full head visible. Children and labels also fit within their display area."
 }
