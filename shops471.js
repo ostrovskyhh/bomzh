@@ -21,10 +21,10 @@ for(const row of CITY_PRICE_BASE_468){const kind=SHOP471_GROUPS.get(row.item);if
  if(value!==row.value){SHOP471_CHANGED.push({kind,field:row.field,before:row.value,after:value});row.value=value;}
 }
 // Optional alternatives only: essential food/medicine and a cash route to job clothing remain available.
-for(const [slot,id] of [['hat','cilinder'],['body','malinovy'],['shoes','boots']]){const it=CLOTHES[slot].find(x=>x.id===id);if(it)it.payBottles=true;}
-for(const id of ['ferret','rabbit']){const p=PETS.find(x=>x.id===id);if(p)p.payBottles=true;}
-for(const id of ['bt_amber','bt_milk','bt_agave','bt_fr_parfum']){const b=bottleById(id);if(b)b.payBottles=true;}
-function shopBottleCost(item){if(!item?.payBottles)return 0;const min=10000*1.15**CITIES[city()].idx;return Math.ceil(Math.max(min,item.price*2.5/(.8*CITY_RATE_FACTOR()))/100)*100;}
+for(const [slot,id] of [['hat','ushanka'],['body','pukhovik'],['shoes','kedy']]){const it=CLOTHES[slot].find(x=>x.id===id);if(it)it.payBottles=true;}
+for(const id of ['tortoise','ferret']){const p=PETS.find(x=>x.id===id);if(p)p.payBottles=true;}
+for(const id of ['bt_duchesse','bt_amber','bt_blue','bt_milk']){const b=bottleById(id);if(b)b.payBottles=true;}
+function shopBottleCost(item){if(!item?.payBottles)return 0;const min=10000*1.15**CITIES[city()].idx,previous=Math.ceil(Math.max(min,item.price*2.5/(.8*CITY_RATE_FACTOR()))/100)*100;return Math.round(previous*.85);}
 function shopCanPay(item,n=1){return !!item&&Number.isSafeInteger(n)&&n>0&&(item.payBottles?S.bottles>=shopBottleCost(item)*n:S.money>=item.price*n);}
 function shopPay(item,n=1){if(!shopCanPay(item,n))return false;if(item.payBottles){const cost=shopBottleCost(item)*n;S.bottles-=cost;S.stats.bottlesSpent=(S.stats.bottlesSpent||0)+cost;}else S.money-=item.price*n;return true;}
 function shopBottleLabel(item){return fmt(shopBottleCost(item))+' 🍾';}
@@ -36,6 +36,6 @@ const shopPriceBefore471=priceBtn;priceBtn=function(act,id,price,can,label){let 
  const enough=shopCanPay(it);return `<button class="btn ${allowed&&enough?'primary':''}" data-act="${act}" data-id="${esc(id)}" ${allowed&&enough?'':'disabled'} data-currency="bottles">${shopBottleLabel(it)}</button>`;
 };
 const shopBottlePriceBefore471=bottlePrice;bottlePrice=b=>b.payBottles?shopBottleLabel(b):shopBottlePriceBefore471(b);
-const shopRetailBefore471=RENDER.shop[1];renderShop=function(){const html=shopRetailBefore471();return ['clothes','pets','bottles'].includes(TABS.shop)?'<div class="info-card"><b>🍾 Товары за бутылки</b><p>На выбранных товарах указана цена в бутылках. Это отдельная оплата, а не рубли. Цена фиксирована для города и не зависит от текущего курса или усилителей.</p></div>'+html:html;};
+const shopRetailBefore471=RENDER.shop[1];renderShop=function(){const html=shopRetailBefore471();return ['food','clothes','pets','bottles'].includes(TABS.shop)?'<div class="info-card"><b>🍾 Ранние и средние покупки за бутылки</b><p>Часть ранних и средних товаров оплачивается бутылками; лучшие обычные товары — деньгами города. Все цены в бутылках снижены на 15%. Цена фиксирована для города и не зависит от курса продажи или усилителей.</p></div>'+html:html;};
 RENDER.shop[1]=renderShop;
 HOOKS.load.push(cityPrices468);cityPrices468();

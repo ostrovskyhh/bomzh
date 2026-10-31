@@ -1,7 +1,13 @@
 // Legacy ownership is a floor, never a reason to remove a player's property.
-for(const i of [4,6])if(HOUSING[i])HOUSING[i].payBottles=true;
-for(const i of [2,5,9])if(TRANSPORT[i])TRANSPORT[i].payBottles=true;
-for(const id of ['protein','sushi','chef']){const f=FOOD.find(f=>f.id===id);if(f)f.payBottles=true;}
+const BOTTLE_HOUSING72={zas:[3,4],msk:[3,4],mex:[2,3],fr:[2,3],it:[2,3],cn:[2,3]};
+function purchaseCurrencies72(c=city()){
+ const homes=BOTTLE_HOUSING72[c]||BOTTLE_HOUSING72.zas;
+ HOUSING.forEach((h,i)=>{h.payBottles=homes.includes(i);});
+ TRANSPORT.forEach((t,i)=>{t.payBottles=[2,4,5].includes(i);});
+ FOOD.forEach(f=>{f.payBottles=['pelmeni','stolovka','protein'].includes(f.id);});
+}
+const purchaseCityBefore72=applyCity;applyCity=function(c=city()){const result=purchaseCityBefore72.apply(this,arguments);purchaseCurrencies72(c);return result;};
+purchaseCurrencies72();
 function purchaseProgress72(){
   if(!S.buyProgress72){S.buyProgress72={city:city(),home:Math.max(S.ownedHousing||0,S.housing||0),car:Math.max(S.transport||0,...fleet())};}
   if(S.buyProgress72.city!==city())S.buyProgress72={city:city(),home:S.ownedHousing||0,car:S.transport||0};
@@ -20,6 +26,7 @@ priceBtn=function(act,id,price,can,label){
   if(!item)return priceBefore72(act,id,price,can,label);
   if(!allowed){const why=act==='house'||act==='rentHouse'?purchaseWhy72('home',+id):act==='buyTransport'?purchaseWhy72('car',+id):'Нужен следующий уровень';return `<button class="btn" disabled>${esc(why)}</button>`;}
   if(item.payBottles&&act!=='rentHouse')return `<button class="btn ${shopCanPay(item)?'primary':''}" data-act="${act}" data-id="${esc(id)}" data-currency="bottles" ${shopCanPay(item)?'':'disabled'}>${shopBottleLabel(item)}</button>`;
+  if(act==='house')label=(String(label||'').startsWith('Выкупить')?'Выкупить':'Купить')+' '+(typeof currencyMoney511==='function'?currencyMoney511(item.price):cityMoney(item.price));
   return priceBefore72(act,id,price,can,label);
 };
-for(const tab of ['housing','transport']){const old=EXTRA_TABS.shop[tab];EXTRA_TABS.shop[tab]=()=>'<div class="info-card"><b>Постепенное развитие</b><p>Покупай жильё и транспорт по порядку. Ранее купленное сохранено. Аренда не открывает следующую покупку. Продажа транспорта не отменяет пройденную ступень.</p><p>🍾 Некоторые покупки оплачиваются бутылками. Аренда, коммуналка и бензин — деньгами.</p></div>'+old().replace(/class="card /g,'class="card purchase-card72 ');}
+for(const tab of ['housing','transport']){const old=EXTRA_TABS.shop[tab];EXTRA_TABS.shop[tab]=()=>'<div class="info-card"><b>Постепенное развитие</b><p>Покупай жильё и транспорт по порядку. Ранее купленное сохранено. Аренда не открывает следующую покупку. Продажа транспорта не отменяет пройденную ступень.</p><p>🍾 Бутылками оплачиваются выбранные ранние и средние ступени; верхние — деньгами города. Цены в бутылках снижены на 15%. Аренда, коммуналка и бензин — деньгами.</p></div>'+old().replace(/class="card /g,'class="card purchase-card72 ');}
