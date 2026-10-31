@@ -2825,7 +2825,7 @@ function statFloats() {
     const v = S[key];
     if (shown[key] !== undefined) {
       const d = v - shown[key];
-      if (Math.abs(d) >= min) floatAt($(target), `${d > 0 ? '+' : '−'}${fmt(Math.abs(d))}${unit ? ' ' + unit : ''}`, d > 0 ? 'good' : 'bad');
+      if (Math.abs(d) >= min) floatAt($(target), key==='money'&&typeof cityMoney==='function'?`${d > 0 ? '+' : '−'}${cityMoney(Math.abs(d))}`:`${d > 0 ? '+' : '−'}${fmt(Math.abs(d))}${unit ? ' ' + unit : ''}`, d > 0 ? 'good' : 'bad');
       if (key === 'energy' && v < 1 && shown.energy >= 1) { toast('⚡ Энергия кончилась! Поспи или выпей кофе', 'bad'); bump('energyText'); }
     }
     shown[key] = v;

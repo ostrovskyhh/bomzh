@@ -1,0 +1,15 @@
+/* Color, border and existing text/icon jointly identify the currency. */
+body.beta button[data-purchase519]{border-width:1px;border-style:solid;white-space:normal;line-height:1.4;min-height:42px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+body.beta button[data-purchase519="money"]{background:linear-gradient(135deg,#214b3f,#153a30)!important;border-color:#77cba6!important;color:#e2fff0!important;box-shadow:inset 4px 0 #77cba6}
+body.beta button[data-purchase519="bottles"]{background:linear-gradient(135deg,#164b59,#103740)!important;border-color:#74d7e7!important;color:#e4fcff!important;box-shadow:inset 4px 0 #74d7e7}
+body.beta button[data-purchase519="caps"]{background:linear-gradient(135deg,#e5af4e,#c58b2d)!important;border-color:#ffe0a0!important;color:#281b0b!important;box-shadow:inset 4px 0 #fff0bd}
+body.beta button[data-purchase519="stars"]{background:linear-gradient(135deg,#543a75,#392852)!important;border-color:#c7a4f0!important;color:#faf0ff!important;box-shadow:inset 4px 0 #c7a4f0}
+body.beta button[data-purchase519="keys"]{background:#30353c!important;border-color:#a9b4c1!important;color:#f2f5f9!important}
+body.beta button[data-purchase519]:disabled{opacity:.58;filter:saturate(.6);cursor:not-allowed}
+body.beta button[data-purchase519]:focus-visible{outline:3px solid #fff;outline-offset:3px}
+button[data-exact-cost519],.purchase-number519{font-weight:850;font-variant-numeric:tabular-nums}
+button[data-purchase519="caps"][data-id="energetik"]{display:flex!important;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;min-width:0;height:auto!important;min-height:48px}
+button[data-purchase519="caps"] .energy77-price{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;max-width:100%;min-height:28px;flex:0 0 auto;white-space:normal!important;line-height:1.4}
+button[data-purchase519="caps"] .energy77-price .currency-name511{white-space:normal;font-size:inherit}
+button[data-purchase519="caps"] .energy77-price .ic{width:20px;height:20px;flex:0 0 20px}
+@media(prefers-reduced-motion:no-preference){button[data-purchase519]:not(:disabled):active{filter:brightness(1.15)}}
