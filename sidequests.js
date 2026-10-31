@@ -85,10 +85,12 @@ function sideCard(q, mode) {
   const head = `<div class="sq-head"><span class="sq-who">${q.who}</span><div><small>${SIDE_GROUPS[q.group]} · ${q.from}</small><b>${q.title}</b></div>${q.every ? `<i class="sq-rep">🔁 ${q.every} ч</i>` : ''}</div>`;
   if (mode === 'active') {
     const ready = sideReady(q);
+    const missing=q.goals.filter(g=>sideProg(q,g)<g.need).map(g=>`${g.text} (${Math.min(g.need,sideProg(q,g))}/${g.need})`).join(' · ');
+    const guide=!ready&&q.yardGuide?`<div class="info-card sq-help"><b>Как выполнить поручение</b><ol>${q.yardSteps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol><p>${esc(q.yardNote)}</p><div class="btn-row"><button class="btn primary small" data-act="gangGuideGo" data-id="yard">Открыть двор</button><button class="btn small" data-act="gangGuide" data-id="${q.yardGuide}">Подробная инструкция</button></div></div>`:'';
     return `<div class="sq-card active ${ready ? 'ready' : ''}">${head}<p>«${q.text}»</p>
       <div class="goals">${q.goals.map((g) => { const c = Math.min(g.need, sideProg(q, g)); return `<div class="goal ${c >= g.need ? 'ok' : ''}"><span>${c >= g.need ? '✅' : '▫️'} ${g.text}</span><b>${c}/${g.need}</b><div class="progress"><div style="width:${(c / g.need) * 100}%"></div></div></div>`; }).join('')}</div>
-      <div class="q-reward">🎁 ${sideRewardText(q)}</div>
-      <div class="btn-row"><button class="btn ${ready ? 'primary' : ''}" data-act="sideDone" data-id="${q.id}" ${ready ? '' : 'disabled'}>${ready ? 'Сдать поручение' : 'Выполняется…'}</button>
+      ${guide}<div class="q-reward">🎁 ${sideRewardText(q)}</div>
+      <div class="btn-row"><button class="btn ${ready ? 'primary' : ''}" data-act="sideDone" data-id="${q.id}" ${ready ? '' : `disabled data-why="${esc('Ещё нужно: '+missing)}"`}>${ready ? 'Сдать поручение' : 'Выполняется…'}</button>
         <button class="btn small" data-act="sideDrop" data-id="${q.id}">Отказаться</button></div></div>`;
   }
   const ok = !q.req || q.req();
