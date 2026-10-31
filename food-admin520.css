@@ -1,0 +1,4 @@
+.food520-nav{grid-column:1/-1;display:flex;gap:10px;position:sticky;top:0;z-index:4;padding:8px 0;background:var(--bg,#171512)}
+.food520-nav>.btn{flex:1;min-height:44px}
+.food520-group{scroll-margin-top:64px;display:grid;gap:12px;grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}.food520-heading{grid-column:1/-1;padding:15px 2px 10px;font-size:19px;border-bottom:1px solid #ffffff20;margin:12px 0 0}
+.admin520-self{margin:12px 0!important;min-height:46px!important}.admin520-premium{border:1px solid #cbb06d!important;scroll-margin-top:12px}
