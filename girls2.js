@@ -98,12 +98,13 @@ HOOKS.tick.push(() => {
   if(!g)return; // Preserve unknown legacy partners; never abort later tick hooks.
   const now = Date.now();
   if (S.gfWish && S.gfWish.gid !== S.girlfriend) S.gfWish = null;
-  if (S.gfWish && now > S.gfWish.until) {
+   if (S.gfWish && !S.gfWish.queued518 && now > S.gfWish.until) {
     S.gfWish = null;
     S.gfWishNext = now + rand(10, 18) * GAME_DAY;
     addLove(-10);
     if (typeof addTrust === 'function') addTrust(-4);
-    toast(`😤 ${girlShort(g)} обиделась: ты так и не исполнил её просьбу. 💗 −10`, 'bad');
+    const message=`😤 ${girlShort(g)} обиделась: ты так и не исполнил её просьбу. 💗 −10`;
+    if(typeof relationshipInfo518==='function')relationshipInfo518('Срок просьбы закончился',message);else toast(message,'bad');
     return;
   }
   if (S.gfWish || !popupTurn(2) || S.busy || MG) return;
@@ -112,6 +113,7 @@ HOOKS.tick.push(() => {
   const t = girlTier(g.id);
   const x = GIFTS.find((y) => y.id === pick(t.wish));
   if(!x)return;
+   if(typeof relationshipOffer518==='function'){S.gfWish={id:x.id,gid:g.id,until:0,queued518:true};relationshipOffer518('wish',g);save();return;}
   S.gfWish = { id: x.id, gid: g.id, until: now + WISH_TIME };
   sfx('notify');
   openModal(`<div class="romance"><div class="big-art" style="height:100px"><div class="big-emoji" style="line-height:100px">${g.emoji}</div></div>
@@ -133,7 +135,7 @@ EXTRA_TABS.fun.dates = () => {
     const w = S.gfWish && GIFTS.find((y) => y.id === S.gfWish.id);
     const box = `<div class="info-card gf-perks"><b>${tierTag(g.id)} Привилегии, пока она с тобой${S.married ? ' · жена ×1.5' : ''}</b>
       <ul>${t.perks.map((p) => `<li>${p}</li>`).join('')}</ul>
-      ${w ? `<div class="gf-wish">💝 Просит: <b>${w.emoji} ${w.name}</b> · осталось <span data-until="${S.gfWish.until}"></span>
+       ${w ? `<div class="gf-wish">💝 Просит: <b>${w.emoji} ${w.name}</b> · ${S.gfWish.queued518?'срок начнётся после прочтения':'осталось <span data-until="'+S.gfWish.until+'"></span>'}
         <button class="btn small primary" data-act="giftMenu" data-id="${g.id}">🎁 Подарить</button></div>` : '<small>Иногда она будет просить конкретный подарок — исполняй, и любовь вырастет быстрее.</small>'}</div>`;
     html = html.replace(/(<div class="premium-hero wife-hero">[\s\S]*?<\/div><\/div>)/, `$1${box}`);
   }
@@ -146,7 +148,7 @@ const TEMPT_GF = 20 * GAME_DAY;   // ≈ раз в 2 часа
 const TEMPT_WIFE = 40 * GAME_DAY; // ≈ раз в 4 часа
 approachGap = () => (S.married ? TEMPT_WIFE : S.girlfriend ? TEMPT_GF : APPROACH_SINGLE);
 // Даже когда срок подошёл — только в половине случаев
-temptation = (function (orig) { return (g) => { if (Math.random() < 0.5) return; orig(g); }; })(temptation);
+temptation = (function (orig) { return (g) => { if (!(typeof RELATIONSHIP_MANUAL518!=='undefined'&&RELATIONSHIP_MANUAL518)&&Math.random() < 0.5) return; orig(g); }; })(temptation);
 // Свидание со своей отодвигает искушение
 HOOKS.track.push((key) => { if (key === 'date' && S.girlfriend) S.approachAt = Math.max(S.approachAt || 0, Date.now() + approachGap() / 2); });
 // Старые сохранения: искушение было запланировано по старому частому графику

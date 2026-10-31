@@ -4,7 +4,7 @@ const WORLD_GAME_HINTS50={recipe:'Собери показанный рецепт
 function worldInt50(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function worldRound50(w){
  w.message='';w.partial=0;
- if(w.kind==='recipe'){w.items=['🍅','🧀','🌿','🍄','🫒'];w.order=Array.from({length:3},()=>worldInt50(0,4));}
+ if(w.kind==='recipe'){w.items=w.recipeItems||['🍅','🧀','🌿','🍄','🫒'];w.order=Array.from({length:3},()=>worldInt50(0,w.items.length-1));}
  if(w.kind==='sort'){w.items=w.city==='it'?['🍕','🏺','✉️']:['🥟','🍵','🔧'];w.correct=worldInt50(0,2);}
  if(w.kind==='route'){w.position=0;w.blocks=w.round%2?[1,5]:[5,6];}
  if(w.kind==='mosaic'){w.target=Array.from({length:9},(_,i)=>(i+w.round)%4);w.tiles=w.target.map(n=>(n+1+worldInt50(0,2))%4);}
@@ -21,7 +21,7 @@ function worldGameDraw50(mg){
  if(w.kind==='tea')body=`<div class="w50-tea">🍵 <b>Заказ: ${w.targetTemp}° · ${w.targetCups} ☕</b><div><span>${w.temp}°</span>${b('cool','−10°')}${b('heat','+10°')}</div><div><span>${w.cups} ☕</span>${b('less','−1')}${b('more','+1')}</div>${b('brew','Заварить чай','primary wide')}</div>`;
  if(w.kind==='circuit')body=`<div class="w50-circuit"><small>ОБРАЗЕЦ</small><div>${w.target.map(n=>`<i class="${n?'lit':''}">${n?'●':'○'}</i>`).join('')}</div><small>ВКЛЮЧИ ТАКИЕ ЖЕ УЗЛЫ</small><div>${w.bits.map((n,i)=>`<button class="${n?'lit':''}" data-w-input="${i}">${n?'●':'○'}</button>`).join('')}</div>${b('check','Проверить цепь','primary wide')}</div>`;
  if(w.kind==='logic')body=`<div class="w50-paper"><small>КВИТАНЦИЯ МАСТЕРСКОЙ</small><h3>${w.qty} × ${w.price} = ${w.total}</h3><p>${w.stamp?'✓ Штамп мастера на месте':'✕ Штампа мастера нет'}</p></div><div class="w50-inputs">${b('accept','Принять','green')}${b('return','Вернуть')}</div>`;
- const arena=$('mgArena');arena.className='mg-arena w50-arena '+w.city;arena.innerHTML=`<section class="w50-game"><header><small>${d.flag} ${esc(w.title||WORLD_GAME_NAMES50[w.kind])}</small><b>Задачи: ${mg.score}/${w.need}</b></header><p>${WORLD_GAME_HINTS50[w.kind]}</p>${body}<p class="w50-feedback" aria-live="polite">${w.message||'Без таймера — действуй в своём темпе'}</p><small>Ошибки: ${mg.mistakes||0}/5</small><button class="btn small" data-act="worldGameCancel50">Выйти без награды</button></section>`;
+ const arena=$('mgArena');arena.className='mg-arena w50-arena '+w.city;arena.innerHTML=`<section class="w50-game"><header><small>${d.flag} ${esc(w.title||WORLD_GAME_NAMES50[w.kind])}</small><b>Задачи: ${mg.score}/${w.need}</b></header><p>${WORLD_GAME_HINTS50[w.kind]}</p>${body}<p class="w50-feedback" aria-live="polite">${w.message||'Без таймера — действуй в своём темпе'}</p><small>Ошибки: ${mg.mistakes||0}/${w.mistakeLimit||5}</small><button class="btn small" data-act="worldGameCancel50">Выйти без награды</button></section>`;
  arena.onclick=e=>{const el=e.target.closest('[data-w-input]');if(el&&!el.disabled)worldGameInput50(mg,el.dataset.wInput);};if(typeof I18N!=='undefined')I18N.apply(arena);
 }
 function worldGameInput50(mg,key){
@@ -33,9 +33,9 @@ function worldGameInput50(mg,key){
  if(w.kind==='tea'){if(key==='heat')w.temp=Math.min(100,w.temp+10);else if(key==='cool')w.temp=Math.max(60,w.temp-10);else if(key==='more')w.cups=Math.min(4,w.cups+1);else if(key==='less')w.cups=Math.max(1,w.cups-1);else if(key==='brew'){good=w.temp===w.targetTemp&&w.cups===w.targetCups;wrong=!good;}}
  if(w.kind==='circuit'){if(key==='check'){good=w.bits.every((v,i)=>v===w.target[i]);wrong=!good;}else if(Number.isInteger(n)&&n>=0&&n<4)w.bits[n]=1-w.bits[n];}
  if(w.kind==='logic'){good=(key==='accept')===!!(w.stamp&&w.total===w.qty*w.price);wrong=!good;}
- if(wrong){mg.mistakes=(mg.mistakes||0)+1;w.message='Не совпало. Проверь образец и попробуй снова.';sfx('error');if(mg.mistakes>=5){mg.score=0;mgEnd();return;}}
+ if(wrong){mg.mistakes=(mg.mistakes||0)+1;w.message='Не совпало. Проверь образец и попробуй снова.';sfx('error');if(mg.mistakes>=(w.mistakeLimit||5)){mg.score=0;mgEnd();return;}}
  if(good){mgScore(1);w.round++;if(mg.score>=w.need){mgEnd();return;}worldRound50(w);}
  worldGameDraw50(mg);
 }
-function worldGameSetup50(mg,cfg={}){const home=cfg.city||city();mg.world50={city:home,kind:cfg.kind||'sort',need:Math.max(1,cfg.need||4),title:cfg.title||'',round:0};worldRound50(mg.world50);const bar=$('mgTime')?.parentElement;if(bar)bar.style.display='none';worldGameDraw50(mg);}
+function worldGameSetup50(mg,cfg={}){const home=cfg.city||city();mg.world50={city:home,kind:cfg.kind||'sort',need:Math.max(1,cfg.need||4),title:cfg.title||'',round:0,recipeItems:cfg.items,mistakeLimit:cfg.mistakeLimit||5};worldRound50(mg.world50);const bar=$('mgTime')?.parentElement;if(bar)bar.style.display='none';worldGameDraw50(mg);}
 ACTIONS.worldGameCancel50=()=>{if(MG?.world50){MG.score=0;mgEnd();}};

@@ -78,7 +78,8 @@ function partnerEvent() {
 }
 
 function partnerReply(emoji, title, text, good) {
-  resultModal({ emoji, rays: good ? '' : 'bad', title, text: `${text}<br><small>Доверие ${Math.round(S.trust)}/100</small>`, btn: 'Ок' });
+  if(typeof relationshipReply518==='function')relationshipReply518(emoji,title,text,good);
+  else resultModal({ emoji, rays: good ? '' : 'bad', title, text: `${text}<br><small>Доверие ${Math.round(S.trust)}/100</small>`, btn: 'Ок' });
   sfx(good ? 'good' : 'bad');
   checkTrust();
 }

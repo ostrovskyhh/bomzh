@@ -282,6 +282,7 @@ partnerEvent = (function (orig) {
   return function () {
     const g = partner();
     if (!g) return;
+    if(typeof relationshipOffer518==='function'&&!RELATIONSHIP_MANUAL518){relationshipOffer518('partner',g);return;}
     const list = PARTNER_STORIES.filter((s) => !s.cond || s.cond());
     if (Math.random() > 0.35 || !list.length) { orig(); return; }
     const st = pick(list);

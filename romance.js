@@ -46,6 +46,7 @@ HOOKS.tick.push(() => {
 });
 
 function approach(g) {
+  if(typeof relationshipOffer518==='function'&&!RELATIONSHIP_MANUAL518){relationshipOffer518('approach',g);return;}
   sfx('notify'); haptic('medium');
   APPROACH = g.id;
   openModal(`<div class="romance">
@@ -59,6 +60,7 @@ function approach(g) {
 }
 
 function temptation(g) {
+  if(typeof relationshipOffer518==='function'&&!RELATIONSHIP_MANUAL518){relationshipOffer518('temptation',g);return;}
   sfx('notify'); haptic('heavy');
   APPROACH = g.id;
   const partner = GIRLS.find((x) => x.id === S.girlfriend);
