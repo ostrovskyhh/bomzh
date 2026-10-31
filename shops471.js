@@ -24,7 +24,7 @@ for(const row of CITY_PRICE_BASE_468){const kind=SHOP471_GROUPS.get(row.item);if
 for(const [slot,id] of [['hat','ushanka'],['body','pukhovik'],['shoes','kedy']]){const it=CLOTHES[slot].find(x=>x.id===id);if(it)it.payBottles=true;}
 for(const id of ['tortoise','ferret']){const p=PETS.find(x=>x.id===id);if(p)p.payBottles=true;}
 for(const id of ['bt_duchesse','bt_amber','bt_blue','bt_milk']){const b=bottleById(id);if(b)b.payBottles=true;}
-function shopBottleCost(item){if(!item?.payBottles)return 0;const min=10000*1.15**CITIES[city()].idx,previous=Math.ceil(Math.max(min,item.price*2.5/(.8*CITY_RATE_FACTOR()))/100)*100;return Math.round(previous*.85);}
+function shopBottleCost(item){if(!item?.payBottles)return 0;const floor=100*1.15**CITIES[city()].idx,base=Math.max(floor,item.price*1.25/(.8*CITY_RATE_FACTOR())),step=base>=10000?100:10;return Math.round(Math.ceil(base/step)*step*.85);}
 function shopCanPay(item,n=1){return !!item&&Number.isSafeInteger(n)&&n>0&&(item.payBottles?S.bottles>=shopBottleCost(item)*n:S.money>=item.price*n);}
 function shopPay(item,n=1){if(!shopCanPay(item,n))return false;if(item.payBottles){const cost=shopBottleCost(item)*n;S.bottles-=cost;S.stats.bottlesSpent=(S.stats.bottlesSpent||0)+cost;}else S.money-=item.price*n;return true;}
 function shopBottleLabel(item){return fmt(shopBottleCost(item))+' 🍾';}

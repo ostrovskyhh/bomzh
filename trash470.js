@@ -1,10 +1,14 @@
 // One roll and one grant per search. Animation never owns the reward transaction.
 const TRASH_ODDS=[{id:'empty',chance:.30},{id:'damage',chance:.20},{id:'budget',chance:.476},{id:'valuable',chance:.014},{id:'premium',chance:.01}];
 let TRASH_RUN=null;
-function trashOutcome(roll=Math.random()){let n=roll;for(const o of TRASH_ODDS)if((n-=o.chance)<-1e-12)return o.id;return 'premium';}
+function trashOdds516(){const odds=TRASH_ODDS.map(x=>({...x}));for(const id of ['valuable','premium'])if(!trashPool80(id).length){const band=odds.find(x=>x.id===id);odds.find(x=>x.id==='budget').chance+=band.chance;band.chance=0;}return odds;}
+function trashOutcome(roll=Math.random()){let n=roll;for(const o of trashOdds516())if((n-=o.chance)<-1e-12)return o.id;return 'budget';}
 function trashFindPool(rarity){return CASES.flatMap(c=>(rarity==='common'?['common','uncommon']:[rarity]).flatMap(r=>(c.loot[r]||[]).map(row=>({c,row,rarity:r}))));}
 const TRASH_BANDS80={budget:{min:10,max:500000},valuable:{min:500010,max:1000000},premium:{min:1000010,max:Infinity}};
 let trashPools80=null;
+// Reference income excludes paid, temporary and prestige multipliers. The first
+// city job is the fallback before employment opens; ownership is never changed.
+function trashBudget516(){const jobs=JOBS.filter(j=>reqOk(j.req)),base=Math.max(...(jobs.length?jobs:JOBS.filter(j=>j.id==='dvornik')).map(j=>j.pay));return Math.max(250,Math.floor(base*10));}
 function trashPool80(kind){
  if(!trashPools80){trashPools80=Object.fromEntries(Object.keys(TRASH_BANDS80).map(k=>[k,[]]));
   for(const [rarity,weight] of [['common',.4],['rare',.09],['epic',.009],['legend',.001]]){const rows=trashFindPool(rarity);
@@ -13,7 +17,8 @@ function trashPool80(kind){
    }
   }
  }
- return trashPools80[kind]||[];
+ const budget=trashBudget516(),cap=Math.min(TRASH_BANDS80[kind]?.max||Infinity,budget*({budget:1,valuable:2,premium:3}[kind]||1));
+ return (trashPools80[kind]||[]).filter(x=>x.lo<=cap).map(x=>({...x,hi:Math.min(x.hi,Math.floor(cap/x.step)*x.step)})).filter(x=>x.lo<=x.hi);
 }
 function trashFind(kind){
  const pool=trashPool80(kind);if(!pool.length)throw Error('Empty trash price band: '+kind);
@@ -30,7 +35,7 @@ function trashGrant(kind){
  if(typeof onTrashExtra==='function')onTrashExtra();
  return {kind,emoji:it.e,title:it.name,item:it,text:'Находка добавлена на барахолку. Можно оставить, осмотреть или продать.'};
 }
-function trashOddsHTML(){return '<div class="info-card trash470-odds"><b>Шансы каждой попытки</b><p>Пусто — 30% · урон — 20% · предмет до 500 000 ₽ включительно — 47,6% · дороже 500 000 до 1 000 000 ₽ включительно — 1,4% · дороже 1 000 000 ₽ — 1%.</p><p>Шансы считаются за одну попытку по окончательной цене предмета в рублях, с учётом качества. Уровень, город и VIP не меняют шансы. Вещи обычных кейсов хранятся на барахолке; эксклюзивы за Stars остаются в донатных кейсах.</p></div>';}
+function trashOddsHTML(){const odds=trashOdds516(),percent=id=>(100*odds.find(x=>x.id===id).chance).toLocaleString('ru-RU',{maximumFractionDigits:2});return `<div class="info-card trash470-odds"><b>Шансы каждой попытки</b><p>Пусто — 30% · урон — 20% · обычная находка — ${percent('budget')}% · от 500 000 до 1 000 000 ₽ — ${percent('valuable')}% · дороже 1 000 000 ₽ — ${percent('premium')}%.</p><p>Стоимость новых находок зависит от доступных работ: обычная — не выше 10 базовых смен, дорогие — до 20 и 30. Сейчас предел обычной находки: ${incomeMoney(Math.min(500000,trashBudget516()))}. Бонусы VIP, Premium и престижа этот бюджет не увеличивают. Если дорогая категория пока недоступна, её шанс переходит обычным находкам. Уже найденные вещи сохраняют свою цену. Эксклюзивы за Stars остаются в донатных кейсах.</p></div>`;}
 ACTIONS.trashOdds=()=>openModal('<h3>🗑️ Что можно найти</h3>'+trashOddsHTML()+'<button class="btn primary wide" data-act="close">Понятно</button>',{center:true});
 openTrash=function(){
  if(S.busy||MG||MG_PENDING){toast('Валера занят','bad');return;}

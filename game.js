@@ -1266,7 +1266,7 @@ function startSleep() {
   if (S.busy) { toast('Валера занят', 'bad'); return; }
   const missing = maxEnergy() - S.energy;
   if (missing < 5) { toast('Валера бодр, спать не хочется', 'bad'); return; }
-  const minutes = clamp(missing / (regenPerMin() * SLEEP_SPEED), 0.5, 6);
+  const minutes = clamp(missing / (regenPerMin() * SLEEP_SPEED), 0.4, 4.8);
   S.busy = { type: 'sleep', start: Date.now(), end: Date.now() + minutes * 60000, from: S.energy };
   toast(`💤 Валера уснул. ${S.housing < 3 ? 'На улице могут обчистить…' : 'Тут безопасно'}`);
   sfx('sleep');

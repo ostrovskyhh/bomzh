@@ -31,10 +31,14 @@ function promoPrice(item) { const p = promoFor(item.id); return p && p.discount 
 
 // Покупки начисляются с учётом акции, которая шла в момент оплаты (бонус считает сервер)
 const _payClaim = payClaim;
+let paidClaimBusy516=false;
 payClaim = async function () {
-  if (document.hidden || !onlineOn()) return;
+  if (document.hidden || !onlineOn() || paidClaimBusy516 || SAVE_LOCK || !LOADED) return;
+  paidClaimBusy516=true;
   try {
-    const { items } = await apiPost('pay/claim', {products:Object.keys(PREM_GIVE)});
+    const response = await apiPost('pay/claim', {products:Object.keys(PREM_GIVE),protocol:516});
+    S.paidClaims516||=[];
+    const items=(response.items||[]).filter(it=>!S.paidClaims516.includes(it.id));
     if (!items || !items.length) return;
     const got = items.map((it) => {
       const id = typeof it === 'string' ? it : it.product;
@@ -42,6 +46,9 @@ payClaim = async function () {
       const extra = [];
       if (it.bonus) { addCaps(it.bonus); extra.push(`🔥 акция: +${it.bonus} крышек`); }
       if (it.days) { S.vipUntil += it.days * 86400000; extra.push(`🔥 акция: +${it.days} дней VIP`); }
+      if(it.rights?.premiumUntil75){S.premiumUntil75=it.rights.premiumUntil75;S.autopayUntil=Math.max(S.autopayUntil||0,S.premiumUntil75);}
+      for(const [skin,until] of Object.entries(it.rights?.skins75||{})){S.skins75||={};S.skins75[skin]=until;}
+      S.paidClaims516.push(it.id);
       return [line, ...extra].join(' · ');
     });
     track('purchase', items.length);
@@ -49,7 +56,8 @@ payClaim = async function () {
     confetti(80); sfx('jackpot');
     const receipt={ emoji: '⭐', title: 'Покупка зачислена!', text: `${got.join('<br>')}<br><br>Спасибо, что поддерживаешь игру!`, btn: 'Ура!' };
     if(typeof returnIsArriving==='function'&&returnIsArriving())returnNotice({key:'purchase:'+Date.now(),kind:'gift',title:receipt.title,body:receipt.text});else resultModal(receipt);
-  } catch (e) { /* сервер выключен — заберём при следующем входе */ }
+  } catch (e) { /* Receipt stays pending until an accepted save acknowledges it. */ }
+  finally {paidClaimBusy516=false;}
 };
 
 // Магазин доната: баннер акции, перечёркнутые цены и бейджи бонусов

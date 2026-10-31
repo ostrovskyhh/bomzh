@@ -1,6 +1,7 @@
 // Sleep, retail and optional ad rewards. Purchased skill levels stay intact.
-for(const row of CITY_PRICE_BASE_468)if(row.item.id==='coffee'&&row.field==='price'){row.value*=2;row.afterRounding=2;}
+for(const row of CITY_PRICE_BASE_468)if(row.item.id==='coffee'&&row.field==='price'){row.value*=2;row.afterRounding=1.7;}
 cityPrices468();
+HOOKS.mods.push(m=>{m.regen*=1.25;});
 const canPayBefore77=shopCanPay,payBefore77=shopPay;
 shopCanPay=(item,n=1)=>item?.id==='energetik'?Number.isSafeInteger(n)&&n>0&&S.caps>=3*n:canPayBefore77(item,n);
 shopPay=(item,n=1)=>{if(item?.id!=='energetik')return payBefore77(item,n);if(!shopCanPay(item,n))return false;S.caps-=3*n;return true;};
@@ -25,7 +26,7 @@ ACTIONS.adSkill77=async id=>{const t=TRICKS.find(t=>t.id===id);if(!t||level()<t.
 ACTIONS.adEnergy77=()=>{if(S.energy>=maxEnergy()){toast('Энергия уже полная.');return;}rewardedWatch('energy');};
 energyOffer=function(){
   energyOfferedAt=Date.now();adsState();const coffee=FOOD.find(f=>f.id==='coffee');
-  openModal(`<h3>⚡ Восстановить энергию</h3><p>Сон теперь восстанавливает энергию вдвое дольше. Рядом — мгновенное полное восстановление за рекламу, только по желанию.</p><div class="btns energy-actions77"><button class="btn wide" data-act="energyFix" data-id="sleep" ${S.busy?'disabled':''}>💤 Лечь спать</button><button class="btn primary wide" data-act="adEnergy77" ${S.energy>=maxEnergy()||adChoice77('energy')?'disabled':''}>🎬 Полная энергия за рекламу</button>${priceBtn('energyFix','coffee',coffee.price,shopCanPay(coffee),'☕ Кофе · +'+coffee.energy+' ⚡ · '+incomeMoney(coffee.price))}${priceBtn('energyFix','energetik',0,true)}<button class="btn wide" data-act="close">Не сейчас</button></div><small>Энергия: до 5 рекламных восстановлений в сутки, пауза 5 минут между ними. Между разными наградами — 30 секунд, общий предел — 25 в сутки. Дополнительных крышек нет.</small>${adStatus81('energy')}`,{center:true});
+  openModal(`<h3>⚡ Восстановить энергию</h3><p>Сон и обычное восстановление энергии занимают на 20% меньше времени. Полную энергию также можно получить за рекламу, по желанию.</p><div class="btns energy-actions77"><button class="btn wide" data-act="energyFix" data-id="sleep" ${S.busy?'disabled':''}>💤 Лечь спать</button><button class="btn primary wide" data-act="adEnergy77" ${S.energy>=maxEnergy()||adChoice77('energy')?'disabled':''}>🎬 Полная энергия за рекламу</button>${priceBtn('energyFix','coffee',coffee.price,shopCanPay(coffee),'☕ Кофе · +'+coffee.energy+' ⚡ · '+incomeMoney(coffee.price))}${priceBtn('energyFix','energetik',0,true)}<button class="btn wide" data-act="close">Не сейчас</button></div><small>Энергия: до 5 рекламных восстановлений в сутки, пауза 5 минут между ними. Между разными наградами — 30 секунд, общий предел — 25 в сутки. Дополнительных крышек нет.</small>${adStatus81('energy')}`,{center:true});
   adsState().then(()=>{const b=document.querySelector('[data-act="adEnergy77"]');if(b)b.disabled=S.energy>=maxEnergy()||adChoice77('energy');});
 };
 let adBenefitsBusy77=false;
