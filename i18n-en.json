@@ -37095,5 +37095,9 @@
   "💰 Покупки снова за деньги": "💰 Cash purchases return",
   "Обычные товары в магазинах снова оплачиваются деньгами города вместо бутылок.": "Ordinary shop items are paid for with city money again instead of bottles.",
   "🔓 Для жилья, транспорта и бизнеса появился выбор: нужная глава и уровень героя либо платное открытие доступа за две цены предмета. Сам предмет покупается отдельно. Перед оплатой видна полная сумма.": "🔓 Homes, vehicles and businesses now offer a choice: meet the chapter and hero level requirements, or unlock access for twice the item price. The item is purchased separately. The full total is shown before payment.",
-  "На карточках больше нет двух одинаковых сюжетных замков.": "Item cards no longer show two identical story locks."
+  "На карточках больше нет двух одинаковых сюжетных замков.": "Item cards no longer show two identical story locks.",
+  "🍾 Цены за бутылки отменены": "🍾 Bottle payments have been removed",
+  "Эксперимент с покупками за бутылки оказался неудачным — мы его отменили.": "The experiment with bottle payments did not work well, so we have ended it.",
+  "Все товары, которые были переведены на оплату бутылками, снова покупаются за деньги текущего города. Бутылки можно, как и раньше, продавать в обменнике.": "All items that switched to bottle payments can once again be bought with the current city’s money. You can still sell bottles at the exchange as before.",
+  "Уже купленные вещи остаются у вас.": "Items you already bought remain yours."
 }
