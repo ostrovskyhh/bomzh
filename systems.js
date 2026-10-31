@@ -444,6 +444,7 @@ HOOKS.track.push((k) => { if (k === 'house') { S.ownedHousing = Math.max(S.owned
 // Стоит первым в списке, чтобы автоплатёж и начисление долга видели уже сдвинутый срок.
 const BILL_PAUSE_GAP = 60000;
 function housingBillsPause522() {
+  if(S.housingMode==='rent'&&typeof rentalBilling523==='function'){rentalBilling523();return;}
   const now = Date.now();
   const gap = S.billSeen ? now - S.billSeen : 0;
   S.billSeen = now;
@@ -455,6 +456,7 @@ HOOKS.tick.unshift(housingBillsPause522);
 document.addEventListener('visibilitychange', () => { if (document.hidden && typeof S !== 'undefined' && S) S.billSeen = Date.now(); });
 
 function housingBillsTick522() {
+  if(S.housingMode==='rent'&&typeof rentalBilling523==='function'){rentalBilling523();return;}
   const now = Date.now();
   if (S.housing < 3) return;
   if (!S.billDue) S.billDue = now + MONTH_MS;

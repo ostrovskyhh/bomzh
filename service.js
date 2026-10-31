@@ -190,6 +190,7 @@ notifyPlan = (function (orig) {
 
 // Пока автоплатёж действует, счета закрываются сами (раньше, чем начислится долг)
 HOOKS.tick.unshift(() => {
+  if(S.housingMode==='rent')return; // Rental billing, including overnight autopay, is handled centrally.
   if (!autopayOn() || S.housing < 3 || !S.billDue) return;
   let n = 0;
   while (Date.now() >= S.billDue && n++ < 6) S.billDue += MONTH_MS;

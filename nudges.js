@@ -88,7 +88,7 @@ HOOKS.hud.push(() => {
     pin = $('debtPin');
   }
   if (!(S.debt > 0)) { pin.classList.add('hidden'); return; }
-  const html = `<span>🧾</span><div><b>Долг по счетам: ${fmt(S.debt)} ₽</b><small>${S.missed ? `Просрочка ${S.missed} мес. · ` : ''}нажми, чтобы оплатить</small></div>`;
+  const html = S.housingMode==='rent'&&typeof rentalDebtPin523==='function'?rentalDebtPin523():`<span>🧾</span><div><b>Долг по счетам: ${fmt(S.debt)} ₽</b><small>${S.missed ? `Просрочка ${S.missed} мес. · ` : ''}нажми, чтобы оплатить</small></div>`;
   if (pin.dataset.html !== html) { pin.innerHTML = html; pin.dataset.html = html; }
   pin.classList.remove('hidden');
 });
