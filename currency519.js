@@ -33,7 +33,7 @@ function purchaseDecor519(root=document){
 }
 const purchasePriceBefore519=priceBtn;priceBtn=function(act,id,price,can,label){
  const t=document.createElement('template');t.innerHTML=purchasePriceBefore519(act,id,price,can,label);const b=t.content.querySelector('button');
- if(b&&Number.isFinite(price)&&price>0&&!purchaseKind519(b))b.dataset.purchase519='money';
+ if(b&&Number.isFinite(price)&&price>0&&!b.closest('.story-access521')&&!purchaseKind519(b))b.dataset.purchase519='money';
  purchaseDecor519(t.content);return t.innerHTML;
 };
 const purchaseFillBefore519=fillIcons;fillIcons=function(root=document){purchaseFillBefore519(root);purchaseDecor519(root);};

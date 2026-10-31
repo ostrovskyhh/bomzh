@@ -82,7 +82,7 @@ function businessCollect(ids,btn){
   toast(`💼 Получено ${incomeMoney(collected)}${count>1?' из '+count+' касс':''} · все удержания учтены`,'good');
 }
 Object.assign(ACTIONS,{
-  bizBuy:(id)=>{const b=BUSINESSES.find(x=>x.id===id);if(!b||S.biz[id]||level()<b.level||S.money<b.price)return;
+  bizBuy:(id)=>{const b=BUSINESSES.find(x=>x.id===id);if(!b||S.biz[id]||!storyAssetLevelAllowed506('biz',id)||S.money<b.price)return;
     businessTick();S.money-=b.price;S.biz[id]={lvl:1,cash:0,last:businessNow()||0,started:businessNow()||Date.now(),version:2,broken:false};businessTick();track('bizBuy');sfx('buy');confetti(30);toast(`${b.emoji} ${b.name} открыт! Доход ${incomeMoney(businessNetRate(b))}/ч`,'good');},
   bizCollect:(id,btn)=>{if(BUSINESSES.some(b=>b.id===id))businessCollect([id],btn);},
   bizCollectAll:(_,btn)=>businessCollect(BUSINESSES.map(b=>b.id),btn),
@@ -103,7 +103,7 @@ function businessDetails(id){
     <p>+50% базового дохода за каждый уровень. ${st.lvl<BIZ_MAX_LVL?`Следующий уровень: +${incomeMoney(up)}/ч за ${incomeMoney(bizUpgradeCost(b,st))}.`:'Предприятие полностью развито.'}</p><p>Новая прибыль снижена на 30%. Раз в 3 реальных часа возможна поломка: до ремонта доход ниже ещё на 50%, касса сохраняется. Premium чинит автоматически и бесплатно. За рекламу доступен доход ×2 на час. Бонусы к работе, тапам и опыту не умножают бизнес — здесь перечислены именно его бонусы.</p><button class="btn primary wide" data-act="close">Понятно</button></div>`);
 }
 function businessCard(b){
-  const st=S.biz[b.id],preview=incomeBusiness(b),rate=businessNetRate(b,preview),can=level()>=b.level;
+  const st=S.biz[b.id],preview=incomeBusiness(b),rate=businessNetRate(b,preview),can=storyAssetLevelAllowed506('biz',b.id);
   return `<article class="business-card ${st?'owned':can?'available':'locked'}" data-business="${b.id}"><div class="business-card-head"><div class="business-emblem">${b.emoji}</div><div><small>${st?'ТВОЁ ПРЕДПРИЯТИЕ':can?'МОЖНО ОТКРЫТЬ':'С '+b.level+' УРОВНЯ'}</small><h3>${esc(b.name)}</h3>${st?`<div class="business-level">${Array.from({length:BIZ_MAX_LVL},(_,i)=>`<i class="${i<st.lvl?'on':''}"></i>`).join('')}<span>${st.lvl}/${BIZ_MAX_LVL}</span></div>`:''}</div></div>
     <div class="business-rate">${incomeHTML('biz-rate',b.id)}<small>/ час чистыми</small></div><div class="business-day">${incomeHTML('biz-day',b.id)} за следующие сутки без ручного ремонта, при свободной кассе</div>
     ${st?`<div class="business-till"><span>К получению <b>${incomeHTML('biz-cash',b.id)}</b></span><div class="progress"><div data-income-progress="${b.id}" style="width:${Math.min(100,st.cash/bizCap(b,st)*100)}%"></div></div><small>${incomeHTML('biz-fill',b.id)}</small></div><button class="btn primary wide" data-business-collect="${b.id}" data-act="bizCollect" data-id="${b.id}" ${businessPayout(st).beforeAlimony<1?'disabled':''}>Забрать из кассы</button>

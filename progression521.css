@@ -1,0 +1,7 @@
+.story-access521{display:flex;flex-direction:column;gap:8px;min-width:0;width:100%;align-self:stretch}
+.story-access521 .btn{height:auto;min-height:44px;white-space:normal;overflow-wrap:anywhere;line-height:1.35;padding:12px}
+.story-access521 small{display:block;color:var(--muted);font-size:12px;line-height:1.4}
+.story-access521 .story-chapter521{background:rgba(118,159,204,.1);border:1px solid rgba(118,159,204,.35);color:var(--text)}
+.story-access-confirm521 p{line-height:1.5}.story-access-confirm521 .btn{white-space:normal;height:auto;min-height:44px}
+.card>.story-access521{grid-column:1/-1}.card>.btn-col:has(.story-access521){grid-column:1/-1}
+.card.locked:has(.story-access521){opacity:1}.card.locked:has(.story-access521)>.thumb{opacity:.65}

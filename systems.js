@@ -508,11 +508,12 @@ EXTRA_TABS.shop.housing = () => {
   }
   return status + HOUSING.map((h, i) => {
     const here = i === S.housing;
-    const lvlOk = level() >= h.level;
+    const lvlOk = i===0 || storyAssetLevelAllowed506('home',i);
     const owned = i <= S.ownedHousing;
     let btn = '';
     if (here) btn = S.housingMode === 'rent' && !owned ? priceBtn('house',i,h.price,S.money>=h.price,`Выкупить ${fmt(h.price)} ₽`) : '<button class="btn" disabled>Живу тут</button>';
     else if (owned) btn = `<button class="btn green" data-act="moveHouse" data-id="${i}">Переехать</button>`;
+    else if (storyAssetLocked521('home',i)) btn = storyAssetButtons521('home',i);
     else if (!lvlOk) btn = lockBtn;
     else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)} ₽`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, `Снять ${fmt(h.rent)}/мес`) : ''}</div>`;
     return card({ thumb: sceneThumbSVG(i), title: h.name, btn, cls: `${here ? 'current' : ''} ${!owned && !lvlOk ? 'locked' : ''}`,
@@ -524,7 +525,7 @@ EXTRA_TABS.shop.housing = () => {
 Object.assign(ACTIONS, {
   house: (id) => {
     const i = +id, h = HOUSING[i];
-    if (!h || i <= S.ownedHousing || !purchaseAllowed72('home',i) || !shopCanPay(h) || level() < h.level) return;
+    if (!h || i <= S.ownedHousing || !purchaseAllowed72('home',i) || !shopCanPay(h) || !storyAssetLevelAllowed506('home',i)) return;
     if (!shopPay(h)) return;
     S.housing = i;
     S.energy = maxEnergy();
@@ -543,7 +544,7 @@ Object.assign(ACTIONS, {
   },
   rentHouse: (id) => {
     const i = +id, h = HOUSING[i];
-    if (!h || !purchaseAllowed72('home',i) || !h.rent || S.money < h.rent || level() < h.level || i === S.housing) return;
+    if (!h || !purchaseAllowed72('home',i) || !h.rent || S.money < h.rent || !storyAssetLevelAllowed506('home',i) || i === S.housing) return;
     S.money -= h.rent;
     S.housing = i;
     S.housingMode = 'rent';

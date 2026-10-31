@@ -1,4 +1,51 @@
-// Story unlocks supplement prices, levels and sequential ownership. Existing property is retained.
+// Story/level access can be opened for cash. The fee never buys the asset or advances a quest.
+function storyAssetItem521(kind,id){
+ if(kind==='biz')return BUSINESSES.find(x=>x.id===id);
+ if(!['home','car'].includes(kind)||!Number.isSafeInteger(Number(id))||Number(id)<1)return null;
+ return (kind==='home'?HOUSING:TRANSPORT)[Number(id)]||null;
+}
+function storyAssetPaid521(kind,id){
+ const state=S.assetAccess521;
+ return !!storyAssetItem521(kind,id)&&state?.cycle===(S.prestige||0)&&state.cities?.[city()]?.[kind]?.includes(String(id))===true;
+}
+function storyAssetLevelAllowed506(kind,id){const item=storyAssetItem521(kind,id);return !!item&&(level()>=(item.level||1)||storyAssetPaid521(kind,id));}
+function storyAssetLocked521(kind,id){return !!storyAssetItem521(kind,id)&&!storyAssetOwned506(kind,id)&&(!storyAssetAllowed506(kind,id)||!storyAssetLevelAllowed506(kind,id));}
+function storyAccessCost521(kind,id){const price=storyAssetItem521(kind,id)?.price;return Number.isSafeInteger(price)&&price>0&&Number.isSafeInteger(price*2)?price*2:0;}
+function storyAccessPrerequisite521(kind,id){return kind==='biz'||storyPurchaseBefore506(kind,Number(id));}
+function storyAccessKey521(kind,id){return city()+':'+kind+':'+id;}
+function storyAccessTarget521(raw){
+ const parts=String(raw||'').split(':');if(parts.length!==3||parts[0]!==city())return null;
+ const kind=parts[1],id=kind==='biz'?parts[2]:Number(parts[2]);
+ return storyAssetItem521(kind,id)?{kind,id,key:storyAccessKey521(kind,id)}:null;
+}
+function storyAssetButtons521(kind,id){
+ const item=storyAssetItem521(kind,id),cost=storyAccessCost521(kind,id),chapter=storyAssetChapter506(kind,id),storyDone=(Number(S.quest?.idx)||0)>=chapter;
+ const prerequisite=storyAccessPrerequisite521(kind,id),enough=Number.isFinite(S.money)&&S.money>=cost,can=cost>0&&prerequisite&&enough;
+ const why=!prerequisite?storyWhyBefore506(kind,Number(id)):!enough?'Не хватает '+cityMoney(cost-S.money):'';
+ return `<div class="story-access521" data-access-kind521="${kind}" data-access-id521="${esc(id)}"><button class="btn wide story-chapter521" data-act="storyAccessChapter521" data-id="${esc(storyAccessKey521(kind,id))}">📖 ${chapter>0?(storyDone?'Глава '+chapter+' пройдена':'Пройди главу '+chapter+' сюжета города'):'Сюжетное ограничение снято'}</button><button class="btn wide primary" data-act="storyAccessBuy521" data-id="${esc(storyAccessKey521(kind,id))}" data-currency="money" ${can?'':'disabled'} ${why?'data-why="'+esc(why)+'"':''}>🔓 Открыть доступ · ${currencyMoney511(cost)}</button><small>Сюжет и уровень можно заменить оплатой. Покупка оплачивается отдельно.</small>${!prerequisite?'<small>'+esc(why)+'</small>':''}${!storyAssetLevelAllowed506(kind,id)?'<small>Нужен уровень '+item.level+' или платный доступ.</small>':''}</div>`;
+}
+let STORY_ACCESS521=null;
+ACTIONS.storyAccessChapter521=raw=>{if(storyAccessTarget521(raw))showScreen('tasks','story');};
+ACTIONS.storyAccessCancel521=()=>{STORY_ACCESS521=null;closeModal();};
+ACTIONS.storyAccessBuy521=raw=>{
+ const target=storyAccessTarget521(raw);STORY_ACCESS521=null;
+ if(!target||!storyAssetLocked521(target.kind,target.id)||!storyAccessPrerequisite521(target.kind,target.id))return;
+ const cost=storyAccessCost521(target.kind,target.id),item=storyAssetItem521(target.kind,target.id);
+ if(!cost||!Number.isFinite(S.money)||S.money<cost){toast('Не хватает денег на открытие доступа.','bad');return;}
+ STORY_ACCESS521={...target,city:city(),cycle:S.prestige||0,cost};
+ openModal(`<section class="story-access-confirm521" data-access-key521="${esc(target.key)}"><h3>Открыть доступ к покупке?</h3><p><b>${esc(item.name)}</b></p><p>Открытие: <b>${currencyMoney511(cost)}</b> — две цены покупки.</p><p>Снимаются требования главы сюжета и уровня героя только для этой покупки. Сам предмет пока не выдаётся.</p><p>После открытия покупка стоит ещё <b>${currencyMoney511(item.price)}</b>. Всего: <b>${currencyMoney511(cost+item.price)}</b>.</p><p>Доступ сохраняется в этом городе до следующего престижа. Порядок покупки жилья и транспорта сохраняется.</p><button class="btn primary wide" data-currency="money" data-act="storyAccessConfirm521">Заплатить за доступ · ${currencyMoney511(cost)}</button><button class="btn wide" data-act="storyAccessCancel521">Отмена</button></section>`,{center:true});
+};
+ACTIONS.storyAccessConfirm521=()=>{
+ const offer=STORY_ACCESS521;STORY_ACCESS521=null;
+ if(!offer||offer.city!==city()||offer.cycle!==(S.prestige||0)||document.querySelector('.story-access-confirm521')?.dataset.accessKey521!==offer.key)return;
+ const {kind,id,cost}=offer;
+ if(cost!==storyAccessCost521(kind,id)||!cost||!storyAssetLocked521(kind,id)||!storyAccessPrerequisite521(kind,id)||!Number.isFinite(S.money)||S.money<cost)return;
+ if(S.assetAccess521?.cycle!==(S.prestige||0))S.assetAccess521={cycle:S.prestige||0,cities:{}};
+ S.assetAccess521.cities||={};const cityAccess=S.assetAccess521.cities[city()]||={};
+ if(!Array.isArray(cityAccess[kind]))cityAccess[kind]=[];
+ S.money-=cost;cityAccess[kind].push(String(id));
+ closeModal();save(true);refresh();sfx('buy');toast('Доступ открыт. Теперь можно купить предмет отдельно.','good');
+};
 function storyAssetChapter506(kind,id){
  const table=kind==='home'?HOUSING:kind==='car'?TRANSPORT:BUSINESSES,i=kind==='biz'?table.findIndex(x=>x.id===id):Number(id);
  if(i<0||i>=table.length)return Infinity;
@@ -12,21 +59,21 @@ function storyAssetChapter506(kind,id){
  }});return Math.max(0,need);
 }
 function storyAssetOwned506(kind,id){return kind==='home'?Number(id)<=Math.max(S.ownedHousing||0,purchaseProgress72().home):kind==='car'?ownsTransport(Number(id))||Number(id)<=purchaseProgress72().car:!!S.biz?.[id];}
-function storyAssetAllowed506(kind,id){return storyAssetOwned506(kind,id)||(Number(S.quest?.idx)||0)>=storyAssetChapter506(kind,id);}
+function storyAssetAllowed506(kind,id){return storyAssetOwned506(kind,id)||storyAssetPaid521(kind,id)||(Number(S.quest?.idx)||0)>=storyAssetChapter506(kind,id);}
 function storyAssetWhy506(kind,id){return 'Пройди главу '+storyAssetChapter506(kind,id)+' сюжета города';}
 const storyPurchaseBefore506=purchaseAllowed72;
 purchaseAllowed72=(kind,i)=>storyPurchaseBefore506(kind,i)&&storyAssetAllowed506(kind,i);
 const storyWhyBefore506=purchaseWhy72;
 purchaseWhy72=(kind,i)=>!storyAssetAllowed506(kind,i)?storyAssetWhy506(kind,i):storyWhyBefore506(kind,i);
 const storyPriceBefore506=priceBtn;
-priceBtn=function(act,id,...rest){const kind=act==='house'||act==='rentHouse'?'home':act==='buyTransport'?'car':null;if(kind&&!storyAssetAllowed506(kind,+id))return `<button class="btn wide" disabled>🔒 ${esc(storyAssetWhy506(kind,+id))}</button>`;return storyPriceBefore506(act,id,...rest);};
+priceBtn=function(act,id,...rest){const kind=act==='house'||act==='rentHouse'?'home':act==='buyTransport'?'car':null;if(kind&&storyAssetLocked521(kind,+id))return act==='rentHouse'?'':storyAssetButtons521(kind,+id);return storyPriceBefore506(act,id,...rest);};
 const storyBuyBefore506=ACTIONS.bizBuy;
 ACTIONS.bizBuy=id=>{if(!storyAssetAllowed506('biz',id)){toast(storyAssetWhy506('biz',id));return;}return storyBuyBefore506(id);};
 const storyBusinessBefore506=businessCard;
-businessCard=function(b){let html=storyBusinessBefore506(b);if(S.biz[b.id]||storyAssetAllowed506('biz',b.id))return html;const t=document.createElement('template');t.innerHTML=html;const card=t.content.querySelector('.business-card');card.classList.remove('available');card.classList.add('locked');const buy=t.content.querySelector('[data-act="bizBuy"]');if(buy){buy.disabled=true;buy.textContent='🔒 '+storyAssetWhy506('biz',b.id);}return t.innerHTML;};
-for(const tab of ['housing','transport']){const before=EXTRA_TABS.shop[tab];EXTRA_TABS.shop[tab]=()=>'<div class="info-card"><b>Доступ по сюжету</b><p>Новые ступени открываются после глав этого города. Цена, уровень и покупка по порядку тоже учитываются. Ранее купленные вещи остаются доступны.</p><button class="btn" data-screen="tasks" data-tab="story">Открыть сюжет города</button></div>'+before();}
+businessCard=function(b){let html=storyBusinessBefore506(b);if(!storyAssetLocked521('biz',b.id))return html;const t=document.createElement('template');t.innerHTML=html;const card=t.content.querySelector('.business-card');card.classList.remove('available');card.classList.add('locked');const buy=t.content.querySelector('[data-act="bizBuy"]'),buttons=storyAssetButtons521('biz',b.id);if(buy)buy.outerHTML=buttons;else t.content.querySelector('.business-more').insertAdjacentHTML('beforebegin',buttons);return t.innerHTML;};
+for(const tab of ['housing','transport']){const before=EXTRA_TABS.shop[tab];EXTRA_TABS.shop[tab]=()=>'<div class="info-card"><b>Доступ по сюжету или за деньги</b><p>Пройди нужную главу и достигни уровня героя либо открой доступ за две цены предмета. Сам предмет оплачивается отдельно. Ранее купленные вещи остаются доступны.</p><button class="btn" data-screen="tasks" data-tab="story">Открыть сюжет города</button></div>'+before();}
 const storyDashboardBefore506=businessDashboard;
-businessDashboard=function(){return '<div class="info-card"><b>Расширяй дело вместе с историей</b><p>Следующие предприятия открываются за прохождение сюжета. Свой бизнес можно улучшать и собирать его доход как обычно.</p><button class="btn" data-screen="tasks" data-tab="story">Открыть сюжет города</button></div>'+storyDashboardBefore506();};
+businessDashboard=function(){return '<div class="info-card"><b>Доступ по сюжету или за деньги</b><p>Пройди нужную главу и достигни уровня героя либо открой доступ за две цены предмета. Сам предмет оплачивается отдельно. Свой бизнес можно улучшать и собирать его доход как обычно.</p><button class="btn" data-screen="tasks" data-tab="story">Открыть сюжет города</button></div>'+storyDashboardBefore506();};
 EXTRA_TABS.life.business=businessDashboard;
 
 // Expanded French saves used a captured list that omitted the new exit.

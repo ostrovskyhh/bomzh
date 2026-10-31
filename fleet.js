@@ -42,10 +42,11 @@ EXTRA_TABS.shop.transport = () => {
   const salonHTML = `<div class="subhead">Автосалон дяди Ашота</div><div class="info-card">Новый транспорт — по полной цене. Старый потом можно продать за 25% или оставить в автопарке.</div>` +
     TRANSPORT.slice(1).map((t, k) => {
       const i = k + 1;
-      const ok = level() >= t.level;
+      const ok = storyAssetLevelAllowed506('car',i);
       let btn;
       if (S.transport === i) btn = '<button class="btn" disabled>Твой</button>';
       else if (fleet().includes(i)) btn = '<button class="btn" disabled>В автопарке</button>';
+      else if (storyAssetLocked521('car',i)) btn = storyAssetButtons521('car',i);
       else if (!ok) btn = lockBtn;
       else btn = priceBtn('buyTransport', i, t.price, S.money >= t.price);
       return card({ thumb: t.emoji, title: t.name, cls: ok || ownsTransport(i) ? '' : 'locked',
@@ -59,7 +60,7 @@ EXTRA_TABS.shop.transport = () => {
 Object.assign(ACTIONS, {
   buyTransport: (id) => {
     const i = +id, t = TRANSPORT[i];
-    if (!t || ownsTransport(i) || !purchaseAllowed72('car',i) || !shopCanPay(t) || level() < t.level) return;
+    if (!t || ownsTransport(i) || !purchaseAllowed72('car',i) || !shopCanPay(t) || !storyAssetLevelAllowed506('car',i)) return;
     if (!shopPay(t)) return;
     const old = S.transport;
     if (old) fleetPark(old);
