@@ -443,17 +443,18 @@ HOOKS.track.push((k) => { if (k === 'house') { S.ownedHousing = Math.max(S.owned
 // закрыта или свёрнута, срок оплаты и поломки «стоят на паузе» — сдвигаются на время отсутствия.
 // Стоит первым в списке, чтобы автоплатёж и начисление долга видели уже сдвинутый срок.
 const BILL_PAUSE_GAP = 60000;
-HOOKS.tick.unshift(() => {
+function housingBillsPause522() {
   const now = Date.now();
   const gap = S.billSeen ? now - S.billSeen : 0;
   S.billSeen = now;
   if (gap < BILL_PAUSE_GAP) return;
   if (S.billDue) S.billDue += gap;
   if (S.nextBreakAt) S.nextBreakAt += gap;
-});
+}
+HOOKS.tick.unshift(housingBillsPause522);
 document.addEventListener('visibilitychange', () => { if (document.hidden && typeof S !== 'undefined' && S) S.billSeen = Date.now(); });
 
-HOOKS.tick.push(() => {
+function housingBillsTick522() {
   const now = Date.now();
   if (S.housing < 3) return;
   if (!S.billDue) S.billDue = now + MONTH_MS;
@@ -463,7 +464,7 @@ HOOKS.tick.push(() => {
     S.debt += billAmount();
     S.billDue += MONTH_MS;
     sfx('notify');
-    toast(S.housingMode === 'rent' ? `🧾 Пора платить аренду: ${fmt(billAmount())} ₽` : `🧾 Пришла квитанция за коммуналку: ${fmt(billAmount())} ₽`, 'bad');
+    toast(S.housingMode === 'rent' ? `🧾 Пора платить аренду: ${cityMoney(billAmount())}` : `🧾 Пришла квитанция за коммуналку: ${cityMoney(billAmount())}`, 'bad');
     if (S.housingMode === 'rent' && S.missed >= 2) evict();
   }
   // Поломки — только в своём жилье
@@ -479,7 +480,8 @@ HOOKS.tick.push(() => {
       }
     }
   }
-});
+}
+HOOKS.tick.push(housingBillsTick522);
 
 function evict() {
   const from = HOUSING[S.housing].name;
@@ -489,7 +491,7 @@ function evict() {
   S.billDue = Date.now() + MONTH_MS;
   addMood(-30);
   renderScene();
-  resultModal({ emoji: '📦', rays: 'bad', title: 'Выселили!', text: `Два месяца без оплаты — хозяин выставил тебя из «${from}». Ты вернулся в «${HOUSING[S.housing].name}». Радость −30`, btn: 'Эх…' });
+  resultModal({ emoji: '📦', rays: 'bad', title: 'Выселили!', text: `Две просрочки аренды — хозяин выставил тебя из «${from}». Ты вернулся в «${HOUSING[S.housing].name}». Радость −30`, btn: 'Эх…' });
 }
 
 function repairCost(id) { return Math.max(50, Math.round((HOUSING[S.housing].util || 100) * BREAKDOWNS.find((b) => b.id === id).k)); }
@@ -499,14 +501,9 @@ EXTRA_TABS.shop.housing = () => {
   const dueLeft = S.billDue ? S.billDue : 0;
   let status = '';
   if (S.housing >= 3) {
-    status = `<div class="info-card ${S.debt > 0 ? 'warn' : ''}">
-      ${S.housingMode === 'rent' ? `🔑 Аренда: <b>${fmt(cur.rent)} ₽</b> в месяц. Не заплатишь два месяца подряд — выселят.` : `🏠 Своё жильё. Коммуналка: <b>${fmt(cur.util)} ₽</b> в месяц. Долг дольше месяца — отключат свет.`}
-      <br>1 игровой месяц = 3 часа. Следующий счёт через <b><span data-until="${dueLeft}"></span></b>
-      ${S.debt > 0 ? `<br><b style="color:var(--red)">Долг: ${fmt(S.debt)} ₽${S.missed ? ` · просрочка ${S.missed} мес.` : ''}</b>` : ''}
-      ${S.debt > 0 ? `<div style="margin-top:8px">${priceBtn('payBills', '', S.debt, S.money >= S.debt, `Оплатить ${fmt(S.debt)} ₽`)}</div>` : ''}</div>
-      ${S.breakdowns.map((id) => { const b = BREAKDOWNS.find((x) => x.id === id); return card({ thumb: b.emoji, title: b.name, desc: b.desc, btn: priceBtn('repair', id, repairCost(id), S.money >= repairCost(id), `🔧 ${fmt(repairCost(id))}`) }); }).join('')}`;
+    status = housingBillHTML522(cur,dueLeft) + S.breakdowns.map((id) => { const b = BREAKDOWNS.find((x) => x.id === id); return card({ thumb: b.emoji, title: b.name, desc: b.desc, btn: priceBtn('repair', id, repairCost(id), S.money >= repairCost(id), `🔧 ${fmt(repairCost(id))}`) }); }).join('');
   }
-  return status + HOUSING.map((h, i) => {
+  return rentalInfo522() + status + HOUSING.map((h, i) => {
     const here = i === S.housing;
     const lvlOk = i===0 || storyAssetLevelAllowed506('home',i);
     const owned = i <= S.ownedHousing;
@@ -515,9 +512,9 @@ EXTRA_TABS.shop.housing = () => {
     else if (owned) btn = `<button class="btn green" data-act="moveHouse" data-id="${i}">Переехать</button>`;
     else if (storyAssetLocked521('home',i)) btn = storyAssetButtons521('home',i);
     else if (!lvlOk) btn = lockBtn;
-    else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)} ₽`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, `Снять ${fmt(h.rent)}/мес`) : ''}</div>`;
+    else btn = `<div class="btn-col">${priceBtn('house', i, h.price, S.money >= h.price, `Купить ${fmt(h.price)} ₽`)}${h.rent ? priceBtn('rentHouse', i, h.rent, S.money >= h.rent, rentalButton522(h)) : ''}</div>`;
     return card({ thumb: sceneThumbSVG(i), title: h.name, btn, cls: `${here ? 'current' : ''} ${!owned && !lvlOk ? 'locked' : ''}`,
-      desc: `${h.desc}<br>Энергия <b>${h.energy}</b> (+${h.regen}/мин) · здоровье ${h.hpm > 0 ? '+' : ''}${h.hpm}/мин${h.util ? `<br>Коммуналка ${fmt(h.util)} ₽/мес${h.rent ? ` · аренда ${fmt(h.rent)} ₽/мес` : ''}` : ''}`,
+      desc: `${h.desc}<br>Энергия <b>${h.energy}</b> (+${h.regen}/мин) · здоровье ${h.hpm > 0 ? '+' : ''}${h.hpm}/мин${housingFees522(h)}`,
       extra: !owned && !lvlOk ? reqHTML({ level: h.level }) : '' });
   }).join('');
 };
@@ -554,7 +551,7 @@ Object.assign(ACTIONS, {
     track('rent');
     sfx('buy');
     renderScene();
-    toast(`🔑 Снял «${h.name}». Первый месяц оплачен`, 'good');
+    toast(`🔑 Снял «${h.name}». Первые 3 часа активной игры оплачены`, 'good');
   },
   moveHouse: (id) => {
     const i = +id;

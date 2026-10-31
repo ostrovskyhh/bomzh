@@ -1,0 +1,10 @@
+// Rental and purchase use the same city cash price; no player debt/save is rewritten.
+const RENT_SHARE522=.03;
+function rentalPrices522(){for(let i=3;i<HOUSING.length;i++){const h=HOUSING[i];if(h.rent>0&&Number.isFinite(h.price)&&h.price>0)h.rent=Math.max(1,Math.round(h.price*RENT_SHARE522));}}
+const rentalCityPricesBefore522=cityPrices468;cityPrices468=function(...args){const result=rentalCityPricesBefore522(...args);rentalPrices522();return result;};
+const rentalApplyBefore522=applyCity;applyCity=function(...args){const result=rentalApplyBefore522(...args);rentalPrices522();return result;};
+HOOKS.load.push(rentalPrices522);rentalPrices522();
+function rentalButton522(h){return `<span>Арендовать · ${currencyMoney511(h.rent)}</span><small data-rent-period522>за 3 часа активной игры</small>`;}
+function housingFees522(h){return h.util||h.rent?`${h.rent?`<br>Аренда: <b>${currencyMoney511(h.rent)}</b> за 3 ч игры, коммуналка включена`:''}${h.util?`<br>Коммуналка при покупке: <b>${currencyMoney511(h.util)}</b> за 3 ч игры`:''}`:'';}
+function rentalInfo522(){return '<p class="rental-info522" data-rental-info522>Аренда — 3% цены покупки за 3 часа активной игры. Первый период оплачивается при заселении, следующие — по счёту. Вне игры отсчёт приостановлен.</p>';}
+function housingBillHTML522(h,due){return `<div class="info-card ${S.debt>0?'warn':''}" data-housing-bill522>${S.housingMode==='rent'?`🔑 Аренда: <b>${currencyMoney511(h.rent)}</b> за 3 часа активной игры. Коммуналка включена.`:`🏠 Своё жильё. Коммуналка: <b>${currencyMoney511(h.util)}</b> за 3 часа активной игры.`}<br><small>${S.housingMode==='rent'?'Две просрочки аренды приводят к выселению.':'При просрочке коммуналки отключают свет.'}</small><br>Следующий счёт через <b><span data-until="${due}"></span></b>. Вне игры отсчёт приостановлен.${S.debt>0?`<br><b class="housing-debt522">Долг: ${currencyMoney511(S.debt)}${S.missed?' · просроченных периодов: '+S.missed:''}</b><div class="housing-pay522">${priceBtn('payBills','',S.debt,S.money>=S.debt,'Оплатить '+currencyMoney511(S.debt))}</div>`:''}</div>`;}
