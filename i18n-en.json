@@ -37174,5 +37174,15 @@
   "Сообщение уже недоступно": "The message is no longer available",
   "Чат игроков и онлайн-вызовы": "Player chat and online challenges",
   "💬 Новый чат игроков — версия 5.25": "💬 New player chat — version 5.25",
-  "🔄 Возвращение после потери связи корректно завершает уже сыгранный бой; его результат не обрабатывается повторно.": "🔄 Returning after a lost connection correctly settles a completed fight; its result is not processed twice."
+  "🔄 Возвращение после потери связи корректно завершает уже сыгранный бой; его результат не обрабатывается повторно.": "🔄 Returning after a lost connection correctly settles a completed fight; its result is not processed twice.",
+  "Прогулка за деньгами": "Cash reward walk",
+  "Прогулка за деньгами ·": "Cash reward walk ·",
+  "Прогулка за деньгами · {3}": "Cash reward walk · {3}",
+  "Денежная награда гарантирована, случайных находок нет. −10 энергии, +6 дружбы, +3 радости. Общая перезарядка с обычной прогулкой — 15 минут.": "Guaranteed cash reward, without random finds. −10 energy, +6 friendship, +3 mood. Shared cooldown with the regular walk: 15 minutes.",
+  "Понятные прогулки с питомцем": "Clear pet walk choices",
+  "🐾 Вместо двусмысленной «быстрой прогулки без мини-игры» показана прогулка за деньгами: награда гарантирована, случайных находок нет. Обычная прогулка и отдельная игра с игрушкой сохранены.": "🐾 The ambiguous quick walk without a mini-game is now labelled as a cash reward walk: the reward is guaranteed, with no random finds. The regular walk and separate toy mini-game remain available.",
+  "🦮 До выбора видны денежная награда, затраты энергии, бонусы дружбы и общая перезарядка прогулок.": "🦮 The cash reward, energy cost, friendship bonus and shared walk cooldown are visible before you choose.",
+  "🐾 Понятные прогулки с питомцем — версия 5.26": "🐾 Clear pet walk choices — version 5.26",
+  "У питомца теперь понятнее различаются два варианта: обычная прогулка со случайной находкой и прогулка за деньгами с заранее показанной гарантированной суммой.": "The two pet walks are now clearly distinguished: a regular walk with random finds, and a cash reward walk showing the guaranteed amount in advance.",
+  "Название «Быстрая прогулка без мини-игры» убрано: обе прогулки проходят сразу. Мини-игра с игрушкой остаётся отдельной кнопкой «Поиграть». Награды, затраты и общая перезарядка прогулок не изменились.": "The misleading quick walk without a mini-game label has been removed: both walks finish instantly. The toy mini-game remains a separate Play action. Rewards, costs and the shared walk cooldown have not changed."
 }
