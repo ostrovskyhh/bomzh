@@ -62,7 +62,7 @@ function c524Tick(){const c=CHAT;if(chatValid524(c)){const root=chatRoot524(c);f
 }
 setInterval(c524Tick,500);
 const c524WaitingBefore=obWaitingModal;obWaitingModal=function(...args){if(CHAT_UI524.starting)return;return c524WaitingBefore.apply(this,args);};
-const c524ApplyBefore=obApply;obApply=async function(v){if(!OB||v.code!==OB.code)return;if(OB.chat524&&OB.view.status==='waiting'&&v.status==='finished'){chatEndWait524(v.reason||chatText524('expires'));return;}if(OB.chat524&&v.status==='active'){CHAT_UI524.own=null;delete S.chatInvite524;save(true);}return c524ApplyBefore(v);};
+const c524ApplyBefore=obApply;obApply=async function(v){if(!OB||v.code!==OB.code)return;if(OB.chat524&&(v.status==='active'||(v.status==='finished'&&v.op))){CHAT_UI524.own=null;delete S.chatInvite524;save(true);if(OB.view.status==='waiting'&&v.status==='finished'){OB.view=v;obBattleModal();}}else if(OB.chat524&&OB.view.status==='waiting'&&v.status==='finished'){chatEndWait524(v.reason||chatText524('expires'));return;}return c524ApplyBefore(v);};
 
 Object.assign(ACTIONS,{
  c524OverlayClose:()=>{chatRoot524()?.querySelector('.c524-veil')?.remove();if(CHAT){CHAT.overlay=null;CHAT.overlaySerial=(CHAT.overlaySerial||0)+1;}},

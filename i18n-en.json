@@ -37171,5 +37171,8 @@
   "Приглашение уже принято": "The invitation has already been accepted",
   "Приглашение больше не действует": "The invitation is no longer available",
   "Сообщение для ответа уже недоступно": "The message you are replying to is no longer available",
-  "Сообщение уже недоступно": "The message is no longer available"
+  "Сообщение уже недоступно": "The message is no longer available",
+  "Чат игроков и онлайн-вызовы": "Player chat and online challenges",
+  "💬 Новый чат игроков — версия 5.25": "💬 New player chat — version 5.25",
+  "🔄 Возвращение после потери связи корректно завершает уже сыгранный бой; его результат не обрабатывается повторно.": "🔄 Returning after a lost connection correctly settles a completed fight; its result is not processed twice."
 }
