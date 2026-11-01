@@ -124,7 +124,7 @@
 .chat524 .c524-section{padding:16px}
 .chat524 .c524-feed{scroll-behavior:auto}
 .chat524 .c524-avatar svg{width:100%;height:100%}
-.chat524 .c524-avatar{overflow:hidden}
+.chat524 .c524-avatar{position:relative;overflow:hidden}
 .chat524 .c524-veil{padding:16px;align-items:center;overflow:auto;backdrop-filter:blur(3px)}
 .chat524 .c524-sheet{max-height:100%;overflow:auto;overscroll-behavior:contain}
 .chat524 .c524-icon{display:inline-flex;align-items:center;justify-content:center;min-width:16px;font-size:16px;line-height:1}
