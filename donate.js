@@ -31,7 +31,7 @@ function donateHTML() {
     <h3 style="margin-top:0">🟡 Золотые крышки: ${fmt(S.caps)}</h3>
     ${banner}
     <div class="premium-hero"><i class="ic" data-ic="crown"></i><div><b>VIP «Авторитет»</b>
-      <p>Доход ×2, офлайн-копилка 24 ч вместо 8, корона в рейтинге</p></div></div>
+      <p>Доход ×2, офлайн-копилка 16 ч вместо 8, корона в рейтинге</p></div></div>
     ${card({ thumb: '👑', title: `Авторитет на 30 дней${tag('vip')}`, desc: isVip() ? `Активен до ${new Date(S.vipUntil).toLocaleDateString('ru-RU')}` : 'Лучшее предложение', btn: starBtn('vip', 299) })}
     <div class="subhead">Купить крышки за ⭐</div>
     ${PREMIUM.map((x) => card({ thumb: x.emoji, title: `${x.name}${x.tag ? ` <span class="rarity rare">${x.tag}</span>` : ''}${tag(x.id)}`, desc: `<b>+${x.caps} крышек</b> · ${(x.stars / x.caps).toFixed(2)} ⭐ за штуку`, btn: starBtn(x.id, x.stars, x) })).join('')}

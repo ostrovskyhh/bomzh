@@ -32,7 +32,7 @@ donateHTML = function premiumDonate() {
     ${banner}
     ${typeof starterHTML === 'function' ? starterHTML() : ''}
     <div class="dn-card vip ${vipOn ? 'on' : ''}"><div class="dn-card-e">👑</div><div class="dn-card-b"><b>VIP «Авторитет» · 30 дней</b>
-        <small>${vipOn ? `Активен до ${new Date(S.vipUntil).toLocaleDateString('ru-RU')} — продление добавит 30 дней` : 'Доход ×2 · копилка 24 ч вместо 8 · корона в топе и рамка'}</small>${promoBadge('vip', p)}</div>
+        <small>${vipOn ? `Активен до ${new Date(S.vipUntil).toLocaleDateString('ru-RU')} — продление добавит 30 дней` : 'Доход ×2 · копилка 16 ч вместо 8 · корона в топе и рамка'}</small>${promoBadge('vip', p)}</div>
       <button class="dn-buy" data-act="prem" data-id="vip">${starPrice(299)}</button></div>
     ${pass}
     <div class="dn-title">Наборы крышек</div>

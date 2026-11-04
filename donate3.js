@@ -279,7 +279,7 @@ function dnSetsTab(p) {
   }).join('');
   return `${typeof starterHTML === 'function' ? starterHTML() : ''}
     <div class="dn-card vip ${vipOn ? 'on' : ''}"><div class="dn-card-e">👑</div><div class="dn-card-b"><b>VIP «Авторитет» · 30 дней</b>
-      <small>${vipOn ? `Активен до ${new Date(S.vipUntil).toLocaleDateString('ru-RU')} — продление добавит 30 дней` : 'Доход ×2 · копилка 24 ч вместо 8 · корона в топе и рамка'}</small>${promoBadge('vip', p)}</div>
+      <small>${vipOn ? `Активен до ${new Date(S.vipUntil).toLocaleDateString('ru-RU')} — продление добавит 30 дней` : 'Доход ×2 · копилка 16 ч вместо 8 · корона в топе и рамка'}</small>${promoBadge('vip', p)}</div>
       ${dnStars('vip', promoPrice({ id: 'vip', stars: 299 }), 299)}</div>
     ${typeof PASS_STARS !== 'undefined' && !passPaid ? `<div class="dn-card pass"><div class="dn-card-e">🎫</div><div class="dn-card-b"><b>Золотой пропуск сезона</b>
       <small>Крышки и деньги на каждом уровне, Кепка сезона, 3 дня VIP. Награды за пройденные уровни — сразу</small></div>${dnStars('pass', PASS_STARS)}</div>` : ''}

@@ -210,6 +210,7 @@ maybeEvent = function () {
     badStreak = bad ? badStreak + 1 : 0;
     const pool = (bad ? MINI_BAD : MINI_GOOD).filter((m) => !m.cond || m.cond());
     const ev = pick(pool);
+    if (!ev) return; // в этом городе и на этой стадии подходящих мелочей нет
     const res = ev.run();
     addXp(XP.mini);
     taskProgress('events');
@@ -221,7 +222,9 @@ maybeEvent = function () {
   if (now < nextEventAt || !$('screen-game').classList.contains('active') || S.busy) return;
   nextEventAt = now + rand(300, 520) * 1000;
   const pool = EVENTS.filter((e) => (!e.cond || e.cond()) && !recentEvents.includes(e.id));
-  const ev = pick(pool.length ? pool : EVENTS);
+  // Запасной путь не должен выдавать события чужого города и стадии: только повтор из подходящих
+  const ev = pick(pool.length ? pool : EVENTS.filter((e) => !e.cond || e.cond()));
+  if (!ev) return;
   recentEvents.push(ev.id);
   if (recentEvents.length > 5) recentEvents.shift();
   const opts = ev.options.map((o, i) => ({ o, i })).filter(({ o }) => !o.cond || o.cond());
