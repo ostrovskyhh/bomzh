@@ -16,3 +16,7 @@
 .set-toggle528.on i{color:var(--gold,#F2C744)}
 .set-chips528{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .calm528 p{margin:6px 0 10px}
+.dg529 .progress{height:10px;margin:8px 0 4px}
+.dg529 small{display:block;color:var(--muted);line-height:1.35}
+.dg-tier529{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px;margin-top:6px;font-size:13px;font-weight:700}
+.dg-tier529 .btn{flex:none;padding:6px 12px}

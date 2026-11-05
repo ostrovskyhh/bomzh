@@ -114,7 +114,7 @@ ACTIONS.trial528 = (key) => {
   toast(`🏅 Испытание пройдено: +${fmt(m)} ₽ и 4 🟡`, 'good');
   renderCurrent(false);
 };
-EXTRA_TABS.tasks.district528 = () => `<div class="premium-hero"><div class="e">🏘️</div><div><b>Твой район</b><p>Цели на месяцы вперёд, когда денег уже больше, чем дел.</p></div></div>${trialsHTML528()}${fundHTML528()}`;
+EXTRA_TABS.tasks.district528 = () => `<div class="premium-hero"><div class="e">🏘️</div><div><b>Твой район</b><p>Цели на месяцы вперёд, когда денег уже больше, чем дел.</p></div></div>${districtGoal529()}${trialsHTML528()}${fundHTML528()}`;
 
 // ---------- Дубли и заказы коллекционера ----------
 const DUP_SWAP_528 = 5;
