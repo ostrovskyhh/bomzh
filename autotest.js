@@ -185,6 +185,9 @@
     (0, eval)("onlineOn = () => false");
     // Important windows retain priority; automatic advertising (priority 5) is discarded.
     pendingLevelUp = null;
+    // Проверка начинает с пустого экрана и пустой очереди: игровые окна, накопленные раньше, сюда не относятся.
+    for (let i = 0; i < 5 && $('modalRoot').children.length; i++) closeModal();
+    POPUP_Q.length = 0;
     openModal('<p>занято</p>');
     const shown = [];
     queuePopup('t5', 5, () => { shown.push(5); openModal('<p>5</p>'); });
