@@ -6,7 +6,7 @@
 const REF_API = 'https://178-236-248-87.sslip.io';
 
 // Standard gateways share one API/SQLite. The temporary relay is opt-in support only.
-const API_GATEWAYS504=Object.freeze([REF_API,'https://178-236-248-87.nip.io','https://girls-punk-friendly-savannah.trycloudflare.com']);
+const API_GATEWAYS504=Object.freeze([REF_API,'https://178-236-248-87.nip.io','https://nvidia-inspiration-tion-von.trycloudflare.com']);
 const API_SUPPORT505=new URLSearchParams(location.search).get('gateway')==='support';
 let API_GATEWAY504=API_SUPPORT505?2:new URLSearchParams(location.search).get('gateway')==='backup'?1:0;
 function apiGatewayUrl504(url,index=API_GATEWAY504){
