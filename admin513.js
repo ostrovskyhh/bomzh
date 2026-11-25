@@ -32,9 +32,10 @@ ACTIONS.admTab=async id=>{
   if(A6.card?.player.uid!==adminSelfUid513()){A6.card=null;await adminLoadSelf513();}else openAdmin();
   return;
  }
- if(ADM_TAB==='hero'&&id==='players'&&A6.ops.length){adminSwitchAsk513(id);return;}
- A6.self513=false;
- if(ADM_TAB==='hero'&&id==='players'){A6.card=null;A6.ops=[];}
+ if(id==='players'&&A6.self513){
+  if(A6.ops.length){adminSwitchAsk513(id);return;}
+  A6.self513=false;A6.card=null;
+ }
  return adminTabBefore513(id);
 };
 function adminSwitchAsk513(id){openModal(`<h3>Есть подготовленные правки</h3><p>Сохрани их через проверку или отмени черновик перед сменой получателя.</p><button class="btn primary wide" data-act="a6PlanBack">Вернуться к правкам</button><button class="btn wide" data-act="a513Switch" data-id="${id}">Отменить черновик и перейти</button>`,{center:true});}
@@ -109,4 +110,4 @@ const adminOptionsBefore513=a6options;
 a6options=function(path){if(path.length===1&&path[0]==='skin75')return [[null,'Без полного облика'],...Object.entries(a6draft().skins75||{}).filter(([id,until])=>until>Date.now()&&A6.schema.catalog.skins?.[id]).map(([id])=>[id,A6.schema.catalog.skins[id]])];return adminOptionsBefore513(path);};
 
 const adminMenuBefore513=ACTIONS.adminMenu;
-ACTIONS.adminMenu=()=>{A6.self513=false;A6.selfError513='';A6.search513=null;return adminMenuBefore513();};
+ACTIONS.adminMenu=()=>{if(!A6.ops.length)A6.self513=false;A6.selfError513='';A6.search513=null;return adminMenuBefore513();};

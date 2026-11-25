@@ -70,9 +70,12 @@ openSettings = (function (orig) {
       progress: [grp('История', [btnBy('journal'), btnBy('story')]), grp('Обучение', [btnBy('restartTut')]), grp('⚠️ Опасная зона', [btnBy('reset')], 'danger')],
       friends: secs.friends ? [grp('Сообщество', [setEl('<button class="btn primary wide" data-act="community">🍾 Беседа игроков в Telegram</button>'), communityRewardButtons()]), grp('Друзья', [...secs.friends.children])] : [],
       help: secs.help ? [grp('Сообщество', [setEl('<button class="btn wide" data-act="community">💬 Общение и помощь игроков</button>'), communityRewardButtons()]), grp('Связь с разработчиком', [...secs.help.querySelectorAll('[data-act="feedback"]')]), grp('Справка', [btnBy('openHelp'), btnBy('news'),city()==='fr'?setEl('<button class="btn wide" data-act="frGlossary">🇫🇷 Словарь Франции</button>'):city()==='mex'?setEl('<button class="btn wide" data-act="mexGlossary">🌵 Словарь Мексики</button>'):null]), secs.help.querySelector('.test-note')] : [],
-      admin: secs.admin ? [grp('Админ', [...secs.admin.children])] : [],
     };
-    const list = [...SET_PAGES, ...(secs.admin ? [{ id: 'admin', e: '🛠️', t: 'Админ', d: 'Игроки, мир, сервер' }] : [])];
+    const list = SET_PAGES;
+    const adminEntry = secs.admin && S.admin ? `<button type="button" class="set2-tile set2-admin-launch" data-act="adminMenu" data-i18n-ignore>
+      <span aria-hidden="true">🛠️</span><b>${a6Text('Админ-панель','Admin console')}</b>
+      <small>${a6Text('Поиск игроков, обращения и подарки','Find players, review reports, and prepare gifts')}</small>
+    </button>` : '';
     const page = list.some((p) => p.id === SET_PAGE) ? SET_PAGE : null;
     const wrap = document.createElement('div');
     wrap.className = 'set2';
@@ -81,7 +84,7 @@ openSettings = (function (orig) {
         <div class="set2-me"><div class="avatar frame-${typeof currentFrame === 'function' ? currentFrame() : 'none'}">${typeof avaFace === 'function' ? avaFace(playerName(), S.avatar) : esc(playerName()[0])}</div>
           <div><b>${userLabel(playerName())}</b><small>${lv} уровень · ${typeof cityName === 'function' ? cityName() : ''}</small></div></div>
         ${typeof I18N !== 'undefined' ? I18N.languageCard() : ''}
-        <div class="set2-grid">${list.map((p) => `<button class="set2-tile" data-act="setGo" data-id="${p.id}"><span>${p.e}</span><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</div>
+        <div class="set2-grid">${adminEntry}${list.map((p) => `<button class="set2-tile" data-act="setGo" data-id="${p.id}"><span>${p.e}</span><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</div>
         <div class="set2-quick"><small>Быстро</small>${['sfx', 'music', 'vibro'].map((k) => `<button class="chip ${S.settings[k] ? 'on' : ''}" data-act="toggleSet" data-id="${k}">${{ sfx: '🔊 Звуки', music: '🎵 Музыка', vibro: '📳 Вибрация' }[k]}</button>`).join('')}</div>
       </div>
       ${list.map((p) => `<div class="set2-page ${page === p.id ? '' : 'hidden'}" data-page="${p.id}"><button class="set2-back" data-act="setHome">‹ Все настройки</button><div class="set2-h"><span>${p.e}</span><b>${p.t}</b></div></div>`).join('')}
@@ -104,6 +107,7 @@ Object.assign(ACTIONS, {
   },
   settings: (function (orig) { return () => { SET_PAGE = null; orig(); }; })(ACTIONS.settings),
   setGo: (id) => {
+    if (id === 'admin') return ACTIONS.adminMenu();
     SET_PAGE = id;
     document.querySelectorAll('#modalRoot .set2-home').forEach((h) => h.classList.add('hidden'));
     document.querySelectorAll('#modalRoot .set2-page').forEach((p) => p.classList.toggle('hidden', p.dataset.page !== id));

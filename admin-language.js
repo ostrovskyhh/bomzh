@@ -14,17 +14,42 @@ const A6_GROUP_HELP={
  extra:'Редкие параметры, дополнительные таймеры и служебные отметки. Для обычной помощи сначала используй основные разделы.',
  service:'Личное сообщение, ограничения чата и топа, обращения и ожидающие выдачи.'};
 const A6_TAB_HELP={
- home:'Обзор всей игры: количество игроков, активность и быстрый переход к поддержке.',
- players:'Найди игрока по имени, игровому или Telegram ID. В карточке выбери раздел и подготовь правки.',
- reports:'Здесь разбираются баги и идеи. «В работе» — ещё проверяется; «Дубликат» — повтор другого обращения. Награда — только за проверенное исправление или реализованную идею.',
- comms:'Личное сообщение адресуется одному игроку. Подарок попадёт в очередь получения. Рассылка предназначена выбранной аудитории: проверь её перед отправкой.',
- tools:'Инструменты для проверки на твоём персонаже. Для изменения другого игрока открой его карточку во вкладке «Игроки».',
- audit:'Кто, кому и когда изменил параметры. Видны значения до и после. Откат тоже требует просмотра и подтверждения; при конфликте с новыми данными он будет остановлен.',
- server:'Проверка связи и данные для диагностики. Вставка сохранения заменяет твой профиль. Сброс турнира затрагивает его участников и возвращает взносы.'};
+ players:['Найди игрока по имени, игровому или Telegram ID. В карточке выбери раздел и подготовь правки.','Find a player by name, player ID, or Telegram ID. Open their profile to prepare changes.'],
+ reports:['«В работе» означает, что обращение ещё проверяется. «Дубликат» ссылается на исходное обращение. Награда положена за проверенное исправление или реализованную идею.','In progress means the report is still being investigated. A duplicate points to the original report. Rewards are for verified fixes and implemented ideas.'],
+ comms:['Личное сообщение получает один игрок. Подарок ждёт, пока игрок его заберёт. Перед рассылкой проверь аудиторию.','A direct message goes to one player. Gifts wait for the player to claim them. Check the audience before sending a broadcast.'],
+ tools:['Проверяй механики на своём персонаже. Для правки чужого профиля открой его во вкладке «Игроки».','Test game mechanics on your own character. To edit another profile, open it from Players.'],
+ audit:['История показывает автора правки, получателя и значения до и после. Для отката нужна проверка и подтверждение. При конфликте с более новыми данными откат остановится.','The log shows who made each change, the recipient, and the before and after values. Review and confirm a rollback. Conflicting newer data blocks the rollback.'],
+ server:['Здесь можно проверить связь и посмотреть диагностику. Вставка сохранения заменяет твой профиль. Сброс турнира возвращает взносы участникам.','Check connectivity and diagnose issues here. Importing a save replaces your profile. A tournament reset refunds the entry fees.']
+};
 const A6_CHILD_LABELS={lvl:'Уровень развития',cash:'Накоплено в кассе',last:'Последнее начисление',started:'Начало работы',version:'Версия данных',broken:'Есть поломка',name:'Имя',sex:'Пол',born:'Дата рождения',joy:'Радость',smart:'Ум',rel:'Отношения',met:'Знакомы',idx:'Текущая глава',path:'Сюжетный путь',until:'Окончание действия',id:'Вид',hat:'Голова',body:'Одежда на теле',shoes:'Обувь',color:'Цвет',outfit:'Комплект одежды',pending:'Ожидает выплаты',opening:'Прежняя касса',received:'Всего получено',fees:'Удержанная комиссия',next:'Следующая выплата',base:'Базовое значение',wages:'Зарплаты',rating:'Рейтинг',wins:'Победы',losses:'Поражения',care:'Забота',owned:'Купленные вещи',fedUntil:'Сытость до даты',playAt:'Следующая игра',paid:'Платная часть открыта',got:'Полученные награды',free:'Бесплатные награды',sp:'Опыт пропуска',season:'Сезон',extra:'Дополнительный прогресс',daily:'Ежедневные задания',weekly:'Недельные задания',day:'Игровой день',lastDay:'Последний день',streak:'Серия подряд',best:'Лучший результат',rivals:'Соперники',rivalsAt:'Обновление соперников',leagueMax:'Лучшая лига',week:'Неделя',weekBest:'Лучший результат недели',weekFights:'Боёв за неделю',done:'Выполнено',need:'Требуется',stage:'Ступень обучения',retake:'Пересдача',paidAt:'Дата оплаты',amount:'Сумма',city:'Город',biz:'Бизнесы',business:'Бизнес',cashAt:'Расчёт кассы',ms:'Всего времени',sessions:'Количество сессий',longest:'Самая долгая сессия',dayMs:'Время за день',cityMs:'Время по городам',first:'Начало статистики',cur:'Текущая сессия',sound:'Звук',sfx:'Звуковые эффекты',music:'Музыка',mainMusic:'Музыка на главном экране',volume:'Громкость',vibro:'Вибрация',notifications:'Уведомления',cityPanelMode:'Панель города',newcomerOffers:'Предложения новичкам',lang:'Язык',language:'Язык',cuts:'Сюжетные сценки',step:'Шаг обучения',kids:'Дети',wives:'Супруги',accessory:'Украшение',clothes:'Одежда',meal:'Угощение',played:'Играли вместе',strength:'Сила',form:'Форма',energy:'Энергия',food:'Сытость',health:'Здоровье',mood:'Радость',max:'Максимум',count:'Количество',total:'Всего',active:'Активно',enabled:'Включено',progress:'Прогресс',claimed:'Получено',type:'Тип',price:'Стоимость',rar:'Редкость',value:'Стоимость',emoji:'Значок',level:'Уровень',xp:'Опыт',hp:'Здоровье',at:'Дата',ts:'Дата',time:'Время',duration:'Длительность',deadline:'Срок',status:'Состояние',title:'Название',text:'Текст',note:'Комментарий',payout:'Выплата',bet:'Ставка',profit:'Прибыль',won:'Выигрыш',lost:'Потери',feedAt:'Последнее кормление',playUntil:'Время игры',training:'Тренировка',trained:'Обучен',stars:'Звёзды',baseCash:'Базовый доход',earned:'Всего заработано',taps:'Всего нажатий',sold:'Всего продано',shifts:'Отработано смен'};
 const A6_COUNTER_NAMES={taps:'Нажатия на героя',sold:'Проданные бутылки',events:'Уличные события',trash:'Поиски в мусорке',cutscene:'Сюжетные сценки',bought:'Покупки',house:'Покупки жилья',marketSold:'Продажи на рынке',questDone:'Пройденные задания',sleep:'Отдых и сон',hired:'Трудоустройства',shift:'Рабочие смены',stateShift:'Смены на госслужбе',eat:'Приёмы пищи',lesson:'Учебные занятия',gym:'Тренировки',gymGame:'Игры в спортзале',approached:'Знакомства',casino:'Игры в казино',bjWin:'Победы в блэкджеке',roulWin:'Победы в рулетке',overeat:'Переедания',date:'Свидания',fightWin:'Победы в боях',fight:'Бои',collectible:'Коллекционные находки',trick:'Изучение навыков',promotion:'Повышения по работе',jobLoot:'Находки со смен',petPlay:'Игры с питомцем',petTrain:'Тренировки питомца',petLevel:'Уровни питомца',bizBuy:'Покупки бизнесов',trickUp:'Улучшения навыков',uwRefuse:'Отказы криминальным знакомым',leisureGame:'Мини-игры отдыха',hardWin:'Победы над сильными соперниками',sideDone:'Выполненные поручения',gift:'Подарки персонажам',transport:'Покупки транспорта',vet:'Посещения ветеринара',petWalk:'Прогулки с питомцем',seasonItem:'Сезонные предметы',chestOpen:'Открытые сундуки',heartAttack:'Сердечные приступы',nightGift:'Ночные подарки',betaToggle:'Смена оформления',caseOpen:'Открытые кейсы',caseItem:'Предметы из кейсов',fleaSold:'Продажи вещей',transportSold:'Проданный транспорт',lottery:'Участие в лотерее',partnerStory:'Истории с партнёршей',gfWish:'Просьбы партнёрши',collectionDone:'Собранные коллекции',lotteryWin:'Победы в лотерее',partnerBed:'Близость с партнёршей',weeklyStep:'Недельные задания',tourJoin:'Участие в турнире',friendAdd:'Добавленные друзья',tourWin:'Победы в турнире',friendVisit:'Визиты к друзьям',kickback:'Откаты',faithful:'Верность',nightBonus:'Ночные бонусы',onlineFight:'Онлайн-бои',partnerGift:'Подарки партнёрше',carStolen:'Угнанные машины',tourPrize:'Призы турнира',duelCall:'Вызовы на поединок',friendGiftGot:'Подарки от друзей',contractSign:'Подписанные контракты',caseLegend:'Легендарные предметы из кейсов',uwStep:'Криминальные поручения',yardHelp:'Помощь двору',bugReport:'Отправленные баг-репорты',rpsGame:'Камень, ножницы, бумага',rpsWin:'Победы в камень, ножницы, бумага',refUsed:'Ввод кода друга',rent:'Платежи аренды',petShow:'Выставки питомцев',cheat:'Измены',cured:'Лечение',pharma:'Покупки в аптеке',garage:'Покупки гаражей',friendGift:'Подарки друзьям',honestShift:'Успешные честные смены',transportDelivery:'Перевозки',familyRest:'Семейный отдых'};
 const A6_ARCHIVED_COUNTERS = new Set(['clanJoin','clanDonate','gangPot']);
 const A6_ENUM_RU={own:'Собственное жильё',rent:'Аренда',boy:'Мальчик',girl:'Девочка',honest:'Честный путь',dark:'Тёмный путь',boss:'Главарь',deputy:'Заместитель',member:'Участник',new:'Новое',investigating:'В работе',fixed:'Выполнено',duplicate:'Дубликат',rejected:'Отклонено',bug:'Баг',idea:'Идея',chat:'Чат',top:'Топ игроков',full:'Полностью',compact:'Компактно',hidden:'Скрыто',off:'Выключено',ru:'Русский',en:'Английский',rare:'Редкая',epic:'Эпическая',legend:'Легендарная',common:'Обычная',uncommon:'Необычная'};
+const A6_ENUM_EN={own:'Owned',rent:'Rented',boy:'Boy',girl:'Girl',honest:'Honest path',dark:'Dark path',boss:'Leader',deputy:'Deputy',member:'Member',new:'New',investigating:'In progress',fixed:'Resolved',duplicate:'Duplicate',rejected:'Rejected',bug:'Bug',idea:'Idea',chat:'Chat',top:'Leaderboard',full:'Full',compact:'Compact',hidden:'Hidden',off:'Off',ru:'Russian',en:'English',rare:'Rare',epic:'Epic',legend:'Legendary',common:'Common',uncommon:'Uncommon'};
+const A6_REVIEW_LABELS_EN={
+ money:'Money balance',caps:'Caps',bottles:'Bottles',debt:'Outstanding debt',rentDebt:'Rent debt',
+ vipUntil:'VIP expiry',premiumUntil75:'Premium expiry',premiumLegacyUntil75:'Legacy Premium expiry',
+ $level:'Level',xp:'Experience',city:'City',prestige:'Prestige',pp:'Prestige points',quest:'Story',
+ energy:'Energy',food:'Fullness',health:'Health',mood:'Mood',strength:'Strength',form:'Fitness',
+ housing:'Current home',ownedHousing:'Owned home',housingMode:'Housing type',billDue:'Next bill',
+ biz:'Businesses',managedBusinesses:'Managed businesses',transport:'Transport',fuel:'Fuel',
+ edu:'Education',jobs:'Jobs',jobPos:'Job grade',hired:'Employment',owned:'Owned items',eq:'Equipped items',
+ cosm:'Cosmetics',bottleSkin:'Bottle style',hat:'Headwear',body:'Clothing',shoes:'Shoes',
+ pets:'Pets',pet:'Active pet',petFood:'Pet fullness',petHp:'Pet health',petSick:'Pet illness',
+ lvl:'Level',cash:'Cash on hand',last:'Last accrual',started:'Start date',born:'Date of birth',until:'Expiry',
+ idx:'Current chapter',path:'Story path',stats:'Statistics',counters:'Progress counters'
+};
+
+function a6reviewLabel(path, lang) {
+ const label=a6name(path);
+ if(lang!=='en')return label;
+ const key=path.at(-1);
+ if(typeof key==='number')return (path[0]==='kids'?'Child':path[0]==='effects'?'Effect':'Item')+' '+(key+1);
+ const english=Object.hasOwn(A6_REVIEW_LABELS_EN,key)?A6_REVIEW_LABELS_EN[key]:Object.hasOwn(I18N.messages,label)?I18N.messages[label]:null;
+ if(english)return english;
+ const words=String(key??'').replace(/([a-z])([A-Z])/g,'$1 $2').replace(/_/g,' ');
+ return words?words[0].toUpperCase()+words.slice(1):'Additional field';
+}
 function a6friendlyName(path){
  const key=String(path.at(-1)),root=path[0],cat=A6.schema?a6catalog():{};
  if(root==='dkeys'&&path.length===2)return [...DCASES,...STAR_CASES].find(x=>x.id===key)?.name||'Ключи отдельного кейса';
@@ -58,47 +83,89 @@ function a6fieldHelp(path){
  return '';
 }
 function a6isDate(path,value){const k=String(path.at(-1));return typeof value==='number'&&(A6.schema?.times?.includes(path[0])||path[0]==='cd'||k==='last'&&['biz','managedBusinesses'].includes(path[0])||['born','until','started','next','fedUntil','playAt','lastGym','billSeen','nextBreakAt','petFedAt','petFind2At','petFindAt','petHpAt','petPetAt','tipAskAt','boostUntil','overAt'].includes(k));}
-function a6display(path,value){
- if(value===null||value===undefined)return 'Не задано';
- if(typeof value==='boolean')return value?'Да':'Нет';
- if(typeof value==='object')return Array.isArray(value)?(value.length?'Элементов: '+value.length:'Пока пусто'):(Object.keys(value).length?'Параметров: '+Object.keys(value).length:'Пока пусто');
+function a6display(path,value,lang='ru'){
+ const english=lang==='en', text=(ru,en)=>english?en:ru, locale=english?'en-US':'ru-RU';
+ if(value===null||value===undefined)return text('Не задано','Not set');
+ if(typeof value==='boolean')return value?text('Да','Yes'):text('Нет','No');
+ if(typeof value==='object'){
+  const count=Object.keys(value).length;
+  return count?text(Array.isArray(value)?'Элементов: ':'Параметров: ',Array.isArray(value)?'Items: ':'Fields: ')+count.toLocaleString(locale):text('Пока пусто','Empty');
+ }
  const root=path[0],key=String(path.at(-1)),c=A6.schema?a6catalog():{};
- if(root==='vipUntil'&&typeof value==='number'){if(!value)return 'VIP не активен';const date=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));return (value>Date.now()?'VIP действует до ':'VIP закончился ')+date;}
- if(a6isDate(path,value))return value===0?'Не назначено':value>4102444800000?'Таймер отключён':new Date(value).toLocaleString('ru-RU');
- if(root==='play'&&(['ms','dayMs','longest','cur'].includes(key)||path[1]==='cityMs'))return (value/3600000).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ч';
- if(root==='city')return c.cities?.[value]?.name||'Город не найден';
- if(root==='jobPos'&&path.length===2&&typeof value==='number')return ['Первая ступень','Вторая ступень','Третья ступень','Четвёртая ступень','Пятая ступень'][value]||'Ступень не определена';
- if(root==='quest'&&key==='idx'&&typeof value==='number'){const qs=c.cities?.[a6draft().city||'zas']?.quests||[];return value===qs.length?'Глава завершена':'Глава '+(value+1)+(qs[value]?.name?' · '+qs[value].name:'');}
+ const catalogName=name=>english&&Object.hasOwn(I18N.messages,name)?I18N.messages[name]:name;
+ if(path.length===1&&['vipUntil','premiumUntil75','vipLegacyUntil75'].includes(root)&&typeof value==='number'){
+  const name=root==='premiumUntil75'?'Premium':root==='vipLegacyUntil75'?text('Прежний VIP','Legacy VIP'):'VIP';
+  if(!value)return name+text(' не активен',' inactive');
+  const date=new Intl.DateTimeFormat(locale,{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
+  return name+(value>Date.now()?text(' действует до ',' until '):text(' закончился ',' expired '))+date;
+ }
+ if(root==='crimeStock72'&&path.length===2&&typeof value==='number')return (value/1000).toLocaleString(locale,{maximumFractionDigits:3})+text(' ед.',' units');
+ if(root==='skins75'&&path.length===2&&typeof value==='number')return value?text('До ','Until ')+new Date(value).toLocaleString(locale):text('Срок отключён','Expiry off');
+ if(a6isDate(path,value))return value===0?text('Не назначено','Not scheduled'):value>4102444800000?text('Таймер отключён','Timer off'):new Date(value).toLocaleString(locale);
+ if(root==='play'&&(['ms','dayMs','longest','cur'].includes(key)||path[1]==='cityMs'))return (value/3600000).toLocaleString(locale,{maximumFractionDigits:2})+text(' ч',' h');
+ if(root==='city')return catalogName(c.cities?.[value]?.name)||text('Город не найден','Unknown city');
+ if(root==='jobPos'&&path.length===2&&typeof value==='number')return english?(value>=0&&value<=4?'Grade '+(value+1):'Unknown grade'):['Первая ступень','Вторая ступень','Третья ступень','Четвёртая ступень','Пятая ступень'][value]||'Ступень не определена';
+ if(root==='quest'&&key==='idx'&&typeof value==='number'){const qs=c.cities?.[a6draft().city||'zas']?.quests||[];return value===qs.length?text('Глава завершена','Chapter complete'):text('Глава ','Chapter ')+(value+1)+(qs[value]?.name?' · '+catalogName(qs[value].name):'');}
  if(path.length===1&&['housing','ownedHousing','transport','edu'].includes(root)&&typeof value==='number'){
-  if(ADM_TAB==='audit'||A6.ops.some(o=>o.path[0]==='city'))return (root==='transport'?'Вариант транспорта':root==='edu'?'Ступень образования':'Ступень жилья')+' №'+(value+1);
+  if(ADM_TAB==='audit'||A6.ops.some(o=>o.path[0]==='city'))return (root==='transport'?text('Вариант транспорта','Vehicle option'):root==='edu'?text('Ступень образования','Education stage'):text('Ступень жилья','Housing stage'))+text(' №',' ')+(value+1);
   const names=c.cities?.[a6draft().city||'zas']?.[{housing:'houses',ownedHousing:'houses',transport:'transport',edu:'education'}[root]];
-  return names?.[value]||'Ступень '+(value+1);
+  return catalogName(names?.[value])||text('Ступень ','Stage ')+(value+1);
  }
  if(typeof value==='string'){
-  if(root==='familyLooks'&&key==='outfit')return WIFE_OUTFITS.find(x=>x.id===value)?.name||'Комплект одежды';
-  if(root==='familyLooks'&&key==='color')return WIFE_COLORS.find(x=>x.id===value)?.name||'Цвет';
+  if(root==='skin75')return catalogName(c.skins?.[value])||value;
+  if(root==='familyLooks'&&key==='outfit')return catalogName(WIFE_OUTFITS.find(x=>x.id===value)?.name)||text('Комплект одежды','Outfit');
+  if(root==='familyLooks'&&key==='color')return catalogName(WIFE_COLORS.find(x=>x.id===value)?.name)||text('Цвет','Color');
   const map={pet:'pets',pets:'pets',shelter:'pets',girlfriend:'girls',cosm:'cosm',bottleSkin:'cosm',effects:'effects'}[root];
-  if(c[map]?.[value])return c[map][value];
-  if(['owned','eq'].includes(root)&&c.clothes?.[path[1]]?.[value])return c.clothes[path[1]][value];
-  if(root==='gymPlace')return GYMS.find(x=>x.id===value)?.name||'Место тренировки';
-  if(A6_ENUM_RU[value]&&(['housingMode','path'].includes(root)||['sex','path','rar','role','status','kind','language','lang','cityPanelMode','mainMusic'].includes(key)))return A6_ENUM_RU[value];
+  if(c[map]?.[value])return catalogName(c[map][value]);
+  if(['owned','eq'].includes(root)&&c.clothes?.[path[1]]?.[value])return catalogName(c.clothes[path[1]][value]);
+  if(root==='gymPlace')return catalogName(GYMS.find(x=>x.id===value)?.name)||text('Место тренировки','Training location');
+  const options=english?A6_ENUM_EN:A6_ENUM_RU;
+  if(Object.hasOwn(options,value)&&(['housingMode','path'].includes(root)||['sex','path','rar','role','status','kind','language','lang','cityPanelMode','mainMusic'].includes(key)))return options[value];
  }
- return typeof value==='number'?value.toLocaleString('ru-RU',{maximumFractionDigits:4}):String(value);
+ return typeof value==='number'?value.toLocaleString(locale,{maximumFractionDigits:4}):String(value);
 }
-function a6technical(path,value){return A6.technical?`<details class="a6-technical"><summary>Служебные данные</summary><code>${esc(path.join(' → '))}</code><pre>${esc(JSON.stringify(value,null,2)??'null')}</pre></details>`:'';}
+// Later admin modules also decorate the Russian field editor, so the review keeps its own locale-aware formatter.
+const a6reviewDisplay=a6display;
+function a6technical(path,value,lang='ru'){return A6.technical?`<details class="a6-technical"><summary>${lang==='en'?'Technical details':'Служебные данные'}</summary><code>${esc(path.join(' → '))}</code><pre>${esc(JSON.stringify(value,null,2)??'null')}</pre></details>`:'';}
 a6node=function(path,value,depth=0){
  const id=a6id(path),label=a6name(path),help=a6fieldHelp(path),object=value!==null&&typeof value==='object',rows=object?Object.entries(value).filter(([key])=>!['stats','counters'].includes(path[0])||!A6_ARCHIVED_COUNTERS.has(key)):[],hint=help?`<small class="a6-help-text">${esc(help)}</small>`:'';
  if(object){const add=['pets','shelter','cosm','kids','effects','jobs','jobPos','hired','biz','girls','ach','inv','tricks'].includes(path[0])||path[0]==='owned'&&path.length===2;
  return `<details class="a6-tree" ${depth===0?'open':''}><summary><b>${esc(label)}</b><small>${a6display(path,value)}</small></summary>${hint}${add?`<button class="btn small" data-act="a6Add" data-id="${id}">＋ Добавить в этот список</button>`:''}<div class="a6-tree-children">${rows.slice(0,80).map(([k,v])=>depth<4?a6node([...path,Array.isArray(value)?+k:k],v,depth+1):`<button class="a6-leaf" data-act="a6Edit" data-id="${a6id([...path,Array.isArray(value)?+k:k])}">${esc(a6name([...path,k]))}: ${esc(a6display([...path,k],v))}</button>`).join('')||'<p class="a6-empty">Здесь ещё ничего нет.</p>'}</div>${rows.length>80?'<p>Показаны первые 80 элементов. Полная копия доступна в расширенном редакторе.</p>':''}<details class="a6-advanced"><summary>Расширенное управление этим блоком</summary><p>Изменение целиком заменит весь показанный блок. Обычно достаточно отдельных полей выше.</p><button class="btn small" data-act="a6Edit" data-id="${id}">Изменить весь блок</button>${!add?`<button class="btn small" data-act="a6Add" data-id="${id}">Добавить значение вручную</button>`:''}${path.length>1?`<button class="btn small" data-act="a6Remove" data-id="${id}">Удалить этот элемент</button>`:''}</details>${a6technical(path,value)}</details>`;}
  return `<div class="a6-leaf"><section><b>${esc(label)}</b>${hint}${A6.technical?`<code>${esc(path.join(' → '))}</code>`:''}</section><span class="a6-field-value">${esc(a6display(path,value))}</span><button class="btn small" data-act="a6Edit" data-id="${id}">Изменить</button></div>`;
 };
-function a6present(path,value,depth=0){
- if(value===null||typeof value!=='object')return `<span>${esc(a6display(path,value))}</span>`;
- const rows=Object.entries(value);if(!rows.length)return '<span>Пока пусто</span>';
- if(depth>=6)return `<span>${esc(a6display(path,value))}</span>${a6technical(path,value)}`;
- return `<dl class="a6-readable">${rows.map(([k,v])=>{const p=[...path,Array.isArray(value)?+k:k];return `<div><dt>${esc(a6name(p))}</dt><dd>${a6present(p,v,depth+1)}</dd></div>`;}).join('')}</dl>`;
+function a6present(path,value,depth=0,lang='ru'){
+ if(value===null||typeof value!=='object')return `<span>${esc(lang==='en'?a6reviewDisplay(path,value,lang):a6display(path,value))}</span>`;
+ const rows=Object.entries(value);if(!rows.length)return `<span>${lang==='en'?'Empty':'Пока пусто'}</span>`;
+ if(depth>=6)return `<span>${esc(a6reviewDisplay(path,value,lang))}</span>${a6technical(path,value,lang)}`;
+ return `<dl class="a6-readable">${rows.map(([k,v])=>{const p=[...path,Array.isArray(value)?+k:k];return `<div><dt>${esc(a6reviewLabel(p,lang))}</dt><dd>${a6present(p,v,depth+1,lang)}</dd></div>`;}).join('')}</dl>`;
 }
-a6planHTML=function(){const p=A6.plan;return `<section class="a6-preview"><h3>Подтверждение 2 из 2</h3>${a6recipient(p)}<p>${esc(p.reason||'Комментарий не указан')}</p><p>Первую проверку ты уже прошёл. Проверь результат ещё раз и подтверди сохранение.</p>${p.changes.map(c=>`<details open><summary>${esc(a6breadcrumb(c.path))}</summary><p>${esc(a6fieldHelp(c.path))}</p>${c.kind==='delta'?`<p><b>${c.value>=0?'Начислить':'Списать'}: ${esc(a6display(c.path,Math.abs(c.value)))}</b></p>`:''}<div class="a6-diff"><section><small>Сейчас у игрока</small>${a6present(c.path,c.before)}</section><section><small>После изменения</small>${a6present(c.path,c.after)}</section></div>${a6technical(c.path,c)}</details>`).join('')}<p>Номер аккаунта уже привязан к этой правке — вводить его не нужно. После подтверждения изменения сохранятся на сервере.</p><button class="btn primary wide" id="a6Apply" data-act="a6Apply" disabled>Подожди 3 секунды</button><button class="btn wide" data-act="a6PlanBack">Вернуться к правкам</button><p id="a6Error"></p></section>`;};
+a6planHTML=function(){
+ const plan=A6.plan, text=a6Text, lang=text('ru','en');
+ const changes=plan.changes.map(change=>{
+  const label=change.path.map((_,index)=>a6reviewLabel(change.path.slice(0,index+1),lang)).join(' → ');
+  const difference=change.kind==='delta'
+   ? `<p class="a541-review-delta"><b>${change.value>=0?text('Начислить','Add'):text('Списать','Deduct')}: ${esc(a6reviewDisplay(change.path,Math.abs(change.value),lang))}</b></p>`
+   : '';
+  const scalar=[change.before,change.after].every(value=>value===null||typeof value!=='object');
+  return `<details class="a541-review-change${scalar?' a541-review-change-scalar':''}" open><summary>${esc(label)}</summary>${difference}
+    <div class="a6-diff">
+      <section><small>${text('Сейчас','Before')}</small>${a6present(change.path,change.before,0,lang)}</section>
+      <section><small>${text('После','After')}</small>${a6present(change.path,change.after,0,lang)}</section>
+    </div>${a6technical(change.path,change,lang)}</details>`;
+ }).join('');
+ return `<section class="a6-preview a6-review a541-review" data-i18n-ignore>
+   <h3>${text('Подтверждение 2 из 2','Confirmation 2 of 2')}</h3>
+   ${a6recipient(plan)}
+   <p>${text('Сверь аккаунт и изменения.','Check the account and changes.')}</p>
+   ${plan.reason?`<p>${text('Комментарий','Comment')}: ${esc(plan.reason)}</p>`:''}
+   ${changes}
+   <div class="a541-review-actions">
+     <p id="a6Error" role="alert"></p>
+     <button type="button" class="btn wide" data-act="a6PlanBack">${text('Вернуться к правкам','Back to draft')}</button>
+     <button type="button" class="btn primary wide" id="a6Apply" data-act="a6Apply" disabled>${text('Подожди…','Please wait…')}</button>
+   </div>
+ </section>`;
+};
 const a6OldOptions=a6options;
 a6options=function(path){if(path[0]==='jobPos'&&path.length===2)return [0,1,2,3,4].map((v,i)=>[v,['Первая ступень','Вторая ступень','Третья ступень','Четвёртая ступень','Пятая ступень'][i]]);if(path[0]==='quest'&&path.at(-1)==='idx'){const c=a6catalog(),qs=c.cities[a6draft().city||'zas'].quests;return [...qs.map((q,i)=>[i,(i+1)+'. '+(q.name||'Глава')]),[qs.length,'Все главы пройдены']];}return a6OldOptions(path);};
 const a6OldEdit=ACTIONS.a6Edit;
@@ -110,7 +177,36 @@ a6basket=function(){let html=a6OldBasket();if(!html)return html;const t=document
 const a6OldAudit=a6audit;
 a6audit=function(){const t=document.createElement('template');t.innerHTML=a6OldAudit();const ops=A6.audit?.operations||[];t.content.querySelectorAll('details.a6-section').forEach((el,i)=>{const o=ops[i];if(!o)return;const pre=el.querySelector('pre');if(pre){let changes=[];try{changes=JSON.parse(o.changes);}catch(_){}pre.outerHTML=changes.map(c=>`<div class="a6-history-change"><b>${esc(a6breadcrumb(c.path))}</b><div class="a6-diff"><section><small>Было</small>${a6present(c.path,c.before)}</section><section><small>Стало</small>${a6present(c.path,c.after)}</section></div>${a6technical(c.path,c)}</div>`).join('');}});t.content.querySelectorAll('.a6-event').forEach((el,i)=>{const e=A6.audit.events[i],names={cancel_gift:'Отмена ожидающего подарка',cancel_cmd:'Отмена команды','/api/admin/cmd':'Команда игроку','/api/admin/gift':'Подарок игроку','/api/admin/ban':'Ограничение игрока','/api/admin/feedback/update':'Обработка обращения','/api/admin/broadcast':'Рассылка'};el.querySelector('b').textContent=names[e.route]||(e.route.startsWith('gang_')?'Историческое действие':'Административное действие');let d={};try{d=JSON.parse(e.summary);}catch(_){}const parts=[];if(d.reason)parts.push('Комментарий: '+d.reason);if(d.status)parts.push('Статус: '+(A6_ENUM_RU[d.status]||'Сохранён'));if(d.kind)parts.push('Раздел: '+(A6_ENUM_RU[d.kind]||'Указан'));if(d.minutes!==undefined)parts.push(d.minutes===0?'Ограничение снято':d.minutes<0?'Бессрочное ограничение':'Срок: '+d.minutes+' мин.');el.querySelector('p').textContent=parts.join(' · ')||'Операция сохранена в журнале.';el.insertAdjacentHTML('beforeend',a6technical(['Действие'],{route:e.route,...d}));});return t.innerHTML;};
 const a6OldOpen=openAdmin;
-openAdmin=function(){if(A6.schema)for(const [k,v] of Object.entries(A6.schema.roots)){if(A6_HELP[k])Object.assign(v,A6_HELP[k]);}a6OldOpen();const frame=document.querySelector('.a6');if(!frame)return;frame.classList.add('a6-friendly');const body=frame.querySelector('.a6-body');body.insertAdjacentHTML('beforeend',`<details class="a6-guide"><summary>Что можно сделать в этом разделе?</summary><p>${esc(A6_TAB_HELP[ADM_TAB]||'')}</p>${ADM_TAB==='players'?'<ol><li>Выбери игрока и нужный параметр.</li><li>Подготовь правки и посмотри результат.</li><li>На проверке сверь имя, номер аккаунта и список изменений, затем подтверди сохранение.</li></ol>':''}<button class="btn small" data-act="a6Technical">${A6.technical?'Скрыть служебные коды':'Показать служебные коды'}</button></details>`);if(A6.card&&['players','hero'].includes(ADM_TAB)){const nav=frame.querySelector('.a6-groups');nav.insertAdjacentHTML('beforebegin',`<label class="a6-section-choice">Что меняем у игрока?<select id="a6Section">${Object.entries({...A6.schema.groups,service:a6Text('Связь и обращения','Contact and reports')}).map(([id,n])=>`<option value="${id}" ${id===A6.group?'selected':''}>${esc(n)}</option>`).join('')}</select></label><p class="a6-group-guide">${esc(A6_GROUP_HELP[A6.group]||'')}</p>`);$('a6Section').addEventListener('change',e=>ACTIONS.a6Group(e.target.value));const exp=frame.querySelector('#a6Import')?.closest('details');if(exp){exp.querySelector('summary').textContent='Расширенное управление: загрузить данные целого раздела';}frame.querySelectorAll('[data-act="a6Report"] b').forEach(el=>{const r=A6.card.reports.find(x=>String(x.id)===el.closest('button').dataset.id);if(r)el.textContent='№'+r.id+' · '+(A6_ENUM_RU[r.status]||'Обращение');});}frame.querySelector('[data-act="a6Refresh"]').title='Загрузить свежие данные с сервера';};
+openAdmin=function(){
+ if(A6.schema)for(const [key,entry] of Object.entries(A6.schema.roots))if(A6_HELP[key])Object.assign(entry,A6_HELP[key]);
+ a6OldOpen();
+ const frame=document.querySelector('.a6');
+ if(!frame)return;
+ frame.classList.add('a6-friendly');
+ const body=frame.querySelector('.a6-body'), help=A6_TAB_HELP[ADM_TAB], text=a6Text;
+ if(help&&ADM_TAB!=='more'&&ADM_TAB!=='home'){
+  body.insertAdjacentHTML('beforeend',`<details class="a6-guide" data-i18n-ignore>
+    <summary>${text('Что можно сделать в этом разделе?','About this section')}</summary><p>${esc(text(...help))}</p>
+    ${ADM_TAB==='players'?`<ol><li>${text('Выбери игрока и параметр.','Choose a player and setting.')}</li><li>${text('Подготовь и проверь правки.','Prepare and review your changes.')}</li><li>${text('Сверь имя, номер аккаунта и значения перед сохранением.','Check the name, account ID, and values before saving.')}</li></ol>`:''}
+    <button type="button" class="btn small" data-act="a6Technical">${A6.technical?text('Скрыть служебные коды','Hide technical IDs'):text('Показать служебные коды','Show technical IDs')}</button>
+  </details>`);
+ }
+ if(A6.card&&['players','hero'].includes(ADM_TAB)){
+  const nav=frame.querySelector('.a6-groups');
+  if(nav){
+   nav.insertAdjacentHTML('beforebegin',`<label class="a6-section-choice">Что меняем у игрока?<select id="a6Section">${Object.entries({...A6.schema.groups,service:a6Text('Связь и обращения','Contact and reports')}).map(([id,name])=>`<option value="${id}" ${id===A6.group?'selected':''}>${esc(name)}</option>`).join('')}</select></label><p class="a6-group-guide">${esc(A6_GROUP_HELP[A6.group]||'')}</p>`);
+   $('a6Section').addEventListener('change',event=>ACTIONS.a6Group(event.target.value));
+  }
+  const importDetails=frame.querySelector('#a6Import')?.closest('details');
+  if(importDetails)importDetails.querySelector('summary').textContent='Расширенное управление: загрузить данные целого раздела';
+  frame.querySelectorAll('[data-act="a6Report"] b').forEach(element=>{
+   const report=A6.card.reports.find(item=>String(item.id)===element.closest('button').dataset.id);
+   if(report)element.textContent='№'+report.id+' · '+(A6_ENUM_RU[report.status]||'Обращение');
+  });
+ }
+ const refresh=frame.querySelector('[data-act="a6Refresh"]');
+ if(refresh)refresh.title=a6Text('Загрузить свежие данные с сервера','Refresh server data');
+};
 ACTIONS.a6Technical=()=>{A6.technical=!A6.technical;openAdmin();};
 
 function a6commandText(raw){let c=raw;if(typeof c==='string')try{c=JSON.parse(c);}catch(_){return 'Команда для разбора в техническом режиме';}const names={money:'Изменить баланс игровых денег',caps:'Изменить количество крышек',levels:'Добавить уровни',setlevel:'Установить уровень',vip:'Добавить дни VIP',heal:'Восстановить состояние',debts:'Списать долг',give:'Выдать предмет',note:'Личное сообщение',set:'Изменить параметр',wipe:'Сбросить профиль'};let text=names[c?.type]||'Административная команда';if(['money','caps'].includes(c?.type))return (c.n>=0?'Начислить ':'Списать ')+Math.abs(Number(c.n)||0).toLocaleString('ru-RU')+(c.type==='money'?' игровых денег':' крышек');if(c?.type==='levels')return 'Добавить уровни: '+c.n;if(c?.type==='setlevel')return 'Установить уровень: '+c.n;if(c?.type==='vip')return 'Продлить VIP на '+c.n+' дней';if(c?.type==='give'){const ids=String(c.text||'').split(':'),cat=A6.schema?a6catalog():{};let name='предмет из выбранной категории';for(const id of ids)for(const map of ['cosm','pets','items'])if(cat[map]?.[id])name=cat[map][id];return 'Выдать: '+name+' · количество '+(c.n||1);}if(c?.field)text+=' · '+(A6_HELP[c.field]?.label||'Дополнительное поле');if(c?.n!==undefined)text+=' · '+Number(c.n).toLocaleString('ru-RU');if(c?.text)text+=' · '+String(c.text);return text;}

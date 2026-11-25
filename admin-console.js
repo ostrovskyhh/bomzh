@@ -1,8 +1,8 @@
 // Server-authorized workbench; client admin flag only controls visibility.
 const A6={schema:null,card:null,list:null,loading:false,query:'',city:'',filter:'all',sort:'recent',offset:0,group:'wallet',fieldSearch:'',ops:[],plan:null,audit:null,auditOffset:0,auditUid:0,confirm:null};
-const A6_TABS=[['home','📊','Обзор'],['hero','🧑','Мой герой'],['players','👥','Игроки'],['reports','🐞','Обращения'],['comms','📢','Связь'],['tools','🧰','Проверка игр'],['audit','🕘','История'],['server','🖥️','Сервер']];
-const A6_NAV_GROUPS=[['Работа','Work',['home','players','reports','comms']],['Управление','Management',['hero','audit','tools','server']]];
-const A6_NAV_EN={home:'Overview',hero:'My character',players:'Players',reports:'Reports',comms:'Messages',tools:'Game testing',audit:'History',server:'Server'};
+const A6_TABS=[['home','⌂','Сводка'],['players','👥','Игроки'],['reports','▤','Обращения'],['more','···','Ещё'],['hero','🧑','Мой герой'],['comms','📢','Связь'],['tools','🧰','Проверка игр'],['audit','🕘','История'],['server','🖥️','Сервер']];
+const A6_PRIMARY_TABS=['home','players','reports','more'];
+const A6_NAV_EN={home:'Overview',hero:'My character',players:'Players',reports:'Reports',more:'More',comms:'Messages',tools:'Game testing',audit:'History',server:'Server'};
 const a6Text=(ru,en)=>typeof I18N!=='undefined'&&I18N.lang==='en'?en:ru;
 const a6attr=x=>esc(String(x??'')).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const a6id=p=>encodeURIComponent(JSON.stringify(p));
@@ -53,7 +53,7 @@ function a6playerHeader(c,group){
    <small>${admAgo(c.player.last_seen)} · ${t('версия профиля','profile version')} ${c.rev}</small>
    ${c.activeWallet?`<p class="a6-error">${t('Идёт онлайн-ставка. Правки профиля заблокированы до завершения.','An online bet is in progress. Profile editing is locked until it ends.')}</p>`:''}
    <div class="a6-player-jumps" aria-label="${t('Частые действия с игроком','Common player actions')}">${links.filter(([id])=>id==='service'||A6.schema.groups[id]).map(([id,label])=>`<button class="btn ${id===group?'primary':''}" data-act="a6Group" data-id="${id}" ${id===group?'aria-current="true"':''}>${label}</button>`).join('')}</div>
-   <div class="a6-filter"><button class="btn" data-act="a6Reload">${t('Обновить карточку','Refresh profile')}</button><button class="btn" data-act="a6PlayerAudit">${t('История игрока','Player history')}</button><button class="btn" data-act="a6Export">${t('Копия для поддержки','Copy for support')}</button></div></section>`;
+   <div class="a6-filter"><button class="btn" data-act="a6Reload" ${A6.ops.length?'disabled':''}>${t('Обновить карточку','Refresh profile')}</button><button class="btn" data-act="a6PlayerAudit">${t('История игрока','Player history')}</button><button class="btn" data-act="a6Export">${t('Копия для поддержки','Copy for support')}</button></div></section>`;
 }
 function a6card(){
  const c=A6.card,s=a6draft(),groups=A6.schema.groups;const roots=Object.keys(A6.schema.roots).filter(k=>(A6.schema.roots[k].group===A6.group)&&(A6.fieldSearch===''||`${k} ${A6.schema.roots[k].label} ${A6.schema.roots[k].help||''}`.toLowerCase().includes(A6.fieldSearch.toLowerCase())));
@@ -67,11 +67,11 @@ async function a6pick(uid){if(A6.loading)return;A6.loading=true;try{await a6load
 async function a6loadAudit(){if(A6.loading)return;A6.loading=true;try{A6.audit=await a6request('audit',{uid:A6.auditUid,offset:A6.auditOffset});}catch(e){toast(e.message,'bad');}finally{A6.loading=false;if(ADM_TAB==='audit')openAdmin();}}
 
 function a6navigation(tab){
- return `<nav class="a6-nav" aria-label="${a6Text('Разделы админки','Admin sections')}">${A6_NAV_GROUPS.map(([ru,en,ids])=>`
-   <section class="a6-nav-group"><h4>${a6Text(ru,en)}</h4><div>${ids.map(id=>{
-     const [,icon,label]=A6_TABS.find(item=>item[0]===id);
-     return `<button type="button" ${id===tab?'class="on" aria-current="page"':''} data-act="admTab" data-id="${id}"><i aria-hidden="true">${icon}</i><span>${a6Text(label,A6_NAV_EN[id])}</span></button>`;
-   }).join('')}</div></section>`).join('')}</nav>`;
+ const selection=A6_PRIMARY_TABS.includes(tab)?tab:'more';
+ return `<nav class="a6-nav a541-nav" aria-label="${a6Text('Разделы админки','Admin sections')}">${A6_PRIMARY_TABS.map(id=>{
+   const [,icon,label]=A6_TABS.find(item=>item[0]===id);
+   return `<button type="button" ${id===selection?'class="on" aria-current="page"':''} data-act="admTab" data-id="${id}"><i aria-hidden="true">${icon}</i><span>${a6Text(label,A6_NAV_EN[id])}</span></button>`;
+ }).join('')}</nav>`;
 }
 
 function a6shortcut([icon,label,detail,act,id]){
@@ -81,6 +81,7 @@ function a6shortcut([icon,label,detail,act,id]){
 function a6summary(){
  const template=document.createElement('template');
  template.innerHTML=adm4Home();
+ template.content.querySelector('.adm4-actions')?.closest('.adm4-sec').remove();
  const labels=['All players','Online now','Active today','Active this week','Restricted players','Pending commands'];
  if(a6Text(false,true))template.content.querySelectorAll('.adm4-kpi small').forEach((item,i)=>{item.textContent=labels[i];});
  template.content.querySelectorAll('.adm4-who b').forEach(item=>item.setAttribute('data-i18n-user',''));
@@ -90,13 +91,11 @@ function a6summary(){
 function a6home(query){
  const t=a6Text,draft=A6.card&&A6.ops.length;
  const shortcuts=[
-   ['🗂️',t('Разобрать обращения','Review reports'),t('Ошибки и идеи игроков','Player bugs and ideas'),'admTab','reports'],
    ['🎁',t('Подготовить подарок','Prepare a gift'),t('Деньги, крышки и уровни','Money, caps, and levels'),'giftOpen',''],
-   ['📢',t('Сообщения игрокам','Player messages'),t('Объявления и личные сообщения','Announcements and direct messages'),'admTab','comms'],
-   ['🕘',t('Проверить историю','Check history'),t('Изменения профилей и команды','Profile changes and commands'),'admTab','audit'],
+   ['🗂️',t('Очередь обращений','Reports queue'),t('Ошибки и идеи игроков','Player bugs and ideas'),'admTab','reports'],
  ];
  const summary=a6summary();
- return `<section class="a6-welcome">
+ return `<div class="a541-workspace"><section class="a6-welcome a541-search">
    <h3>${t('Найти игрока','Find a player')}</h3>
    ${draft?`<p>${t('Есть черновик для игрока','There is a draft for')} <b data-i18n-user>${esc(A6.card.player.name)}</b>.</p><button class="btn primary" data-act="admTab" data-id="${A6.self513?'hero':'players'}">${t('Вернуться к черновику','Return to draft')}</button>`:`
    <form id="a6HomeSearch" role="search">
@@ -104,8 +103,24 @@ function a6home(query){
      <div class="a6-search-row"><input id="a6HomeQuery" type="search" value="${a6attr(query)}" autocomplete="off" enterkeyhint="search"><button class="btn primary" type="submit">${t('Найти','Search')}</button></div>
    </form>`}
  </section>
- <section class="a6-shortcuts" aria-label="${t('Быстрые действия','Quick actions')}">${shortcuts.map(a6shortcut).join('')}</section>
- <details class="a6-section a6-summary" open><summary>${t('Активность и сводка','Activity and overview')}</summary>${summary}</details>`;
+ <section class="a6-shortcuts a541-quick" aria-label="${t('Быстрые действия','Quick actions')}">${shortcuts.map(a6shortcut).join('')}</section>
+ <details class="a6-section a6-summary"><summary>${t('Активность игроков','Player activity')}</summary>${summary}</details></div>`;
+}
+
+function a6more(){
+ const t=a6Text;
+ const groups=[
+  [t('Работа с игроками','Player operations'),[
+   ['📢',t('Связь','Messages'),t('Личное сообщение, подарок или рассылка','Direct message, gift, or broadcast'),'admTab','comms'],
+   ['🕘',t('История действий','Activity log'),t('Правки профилей, команды и модерация','Profile edits, commands, and moderation'),'admTab','audit'],
+  ]],
+  [t('Настройка игры','Game tools'),[
+   ['🧑',t('Мой герой','My character'),t('Мой профиль, облики и подписки','My profile, outfits, and subscriptions'),'admTab','hero'],
+   ['🧰',t('Проверка игр','Game testing'),t('Сюжет, города и мини-игры','Story, cities, and mini-games'),'admTab','tools'],
+   ['🖥️',t('Сервер','Server'),t('Подключение, копия сохранения и служебные действия','Connection, save backup, and maintenance'),'admTab','server'],
+  ]],
+ ];
+ return `<div class="a541-more">${groups.map(([name,links])=>`<section><h3>${name}</h3><div class="a6-shortcuts">${links.map(a6shortcut).join('')}</div></section>`).join('')}</div>`;
 }
 
 function a6communications(){
@@ -127,7 +142,7 @@ openAdmin=function(){
  ADM_TAB=tab;
  const query=$('a6HomeQuery')?.value??A6.query;
  const bodies={
-   home:()=>a6home(query),hero:admHero,
+   home:()=>a6home(query),more:a6more,hero:admHero,
    players:()=>A6.schema?(A6.card?a6card():a6playerList()):`<p role="status">${connected?t('Загружаю игроков…','Loading players…'):t('Для поиска игроков открой игру через Telegram при доступном сервере.','Open the game from Telegram with an active server connection to find players.')}</p>`,
    reports:feedbackAdminPage,comms:a6communications,
    tools:()=>`<h3>${t('Проверка игр','Game testing')}</h3><details class="a6-section"><summary>${t('Мой персонаж — проверка механик','My character and game mechanics')}</summary>${adminHeroSandbox513()}</details><details class="a6-section"><summary>${t('Города, сюжет и мини-игры','Cities, story, and mini-games')}</summary>${admWorld()}</details>`,
@@ -135,16 +150,19 @@ openAdmin=function(){
  };
  const old=document.querySelector('#modalRoot .a6-console');
  const sameTab=old?.dataset.tab===tab;
- const scroll=sameTab?old.closest('.sheet').scrollTop:0;
+ const scroll=sameTab?old.querySelector('.a541-page')?.scrollTop||0:0;
  const focus=old?.contains(document.activeElement)&&document.activeElement.id;
- openModal(`<div class="adm4 a6 a6-console" data-tab="${tab}">
-   <header class="a6-top"><div><h3>${t('Панель управления','Admin console')}</h3><small><i class="a6-status-dot ${connected?'on':''}" aria-hidden="true"></i>${connected?t('Сервер подключён','Server connected'):t('Локальный режим','Offline mode')} · ${CURRENT_VERSION}</small></div>
-   <div class="a6-top-actions"><button type="button" class="btn" data-act="a6Refresh" aria-label="${t('Обновить данные','Refresh data')}">⟳</button><button type="button" class="btn" data-act="settings" aria-label="${t('Вернуться в настройки','Back to settings')}">✕</button></div></header>
-   <div class="a6-layout"><aside class="a6-sidebar">${a6navigation(tab)}</aside><div class="a6-body" aria-label="${t(A6_TABS.find(x=>x[0]===tab)[2],A6_NAV_EN[tab])}">${bodies[tab]()}</div></div>
+ const title=t(A6_TABS.find(x=>x[0]===tab)[2],A6_NAV_EN[tab]);
+ const ownsDraft=A6.ops.length&&['players','hero'].includes(tab);
+ openModal(`<div class="adm4 a6 a6-console a541-console" data-tab="${tab}">
+   <header class="a6-top a541-header"><div class="a541-title"><small>${t('Админ-панель','Admin console')}</small><h3>${title}</h3>
+   <small><i class="a6-status-dot ${connected?'on':''}" aria-hidden="true"></i>${connected?t('Подключено','Connected'):t('Локальный режим','Offline mode')}</small></div>
+   <div class="a6-top-actions a541-tools"><button type="button" class="btn" data-act="a6Refresh" aria-label="${t('Обновить данные','Refresh data')}" ${ownsDraft?'disabled':''}>⟳</button><button type="button" class="btn" data-act="settings" aria-label="${t('Вернуться в настройки','Back to settings')}">✕</button></div></header>
+   <div class="a6-layout"><aside class="a6-sidebar">${a6navigation(tab)}</aside><div class="a6-body a541-page" aria-label="${title}">${bodies[tab]()}</div></div>
  </div>`,{center:true});
  const frame=document.querySelector('#modalRoot .a6-console');
  if(frame){
-   frame.closest('.sheet').scrollTop=scroll;
+   frame.querySelector('.a541-page').scrollTop=scroll;
    if(sameTab&&focus)$(focus)?.focus({preventScroll:true});
    $('a6HomeSearch')?.addEventListener('submit',event=>{
      event.preventDefault();
@@ -172,13 +190,29 @@ function a6reviewValue(path,value){
 }
 function a6planHTML(){const p=A6.plan;return `<section class="a6-preview"><h3>Подтверждение 2 из 2</h3>${a6recipient(p)}<p>${esc(p.reason||'Комментарий не указан')}</p>${p.changes.map(c=>`<details open><summary>${esc(a6name(c.path))}</summary><div class="a6-diff"><section><small>Сейчас у игрока</small>${a6reviewValue(c.path,c.before)}</section><section><small>После изменения</small>${a6reviewValue(c.path,c.after)}</section></div></details>`).join('')}<p>Проверь получателя и результат. Вводить номер аккаунта не нужно.</p><button class="btn primary wide" id="a6Apply" data-act="a6Apply" disabled>Подожди 3 секунды</button><button class="btn wide" data-act="a6PlanBack">Вернуться к правкам</button><p id="a6Error"></p></section>`;}
 
-function a6showPlan(plan){A6.plan=plan;openModal(a6planHTML(),{center:true,locked:true});const key=plan.plan;const timer=setInterval(()=>{const b=$('a6Apply');if(!b||A6.plan?.plan!==key){clearInterval(timer);return;}const left=Math.max(0,Math.ceil((plan.readyAt-Date.now())/1000));b.disabled=left>0||A6.loading;b.textContent=left?`Подожди ${left} сек.`:'Сохранить изменения';},100);}
+function a6showPlan(plan){
+ A6.plan=plan;
+ openModal(a6planHTML(),{center:true,locked:true});
+ const timer=setInterval(()=>{
+   const button=$('a6Apply');
+   if(!button||A6.plan?.plan!==plan.plan){clearInterval(timer);return;}
+   const left=Math.max(0,Math.ceil((plan.readyAt-Date.now())/1000));
+   button.disabled=left>0||A6.loading;
+   const label=left?a6Text(`Подожди ${left} сек.`,`Wait ${left} s`):a6Text('Сохранить изменения','Save changes');
+   if(button.textContent!==label)button.textContent=label;
+ },100);
+}
+function a6finishDraftFirst(){
+ if(!A6.ops.length)return false;
+ toast(a6Text('Сначала проверь или отмени черновик.','Review or discard the draft first.'),'bad');
+ return true;
+}
 async function a6legacyAsk(route,body,title){A6.confirm={route,body:{...body,uid:A6.card.player.uid,confirm_uid:String(A6.card.player.uid)},ready:Date.now()+3000};openModal(`<h3>${esc(title)}</h3><p>Игрок: ${esc(A6.card.player.name)} · ID ${A6.card.player.uid}</p><pre>${esc(JSON.stringify(body,null,2))}</pre><p>Проверь получателя и последствия.</p><button class="btn primary wide" id="a6LegacyFinal" data-act="a6LegacyFinal" disabled>Подожди 3 секунды</button><button class="btn wide" data-act="a6PlanBack">Отмена</button>`,{center:true,locked:true});const c=A6.confirm,t=setInterval(()=>{const b=$('a6LegacyFinal');if(!b||A6.confirm!==c){clearInterval(t);return;}const left=Math.max(0,Math.ceil((c.ready-Date.now())/1000));b.disabled=left>0||A6.loading;b.textContent=left?`Подожди ${left} сек.`:'Подтверждаю';},100);}
 Object.assign(ACTIONS,{
- adminMenu:()=>{if(!S.admin)return;ADM_TAB='home';A6.card=null;openAdmin();},admTab:id=>{if(!S.admin)return;ADM_TAB=id==='world'?'tools':id;openAdmin();},adm4Tab:id=>ACTIONS.admTab(id),admOpen:uid=>a6pick(uid),admPick:uid=>a6pick(uid),a6Pick:uid=>a6pick(uid),
- adm4Sort:id=>{A6.filter=['online','banned'].includes(id)?id:'all';A6.sort=id==='rich'?'money':id==='level'?'level':'recent';A6.card=null;A6.list=null;A6.offset=0;ADM_TAB='players';openAdmin();},
- a6Find:()=>{A6.query=$('a6Query').value.trim();A6.city=$('a6City').value;A6.filter=$('a6Filter').value;A6.sort=$('a6Sort').value;A6.offset=0;a6loadList();},a6Page:dir=>{A6.offset=Math.max(0,A6.offset+25*(+dir));a6loadList();},a6Back:()=>{A6.card=null;A6.ops=[];openAdmin();},a6Group:g=>{A6.group=g;A6.fieldSearch='';openAdmin();},a6FieldSearch:()=>{A6.fieldSearch=$('a6FieldSearch').value.trim();openAdmin();},a6Reload:()=>a6pick(A6.card.player.uid),
- a6Refresh:()=>{if(['players','hero'].includes(ADM_TAB)){if(A6.card)a6pick(A6.card.player.uid);else a6loadList();}else if(ADM_TAB==='audit')a6loadAudit();else{ADM4.ovAt=0;FBADMIN.items=null;openAdmin();}},
+ adminMenu:()=>{if(!S.admin)return;ADM_TAB='home';if(!A6.ops.length)A6.card=null;openAdmin();},admTab:id=>{if(!S.admin)return;ADM_TAB=id==='world'?'tools':id;openAdmin();},adm4Tab:id=>ACTIONS.admTab(id),admOpen:uid=>a6pick(uid),admPick:uid=>a6pick(uid),a6Pick:uid=>a6pick(uid),
+ adm4Sort:id=>{if(a6finishDraftFirst())return;A6.filter=['online','banned'].includes(id)?id:'all';A6.sort=id==='rich'?'money':id==='level'?'level':'recent';A6.card=null;A6.list=null;A6.offset=0;ADM_TAB='players';openAdmin();},
+ a6Find:()=>{A6.query=$('a6Query').value.trim();A6.city=$('a6City').value;A6.filter=$('a6Filter').value;A6.sort=$('a6Sort').value;A6.offset=0;a6loadList();},a6Page:dir=>{A6.offset=Math.max(0,A6.offset+25*(+dir));a6loadList();},a6Back:()=>{if(a6finishDraftFirst())return;A6.card=null;openAdmin();},a6Group:g=>{A6.group=g;A6.fieldSearch='';openAdmin();},a6FieldSearch:()=>{A6.fieldSearch=$('a6FieldSearch').value.trim();openAdmin();},a6Reload:()=>{if(A6.card&&!a6finishDraftFirst())a6pick(A6.card.player.uid);},
+ a6Refresh:()=>{if(['players','hero'].includes(ADM_TAB)){if(a6finishDraftFirst())return;if(A6.card)a6pick(A6.card.player.uid);else a6loadList();}else if(ADM_TAB==='audit')a6loadAudit();else{ADM4.ovAt=0;FBADMIN.items=null;openAdmin();}},
  a6Edit:id=>{if(!A6.card?.hasSave)return;A6.reason=$('a6Reason')?.value??A6.reason;const path=JSON.parse(decodeURIComponent(id)),raw=path[0]==='$level'?levelInfo(a6draft().xp||0).level:a6at(a6draft(),path),root=path[0],value=raw??(A6.schema.bools.includes(root)?false:[...A6.schema.numbers,...A6.schema.times,...Object.keys(A6.schema.limits)].includes(root)?0:['kids','effects','pets','cosm','shelter'].includes(root)?[]:['owned','eq','jobs','jobPos','hired','biz','girls','ach','inv','tricks','perks','stats','counters','familyCare','familyLooks','settings','cd'].includes(root)?{}:null);A6.edit={path,value};const options=a6options(path),type=typeof value,date=A6.schema.times.includes(root)&&path.length===1||['until','born','last','started','next','fedUntil','playAt'].includes(String(path.at(-1)));A6.edit.date=date;let input=date?`<input id="a6Input" type="datetime-local" value="${value?new Date(value-new Date(value).getTimezoneOffset()*60000).toISOString().slice(0,16):''}"><small>Дата по часовому поясу устройства. Пустое поле — отключить таймер.</small>`:options?`<select id="a6Input" data-select="1">${options.map(([v,n])=>`<option value="${a6attr(JSON.stringify(v))}" ${value===v?'selected':''}>${esc(n)}</option>`).join('')}</select>`:type==='boolean'?`<select id="a6Input" data-select="1"><option value="true" ${value?'selected':''}>Да</option><option value="false" ${!value?'selected':''}>Нет</option></select>`:type==='object'?`<textarea id="a6Input" data-json="1">${esc(JSON.stringify(value,null,2))}</textarea>`:`<input id="a6Input" ${type==='number'?'type="number" step="any"':''} value="${a6attr(value??'')}">`;
  openModal(`<section class="a6-editor"><h3>${esc(a6name(path))}</h3><p>${esc(path.join(' → '))}</p><small>Сейчас: ${esc(a6value(value))}</small>${path.length===1&&['money','caps','bottles','xp'].includes(path[0])?'<select id="a6Mode"><option value="set">Задать итоговое значение</option><option value="delta">Прибавить / списать указанное число</option></select>':''}${input}<button class="btn primary wide" data-act="a6Stage">Добавить в изменения</button>${path.length>1?`<button class="btn wide" data-act="a6Remove" data-id="${id}">Удалить этот элемент</button>`:''}<button class="btn wide" data-act="a6PlanBack">Отмена</button></section>`,{center:true});},
  a6Stage:()=>{try{const input=$('a6Input'),e=A6.edit;let value=e.date?(input.value?new Date(input.value).getTime():0):input.dataset.json||input.dataset.select?JSON.parse(input.value):typeof e.value==='number'?Number(input.value):input.value;if(typeof value==='number'&&!Number.isFinite(value))throw Error('Введи число');const mode=$('a6Mode')?.value||'set';a6queue({path:e.path,value,kind:mode});}catch(e){toast(e.message,'bad');}},
