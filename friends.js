@@ -1,4 +1,4 @@
-// Друзья в игре (Досуг → Друзья): заявки, список с онлайном, подарки раз в день каждому другу,
+// Друзья в игре (Люди → Друзья): заявки, список с онлайном, подарки раз в день каждому другу,
 // «в гости» — посмотреть, как живёт друг, вызов на бой или КНБ. Сервер — bot/friends.py.
 // Кто пришёл по твоему коду, сразу становится другом. За друзей и подарки — достижения и аватарка.
 
@@ -12,7 +12,14 @@ let FR = { data: null, loading: false, at: 0, error: '', requests: 0 };
 async function frLoad() {
   if (FR.loading || !onlineOn()) return;
   FR.loading = true;
-  try { FR.data = await apiPost('friends/list'); FR.error = ''; S.friendCount = FR.data.friends.length; }
+  try {
+    const data = await apiPost('friends/list');
+    if (data.error) throw Error(data.error);
+    FR.data = data;
+    FR.requests = data.incoming.length;
+    FR.error = '';
+    S.friendCount = data.friends.length;
+  }
   catch (e) { FR.error = 'Сервер недоступен, попробуй позже'; }
   FR.loading = false; FR.at = Date.now();
   if (currentScreen === 'fun' && TABS.fun === 'friends') renderCurrent(false);
@@ -46,6 +53,7 @@ EXTRA_TABS.fun.friends = () => {
       <p>Дарите друг другу подарки каждый день, ходите в гости, зовите на бой и в КНБ. Кто придёт по твоему коду — сразу станет другом.</p></div></div>
     <div class="code-row"><input id="frCode" placeholder="Код друга (6 букв)" maxlength="6" autocomplete="off"><button class="btn" data-act="frAddCode">Добавить</button></div>
     ${code ? `<div class="info-card">Твой код: <b>${code}</b> — <a data-act="refShare">отправить другу</a></div>` : ''}`;
+  const findFriends = '<div class="btns"><button class="btn wide" data-act="openChat">💬 Найти друзей в чате</button></div>';
   if (!d) return head + `<div class="info-card">${FR.error || '⏳ Загружаем друзей…'}</div>`;
   const inc = d.incoming.map((f) => card({ thumb: frAva(f), title: `${userLabel(f.name)} <small>ур. ${f.level}</small>`, desc: 'Хочет дружить',
     btn: `<div class="btn-col"><button class="btn green small" data-act="frAnswer" data-id="1:${f.pid}">Принять</button><button class="btn small" data-act="frAnswer" data-id="0:${f.pid}">Нет</button></div>` })).join('');
@@ -60,7 +68,7 @@ EXTRA_TABS.fun.friends = () => {
   const giftsLeft = d.friends.filter((f) => !f.sent).length;
   return head + (inc ? `<div class="subhead">Заявки в друзья</div>${inc}` : '')
     + `<div class="subhead">Мои друзья${giftsLeft ? ` · подарков можно отправить: ${giftsLeft}` : ''}</div>`
-    + (list || '<div class="info-card">Пока никого. Добавь друга по коду, из топа или из списка «Кто онлайн».</div>') + out;
+    + (list || '<div class="info-card">Пока никого. Добавь друга по коду или открой профиль игрока в чате.</div>' + findFriends) + out;
 };
 function frAgo(t) { const m = Math.floor((Date.now() / 1000 - t) / 60); return m < 60 ? `${m} мин назад` : m < 1440 ? `${Math.floor(m / 60)} ч назад` : `${Math.floor(m / 1440)} дн назад`; }
 

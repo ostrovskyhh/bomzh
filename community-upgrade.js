@@ -15,10 +15,10 @@ runGame=(function(orig){return function(options){
 };})(runGame);
 
 ACTIONS.chatReadAll=async()=>{
-  try{const last=await apiPost('chat/last',{channel:chatDistrictChannel()});S.chatSeen=S.chatSeen||{};for(const [key,n] of [['district',last.channels?.ru],['district:worldwide',last.channels?.worldwide],['clan',last.clan]])S.chatSeen[key]=Math.max(S.chatSeen[key]||0,Number(n)||0);CHAT_LAST=last;save();chatBadge();toast('Все текущие сообщения отмечены прочитанными','good');}
+  try{const last=await apiPost('chat/last',{channel:chatDistrictChannel()});S.chatSeen=S.chatSeen||{};for(const [key,n] of [['district',last.channels?.ru],['district:worldwide',last.channels?.worldwide]])S.chatSeen[key]=Math.max(S.chatSeen[key]||0,Number(n)||0);CHAT_LAST=last;save();chatBadge();toast('Все текущие сообщения отмечены прочитанными','good');}
   catch(e){toast(refErrorText(e),'bad');}
 };
-chatOpen=(function(orig){return function(){const r=orig.apply(this,arguments);const tabs=document.querySelector('.chat-tabs,.c2-head');if(tabs&&!document.querySelector('[data-act="chatReadAll"]'))tabs.insertAdjacentHTML('afterend','<button class="btn small" data-act="chatReadAll">✓ Прочитать всё в районе и банде</button>');return r;};})(chatOpen);
+chatOpen=(function(orig){return function(){const r=orig.apply(this,arguments);const tabs=document.querySelector('.chat-tabs,.c2-head');if(tabs&&!document.querySelector('[data-act="chatReadAll"]'))tabs.insertAdjacentHTML('afterend','<button class="btn small" data-act="chatReadAll">✓ Прочитать все сообщения района</button>');return r;};})(chatOpen);
 
 ACHS.push({id:'game_helper',name:'Помогаю развивать игру',emoji:'🛠️',fn:()=>S.helpVerified||0,goals:[1,3,10,25],unit:'подтверждённых исправлений и реализованных идей'});
 for(const [n,name] of [[3,'Помощник игры'],[10,'Соавтор района'],[25,'Легенда сообщества']])FRAMES.push({id:'helper'+n,name,how:n+' подтверждённых исправлений / идей',need:()=>Math.max(S.helpVerified||0,S.achProgress?.game_helper||0)>=n});

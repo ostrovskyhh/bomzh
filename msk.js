@@ -202,7 +202,7 @@ HOOKS.tick.push(() => {
   if (S.chapterIntro !== 'msk' || !popupTurn(2)) return;
   S.chapterIntro = null;
   openModal(`<div class="chapter-card"><div class="cc-sky">${sceneSVG(0)}</div><div class="cc-num">ГЛАВА II</div><div class="cc-title">Москвабад</div>
-    <p>Ты приехал в большой город с одним чемоданом. Здесь своё жильё, работы, еда, одежда, животные, девушки и музыка. И всё дороже. Друзья и банда — с тобой.</p>
+    <p>Ты приехал в большой город с одним чемоданом. Здесь своё жильё, работы, еда, одежда, животные, девушки и музыка. И всё дороже. Список друзей сохранится.</p>
     <div class="cc-list"><span>🏠 Палатка → пентхаус</span><span>💼 15 новых мини-игр на работе</span><span>🐾 6 новых животных</span><span>🎵 Своя музыка</span></div>
     <button class="btn primary wide" data-act="close">Начать главу</button></div>`, { center: true });
   sfx('levelup');

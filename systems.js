@@ -771,14 +771,17 @@ HOOKS.tick.push(() => {
 });
 
 EXTRA_TABS.tasks.ach = () => {
-  const done = ACHS.reduce((s, a) => s + achTier(a), 0), total = ACHS.reduce((s, a) => s + a.goals.length, 0);
+  const visible = ACHS.filter((a) => !a.retired || achTier(a) || achReady(a));
+  const done = visible.reduce((sum, a) => sum + achTier(a), 0);
+  const limits = visible.map((a) => a.retired ? Math.max(achTier(a), a.goals.filter((goal) => achValue(a) >= goal).length) : a.goals.length);
+  const total = limits.reduce((sum, n) => sum + n, 0);
   return `<div class="info-card">Открыто <b>${done} из ${total}</b> уровней достижений. У каждого достижения своя награда: крышки, опыт, бутылки или косметика. Награда указана в карточке.</div>` +
-    ACHS.map((a) => {
-      const t = achTier(a), v = achValue(a), max = t >= a.goals.length;
-      const goal = a.goals[Math.min(t, a.goals.length - 1)];
+    visible.map((a, i) => {
+      const t = achTier(a), v = achValue(a), max = t >= limits[i];
+      const goal = a.goals[Math.min(t, limits[i] - 1)];
       return card({ thumb: a.emoji, title: `${a.name} ${max ? '✓' : ACH_TIERS[t]}`, cls: max ? 'current' : '',
         desc: max ? `Все уровни открыты · ${fmt(v)} ${a.unit}` : `${fmt(Math.min(v, goal))} / ${fmt(goal)} ${a.unit} · ${a.rewards72 ? achRewardLabel72(a.rewards72[t]) : `награда ${ACH_REWARDS[t]} кр.`}`,
-        extra: `<div class="lvl-pips">${a.goals.map((_, i) => `<i class="${i < t ? 'on' : ''}"></i>`).join('')}</div>${max ? '' : `<div class="progress"><div style="width:${Math.min(1, v / goal) * 100}%"></div></div>`}`,
+        extra: `<div class="lvl-pips">${a.goals.slice(0, limits[i]).map((_, i) => `<i class="${i < t ? 'on' : ''}"></i>`).join('')}</div>${max ? '' : `<div class="progress"><div style="width:${Math.min(1, v / goal) * 100}%"></div></div>`}`,
         btn: achReady(a) ? `<button class="btn green" data-act="achClaim" data-id="${a.id}">Забрать</button>` : '' });
     }).join('');
 };

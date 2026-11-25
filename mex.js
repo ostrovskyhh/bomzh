@@ -521,7 +521,7 @@ function mexStartModal() {
     <div class="move-box lose"><b>💱 Барыга у порта меняет рубли</b>По <b>300 ₽ за $1</b> (честный курс — 80). Из ${fmt(total)} ₽ получится <b>$${usdGot.toLocaleString('ru-RU')}</b> — а могло бы быть $${usdFair.toLocaleString('ru-RU')}. Грустно, но не оставлять же всё на родине. В Мексике рублей нет: всё в долларах.</div>
     <div class="move-box lose"><b>Останется в Москвабаде</b>Жильё, транспорт, обычная одежда, хлам, питомцы (Гульнара присмотрит), работа и дипломы</div>
     ${managedMoveInfo()}
-    <div class="move-box keep"><b>Поплывёт с тобой</b>Доллары, все крышки, уровень, форма и сила, престиж, достижения${keepWear ? `, ${keepWear} уник. вещ.` : ''}${premium ? `, премиум-питомцы (${premium})` : ''}. Друзья и банда — с тобой</div>
+    <div class="move-box keep"><b>Поплывёт с тобой</b>Доллары, все крышки, уровень, форма и сила, престиж, достижения${keepWear ? `, ${keepWear} уник. вещ.` : ''}${premium ? `, премиум-питомцы (${premium})` : ''}. Список друзей сохранится</div>
     ${p ? `<div class="move-box fam"><b>${married ? '👰' : '💑'} ${p.name}${kids ? ` и дети (${kids})` : ''}</b>${married ? `Взять семью с собой или развестись${kids ? `. При разводе ${ALIMONY_DAYS} игровых дней ${Math.round(ALIMONY_SHARE * 100)}% дохода — алименты` : ''}.` : 'Позвать её в Мексику или расстаться.'}
       <div class="move-opts">${opt('partner', 'take', married ? '👨‍👩‍👧 Плывём вместе' : '💑 Плывём вместе')}${opt('partner', 'leave', married ? `💔 Развод${kids ? ' и алименты' : ''}` : '💔 Расстаться', 'dark-path')}</div></div>` : ''}
     ${club ? `<div class="move-box fam"><b>🪩 Руфтоп-клуб</b>Можно успеть продать перекупщику за 20% цены — <b>${fmt(club)} ₽</b> (тоже поменяешь у барыги).
@@ -604,7 +604,7 @@ HOOKS.tick.push(() => {
   if (S.chapterIntro !== 'mex' || !popupTurn(2)) return;
   S.chapterIntro = null;
   openModal(`<div class="chapter-card mex"><div class="cc-sky">${sceneSVG(0)}</div><div class="cc-num">ГЛАВА III</div><div class="cc-title">Мексика</div>
-    <p>¡Hola, amigo! — Привет, друг! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Друзья и банда — с тобой. Знать испанский заранее не нужно: в обучении есть русские подсказки.</p>
+    <p>¡Hola, amigo! — Привет, друг! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Список друзей сохранится. Знать испанский заранее не нужно: в обучении есть русские подсказки.</p>
     <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 работ и 40 своих мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span><span>🦂 Картель и бандиты</span></div>
     <button class="btn primary wide" data-act="close">Вперёд! · ¡Vamos!</button></div>`, { center: true });
   sfx('levelup');

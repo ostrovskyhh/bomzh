@@ -10,7 +10,7 @@ function managedTransferReady(){
 // Validate before older move wrappers clear a garage or apply newcomer money.
 for(const action of ['doMove','doMoveMex','doMoveFrance']){const orig=window[action];window[action]=function(){if(!managedTransferReady())return false;return orig.apply(this,arguments);};}
 function managedSnapshot(e){
-  const k=prestigeMult()*(1+clanBonus())*(1+.05*perk('boss'));
+  const k=prestigeMult()*(1+.05*perk('boss'));
   return {plain:Math.max(0,e.base*k-e.wages),vip:Math.max(0,e.base*k*2-e.wages),vipUntil:Math.max(0,Number(S.vipUntil)||0)};
 }
 function managedAccrual(r,from,to){

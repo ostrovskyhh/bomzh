@@ -298,7 +298,7 @@ function dnCasesTab() {
 }
 
 function dnStyleTab() {
-  const kinds = [['fx', '✨ Эффекты', 'Летят из Валеры при тапе'], ['aura', '🌟 Ауры', 'Светятся вокруг Валеры'], ['frame', '🖼️ Рамки', 'Видны в топе, чате и банде'], ['avatar', '😎 Аватарки', 'Вместо буквы имени']];
+  const kinds = [['fx', '✨ Эффекты', 'Летят из Валеры при тапе'], ['aura', '🌟 Ауры', 'Светятся вокруг Валеры'], ['frame', '🖼️ Рамки', 'Видны в топе и чате'], ['avatar', '😎 Аватарки', 'Вместо буквы имени']];
   const [, , hint] = kinds.find((k) => k[0] === DN_STYLE);
   const deals = cosmDeals();
   const list = COSMETICS.filter((c) => c.kind === DN_STYLE).sort((a, b) => (ownsCosm(b.id) - ownsCosm(a.id)) || ((a.src ? 1 : 0) - (b.src ? 1 : 0)));

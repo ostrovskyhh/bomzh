@@ -1,5 +1,12 @@
 // Социальное в игре: оплата Telegram Stars, напоминания от бота, приглашение через историю и ссылку,
-// чат района (кнопка на главном экране) и банды. Всё идёт через сервер в боте (bot/social.py).
+// чат района (кнопка на главном экране). Всё идёт через сервер в боте (bot/social.py).
+
+function leftText(ms) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  if (m >= 1440) return `${Math.floor(m / 1440)} д ${Math.floor((m % 1440) / 60)} ч`;
+  if (m >= 60) return `${Math.floor(m / 60)} ч ${m % 60} мин`;
+  return `${m} мин`;
+}
 
 // =====================================================================
 // Оплата звёздами
@@ -108,7 +115,7 @@ refBoxHTML = () => {
 };
 
 // =====================================================================
-// Чат района и банды
+// Чат района
 // =====================================================================
 
 const CHAT_POLL = 2500;
@@ -131,13 +138,11 @@ document.addEventListener('game-language-change', () => {
   if (onlineOn()) chatCheck();
 });
 
-function chatOpen(room = 'district') {
+function chatOpen() {
   if (!onlineOn()) { toast('Чат работает в игре внутри Telegram', 'bad'); return; }
   if (CHAT && CHAT.timer) clearInterval(CHAT.timer);
-  CHAT = { room, channel: chatDistrictChannel(), last: 0, timer: null, admin: false };
+  CHAT = { room: 'district', channel: chatDistrictChannel(), last: 0, timer: null, admin: false };
   openModal(`<div class="chat">
-      <div class="seg seg2 chat-tabs"><button class="${room === 'district' ? 'on' : ''}" data-act="chatRoom" data-id="district">🏙️ Район</button>
-        <button class="${room === 'clan' ? 'on' : ''}" data-act="chatRoom" data-id="clan">🏴 Банда</button></div>
       <div class="chat-list" id="chatList"><div class="chat-empty">Загружаем…</div></div>
       <div class="chat-input"><input id="chatText" maxlength="200" placeholder="Напиши району…" autocomplete="off"><button class="btn primary" data-act="chatSend">➤</button></div>
       <small class="chat-rules">Без мата, ссылок и рекламы. Сообщение — не чаще раза в 3 секунды.</small>
@@ -155,7 +160,7 @@ async function chatPoll() {
     if (CHAT !== c || !$('chatList')) return;
     c.admin = r.admin;
     const list = $('chatList');
-    if (r.error && !c.last) { list.innerHTML = `<div class="chat-empty">${r.error}. Вступи в банду во вкладке «Досуг → Банда».</div>`; return; }
+    if (r.error && !c.last) { list.innerHTML = `<div class="chat-empty">${esc(r.error)}</div>`; return; }
     if (!c.last) list.innerHTML = r.messages.length ? '' : '<div class="chat-empty">Тут пока тихо. Напиши первым!</div>';
     const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
     for (const m of r.messages) {
@@ -173,13 +178,13 @@ async function chatPoll() {
 }
 
 // Непрочитанные — красная точка на кнопке чата
-let CHAT_LAST = { district: 0, clan: 0 };
+let CHAT_LAST = { district: 0 };
 function chatBadge() {
   const b = $('chatBadge');
   if (!b) return;
   const seen = S.chatSeen || {};
   const channel = chatDistrictChannel(), key = channel === 'worldwide' ? 'district:worldwide' : 'district';
-  const n = ((CHAT_LAST.channels?.[channel] || 0) > (seen[key] || 0) ? 1 : 0) + (CHAT_LAST.clan > (seen.clan || 0) ? 1 : 0);
+  const n = (CHAT_LAST.channels?.[channel] || 0) > (seen[key] || 0);
   b.classList.toggle('hidden', !n);
   $('chatBtn').classList.toggle('hidden', !onlineOn() || !S.storySeen);
 }
@@ -192,7 +197,7 @@ HOOKS.init.push(() => { setTimeout(chatCheck, 3000); setInterval(chatCheck, 6000
 
 Object.assign(ACTIONS, {
   openChat: () => chatOpen('district'),
-  chatRoom: (room) => chatOpen(room),
+  chatRoom: () => chatOpen(),
   chatChannel: (channel) => {
     if (!['ru', 'worldwide'].includes(channel)) return;
     chatDistrictChannel(); S.settings.chatChannel = channel;
@@ -213,115 +218,4 @@ Object.assign(ACTIONS, {
     } catch (e) { toast(refErrorText(e), 'bad'); if (CHAT === c && $('chatText') === inp && !inp.value) inp.value = text; }
   },
   chatDel: async (id) => { try { await apiPost('chat/delete', { id: +id }); const el = document.querySelector(`[data-act="chatDel"][data-id="${id}"]`); if (el) el.closest('.chat-msg').remove(); } catch (e) { toast('Не удалось удалить', 'bad'); } },
-});
-
-// =====================================================================
-// Банды
-// =====================================================================
-
-const CLAN_PRICE = 50000;
-const CLAN_CAPS = 25; // плюс золотые крышки
-const CLAN_LEVEL_REQ = 8;
-const CLAN_BONUS = 0.03; // +3% к тапам, работе и бизнесу за каждый уровень банды выше первого
-const CLAN_EMOJI = ['🏴', '🐺', '🦅', '🐻', '🦊', '🐍', '💀', '🔥', '⚡', '👑', '🍾', '🗡️'];
-let CLAN = { data: undefined, list: null, at: 0, loading: false };
-
-function clanBonus() { return S.clan ? CLAN_BONUS * ((S.clan.level || 1) - 1) : 0; }
-HOOKS.mods.push((m) => { const b = clanBonus(); if (b) { m.tap *= 1 + b; m.work *= 1 + b; } });
-// The gang business bonus is included once in businessRates().
-
-async function clanLoad(force) {
-  if (!onlineOn() || CLAN.loading || (!force && Date.now() - CLAN.at < 15000)) return;
-  CLAN.loading = true;
-  try {
-    const my = await apiPost('clan/my');
-    CLAN.data = my.clan;
-    S.clan = my.clan ? { id: my.clan.id, name: my.clan.name, emoji: my.clan.emoji, level: my.clan.level } : null;
-    CLAN.list = (await apiPost('clan/list')).clans;
-  } catch (e) { CLAN.error = 'Сервер банд недоступен'; }
-  CLAN.loading = false;
-  CLAN.at = Date.now();
-  if (currentScreen === 'fun' && TABS.fun === 'clan') renderCurrent(false);
-}
-HOOKS.init.push(() => setTimeout(() => clanLoad(true), 4000));
-
-EXTRA_TABS.fun.clan = () => {
-  if (!onlineOn()) return '<div class="info-card">🏴 Банды работают в игре внутри Telegram: нужен общий сервер.</div>';
-  setTimeout(() => clanLoad(), 0);
-  if (CLAN.data === undefined) return `<div class="info-card">${CLAN.error || '⏳ Загружаем банды района…'}</div>`;
-  const c = CLAN.data;
-  const others = (CLAN.list || []).filter((x) => !c || x.id !== c.id);
-  if (!c) {
-    const can = level() >= CLAN_LEVEL_REQ;
-    return `<div class="premium-hero clan-hero"><div class="e">🏴</div><div><b>Банды района</b><p>Вместе веселее: общий общак, бонус к доходу до +${CLAN_BONUS * 400}%, набеги на чужие банды и свой чат.</p></div></div>
-      <div class="info-card"><b>Основать банду</b> — ${fmt(CLAN_PRICE)} ₽, с ${CLAN_LEVEL_REQ} уровня.
-        <div class="code-row"><input id="clanName" maxlength="20" placeholder="Название банды"><select id="clanEmoji">${CLAN_EMOJI.map((e) => `<option>${e}</option>`).join('')}</select></div>
-        ${can ? priceBtn('clanCreate', '', CLAN_PRICE, S.money >= CLAN_PRICE, `Основать · ${fmt(CLAN_PRICE)} ₽`).replace('class="btn', 'class="btn wide') : `<button class="btn wide" disabled data-why="Нужен ${CLAN_LEVEL_REQ} уровень">🔒 С ${CLAN_LEVEL_REQ} уровня</button>`}</div>
-      <div class="subhead">Топ банд · вступай в любую</div>
-      ${others.length ? others.map((x, i) => card({ thumb: x.emoji, title: `${i + 1}. ${userLabel(x.name)} <span class="rarity rare">ур. ${x.level}</span>`, desc: `${x.members}/20 бойцов · ${fmt(x.score)} баллов`,
-        btn: `<button class="btn ${x.members < 20 ? 'primary' : ''}" data-act="clanJoin" data-id="${x.id}" ${x.members < 20 ? '' : 'disabled data-why="Банда заполнена"'}>Вступить</button>` })).join('') : '<div class="info-card">Банд пока нет — основай первую!</div>'}`;
-  }
-  const bonus = Math.round(clanBonus() * 100);
-  return `<div class="premium-hero clan-hero"><div class="e">${c.emoji}</div><div><b>${userLabel(c.name)} · ур. ${c.level}</b>
-      <p>Общак: <b>${fmt(c.treasury)} ₽</b> · сила ${fmt(c.power)} · ${fmt(c.score)} баллов${bonus ? ` · бонус +${bonus}% к доходу` : ''}</p></div></div>
-    <div class="btn-row"><button class="btn wide" data-act="chatRoom" data-id="clan">💬 Чат банды</button></div>
-    <div class="subhead">Скинуться в общак</div>
-    <div class="btn-row">${[1000, 10000, 100000, 1000000].map((v) => priceBtn('clanDonate', v, v, S.money >= v, `+${fmt(v)}`).replace('class="btn', 'class="btn small')).join('')}</div>
-    ${c.nextCost ? `<div class="info-card">Уровень ${c.level + 1}: бонус +${CLAN_BONUS * 100 * c.level}% ко всем доходам банды. Стоит <b>${fmt(c.nextCost)} ₽</b> из общака.
-      ${c.isOwner ? `<button class="btn ${c.treasury >= c.nextCost ? 'primary' : ''} wide" data-act="clanUpgrade" ${c.treasury >= c.nextCost ? '' : `disabled data-why="В общаке не хватает ${fmt(c.nextCost - c.treasury)} ₽"`}>⬆️ Прокачать банду</button>` : '<small>Прокачивает главарь.</small>'}</div>` : '<div class="info-card">👑 Банда максимального уровня!</div>'}
-    <div class="subhead">Бойцы · ${c.members.length}/20</div>
-    ${c.members.map((m) => card({ thumb: m.role === 'boss' ? '👑' : '👤', title: `${userLabel(m.name)}${m.me ? ' (ты)' : ''}`, desc: `${fmt(m.score)} баллов · вложил ${fmt(m.donated)} ₽`,
-      btn: c.isOwner && !m.me ? `<button class="btn small" data-act="clanKick" data-id="${m.uid}">Выгнать</button>` : '' })).join('')}
-    <div class="subhead">Набеги · раз в 12 часов, победа = 10% чужого общака</div>
-    ${c.raidLeft ? `<div class="info-card">⏳ Бойцы отдыхают: следующий набег через ${fmtTime(c.raidLeft)}</div>` : ''}
-    ${others.slice(0, 15).map((x) => card({ thumb: x.emoji, title: esc(x.name), desc: `ур. ${x.level} · сила ${fmt(x.power)} · ${x.members} бойцов${x.shield ? ' · 🛡️ под защитой' : ''}`,
-      btn: c.isOwner ? `<button class="btn ${c.raidLeft || x.shield ? '' : 'primary'}" data-act="clanRaid" data-id="${x.id}" ${c.raidLeft || x.shield ? `disabled data-why="${x.shield ? 'Банда под защитой после набега' : 'Бойцы ещё отдыхают'}"` : ''}>⚔️ Набег</button>` : '' })).join('')}
-    ${c.isOwner ? '' : '<div class="info-card">Набеги объявляет главарь.</div>'}
-    <button class="btn wide" data-act="clanLeave" style="color:var(--red)">Покинуть банду</button>`;
-};
-
-async function clanCall(path, body, okText) {
-  try {
-    const r = await apiPost(path, body);
-    if (r.error) { toast(r.error, 'bad'); sfx('error'); return null; }
-    if (r.clan !== undefined) { CLAN.data = r.clan; S.clan = r.clan ? { id: r.clan.id, name: r.clan.name, emoji: r.clan.emoji, level: r.clan.level } : null; }
-    if (okText) toast(okText, 'good');
-    CLAN.at = 0;
-    clanLoad(true);
-    return r;
-  } catch (e) { toast(refErrorText(e), 'bad'); return null; }
-}
-
-Object.assign(ACTIONS, {
-  clanCreate: async () => {
-    const name = ($('clanName') || {}).value || '';
-    if (S.money < CLAN_PRICE || level() < CLAN_LEVEL_REQ) return;
-    if (S.caps < CLAN_CAPS) { toast(`Нужно ещё ${CLAN_CAPS - S.caps} 🟡 — крышки можно купить, нажав на них наверху`, 'bad'); return; }
-    const r = await clanCall('clan/create', { name, emoji: ($('clanEmoji') || {}).value }, '🏴 Банда основана!');
-    if (r) { S.money -= CLAN_PRICE; S.caps -= CLAN_CAPS; track('clanCreate'); sfx('levelup'); confetti(60); }
-  },
-  clanJoin: async (id) => { if (await clanCall('clan/join', { id: +id }, '👋 Добро пожаловать в банду!')) { track('clanJoin'); sfx('good'); } },
-  clanLeave: () => {
-    const go = async () => { await clanCall('clan/leave', {}, 'Ты покинул банду'); CLAN.data = null; S.clan = null; renderCurrent(false); };
-    if (tg && tg.showConfirm && tg.initData) tg.showConfirm('Точно выйти из банды? Твои взносы останутся в общаке.', (ok) => ok && go()); else go();
-  },
-  clanDonate: async (v) => {
-    v = +v;
-    if (S.money < v) return;
-    S.money -= v;
-    if (!(await clanCall('clan/donate', { amount: v }, `💰 Вложил ${fmt(v)} ₽ в общак`))) S.money += v;
-    else track('clanDonate', v);
-    save();
-  },
-  clanUpgrade: async () => { if (await clanCall('clan/upgrade', {}, '⬆️ Банда прокачана!')) { sfx('levelup'); confetti(60); } },
-  clanKick: async (uid) => clanCall('clan/kick', { uid: +uid }, 'Боец выгнан'),
-  clanRaid: async (id) => {
-    const r = await clanCall('clan/raid', { target: +id });
-    if (!r) return;
-    track('clanRaid');
-    sfx(r.win ? 'win' : 'lose');
-    if (r.win) confetti(70);
-    resultModal({ emoji: r.win ? '🏴' : '🤕', rays: r.win ? '' : 'bad', title: r.win ? 'Набег удался!' : 'Набег отбит',
-      text: `Сила: ${fmt(r.power[0])} против ${fmt(r.power[1])}.<br>${r.win ? `В общак +${fmt(r.loot)} ₽` : `Из общака ушло ${fmt(r.loot)} ₽`}`, btn: 'Ок' });
-  },
 });

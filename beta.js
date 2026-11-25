@@ -26,8 +26,8 @@ const BETA_HUBS = [
     ['Движ', [{ s: 'fun', t: 'fights' }, { s: 'fun', t: 'rest' }]],
     ['Любовь и семья', [{ s: 'fun', t: 'dates', wide: 1 }]],
   ] },
-  { id: 'people', e: '👥', n: 'Люди', sub: 'все игроки рядом', groups: [
-    ['Свои', [{ s: 'fun', t: 'friends' }, { s: 'fun', t: 'clan' }]],
+  { id: 'people', e: '👥', n: 'Люди', sub: 'друзья и другие игроки', groups: [
+    ['Свои', [{ s: 'fun', t: 'friends', wide: 1 }]],
     ['Район', [{ act: 'openChat', id: 'chat', e: '💬', n: 'Чат района' }, { s: 'tasks', t: 'top' }]],
   ] },
   { id: 'goals', e: '🎯', n: 'Цели', sub: 'куда идти дальше', groups: [
@@ -80,9 +80,10 @@ const BETA_STATUS = {
   'fun:fights': () => `рейтинг ${fmt((S.fight && S.fight.rating) || 1000)}`,
   'fun:rest': () => 'бар, баня, отдых',
   'fun:dates': () => { const g = S.girlfriend && GIRLS.find((x) => x.id === S.girlfriend); return S.married ? 'семья' : g ? g.name : 'познакомься'; },
-  'fun:friends': () => 'в гости, бой, КНБ',
-  'fun:clan': () => 'свой двор и общие истории',
-  'act:chat': () => 'район и банда',
+  'fun:friends': () => FR.requests
+    ? (I18N.lang === 'en' ? `Requests: ${FR.requests}` : `Заявки: ${FR.requests}`)
+    : I18N.lang === 'en' ? 'Gifts, visits, battles' : 'подарки, визиты, бои',
+  'act:chat': () => 'СНГ и English',
   'tasks:top': () => 'рейтинг игроков',
   'tasks:story': () => { const q = currentQuest(); return q ? q.title : 'всё пройдено'; },
   'tasks:side': () => 'просьбы корешей',

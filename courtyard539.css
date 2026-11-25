@@ -1,0 +1,148 @@
+body.courtyard539.design536,
+body.courtyard539.design536[data-city] {
+  --ct-ink: #30201a;
+  --ct-muted: #655347;
+  --ct-paper: #fff1d7;
+  --ct-lavender: #f4dfb6;
+  --ct-line: #d7b78f;
+  --ct-accent: #272d58;
+  --courtyard539-nav: #222752;
+  --courtyard539-local: #fabe52;
+  --courtyard539-ground: #e8c696;
+  --card: #fff9e9;
+  --card2: #f9e7c7;
+  --green: #226141;
+  background: linear-gradient(150deg, var(--courtyard539-ground), #fff3df);
+}
+
+body.courtyard539.design536[data-city="msk"] { --courtyard539-ground: #b9cce1; --courtyard539-local: #8bd6ed; --courtyard-hub-city539: url(assets/courtyard539-msk.webp); }
+body.courtyard539.design536[data-city="mex"] { --courtyard539-ground: #f4bd93; --courtyard539-local: #ec9f68; --courtyard-hub-city539: url(assets/courtyard539-mex.webp); }
+body.courtyard539.design536[data-city="fr"] { --courtyard539-ground: #d1d7c6; --courtyard539-local: #b9ccac; --courtyard-hub-city539: url(assets/courtyard539-fr.webp); }
+body.courtyard539.design536[data-city="it"] { --courtyard539-ground: #edcb9e; --courtyard539-local: #f2b378; --courtyard-hub-city539: url(assets/courtyard539-it.webp); }
+body.courtyard539.design536[data-city="cn"] { --courtyard539-ground: #d6c2ba; --courtyard539-local: #e9ad91; --courtyard-hub-city539: url(assets/courtyard539-cn.webp); }
+
+html:has(body.courtyard539) { background: #252a51; }
+
+.courtyard539.cartoon538.design536 #app .topbar {
+  background: #fff5df;
+  border-bottom-color: #d7b78f;
+}
+
+.courtyard539.cartoon538.design536 .topbar .res,
+.courtyard539.cartoon538.design536 .topbar :is(#resBottles, #resCaps, #settingsBtn) {
+  border-color: #dec49f;
+  background: #fff1d2;
+  color: #3b261b;
+  box-shadow: inset 0 -1px #dab38188;
+}
+
+.courtyard539.cartoon538.design536 :is(.tabbar, #app > #tabbar) {
+  background: linear-gradient(180deg, #333a6b, var(--courtyard539-nav));
+  border-color: #484e7f;
+  box-shadow: 0 -2px 0 #30231725;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub] {
+  color: #fff1d7;
+  min-height: 50px;
+  border: 1px solid transparent;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub] > span {
+  background: transparent;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 0 #151832aa);
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] {
+  color: #352116;
+  background: linear-gradient(#ffdb6d, #ffad28);
+  border-color: #ffd06d;
+  box-shadow: inset 0 -2px #c2751b;
+}
+
+.courtyard539.cartoon538.design536 #tabbar :is(.design536-brand, .design536-brand i) { color: #fff1d7; }
+.courtyard539 #tabbar button:focus-visible { outline-color: #fff2ae; }
+
+.courtyard539-scenery { display: none; }
+.courtyard539 .scene[data-courtyard539-scenery] .cartoon538-yard-art { display: none; }
+.courtyard539 .scene[data-courtyard539-scenery] .courtyard539-scenery {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 65%;
+  pointer-events: none;
+}
+
+.courtyard539 .scene:has(.weather-fx.p-night) .courtyard539-scenery {
+  filter: brightness(.72) saturate(.83);
+}
+
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home > .scene {
+  flex: 1 0 clamp(235px, 48dvh, 550px);
+  min-height: 220px;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 0 #ad8c5e69;
+}
+
+.courtyard539.cartoon538 .redesign536-home #valera:not(.busy) { height: 90%; bottom: 2%; }
+.courtyard539.cartoon538 .redesign536-home #tapHint {
+  background: #fff2d5;
+  color: #352018;
+  border: 1px solid #cb9a61;
+  box-shadow: 0 3px 0 #33231958;
+}
+
+.courtyard539.cartoon538 .redesign536-home .scene-info {
+  background: #fff2dbef;
+  border-color: #d4b383;
+}
+
+.courtyard539.cartoon538 .redesign536-home .scene-info :is(.loc-name, .passive) { color: #36271c; }
+.courtyard539.cartoon538 .redesign536-home .scene-info .passive { color: #235638; font-weight: 800; }
+
+.courtyard539 #activity {
+  background: #fff3dfef;
+  color: #3a271c;
+  border: 1px solid #cfa47a;
+  box-shadow: 0 3px 0 #32251659;
+}
+
+.courtyard539 #activity small { color: #674e3d; }
+.courtyard539 #activity .progress > div { background: #d2881c; }
+
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home .actions > .act {
+  background: linear-gradient(#fff9e9, #fce3b8);
+  border-color: #cfaa7a;
+  box-shadow: inset 0 -2px #d4ad7c77;
+}
+
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home .actions > #exchangeBtn {
+  background: linear-gradient(#ffe99d, #ffc752);
+}
+
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home.nb534-hungry .actions > #eatBtn,
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home.nb534-tired .actions > #sleepBtn {
+  background: #ffd4ab;
+  border-color: #bd6541;
+}
+
+.courtyard539-setting { margin-block: 8px 14px; }
+.courtyard539-setting .switch { flex: 0 0 auto; }
+
+@media (max-width: 899px) {
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .scene {
+    flex-basis: clamp(220px, 48dvh, 450px);
+  }
+}
+
+@media (max-width: 899px) and (max-height: 600px) {
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .scene {
+    flex-basis: clamp(187px, 43dvh, 258px);
+    min-height: 187px;
+  }
+}

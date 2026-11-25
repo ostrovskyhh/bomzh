@@ -1,6 +1,5 @@
 // Сервис 2.5: настройки по разделам, баг-репорт и «предложить изменение» (приходят админу в бота),
-// всплывающие рассылки от админа, напоминания бота о счетах за жильё, автоплатёж за звёзды,
-// «Позвать в банду» из профиля игрока и списка друзей.
+// всплывающие рассылки от админа, напоминания бота о счетах за жильё, автоплатёж за звёзды.
 
 // =====================================================================
 // Настройки по разделам
@@ -121,7 +120,7 @@ ACTIONS.feedbackSend = async (kind, button) => {
 async function broadcastCheck() {
   if (document.hidden || !onlineOn() || !LOADED || !S.storySeen) return;
   try {
-    const r = await apiPost('broadcast/latest', { after: S.bcSeen || 0, communityButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.community, gangGuideButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.gangGuide });
+    const r = await apiPost('broadcast/latest', { after: S.bcSeen || 0, communityButton: typeof BC_BTNS !== 'undefined' && !!BC_BTNS.community });
     (r.items || []).forEach((b) => {
       S.bcSeen = Math.max(S.bcSeen || 0, b.id);
       // Кнопка рассылки ведёт в нужный раздел игры (admin5.js BC_BTNS)
@@ -211,25 +210,3 @@ function autopayHTML() {
 const _housingTabAuto = EXTRA_TABS.shop.housing;
 if (_housingTabAuto) EXTRA_TABS.shop.housing = () => autopayHTML() + _housingTabAuto();
 donateHTML = (function (orig) { return () => orig().replace('<div class="subhead">Крышки → рубли</div>', `${S.housing >= 3 ? `<div class="subhead">Удобства</div>${autopayHTML()}` : ''}<div class="subhead">Крышки → рубли</div>`); })(donateHTML);
-
-// =====================================================================
-// «Позвать в банду» — в профиле игрока (топ, онлайн) и в списке друзей
-// =====================================================================
-duelBtns = (function (orig) {
-  return (pid, name) => {
-    const html = orig(pid, name);
-    return S.clan ? html.replace(/<\/div>$/, `<button class="btn small" data-act="gangInvitePlayer" data-id="${esc(pid)}">🏴 В банду</button></div>`) : html;
-  };
-})(duelBtns);
-const _friendsTabGang = EXTRA_TABS.fun.friends;
-EXTRA_TABS.fun.friends = () => {
-  const html = _friendsTabGang();
-  return S.clan ? html.replace(/(<button class="btn small" data-act="frVisit" data-id="([^"]+)">🏠 В гости<\/button>)/g, '$1<button class="btn small" data-act="gangInvitePlayer" data-id="$2">🏴 В банду</button>') : html;
-};
-ACTIONS.gangInvitePlayer = async (pid) => {
-  try {
-    const r = await apiPost('gang/invite_player', { pid });
-    if (r.error) { toast(r.error, 'bad'); return; }
-    toast(`🏴 ${r.name} получил приглашение в банду от бота`, 'good'); sfx('good'); track('gangInvite');
-  } catch (e) { toast(refErrorText(e), 'bad'); }
-};

@@ -3,7 +3,7 @@
 const STORY_PROMO={data:null,busy:false,queued:false,variant:0,nextCheck:0,notBefore:Date.now()+12000};
 const STORY_COPY=[
   '🍾 Начал с лавки — строю свою империю! Код {code}: +1000 ₽, VIP на 2 дня и +50 крышек на 5-м уровне.',
-  '🏙️ Бизнесы, банды и 4 города. Собираем команду! Код {code}: стартовый подарок и +50 крышек на 5-м уровне.',
+  '🏙️ Бизнесы, друзья и 6 городов. Погнали! Код {code}: стартовый подарок и +50 крышек на 5-м уровне.',
   '😂 Вчера — лавка, сегодня — свой бизнес. Залетай в «Симулятор бомжа»! Код {code}: +50 крышек на 5-м уровне.',
 ];
 function storyPromoReady(){return !!(STORY_PROMO.data?.active&&STORY_PROMO.data?.token);}

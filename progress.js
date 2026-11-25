@@ -207,7 +207,7 @@ myStats = (function (orig) { return () => ({ ...orig(), frame: currentFrame() })
 // Выбор рамки — наверху вкладки «Достижения»
 const _achTabP = EXTRA_TABS.tasks.ach;
 EXTRA_TABS.tasks.ach = () => `<div class="subhead">🖼️ Рамка аватара · видна в топе и чате</div>
-  <div class="frames">${FRAMES.map((f) => { const ok = f.need(); return `<button class="frame-pick ${currentFrame() === f.id ? 'on' : ''}" data-act="pickFrame" data-id="${f.id}" ${ok ? '' : `disabled data-why="Откроется: ${f.how}"`}>
+  <div class="frames">${FRAMES.filter((f) => !f.retired || f.need()).map((f) => { const ok = f.need(); return `<button class="frame-pick ${currentFrame() === f.id ? 'on' : ''}" data-act="pickFrame" data-id="${f.id}" ${ok ? '' : `disabled data-why="Откроется: ${f.how}"`}>
     <div class="avatar frame-${f.id}">${esc(playerName()[0])}</div><small>${f.name}</small></button>`; }).join('')}</div>
   <div class="info-card">🎩 Достижение до 3-го уровня даёт уникальную шапку: ${ACH_HATS.map((h) => `${h.name} (${ACHS.find((a) => a.id === h.ach).name})`).join(', ')}.</div>` + _achTabP();
 ACTIONS.pickFrame = (id) => { const f = FRAMES.find((x) => x.id === id); if (f && f.need()) { S.frame = id; sfx('chip'); updateHud(); } };

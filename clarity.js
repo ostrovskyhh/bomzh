@@ -25,7 +25,7 @@ ACTIONS.scoreRulesToggle = () => { S.scoreRulesOpen = !S.scoreRulesOpen; };
 const _topTabRules = EXTRA_TABS.tasks.top;
 EXTRA_TABS.tasks.top = function topWithRules() {
   const html = _topTabRules();
-  if (S.topMode === 'gangs' || !TOP.data) return html;
+  if (!TOP.data) return html;
   const block = scoreRulesHTML(TOP.data);
   return html.replace(/<details class="top-why">[\s\S]*?<\/details>/, block) || html;
 };
@@ -117,7 +117,7 @@ playerName = () => S.name || _playerNameTg();
 HOOKS.hud.push(() => { const n = $('pname'); if (n && S.name && n.textContent !== S.name) n.textContent = S.name; });
 function nameModal(first) {
   openModal(`<div class="name-pop"><div class="bc-e">🏷️</div><h3>${first ? 'Как зовут твоего бомжа?' : 'Сменить имя'}</h3>
-    <p>${first ? 'Придумай имя — оно станет <b>уникальным именем твоего профиля</b>: его увидят в топе, чате, бандах и боях. Второго такого в игре не будет.' : 'Имя уникально и меняется раз в 7 дней.'}</p>
+    <p>${first ? 'Придумай имя — оно станет <b>уникальным именем твоего профиля</b>: его увидят в топе, чате и боях. Второго такого в игре не будет.' : 'Имя уникально и меняется раз в 7 дней.'}</p>
     <input id="nameInp" class="name-inp" maxlength="16" placeholder="Например: Валера Бутылкин" value="${esc(S.name || '')}" autocomplete="off">
     <small class="fb-note">3–16 символов: буквы, цифры, пробел, дефис</small>
     <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="nameSave" data-id="${first ? 1 : 0}">Сохранить</button>

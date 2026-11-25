@@ -46,13 +46,13 @@ function incomeText(kind,id){
   const j=JOBS.find(j=>j.id===id),b=BUSINESSES.find(b=>b.id===id);
   if(kind==='job')return j?incomeMoney(jobSalary(j)):null;
   if(kind==='job-net') {if(!j)return null;return alimonyOn()||jobFuelCost(j)?`После ${[alimonyOn()?'алиментов':'',jobFuelCost(j)?'бензина':''].filter(Boolean).join(' и ')}: до ${incomeMoney(jobNetSalary(j))}`:'';}
-  if(kind==='job-details')return j?`База ${incomeMoney(j.pay)} · результат до 125% · должность ×${POS_MULT[jobRank(id)]} · активные бонусы и состояния ×${mods().work.toFixed(3)} (VIP: ${isVip()?'действует':'нет'}, усилитель: ${isBoost()?'действует':'нет'}; учтены навыки, настроение, престиж, семья, питомец, коллекции и банда)${j.physical?` · сила ×${(1+S.strength/200).toFixed(2)}`:''}${JOB_GAMES[id]?.type==='lanes'?` · транспорт ×${(1+transportJobBonus()).toFixed(2)} · бензин ${incomeMoney(jobFuelCost(j))}`:''}`:null;
+  if(kind==='job-details')return j?`База ${incomeMoney(j.pay)} · результат до 125% · должность ×${POS_MULT[jobRank(id)]} · активные бонусы и состояния ×${mods().work.toFixed(3)} (VIP: ${isVip()?'действует':'нет'}, усилитель: ${isBoost()?'действует':'нет'}; учтены навыки, настроение, престиж, семья, питомец и коллекции)${j.physical?` · сила ×${(1+S.strength/200).toFixed(2)}`:''}${JOB_GAMES[id]?.type==='lanes'?` · транспорт ×${(1+transportJobBonus()).toFixed(2)} · бензин ${incomeMoney(jobFuelCost(j))}`:''}`:null;
   if(kind==='biz-lifetime')return incomeMoney(S.stats.bizEarned||0);
   if(kind==='biz-allcash')return incomeMoney(businessTotals().cash);
   if(kind==='biz-staffgain'||kind==='biz-staffpayback'){const s=STAFF.find(s=>s.id===id);if(!s||!S.biz.club)return null;return kind==='biz-staffgain'?incomeMoney(businessStaffGain(s)):incomeHours(businessStaffCost(s)/businessStaffGain(s));}
   if(kind==='biz-hours')return String(BIZ_CAP_HOURS*(isVip()?2:1));
   if(kind==='biz-total')return incomeMoney(BUSINESSES.reduce((sum,b)=>sum+(S.biz[b.id]?businessNetRate(b,S.biz[b.id]):0),0));
-  if(kind==='biz-note')return 'Учтены престиж, Деловая жилка, банда, VIP, уровень и персонал. Налог, зарплаты и действующие алименты вычтены.';
+  if(kind==='biz-note')return 'Учтены престиж, Деловая жилка, VIP, уровень и персонал. Налог, зарплаты и действующие алименты вычтены.';
   if(!b)return null;
   if(!S.biz[b.id] && ['biz-rate','biz-payback','biz-investment'].includes(kind)) {
     const forecast = businessBuyForecast535(b);

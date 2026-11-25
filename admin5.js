@@ -9,7 +9,6 @@ const BC_BTNS = {
   cases: ['📦', 'К кейсам', () => ACTIONS.cases()],
   story: ['📖', 'К сюжету', () => showScreen('tasks', 'story')],
   tour: ['🏆', 'К турниру', () => showScreen('fun', 'fights')],
-  gang: ['🏴', 'В банду', () => showScreen('fun', 'clan')],
   pass: ['🎫', 'К батл-пассу', () => showScreen('tasks', 'pass')],
 };
 ACTIONS.bcGo = (id) => { closeModal(); const b = BC_BTNS[id]; if (b) setTimeout(b[2], 80); };

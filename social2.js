@@ -1,58 +1,7 @@
-// Социальное 2.8: карточка любой банды из топа, премиальный чат, плашка «Поддержать проект»
+// Социальное 2.8: премиальный чат, плашка «Поддержать проект»
 // (1 звезда или своя сумма) и раздел «Профиль» в настройках со сменой уникального имени.
 
-// =====================================================================
-// 1. Чужая банда: нажми на банду в топе — увидишь, кто в ней
-// =====================================================================
-gangListHTML = function (list, me) {
-  if (!list || !list.length) return '<div class="info-card">Банд пока нет — основай первую!</div>';
-  return list.map((g) => card({ cls: 'gang-card', thumb: `<div class="gang-place p${g.place}">${g.place}</div>`,
-    title: `${g.emoji} ${userLabel(g.name)} <span class="rarity rare">ур. ${g.level}</span>${g.mine ? ' <small>(твоя)</small>' : ''}`,
-    desc: `${modeTag(g.mode)} · ${g.members}/${g.max} бойцов<br>⚔️ ${fmt(g.week)} очков войны · ${fmt(g.score)} баллов${g.wins ? ` · 🏆×${g.wins}` : ''}<br><span class="gang-more">👁 Нажми, чтобы посмотреть состав</span>`,
-    btn: me === false && !g.mine ? (g.mode === 'invite' ? '<button class="btn small" disabled data-why="Нужна ссылка-приглашение от бойцов банды">🔒</button>'
-      : `<button class="btn ${g.members < g.max ? 'primary' : ''}" data-act="clanJoin" data-id="${g.id}" ${g.members < g.max ? '' : 'disabled data-why="Банда заполнена"'}>Вступить</button>`) : '' })
-    .replace('<div class="card gang-card">', `<div class="card gang-card" data-act="gangView" data-id="${g.id}">`)).join('');
-};
-
-async function gangView(id) {
-  if (!onlineOn()) return;
-  openModal('<div class="gv"><div class="chat-empty">⏳ Загружаем банду…</div></div>', { center: true });
-  let r;
-  try { r = await apiPost('gang/info', { id: +id }); } catch (e) { toast(refErrorText(e), 'bad'); closeModal(); return; }
-  if (!document.querySelector('#modalRoot .gv')) return;
-  if (r.error) { toast(r.error, 'bad'); closeModal(); return; }
-  const g = r.gang;
-  const boss = g.members.find((m) => m.role === 'boss');
-  const online = g.members.filter((m) => m.online).length;
-  const join = g.mine ? '<div class="gv-note">🏴 Это твоя банда</div>'
-    : g.inGang ? '<div class="gv-note">Ты уже в банде. Чтобы перейти, сначала выйди из своей</div>'
-      : g.mode === 'invite' ? '<div class="gv-note">🔒 Только по приглашению — попроси ссылку у любого бойца</div>'
-        : g.members.length >= g.max ? '<div class="gv-note">Мест нет — банда заполнена</div>'
-          : `<button class="btn primary wide" data-act="clanJoin" data-id="${g.id}">🏴 Вступить в банду</button>`;
-  $('modalRoot').querySelector('.gv').innerHTML = `
-    <div class="gv-hero"><div class="gv-emoji">${g.emoji}</div>
-      <div class="gv-title"><b>${userLabel(g.name)}</b><small>ур. ${g.level} · ${modeTag(g.mode)}</small></div></div>
-    <div class="gv-stats">
-      <div><b>${g.place}</b><small>место в войне</small></div>
-      <div><b>${fmt(g.week)}</b><small>очков за неделю</small></div>
-      <div><b>${g.wins ? '🏆×' + g.wins : '—'}</b><small>побед в войнах</small></div>
-      <div><b>${fmt(g.power)}</b><small>сила</small></div>
-      <div><b>${g.members.length}/${g.max}</b><small>бойцов · 🟢 ${online}</small></div>
-      <div><b>${fmtShort(g.treasury)} ₽</b><small>общак</small></div>
-    </div>
-    <small class="gv-sub">👑 Главарь: <b>${boss ? esc(boss.name) : '—'}</b>${g.created ? ` · основана ${new Date(g.created * 1000).toLocaleDateString('ru-RU')}` : ''}</small>
-    <div class="gv-list">${g.members.map((m) => `<div class="gv-m ${m.me ? 'me' : ''}">
-        <div class="top-ava frame-${esc(m.frame || 'none')}">${avaFace(m.name, m.avatar)}${m.online ? '<i class="online-dot on-ava"></i>' : ''}</div>
-        <div class="gv-mb"><b>${m.role === 'boss' ? '👑 ' : ''}${userLabel(m.name)}${m.me ? ' (ты)' : ''}</b>
-          <small>ур. ${m.level} · 🥊 ${m.rating} · ⚔️ ${m.week} за неделю${m.online ? ' · <b class="online-txt">в игре</b>' : ''}</small>
-          ${!m.me && m.pid && typeof duelBtns === 'function' ? duelBtns(m.pid, m.name) : ''}</div></div>`).join('')}</div>
-    ${join}
-    <div class="btns"><button class="btn wide" data-act="close">Закрыть</button></div>`;
-}
-ACTIONS.gangView = (id) => gangView(id);
-
-// =====================================================================
-// 2. Премиальный чат
+// 1. Премиальный чат
 // =====================================================================
 // Смайлы по вкладкам; «Недавние» — последние 16, что ты отправлял
 const CHAT_EMOJI_TABS = [
@@ -63,7 +12,7 @@ const CHAT_EMOJI_TABS = [
   ['💰', ['💰', '💸', '💵', '🪙', '👑', '💎', '🏆', '🥇', '🎰', '🎲', '🃏', '🥊', '⚔️', '🏴', '🚗', '🏙️']],
 ];
 const CHAT_EMOJI = CHAT_EMOJI_TABS[0][1];
-const CHAT_QUICK = ['Всем привет! 👋', 'Кто на бой? 🥊', 'Кто в банду? 🏴', 'Го КНБ ✊', 'GG 🤝', 'Спасибо! 🙏'];
+const CHAT_QUICK = ['Всем привет! 👋', 'Кто на бой? 🥊', 'Го КНБ ✊', 'GG 🤝', 'Спасибо! 🙏'];
 const CHAT_MAX = 200;
 // Делим строку на видимые символы, чтобы не разрезать смайл из нескольких кодов (👨‍👩‍👧, ❤️)
 const CHAT_SEG = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('ru', { granularity: 'grapheme' }) : null;
@@ -82,16 +31,15 @@ function chatDay(ts) {
   return d.toDateString() === t.toDateString() ? 'Сегодня' : d.toDateString() === y.toDateString() ? 'Вчера' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 }
 
-chatOpen = function (room = 'district') {
+chatOpen = function () {
   if (!onlineOn()) { toast('Чат работает в игре внутри Telegram', 'bad'); return; }
   if (CHAT && $('chatText')) CHAT_DRAFTS[chatSeenKey(CHAT)] = $('chatText').value;
   if (CHAT && CHAT.timer) clearInterval(CHAT.timer);
-  CHAT = { room, channel: chatDistrictChannel(), last: 0, timer: null, admin: false, prev: null, users: {} };
-  const tab = (id, e, t) => `<button class="${room === id ? 'on' : ''}" data-act="chatRoom" data-id="${id}"><span>${e}</span>${t}</button>`;
+  CHAT = { room: 'district', channel: chatDistrictChannel(), last: 0, timer: null, admin: false, prev: null, users: {} };
   openModal(`<div class="chat chat2">
-      <div class="c2-head"><div class="c2-tabs">${tab('district', '🏙️', 'Район')}${tab('clan', '🏴', 'Банда')}</div>
+      <div class="c2-head"><div class="c2-tabs">🏙️ Район</div>
         <span class="c2-online" id="chatOnline"></span><button class="c2-x" data-act="close">✕</button></div>
-      ${room === 'district' ? `<div class="c2-channels" role="group" aria-label="Канал чата">${[['ru','RU'],['worldwide','Worldwide']].map(([id,label])=>`<button data-act="chatChannel" data-id="${id}" aria-pressed="${CHAT.channel===id}" class="${CHAT.channel===id?'on':''}">${label}</button>`).join('')}</div>` : ''}
+      <div class="c2-channels" role="group" aria-label="Канал чата">${[['ru','RU'],['worldwide','Worldwide']].map(([id,label])=>`<button data-act="chatChannel" data-id="${id}" aria-pressed="${CHAT.channel===id}" class="${CHAT.channel===id?'on':''}">${label}</button>`).join('')}</div>
       <div class="chat-list c2-list" id="chatList"><div class="chat-empty">Загружаем…</div></div>
       <button class="c2-down hidden" id="chatDown" data-act="chatDown">⬇ Новые</button>
       <div class="c2-emoji hidden" id="chatEmoji">
@@ -99,7 +47,7 @@ chatOpen = function (room = 'district') {
         <div class="c2-egrid" id="chatEGrid">${chatEmojiTab(0)}</div>
         <div class="c2-quick">${CHAT_QUICK.map((q, i) => `<button data-act="chatQuick" data-id="${i}">${q}</button>`).join('')}</div></div>
       <div class="chat-input c2-input"><button class="c2-emo-btn" id="chatEmoBtn" data-act="chatEmoToggle">😊</button>
-        <input id="chatText" placeholder="${room === 'clan' ? 'Написать банде…' : 'Написать району…'}" autocomplete="off" enterkeyhint="send">
+        <input id="chatText" placeholder="Написать району…" autocomplete="off" enterkeyhint="send">
         <span class="c2-count hidden" id="chatCount"></span>
         <button class="c2-send" data-act="chatSend">➤</button></div>
       <small class="chat-rules">Без мата, ссылок и рекламы · нажми на аватарку, чтобы позвать игрока на бой</small>
@@ -139,7 +87,7 @@ chatPoll = async function () {
     c.admin = r.admin;
     const list = $('chatList');
     if (r.online && $('chatOnline')) $('chatOnline').innerHTML = `<i class="online-dot"></i>${r.online} в игре`;
-    if (r.error && !c.last) { list.innerHTML = `<div class="chat-empty c2-empty"><span>🏴</span>${r.error}.<br>Вступи в банду во вкладке «Досуг → Банда».</div>`; return; }
+    if (r.error && !c.last) { list.innerHTML = `<div class="chat-empty c2-empty"><span>💬</span>${esc(r.error)}</div>`; return; }
     if (!c.last) list.innerHTML = r.messages.length ? '' : '<div class="chat-empty c2-empty"><span>💬</span>Тут пока тихо. Напиши первым!</div>';
     const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
     let html = '';
@@ -230,7 +178,7 @@ Object.assign(ACTIONS, {
 });
 
 // =====================================================================
-// 3. Донат: плашка «Поддержать проект»
+// 2. Донат: плашка «Поддержать проект»
 // =====================================================================
 PREM_GIVE.tip = (it) => {
   const n = (it && it.stars) || 1;
@@ -266,9 +214,9 @@ ACTIONS.tipCustom = () => tipPay(($('tipStars') || {}).value);
 ACHS.push({ id: 'patron', name: 'Меценат', emoji: '💛', fn: () => S.tipStars || 0, goals: [1, 50, 250, 1000], unit: '⭐ на поддержку проекта' });
 
 // =====================================================================
-// 4. Настройки → Профиль: уникальное имя
+// 3. Настройки → Профиль: уникальное имя
 // =====================================================================
-const NAME_WARN = 'Это имя станет <b>именем твоего персонажа везде</b>: в топе, чате, бандах, боях и вызовах. Оно уникально и меняется не чаще раза в 7 дней.';
+const NAME_WARN = 'Это имя станет <b>именем твоего персонажа везде</b>: в топе, чате, боях и вызовах. Оно уникально и меняется не чаще раза в 7 дней.';
 SET_TABS.unshift(['profile', '👤 Профиль']);
 openSettings = (function (orig) {
   return function () {
@@ -301,7 +249,7 @@ ACTIONS.nameSave = (function (orig) {
     const name = (($('nameInp') || {}).value || '').trim();
     if (first === '1' || name.length < 3 || name === S.name || !onlineOn()) { orig(first); return; }
     openModal(`<div class="name-pop"><div class="bc-e">⚠️</div><h3>Точно «${esc(name)}»?</h3>
-      <p>Так тебя будут видеть все игроки: в топе, чате, бандах и боях. Следующая смена — только через 7 дней.</p>
+      <p>Так тебя будут видеть все игроки: в топе, чате и боях. Следующая смена — только через 7 дней.</p>
       <input id="nameInp" type="hidden" value="${esc(name)}">
       <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="nameConfirm">✅ Да, это моё имя</button>
       <button class="btn wide" data-act="nameEdit">✏️ Изменить</button></div></div>`, { center: true });
