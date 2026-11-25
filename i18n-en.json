@@ -37287,6 +37287,8 @@
   "Открыть Сеть Валеры": "Open Valera's Network",
   "На сервере есть прогресс района": "Neighborhood progress is saved online",
   "Выбранный путь или заказ уже сохранён. Чтобы продолжить здесь, загрузи серверный профиль. Перед загрузкой можно скачать копию этого устройства.": "Your route or order is already saved. Load your server profile to continue here. You can download a copy from this device first.",
+  "На сервере сохранён новый прогресс": "New progress is saved online",
+  "Новые заказы, выбранный путь или маршруты уже сохранены. Загрузи серверный профиль, чтобы продолжить здесь. Перед этим можно скачать копию этого устройства.": "New orders, your chosen path or routes are already saved. Load your server profile to continue here. You can download a copy from this device first.",
   "🏘 Жизнь района — версия 5.34": "🏘 Neighborhood Life — v5.34",
   "🔑 Михалыч отдаёт ключи от гаража. Выбери, что в нём откроется, возьми первый заказ и посмотри, как меняется район после твоих решений.": "🔑 Mikhalych hands you the garage keys. Choose what to open, take your first order and watch your decisions change the neighborhood.",
   "🚚 Дошёл до финала в Китае? В Сети Валеры уже ждут новые проекты. Собери команду и реши, куда отправить транспорт и к кому обратиться за помощью.": "🚚 Reached the China finale? New projects are ready in Valera's Network. Assemble your crew and decide where to send your vehicles and who to ask for help.",
@@ -37298,5 +37300,12 @@
   "🏘 Понятные цены и заказы — версия 5.35": "🏘 Clearer prices and orders — v5.35",
   "На главном экране проще увидеть, что сейчас делать. В гараже и Сети Валеры быстрее сравниваются пути, затраты и награды.": "See what to do next more easily from home. Compare routes, costs and rewards faster in the garage and Valera's Network.",
   "Оплата поручений растёт вместе с районом. В Сети Валеры сумма зависит от города, поэтому поздние заказы заметнее пополняют баланс.": "Orders pay more as the neighborhood grows. Valera's Network scales with your city, so late-game orders add more to your balance.",
-  "При выборе жилья можно сравнить аренду с покупкой. Перед открытием бизнеса видно, как налог повлияет на общую чистую прибыль в городе.": "Compare renting and buying when choosing a home. Before opening a business, see how tax affects your total net profit in the city."
+  "При выборе жилья можно сравнить аренду с покупкой. Перед открытием бизнеса видно, как налог повлияет на общую чистую прибыль в городе.": "Compare renting and buying when choosing a home. Before opening a business, see how tax affects your total net profit in the city.",
+  "Новый облик и маршруты Валеры": "A new look and Valera’s routes",
+  "Обновили главный экран, разделы игры, магазины и окна действий. На компьютере разделы теперь в боковом меню, на телефоне — в нижней панели.": "Home, navigation, shops and action panels have a new look. Sections are in the side menu on desktop and along the bottom on phones.",
+  "В «Целях» появились маршруты Валеры. Выбирай план по городу, проходи остановки в настоящих игровых делах и забирай оплату. За три маршрута открывается аватар «Знаток района».": "Find Valera’s routes under Goals. Pick a city plan, complete its stops through real activities and collect your pay. Finish three routes to unlock the Neighborhood Guide avatar.",
+  "На главном видно следующее дело, состояние Валеры и быстрые действия. В магазине и бизнесе проще сравнивать цены и доход, а в гараже и Сети Валеры — затраты и награды.": "Home shows your next step, Valera’s needs and quick actions. Compare prices and income in shops and businesses, and compare costs and rewards in the garage and Network.",
+  "🧭 Новый облик и маршруты Валеры — версия 5.36": "🧭 A new look and Valera’s routes — v5.36",
+  "Обновились главная, магазины и разделы игры. На телефоне разделы открываются снизу, а на компьютере — из бокового меню. Нужное действие теперь проще найти по цели или состоянию Валеры.": "Home, shops and game sections have a new look. Use the bottom bar on phones and the side menu on desktop. Find the right action faster from Valera’s needs or current goal.",
+  "В «Целях» выбери маршрут, пройди его через реальные дела города и забери оплату. Можно вернуться позже и продолжить с той же остановки. За три выполненных маршрута открывается аватар «Знаток района».": "Pick a route under Goals, complete its stops through real city activities and collect your pay. Return later and pick up where you left off. Finish three routes to unlock the Neighborhood Guide avatar."
 }

@@ -517,22 +517,27 @@ function nb534HomeRender() {
 
   const html = `${main ? `<div class="nb534-home-task"><button id="nb534HomeMain" type="button" data-act="${main.action}" data-id="${nb534Attr(main.id)}"><small>${esc(main.label)}</small><strong>${esc(main.title)}</strong><span aria-hidden="true">›</span></button>${link ? nb534Button(link.label, link.action, link.id, 'nb534-home-link') : ''}</div>` : ''}
     ${urgent ? `<div class="nb534-urgent">${nb534Button(urgent.label, urgent.action, urgent.id)}</div>` : ''}`;
-  if (panel.dataset.html !== html) {
+  const objectiveHtml = typeof redesign536HomeMarkup === 'function' ? redesign536HomeMarkup(main, link, urgent) : html;
+  if (panel.dataset.html !== objectiveHtml) {
     const restoreMain = document.activeElement?.id === 'nb534HomeMain';
     const restoreButton = panel.contains(document.activeElement) && document.activeElement.dataset.nb534Focus;
-    panel.innerHTML = html;
-    panel.dataset.html = html;
+    panel.innerHTML = objectiveHtml;
+    panel.dataset.html = objectiveHtml;
     if (restoreMain) nb534Focus('nb534HomeMain');
     else if (restoreButton) Array.from(panel.querySelectorAll('[data-nb534-focus]')).find((button) => button.dataset.nb534Focus === restoreButton)?.focus({ preventScroll: true });
   }
-  panel.hidden = !html;
+  panel.hidden = !objectiveHtml;
   const ready = [];
+  const routeShortcut = typeof redesign536HomeRoute === 'function' && redesign536HomeRoute();
+  if (routeShortcut) ready.push(routeShortcut);
   if (!dailyState().claimedToday) ready.push(nb534Button(nb534Text('🎁 Бонус дня', '🎁 Daily bonus'), 'hubGo528', 'tasks:tasks'));
   if (typeof businessTotals === 'function' && businessTotals().cash >= 1) ready.push(nb534Button(nb534Text('🏪 Касса бизнеса', '🏪 Business cash'), 'hubGo528', 'life:business'));
   const extrasHtml = ready.join('');
   if (extras.dataset.html !== extrasHtml) {
+    const focus = extras.contains(document.activeElement) && document.activeElement.dataset.nb534Focus;
     extras.innerHTML = extrasHtml;
     extras.dataset.html = extrasHtml;
+    if (focus) Array.from(extras.querySelectorAll('[data-nb534-focus]')).find((button) => button.dataset.nb534Focus === focus)?.focus({ preventScroll: true });
   }
   extras.hidden = !extrasHtml;
   home.classList.add('nb534-home');

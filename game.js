@@ -920,8 +920,8 @@ function showNeighborhoodSavePick(remote) {
   neighborhoodSaveRemote = remote;
   ALT_SAVE = null;
   SAVE_LOCK = true;
-  openModal(`<h3>На сервере есть прогресс района</h3>
-    <p>Выбранный путь или заказ уже сохранён. Чтобы продолжить здесь, загрузи серверный профиль. Перед загрузкой можно скачать копию этого устройства.</p>
+  openModal(`<h3>На сервере сохранён новый прогресс</h3>
+    <p>Новые заказы, выбранный путь или маршруты уже сохранены. Загрузи серверный профиль, чтобы продолжить здесь. Перед этим можно скачать копию этого устройства.</p>
     <div class="btns"><button class="btn wide" data-act="adminSyncBackup">Скачать мою копию</button>
     <button class="btn primary wide" data-act="neighborhoodSaveUseServer">Загрузить профиль</button></div>`, { center: true, locked: true });
 }
