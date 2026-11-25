@@ -203,39 +203,73 @@ const MOUTHS = {
 
 function valeraSVG(eq, look = {}) {
   const b = BODIES[eq.body] || BODIES.rvan;
-  const beardColor = eq.body === 'kostum' ? '#4A3B2E' : '#6E5C4A';
-  const SKIN = look.sick ? '#D3D49A' : '#F1C7A1';
-  const SKIN_DARK = look.sick ? '#B9BB7E' : '#E0A784';
+  const ink = '#302637';
+  const beardColor = eq.body === 'kostum' ? '#4A3B2E' : '#694735';
+  const skin = look.sick ? '#DFDDA3' : '#FFD2A6';
+  const skinDark = look.sick ? '#BFC38A' : '#F1A978';
+  const cheek = look.sick ? '#C7C28B' : '#F68970';
   const mouth = MOUTHS[look.mood] || MOUTHS.happy;
-  const brows = look.mood === 'sad' ? 'M62 57q7-2 13-5M85 52q7 3 13 5' : 'M62 55q7-4 13 0M85 55q7-4 13 0';
+  const smile = mouth === MOUTHS.happy;
+  const brows = look.mood === 'sad' ? 'M59 56q7-1 15-7M86 49q7 6 15 7' : 'M58 54q6-6 15-3M87 51q8-3 15 3';
+  const hat = eq.hat !== 'none' && HATS[eq.hat];
+  const wornCollar = b === BODIES.rvan ? `
+    <path d="m63 96-8 9 7 10 9-9 9 17m16-28 8 10-7 10-9-9" fill="#946640" stroke="#51372D" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M80 125v32" fill="none" stroke="#523628" stroke-width="2" opacity=".65"/>
+    <g fill="#D2AA70" stroke="#4E3326" stroke-width="1">
+      <circle cx="82" cy="130" r="2.2"/><circle cx="82" cy="143" r="2.2"/><circle cx="82" cy="156" r="2.2"/>
+    </g>` : '';
   return `
 <svg viewBox="0 0 160 240" xmlns="http://www.w3.org/2000/svg" class="valera-svg">
-  <ellipse cx="80" cy="232" rx="54" ry="7" fill="rgba(0,0,0,.25)"/>
-  <rect x="56" y="160" width="20" height="64" rx="8" fill="${b.pants}"/>
-  <rect x="84" y="160" width="20" height="64" rx="8" fill="${b.pants}"/>
-  ${SHOES[eq.shoes] || SHOES.none}
-  <rect x="30" y="102" width="20" height="56" rx="10" fill="${b.jacket}"/>
-  <circle cx="40" cy="160" r="9" fill="${SKIN}"/>
-  <rect x="44" y="94" width="72" height="76" rx="18" fill="${b.jacket}"/>
-  <path d="M70 96L80 128L90 96Z" fill="${b.shirt}"/>
+  <ellipse cx="80" cy="232" rx="47" ry="6" fill="#2C2639" opacity=".22"/>
+  <g stroke="${ink}" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M53 158h27l-3 59q-11 5-24 0l-2-41zM81 158h27l1 21-2 38q-12 5-24 0z" fill="${b.pants}"/>
+    <path d="M59 174q0 21 2 36m30-37 1 35" fill="none" stroke="#FFF5E5" stroke-width="2.6" opacity=".2" stroke-linecap="round"/>
+    <g stroke-width="1.55">${SHOES[eq.shoes] || SHOES.none}</g>
+    <path d="M49 101q-14-1-18 13l-6 30q0 8 7 12l13 3 7-15-7-5 9-23z" fill="${b.jacket}"/>
+    <path d="M33 116l-4 21" stroke="#FFD3A5" stroke-width="2.5" opacity=".4" stroke-linecap="round"/>
+    <path d="M29 153q-3 8 4 13 7 4 12-1 4-4 1-9z" fill="${skin}"/>
+    <path d="M44 115q-1-12 9-19 9-6 27-6t29 7q8 7 7 19l1 39q0 11-9 13H53q-10 0-10-10z" fill="${b.jacket}"/>
+  </g>
+  <path d="M49 111q5-11 15-12m-16 22-1 32q0 6 5 7" fill="none" stroke="#FFDCAD" stroke-width="2.5" stroke-linecap="round" opacity=".42"/>
+  <path d="M107 107q8 5 7 19v30q0 10-9 11H55q-7-1-8-5 28 5 51-2 9-2 9-14z" fill="${ink}" opacity=".17"/>
+  <path d="M68 94q12-5 24 0l-12 34z" fill="${b.shirt}"/>
   ${b.extra}
+  ${wornCollar}
   <g class="bottle-arm">
-    <rect x="110" y="100" width="20" height="50" rx="10" fill="${b.jacket}" transform="rotate(-25 120 104)"/>
+    <path d="M112 99q10-2 15 10l12 27-12 13-15-21q-7-11-6-19 0-6 6-10z" fill="${b.jacket}" stroke="${ink}" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M121 106q4 5 7 12" fill="none" stroke="#FFD3A5" stroke-width="2.25" opacity=".36" stroke-linecap="round"/>
     ${typeof bottleHandSVG==='function'?bottleHandSVG(look.bottle):'<rect x="132" y="108" width="14" height="36" rx="4" fill="#5FA05A"/><rect x="135" y="97" width="8" height="13" rx="2" fill="#5FA05A"/><rect x="134" y="118" width="10" height="10" fill="#F2E6B8"/><rect x="135" y="93" width="8" height="5" rx="1" fill="#C9A23A"/>'}
-    <circle cx="139" cy="146" r="9" fill="${SKIN}"/>
+    <path d="M130 147q-2-7 6-10 5-2 9 1 5 4 2 11-2 6-9 5-6-1-8-7z" fill="${skin}" stroke="${ink}" stroke-width="2.1"/>
+    <path d="M138 142l5 .6m-5 3.5 5 .5" stroke="${skinDark}" stroke-linecap="round" stroke-width="1.2"/>
   </g>
-  <rect x="72" y="84" width="16" height="14" fill="${SKIN_DARK}"/>
-  <circle cx="50" cy="70" r="7" fill="${SKIN}"/><circle cx="110" cy="70" r="7" fill="${SKIN}"/>
-  <circle cx="80" cy="66" r="30" fill="${SKIN}"/>
-  <path d="M52 74Q56 104 80 104Q104 104 108 74Q100 88 80 88Q60 88 52 74Z" fill="${beardColor}"/>
-  <path d="${mouth}" fill="none" stroke="#4A2E22" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M71 83h18v15q-9 7-18 0z" fill="${skinDark}"/>
+  <g fill="${skin}" stroke="${ink}" stroke-width="2.3">
+    <ellipse cx="46" cy="70" rx="8" ry="9"/><ellipse cx="114" cy="70" rx="8" ry="9"/>
+    <path d="M47 58q1-16 11-23 10-7 22-7 23 0 31 20 6 12 1 28-4 17-18 23-14 8-28 0-16-7-20-23-2-10 1-18z"/>
+  </g>
+  <path d="M44 68q2-3 4 0m65 0q3-3 5 1" fill="none" stroke="${skinDark}" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M50 73q5 9 14 9 8-5 16-4 8-1 16 4 10-1 15-10 0 11-6 20-7 9-14 11l-5 2-5-1-6 2-5-3q-14-3-20-20z" fill="${beardColor}" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M58 88q4 7 11 10m30-8-5 6" fill="none" stroke="#E79C61" stroke-width="2" opacity=".44" stroke-linecap="round"/>
+  ${smile ? `
+    <path d="M66 85q13 4 28 0-4 13-14 13-9 0-14-13z" fill="#522B32" stroke="${ink}" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M69 86q11 2 22 0l-4 4q-7 2-14 0z" fill="#FFF3DF"/>
+    <path d="M75 95q6-4 12 0-6 4-12 0z" fill="#E68170"/>` : `
+    <path d="${mouth}" fill="none" stroke="#4A2E26" stroke-width="2.25" stroke-linecap="round"/>`}
   <g class="eyes">
-    <ellipse cx="69" cy="64" rx="3.5" ry="4" fill="#2A2A2A"/><ellipse cx="91" cy="64" rx="3.5" ry="4" fill="#2A2A2A"/>
+    <ellipse cx="68" cy="63" rx="7" ry="8" fill="#FFF2DE"/><ellipse cx="92" cy="63" rx="7" ry="8" fill="#FFF2DE"/>
+    <ellipse cx="70" cy="64" rx="3.7" ry="5" fill="#372526"/><ellipse cx="94" cy="64" rx="3.7" ry="5" fill="#372526"/>
+    <circle cx="71" cy="61.5" r="1.2" fill="#FFF8E8"/><circle cx="95" cy="61.5" r="1.2" fill="#FFF8E8"/>
   </g>
-  <path d="${brows}" fill="none" stroke="#4A3B2E" stroke-width="2.5" stroke-linecap="round"/>
-  <ellipse cx="80" cy="75" rx="6" ry="5" fill="#E08B76"/>
+  <path d="${brows}" fill="none" stroke="#4C3228" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="58" cy="73" rx="5" ry="2.6" fill="${cheek}" opacity=".62"/>
+  <ellipse cx="102" cy="73" rx="5" ry="2.6" fill="${cheek}" opacity=".62"/>
+  <ellipse cx="81" cy="75" rx="9.3" ry="6.8" fill="${cheek}" stroke="#8D493F" stroke-width="1.25"/>
+  <path d="M76 73q3-3 7-2" fill="none" stroke="${skin}" stroke-width="1.8" opacity=".82" stroke-linecap="round"/>
+  ${hat || `
+    <path d="M47 57q-5-8-3-16l-6 2q4-12 13-16l-8-1q9-10 22-11l-3-7q11 3 19 8 11-5 18-6l-4 7q13 0 23 11l-7 1q9 7 7 22l-6-4-4 7q-5-9-17-15l-12 10 2-11q-9 6-17 11l1-8q-9 4-14 18z" fill="#53372B" stroke="${ink}" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M52 33q10-10 24-9m13-1q11-1 19 7" fill="none" stroke="#AA6A43" stroke-width="3" stroke-linecap="round"/>
+    <path d="M47 40q7-7 12-9m35 0q7 1 13 8" fill="none" stroke="#D68A50" stroke-width="1.45" opacity=".72" stroke-linecap="round"/>`}
   ${look.sick ? '<path d="M104 50q4 6 0 10q-4-4 0-10z" fill="#8FD0F5"/>' : ''}
-  ${HATS[eq.hat] || HATS.none}
 </svg>`;
 }
 

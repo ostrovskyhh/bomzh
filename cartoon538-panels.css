@@ -1,0 +1,385 @@
+/* The existing shop, life, leisure, task and dialog layouts share light surfaces. */
+body.design536.cartoon538 {
+  --cp538-paper: #fffdf7;
+  --cp538-cream: #fff3db;
+  --cp538-line: #e0d1b2;
+  --cp538-shadow: #c8ae7f34;
+  --cp538-ink: #243450;
+  --cp538-muted: #565e74;
+  --cp538-lavender: #f0e9ff;
+  --cp538-lilac-line: #d9caef;
+  --cp538-violet: #5844c2;
+  --cp538-deep-violet: #493591;
+  --cp538-mint: #e5f5e7;
+  --cp538-mint-line: #bdddbf;
+  --cp538-green: #21644c;
+  --cp538-honey: #ffdc87;
+  --cp538-honey-line: #d8a951;
+  --cp538-brown: #70501a;
+  --cp538-red: #a1354e;
+}
+
+.cartoon538 #hubList .bh-head {
+  margin: 2px 0 5px;
+  padding: 0 0 5px;
+}
+
+.cartoon538 #hubList .bh-head b,
+.cartoon538 .screen:not(#screen-game) .screen-title,
+.cartoon538 .beta-back > b {
+  color: var(--cp538-ink);
+  font-weight: 850;
+  line-height: 1.12;
+}
+
+.cartoon538 #hubList .bh-sub,
+.cartoon538 .catalog536 .subhead {
+  color: var(--cp538-deep-violet);
+  border-color: var(--cp538-line);
+  font-weight: 750;
+}
+
+.design536.cartoon538 #hubList .bh-grid .bh-tile {
+  background: var(--cp538-paper);
+  border-color: var(--cp538-line);
+  box-shadow: 0 2px var(--cp538-shadow);
+  color: var(--cp538-ink);
+  border-radius: 14px;
+}
+
+.design536.cartoon538 #hubList .bh-tile[data-id="tasks:story"],
+.design536.cartoon538 #hubList .bh-tile.alert {
+  background: #fff1cb;
+  border-color: #e4be74;
+}
+
+.design536.cartoon538 #hubList .bh-tile:active {
+  background: var(--cp538-lavender);
+  border-color: #c1b0e8;
+}
+
+.cartoon538 #hubList .bh-tile .bh-e {
+  background: var(--cp538-lavender);
+  border-radius: 10px;
+}
+
+.cartoon538 #hubList .bh-grid .bh-tile:nth-child(3n + 2) .bh-e { background: var(--cp538-mint); }
+.cartoon538 #hubList .bh-grid .bh-tile:nth-child(3n) .bh-e { background: #ffeab7; }
+
+.cartoon538 #hubList .bh-tile .bh-t small,
+.cartoon538 #hubList .bh-tile.alert small { color: var(--cp538-muted); }
+
+.design536.cartoon538 .beta-back .bb-back {
+  min-height: 44px;
+  color: var(--cp538-deep-violet);
+  border-color: var(--cp538-lilac-line);
+  background: var(--cp538-lavender);
+}
+
+.cartoon538 .beta-back .bb-alt { background: var(--cp538-cream); }
+.cartoon538 .beta-back .bb-alt button { min-height: 44px; }
+.cartoon538 .beta-back .bb-alt button.on { color: var(--cp538-deep-violet); background: var(--cp538-lavender); }
+
+.design536.cartoon538 .screen:not(#screen-game) .city-banner {
+  background: var(--cp538-lavender);
+  border-color: var(--cp538-lilac-line);
+  color: var(--cp538-ink);
+}
+
+/* Wallet, catalogue groups and purchase surfaces retain their original controls. */
+.cartoon538 .catalog536 {
+  --catalog-surface: var(--cp538-paper);
+  --catalog-line: var(--cp538-line);
+  --catalog-accent: var(--cp538-violet);
+}
+
+.cartoon538 .catalog-wallet536 {
+  background: #fff0c7;
+  border-color: #e7cc99;
+}
+
+.cartoon538 .catalog-wallet536 > div + div { border-color: #e1c995; }
+.cartoon538 .catalog-wallet536 small { color: var(--cp538-muted); }
+.cartoon538 .catalog-wallet536 b { color: var(--cp538-ink); }
+.cartoon538 .catalog-wallet536 b,
+.cartoon538 .business-dashboard :is(.business-rate, .business-metrics b, .business-till b) {
+  font-variant-numeric: tabular-nums;
+}
+
+.cartoon538 .catalog-tabs536 {
+  align-items: stretch;
+  background: var(--cp538-cream);
+  border-radius: 13px;
+}
+
+.cartoon538 .catalog-tabs536 button[aria-current="page"] {
+  background: var(--cp538-lavender);
+  border-color: var(--cp538-lilac-line);
+  color: var(--cp538-deep-violet);
+}
+
+.cartoon538 .catalog-jumps536 button {
+  background: var(--cp538-paper);
+  border-color: var(--cp538-line);
+  color: var(--cp538-ink);
+}
+
+.cartoon538 .catalog536 :is(.card, .business-card, .career-ladder, .finance-details535),
+.cartoon538 #screen-tasks :is(.card, .sq-card) {
+  background: var(--cp538-paper);
+  border: 1px solid var(--cp538-line);
+  border-radius: 14px;
+  box-shadow: 0 2px var(--cp538-shadow);
+  color: var(--cp538-ink);
+}
+
+.cartoon538 .catalog536 .card-title { font-weight: 800; }
+.cartoon538 .catalog536 .card-desc { color: var(--cp538-muted); }
+.cartoon538 .catalog536 .card.current { outline: 0; border-color: var(--cp538-mint-line); background: #f3faf0; }
+.cartoon538 .catalog536 .card.current .card-title { color: var(--cp538-green); }
+.cartoon538 .catalog536 .story-access521 {
+  color: var(--cp538-ink);
+  border-color: #e3cb9b;
+  background: var(--cp538-cream);
+}
+
+.cartoon538 :is(.catalog536, #screen-tasks) :is(.rental-info522, .housing-cost535, .finance-details535) > summary { color: var(--cp538-deep-violet); }
+.cartoon538 :is(.catalog536, #screen-tasks) :is(.rental-info522, .finance-details535) { background: var(--cp538-lavender); border-color: var(--cp538-lilac-line); }
+.cartoon538 .catalog536 .rental-info522 { border: 1px solid var(--cp538-lilac-line); color: var(--cp538-muted); }
+.cartoon538 .catalog536 .housing-debt522 { color: var(--cp538-red); }
+
+.cartoon538 :is(.catalog536, #screen-tasks) .btn:not(.primary, .green, .danger, .blue, :has(.star-e, .star-price)) {
+  color: var(--cp538-ink);
+  background: var(--cp538-cream);
+  border: 1px solid #e6cd9b;
+}
+
+.design536.cartoon538 :is(.catalog536, #screen-tasks) .btn.primary:not(:has(.star-e, .star-price)) {
+  color: #fff;
+  background: var(--cp538-violet);
+  box-shadow: inset 0 -2px #413391;
+}
+
+.design536.cartoon538 :is(.catalog536, #screen-tasks) .btn.green {
+  background: #caead1;
+  color: var(--cp538-green);
+}
+
+.cartoon538 :is(.catalog536, #screen-tasks) .btn:disabled:not(:has(.star-e, .star-price)) {
+  color: var(--cp538-muted);
+  background: #eee8dc;
+  border-color: #dcd1bc;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Business figures and comparisons remain legible at both normal and compact widths. */
+.cartoon538 .business-dashboard,
+.cartoon538 .business-dashboard[data-business-city] {
+  --biz-accent: #287456;
+  --biz-ink: #183e31;
+}
+
+.cartoon538 .business-dashboard[data-business-city="msk"] { --biz-accent: #3a5d9b; }
+.cartoon538 .business-dashboard[data-business-city="mex"] { --biz-accent: #815218; }
+.cartoon538 .business-dashboard[data-business-city="fr"] { --biz-accent: #59449a; }
+
+.cartoon538 .business-dashboard .business-hero {
+  border-color: var(--cp538-mint-line);
+  background: radial-gradient(ellipse at 93% 0,#c5ecd3 0,transparent 63%), var(--cp538-mint);
+  color: var(--cp538-ink);
+  box-shadow: 0 2px #a0c89a40;
+}
+
+.cartoon538 .business-hero > h2,
+.cartoon538 .business-card h3,
+.cartoon538 .business-till b,
+.cartoon538 .business-how summary,
+.cartoon538 .business-empty b { color: var(--cp538-ink); }
+
+.cartoon538 :is(.business-hero > p, .business-metrics small, .business-level span, .business-day,
+  .business-till > span, .business-till small, .business-rate > small,
+  .business-upgrade > span, .business-payback, .business-how, .business-empty,
+  .business-staff > p, .business-party p, .finance-business-tax535) {
+  color: var(--cp538-muted);
+}
+
+.cartoon538 .business-dashboard .business-card.owned { border-color: var(--cp538-mint-line); }
+.cartoon538 .business-card.locked { opacity: 1; }
+.cartoon538 .business-emblem { background: var(--cp538-lavender); border-color: var(--cp538-lilac-line); }
+.cartoon538 .business-card.owned .business-emblem { background: var(--cp538-mint); border-color: var(--cp538-mint-line); }
+.cartoon538 .business-level i { background: #e9dcbe; }
+.cartoon538 .business-level i.on { background: var(--biz-accent); }
+.cartoon538 .catalog536 .business-card .business-rate { color: var(--biz-accent); }
+.cartoon538 .business-till {
+  background: var(--cp538-cream);
+  border: 1px solid #e8d1a3;
+}
+
+.cartoon538 :is(.business-how, .business-empty, .business-party, .business-ad78, .mission-bonuses78) {
+  color: var(--cp538-ink);
+  background: var(--cp538-cream);
+  border-color: var(--cp538-line);
+}
+
+.cartoon538 :is(.business-damage78, .business-gate78) { background: #ffebd4; color: var(--cp538-brown); }
+.cartoon538 .business-upgrade { border-color: var(--cp538-line); }
+.cartoon538 .business-more { color: var(--cp538-deep-violet); min-height: 44px; padding-block: 8px; font-size: 12px; }
+.cartoon538 .finance-details535 > summary { color: var(--cp538-deep-violet); }
+
+/* Goals, projects and routes use the same status colours as the income panels. */
+.cartoon538 #screen-tasks .sq-card.locked { opacity: 1; }
+.cartoon538 #screen-tasks .sq-card p { color: var(--cp538-muted); }
+.cartoon538 #screen-tasks .sq-card.ready { border-color: var(--cp538-mint-line); }
+.cartoon538 #screen-tasks .sq-foot small { color: var(--cp538-brown); }
+.cartoon538 .quest-card {
+  color: var(--cp538-ink);
+  background: radial-gradient(ellipse at 97% 0,#fff1bf,transparent 62%), var(--cp538-paper);
+  border: 1px solid var(--cp538-line);
+  box-shadow: 0 2px var(--cp538-shadow);
+}
+.cartoon538 .quest-card.dark-path {
+  background: #ffedf0;
+  border-color: #cd91a0;
+}
+.cartoon538 .quest-card .goal { background: var(--cp538-cream); }
+.cartoon538 .quest-card .q-reward { color: var(--cp538-brown); }
+.cartoon538 #screen-tasks .day { border: 1px solid var(--cp538-line); }
+.cartoon538 #screen-tasks .day.done {
+  color: var(--cp538-green);
+  background: var(--cp538-mint);
+  border-color: var(--cp538-mint-line);
+}
+.cartoon538 #screen-tasks .day.today {
+  color: var(--cp538-brown);
+  background: var(--cp538-cream);
+  border-color: #e8c787;
+}
+
+.cartoon538 #screen-neighborhood534 {
+  --nb-panel: var(--cp538-paper);
+  --nb-border: var(--cp538-line);
+  --nb-muted: var(--cp538-muted);
+  --nb-accent: var(--cp538-deep-violet);
+  --nb-text: var(--cp538-ink);
+}
+
+.cartoon538 #screen-neighborhood534 .nb534-button {
+  color: var(--cp538-deep-violet);
+  background: var(--cp538-lavender);
+  border-color: var(--cp538-lilac-line);
+}
+
+.cartoon538 #screen-neighborhood534 .nb534-button.is-main {
+  color: #fff;
+  background: var(--cp538-violet);
+  border-color: #4a39a3;
+  box-shadow: inset 0 -2px #413391;
+}
+
+.cartoon538 #screen-neighborhood534 :is(.nb534-choice, .nb534-path, .nb534-details, .nb534-progress li) {
+  background: var(--cp538-paper);
+  border-color: var(--cp538-line);
+  color: var(--cp538-ink);
+}
+
+.cartoon538 #screen-neighborhood534 :is(.nb534-path strong, .nb534-section h2) { color: var(--cp538-ink); }
+.cartoon538 #screen-neighborhood534 .nb534-content p.nb534-memory { color: var(--cp538-green); border-color: #81bd9e; }
+.cartoon538 #screen-neighborhood534 :is(.nb534-choice.is-selected, .nb534-progress li.is-done) { background: var(--cp538-mint); border-color: var(--cp538-mint-line); }
+.cartoon538 #screen-neighborhood534 .nb534-progress li.is-current { background: var(--cp538-cream); border-color: #e2c290; }
+.cartoon538 #screen-neighborhood534 .nb534-progress li > span:first-child,
+.cartoon538 #screen-neighborhood534 .nb534-choice-details span { color: var(--cp538-deep-violet); background: var(--cp538-lavender); }
+.cartoon538 #screen-neighborhood534 :is(.nb534-consequence, .nb534-tariff, .nb534-details summary small) { color: var(--cp538-brown); }
+.cartoon538 #screen-neighborhood534 .nb534-details summary { color: var(--cp538-deep-violet); }
+.cartoon538 #screen-neighborhood534 .nb534-hero h1 { color: #fff7e2; }
+
+.cartoon538 .vr536 { color: var(--cp538-ink); }
+.cartoon538 .vr536 .vr536-choices article { background: var(--cp538-paper); border-color: var(--cp538-line); }
+.cartoon538 .vr536 .vr536-current { color: var(--cp538-deep-violet); }
+.cartoon538 .vr536 :is(.vr536-done, .vr536-badge) { color: var(--cp538-green); }
+.cartoon538 .vr536 .vr536-badge { border-color: var(--cp538-mint-line); }
+
+/* Split themed management sheets from specialty game boards. */
+.design536.cartoon538 .backdrop { background: #2f30536e; }
+
+.design536.cartoon538 #modalRoot .sheet:has(
+  #exchangePanel509, #donateBox, .business-detail, .vr536, .set2-grid, .business-party
+),
+.design536.cartoon538 #modalRoot .sheet.chat524-sheet {
+  color: var(--cp538-ink);
+  background: var(--cp538-paper);
+  border-color: var(--cp538-line);
+}
+
+.cartoon538 #modalRoot .sheet :is(#exchangePanel509, .business-detail, .set2-grid) .btn { min-height: 44px; }
+.cartoon538 #modalRoot .sheet:has(#exchangePanel509) #exchangePanel509 {
+  color: var(--cp538-ink);
+  background: #fff5df;
+  border-color: #e5c886;
+}
+
+.cartoon538 #exchangePanel509 #exchangeAmount509 {
+  color: var(--cp538-ink);
+  border-color: #cfbb97;
+  background: var(--cp538-paper);
+}
+
+.cartoon538 #exchangePanel509 #exchangeError509 { color: var(--cp538-red); }
+.cartoon538 #exchangePanel509 .exchange509-preview b { color: var(--cp538-green); }
+.cartoon538 #exchangePanel509 .finance-rate535 .rate { color: var(--cp538-deep-violet); }
+.cartoon538 #modalRoot #donateBox .dn-compact { border-color: var(--cp538-line); }
+.cartoon538 #modalRoot #donateBox .dn-compact > span { color: var(--cp538-brown); }
+.cartoon538 #modalRoot #donateBox .dn-tabs { background: var(--cp538-cream); }
+.cartoon538 #modalRoot :is(.set2-me, .set2-tile) { background: var(--cp538-lavender); border: 1px solid var(--cp538-lilac-line); }
+.cartoon538 #modalRoot .set2-back { color: var(--cp538-deep-violet); min-height: 44px; }
+.cartoon538 #modalRoot .set2-quick .chip { min-height: 44px; }
+
+/* The specialised game boards depend on pairs of dark surfaces and light text. */
+.design536.cartoon538 #modalRoot .sheet:has(
+  .mg-arena, .fight-arena, .city-game-arena, .w50-arena, .casino-lobby, .roul-wrap,
+  .bac-premium, .dice-table, .sort-wrap, .hd-wrap, .tm-zone, .crash-box, #slotMsg, #bjBanner, .a6-body
+),
+.design536.cartoon538 #modalRoot .sheet.chat-sheet:not(.chat524-sheet) {
+  --bg: #101a24;
+  --card: #172633;
+  --card2: #223442;
+  --line: #36505d;
+  --text: #f2f3ec;
+  --muted: #b1c2c9;
+  --gold: #f5cd87;
+  --green: #9ee1c0;
+  --red: #ff9790;
+  --blue: #94c9f6;
+  color-scheme: dark;
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.cartoon538 .chat524 {
+  --c524-bg: #fff8e7;
+  --c524-surface: var(--cp538-paper);
+  --c524-soft: var(--cp538-lavender);
+  --c524-ink: var(--cp538-ink);
+  --c524-muted: var(--cp538-muted);
+  --c524-line: var(--cp538-line);
+  --c524-accent: var(--cp538-violet);
+  --c524-own: var(--cp538-mint);
+  --c524-fight: #fff1cc;
+  --c524-fightline: #dfbe79;
+  --c524-danger: var(--cp538-red);
+  color-scheme: light;
+}
+
+.cartoon538 .chat524 :is(.c524-icon, .c524-action, .c524-channel, .c524-nav button):focus-visible,
+.cartoon538 :is(.nb534-button, .catalog536 button, .catalog536 summary):focus-visible {
+  outline-color: #268297;
+}
+
+@media (max-width: 370px) {
+  .cartoon538 .catalog536 .business-card { padding: 12px; }
+  .cartoon538 .catalog536 .business-emblem { width: 45px; height: 45px; border-radius: 12px; font-size: 24px; }
+  .cartoon538 .catalog536 .business-rate { font-size: 21px; }
+  .cartoon538 .catalog536 .catalog-tabs536 button { padding-inline: 6px; }
+  .cartoon538 #hubList .bh-grid.c3 .bh-tile { padding-inline: 7px; }
+}
