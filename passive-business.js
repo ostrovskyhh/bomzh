@@ -23,7 +23,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)businessSy
 setInterval(()=>{if(!document.hidden)businessSync();},60000);
 // A single ownership rate applies to local and managed enterprises; levels are not businesses.
 function businessOwnedCount(){return Object.keys(S.biz||{}).length+new Set((S.managedBusinesses||[]).map(e=>e.key)).size;}
-function businessTaxRate(){return (Math.round(BIZ_TAX*100)+Math.min(10,Math.max(0,businessOwnedCount()-3)*2))/100;}
+function businessTaxRate(count=businessOwnedCount()){return (Math.round(BIZ_TAX*100)+Math.min(10,Math.max(0,count-3)*2))/100;}
 function businessTaxLabel(){return Math.round(businessTaxRate()*100)+'%';}
 function businessRates(b, st={lvl:1}, vip=isVip()) {
   const lvl=Math.max(1,Math.min(BIZ_MAX_LVL,Number(st.lvl)||1));
@@ -105,10 +105,10 @@ function businessDetails(id){
 function businessCard(b){
   const st=S.biz[b.id],preview=incomeBusiness(b),rate=businessNetRate(b,preview),can=storyAssetLevelAllowed506('biz',b.id);
   return `<article class="business-card ${st?'owned':can?'available':'locked'}" data-business="${b.id}"><div class="business-card-head"><div class="business-emblem">${b.emoji}</div><div><small>${st?'ТВОЁ ПРЕДПРИЯТИЕ':can?'МОЖНО ОТКРЫТЬ':'С '+b.level+' УРОВНЯ'}</small><h3>${esc(b.name)}</h3>${st?`<div class="business-level">${Array.from({length:BIZ_MAX_LVL},(_,i)=>`<i class="${i<st.lvl?'on':''}"></i>`).join('')}<span>${st.lvl}/${BIZ_MAX_LVL}</span></div>`:''}</div></div>
-    <div class="business-rate">${incomeHTML('biz-rate',b.id)}<small>/ час чистыми</small></div><div class="business-day">${incomeHTML('biz-day',b.id)} за следующие сутки без ручного ремонта, при свободной кассе</div>
+    <div class="business-rate">${incomeHTML('biz-rate',b.id)}<small>/ час чистыми</small></div>${st?`<div class="business-day">${incomeHTML('biz-day',b.id)} за следующие сутки без ручного ремонта, при свободной кассе</div>`:''}
     ${st?`<div class="business-till"><span>К получению <b>${incomeHTML('biz-cash',b.id)}</b></span><div class="progress"><div data-income-progress="${b.id}" style="width:${Math.min(100,st.cash/bizCap(b,st)*100)}%"></div></div><small>${incomeHTML('biz-fill',b.id)}</small></div><button class="btn primary wide" data-business-collect="${b.id}" data-act="bizCollect" data-id="${b.id}" ${businessPayout(st).beforeAlimony<1?'disabled':''}>Забрать из кассы</button>
       ${st.lvl<BIZ_MAX_LVL?`<div class="business-upgrade"><b>Следующий уровень</b><span>+${incomeHTML('biz-upgain',b.id)}/ч · окупится за ${incomeHTML('biz-uppayback',b.id)}</span>${priceBtn('bizUp',b.id,bizUpgradeCost(b,st),S.money>=bizUpgradeCost(b,st),'Улучшить · '+incomeMoney(bizUpgradeCost(b,st)))}</div>`:'<p class="business-max">✦ Максимальный уровень · +200% к базе</p>'}`:
-      `<p class="business-payback">Покупка окупится за ${incomeHTML('biz-payback',b.id)} при текущих бонусах</p>${can?priceBtn('bizBuy',b.id,b.price,S.money>=b.price,'Открыть · '+incomeMoney(b.price)):reqHTML({level:b.level})}`}
+      `<p class="business-payback">${incomeHTML('biz-investment',b.id)}</p>${can?priceBtn('bizBuy',b.id,b.price,S.money>=b.price,'Открыть · '+incomeMoney(b.price)):reqHTML({level:b.level})}`}
     <button class="business-more" data-act="bizDetails" data-id="${b.id}">Из чего складывается прибыль →</button></article>`;
 }
 function businessStaffHTML(){

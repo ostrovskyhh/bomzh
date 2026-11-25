@@ -51,6 +51,7 @@ Object.assign(ACTIONS, {
 // Глава открылась — показать её сцену (в очереди окон, после окна награды)
 HOOKS.tick.push(() => {
   if (!S.storySeen || (S.tut && !S.tut.done) || typeof currentQuest !== 'function') return;
+  if (currentScreen === 'neighborhood534' || currentScreen === 'shop' || currentScreen === 'life') return;
   const q = currentQuest();
   if (!q || !storyScene(q.id) || storySeen()[q.id]) return;
   if (popupTurn(2)) playStoryScene(q.id);

@@ -505,7 +505,7 @@ EXTRA_TABS.shop.housing = () => {
   if (S.housing >= 3) {
     status = housingBillHTML522(cur,dueLeft) + S.breakdowns.map((id) => { const b = BREAKDOWNS.find((x) => x.id === id); return card({ thumb: b.emoji, title: b.name, desc: b.desc, btn: priceBtn('repair', id, repairCost(id), S.money >= repairCost(id), `🔧 ${fmt(repairCost(id))}`) }); }).join('');
   }
-  return rentalInfo522() + status + HOUSING.map((h, i) => {
+  return status + rentalInfo522() + HOUSING.map((h, i) => {
     const here = i === S.housing;
     const lvlOk = i===0 || storyAssetLevelAllowed506('home',i);
     const owned = i <= S.ownedHousing;

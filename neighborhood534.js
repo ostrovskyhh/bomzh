@@ -3,14 +3,20 @@
 const NEIGHBORHOOD534_HOUR = 3600000;
 const NEIGHBORHOOD534_LIMIT = 1000000;
 const NEIGHBORHOOD534_MILESTONES = [3, 6, 12];
+const NEIGHBORHOOD534_LOCAL_RATES = [1, 1.25, 1.5, 1.8];
+const NEIGHBORHOOD534_NETWORK_RATES = [1, 1.25, 1.5, 2];
+const NEIGHBORHOOD534_CITY_RATES = [0.1, 0.18, 0.3, 0.45, 0.65, 1];
 
 const NEIGHBORHOOD534_ROUTES = {
   workshop: {
     label: ['Мастерская', 'Workshop'],
+    summary: ['Ремонт · больше денег за заказ', 'Repairs · higher pay per order'],
     description: ['Михалыч отдаёт дальний бокс под ремонт вещей соседей.', 'Mikhailych offers the back bay for repairing things for the neighbors.'],
     consequence: ['На верстаке появятся инструменты. Первое дело — починить тележку пекаря. Заявки на ремонт требуют больше сил и приносят больше денег.', 'Tools go on the workbench. Fix the baker’s cart first. Repair orders take more energy and pay more.'],
-    fullOrder: { energy: 6, reward: 180 },
-    quickOrder: { energy: 4, reward: 115 },
+    firstFull: { energy: 5, reward: 180 },
+    firstQuick: { energy: 3, reward: 115 },
+    fullOrder: { energy: 6, reward: 260 },
+    quickOrder: { energy: 4, reward: 140 },
     first: {
       title: ['Тележка до рассвета', 'A cart before dawn'],
       description: ['У пекаря перекосило колесо. Утром нужно развезти хлеб. Михалыч предлагает заменить втулку или выправить колесо до первой развозки.', 'The baker’s cart has a crooked wheel and bread goes out in the morning. Replace the bushing or straighten the wheel for the first delivery.'],
@@ -33,10 +39,13 @@ const NEIGHBORHOOD534_ROUTES = {
   },
   market: {
     label: ['Свой сервис', 'Own service'],
+    summary: ['Доставка · меньше затрат энергии', 'Delivery · lower energy costs'],
     description: ['Соседние лавки отдают коробки на хранение и выдачу. Ты открываешь свою службу доставки по двору.', 'The market stalls send boxes here for storage and pickup. You start your own neighborhood delivery service.'],
     consequence: ['В боксе появятся стеллажи. Первое дело — найти получателей коробок. Заказы на выдачу и доставку требуют меньше сил и приносят меньше денег.', 'Shelves go in the bay. Find the recipients of the first boxes. Pickup and delivery orders use less energy and pay less.'],
-    fullOrder: { energy: 5, reward: 150 },
-    quickOrder: { energy: 3, reward: 90 },
+    firstFull: { energy: 4, reward: 160 },
+    firstQuick: { energy: 2, reward: 100 },
+    fullOrder: { energy: 5, reward: 190 },
+    quickOrder: { energy: 3, reward: 100 },
     first: {
       title: ['Три коробки для двора', 'Three boxes for the yard'],
       description: ['На двух коробках дождь размыл адреса. Можно обойти лавки и сверить весь список или отвезти подписанную коробку, а остальные оставить на сухой полке.', 'Rain washed the labels off two boxes. Check with the stalls to match the whole list, or deliver the labeled box and keep the others dry.'],
@@ -86,11 +95,12 @@ const NEIGHBORHOOD534_PROJECTS = [
 const NEIGHBORHOOD534_NETWORK = {
   workshops: {
     label: ['Материалы для мастерских', 'Workshop supplies'],
+    summary: ['Бизнес даёт максимальную оплату', 'Your business earns the highest pay'],
     description: ['Линь собирает запросы мастеров из городов, где Валера жил. Первой партии ждут мастера и Михалыч.', 'Lin gathers requests from the cities Valera lived in. The makers and Mikhailych are waiting for the first shipment.'],
     consequence: ['Сеть займётся запчастями, обменом инструментами и наборами для ремонта. Свой транспорт бережёт силы, а команда бизнеса помогает получить максимальную оплату.', 'The network deals in spare parts, tool swaps, and repair kits. Your own transport saves energy and a business team helps you earn the highest payment.'],
-    team: { energy: 8, reward: 260 },
-    vehicle: { energy: 4, reward: 260 },
-    business: { energy: 6, reward: 365 },
+    team: { energy: 8, firstReward: 20000, reward: 30000 },
+    vehicle: { energy: 4, firstReward: 22000, reward: 34000 },
+    business: { energy: 6, firstReward: 35000, reward: 49000 },
     first: [['Первая партия материалов', 'The first shipment of supplies'], ['У Линя три списка. Выбери, кто соберёт и развезёт коробки мастерским.', 'Lin has three lists. Decide how to gather the boxes and get them to the workshops.']],
     recurring: [
       [['Полка запчастей', 'A shelf of spare parts'], ['Мастерским не хватает ходовых деталей. Собери общую партию.', 'The workshops are short of common parts. Assemble a shared shipment.']],
@@ -108,11 +118,12 @@ const NEIGHBORHOOD534_NETWORK = {
   },
   fair: {
     label: ['Ярмарка городов', 'Six-city fair'],
+    summary: ['Свой транспорт даёт максимальную оплату', 'Your transport earns the highest pay'],
     description: ['Торговцы из прошлых городов хотят выставить свои вещи рядом. Начни с пробного развоза по лавкам.', 'Sellers from the earlier cities want to show their wares together. Start with a trial run to the stalls.'],
     consequence: ['Сеть займётся ярмарками, витринами и обменом между лавками. Своя доставка приносит самую высокую оплату, а команда бизнеса бережёт силы.', 'The network runs fairs, sets up displays, and arranges swaps. Delivering on your own ride pays the most, while your business team saves energy.'],
-    team: { energy: 7, reward: 245 },
-    vehicle: { energy: 5, reward: 350 },
-    business: { energy: 3, reward: 275 },
+    team: { energy: 7, firstReward: 18000, reward: 28000 },
+    vehicle: { energy: 5, firstReward: 32000, reward: 47000 },
+    business: { energy: 3, firstReward: 23000, reward: 34000 },
     first: [['Пробная ярмарка', 'The trial fair'], ['Торговцы прислали первые коробки. Выбери, как подготовить столы и довезти товары.', 'The sellers sent their first boxes. Decide how to prepare the stalls and move the goods.']],
     recurring: [
       [['Столы для гостей', 'Stalls for visiting sellers'], ['Два продавца приезжают впервые. Подготовь места для их вещей.', 'Two sellers are coming for the first time. Get their stalls ready.']],
@@ -203,8 +214,8 @@ function neighborhood534FirstJob(route) {
   return {
     id: 'garage-first', kind: 'first', title: neighborhood534Text(...first.title), description: neighborhood534Text(...first.description),
     choices: [
-      neighborhood534Option('careful', first.careful.slice(0, 2), first.careful.slice(2), 5, 0, 160),
-      neighborhood534Option('quick', first.quick.slice(0, 2), first.quick.slice(2), 3, 0, 100),
+      neighborhood534Option('careful', first.careful.slice(0, 2), first.careful.slice(2), route.firstFull.energy, 0, route.firstFull.reward),
+      neighborhood534Option('quick', first.quick.slice(0, 2), first.quick.slice(2), route.firstQuick.energy, 0, route.firstQuick.reward),
     ],
   };
 }
@@ -235,6 +246,44 @@ function neighborhood534Recurring(route, count, offset) {
   return pool[(count + offset) % pool.length];
 }
 
+function neighborhood534Rate(count, rates) {
+  return rates[NEIGHBORHOOD534_MILESTONES.filter((needed) => count >= needed).length];
+}
+
+function neighborhood534TariffLabel(rate) {
+  if (rate === 1) return '';
+  const bonus = Math.round((rate - 1) * 100);
+  return neighborhood534Text(`Оплата за опыт района +${bonus}%`, `+${bonus}% for neighborhood experience`);
+}
+
+function neighborhood534LocalReward(order, count) {
+  return Math.round(order.reward * neighborhood534Rate(count, NEIGHBORHOOD534_LOCAL_RATES));
+}
+
+function neighborhood534Investment(route) {
+  if (!route) return null;
+  const costMoney = NEIGHBORHOOD534_PROJECTS.reduce((sum, project) => sum + project.money, 0);
+  const costEnergy = NEIGHBORHOOD534_PROJECTS.reduce((sum, project) => sum + project.energy, 0);
+  function paybackOrders(order) {
+    let earned = 0;
+    let count = 0;
+    while (earned < costMoney) {
+      earned += neighborhood534LocalReward(order, count);
+      count++;
+    }
+    return count;
+  }
+  const paybackFullOrders = paybackOrders(route.fullOrder);
+  const paybackQuickOrders = paybackOrders(route.quickOrder);
+  const price = cityMoney(costMoney);
+  return {
+    costMoney, costEnergy, paybackFullOrders, paybackQuickOrders,
+    paybackText: neighborhood534Text(
+      `Если оплатить все три стройки (${price}), вложения вернутся за ${paybackFullOrders} полных или ${paybackQuickOrders} коротких заказов.`,
+      `If you pay for all three projects (${price}), ${paybackFullOrders} full or ${paybackQuickOrders} quick orders cover the cost.`),
+  };
+}
+
 function neighborhood534MilestoneView(route, cycle) {
   if (!route) return [];
   const count = neighborhood534Count(cycle);
@@ -257,9 +306,10 @@ function neighborhood534LocalJob(state, route) {
   const quickEnergy = route.quickOrder.energy - (stage >= 2 ? 1 : 0);
   return {
     id: `local-${count}`, kind: 'local', title: neighborhood534Text(...title), description: neighborhood534Text(...description),
+    tariffLabel: neighborhood534TariffLabel(neighborhood534Rate(count, NEIGHBORHOOD534_LOCAL_RATES)),
     choices: [
-      neighborhood534Option('careful', completeLabel, ['Полный заказ готов. Соседи забрали всё сразу.', 'The full order is ready. The neighbors picked everything up together.'], fullEnergy, 0, route.fullOrder.reward),
-      neighborhood534Option('quick', quickLabel, ['Срочная часть сделана. Остальное сосед сможет забрать позже.', 'The urgent part is done. The neighbor can collect the rest later.'], quickEnergy, 0, route.quickOrder.reward),
+      neighborhood534Option('careful', completeLabel, ['Полный заказ готов. Соседи забрали всё сразу.', 'The full order is ready. The neighbors picked everything up together.'], fullEnergy, 0, neighborhood534LocalReward(route.fullOrder, count)),
+      neighborhood534Option('quick', quickLabel, ['Срочная часть сделана. Остальное сосед сможет забрать позже.', 'The urgent part is done. The neighbor can collect the rest later.'], quickEnergy, 0, neighborhood534LocalReward(route.quickOrder, count)),
     ],
   };
 }
@@ -284,14 +334,19 @@ function neighborhood534NetworkJob(state, route) {
   const count = neighborhood534Count(cycle);
   const firstOption = ['team', 'vehicle', 'business'].indexOf(state.outcomes?.networkFirst);
   const [title, description] = first ? route.first : neighborhood534Recurring(route, count, Math.max(0, firstOption));
+  const payoutCity = city();
+  const cityRate = NEIGHBORHOOD534_CITY_RATES[CITIES[payoutCity]?.idx] ?? NEIGHBORHOOD534_CITY_RATES[0];
+  const rate = first ? 1 : neighborhood534Rate(count, NEIGHBORHOOD534_NETWORK_RATES);
+  const reward = (option) => Math.round((first ? option.firstReward : option.reward) * cityRate * rate);
   return {
     id: first ? 'network-first' : `network-${count}`, kind: first ? 'network-first' : 'network',
-    title: neighborhood534Text(...title), description: neighborhood534Text(...description),
+    title: neighborhood534Text(...title), description: neighborhood534Text(...description), payoutCity,
+    tariffLabel: neighborhood534TariffLabel(rate),
     choices: [
-      neighborhood534Option('team', ['Собраться с соседями', 'Gather the neighbors'], ['Соседи разобрали коробки по адресам и довезли всё вместе.', 'The neighbors sorted the boxes by address and delivered them together.'], route.team.energy, 0, route.team.reward),
-      neighborhood534Option('vehicle', ['Развезти на своём транспорте', 'Use your transport'], ['Заказ развезли на твоём транспорте. Теперь коробки у получателей.', 'Your ride carried the shipment. The boxes are with the recipients.'], route.vehicle.energy, 0, route.vehicle.reward,
+      neighborhood534Option('team', ['Собраться с соседями', 'Gather the neighbors'], ['Соседи разобрали коробки по адресам и довезли всё вместе.', 'The neighbors sorted the boxes by address and delivered them together.'], route.team.energy, 0, reward(route.team)),
+      neighborhood534Option('vehicle', ['Развезти на своём транспорте', 'Use your transport'], ['Заказ развезли на твоём транспорте. Теперь коробки у получателей.', 'Your ride carried the shipment. The boxes are with the recipients.'], route.vehicle.energy, 0, reward(route.vehicle),
         neighborhood534HasTransport() ? '' : neighborhood534Text('Нужен исправный транспорт в этом городе.', 'You need working transport in this city.')),
-      neighborhood534Option('business', ['Попросить команду бизнеса', 'Ask your business team'], ['Команда разложила коробки у себя и собрала общий заказ. Оплата за заявку начисляется отдельно.', 'Your team sorted the boxes at their premises and prepared the shipment. This order earns its own payment.'], route.business.energy, 0, route.business.reward,
+      neighborhood534Option('business', ['Попросить команду бизнеса', 'Ask your business team'], ['Команда разложила коробки у себя и собрала общий заказ. Оплата за заявку начисляется отдельно.', 'Your team sorted the boxes at their premises and prepared the shipment. This order earns its own payment.'], route.business.energy, 0, reward(route.business),
         neighborhood534HasBusiness() ? '' : neighborhood534Text('Нужен работающий бизнес в этом или прошлом городе.', 'You need an operating business in this or an earlier city.')),
     ],
   };
@@ -300,6 +355,7 @@ function neighborhood534NetworkJob(state, route) {
 function neighborhood534RouteChoices(catalog) {
   return Object.entries(catalog).map(([id, item]) => ({
     id, label: neighborhood534Text(...item.label), description: neighborhood534Text(...item.description),
+    summary: neighborhood534Text(...item.summary),
     consequence: neighborhood534Text(...item.consequence), available: true,
   }));
 }
@@ -362,7 +418,7 @@ function neighborhood534View() {
     cycleCount: neighborhood534Count(state.localityCycle), milestones: neighborhood534MilestoneView(route, state.localityCycle),
     completedCount: Number(!!state.firstJobAt) + Number(!!state.networkFirstDoneAt) + neighborhood534Count(state.localityCycle) + neighborhood534Count(state.networkCycle),
     choices: route ? [] : neighborhood534RouteChoices(NEIGHBORHOOD534_ROUTES),
-    projects: neighborhood534Projects(state), ...local,
+    projects: neighborhood534Projects(state), investment: neighborhood534Investment(route), ...local,
     network: {
       eligible, started: !!networkRoute, route: networkRoute ? state.network : '',
       routeLabel: networkRoute ? neighborhood534Text(...networkRoute.label) : '',
