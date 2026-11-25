@@ -395,6 +395,10 @@
 .a541-review-actions #a6Error { color: #8c1839; }
 .a541-review-actions #a6Error:empty { display: none; }
 
+@media (max-width: 375px) {
+  .a541-console .a541-quick { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (min-width: 820px) {
   #modalRoot .backdrop.center:has(> .sheet > .a541-console) { padding: 20px; }
   #modalRoot .backdrop.center .sheet:has(> .a6-console.a541-console) {
