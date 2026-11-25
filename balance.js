@@ -142,7 +142,7 @@ EVENTS.push(
     ],
   },
   {
-    id: 'turf', title: 'Разборка', emoji: '👊', text: 'Банда с соседнего двора требует отдать твою точку сбора бутылок.',
+    id: 'turf', title: 'Разборка', emoji: '👊', text: 'Ребята с соседнего двора требуют отдать твою точку сбора бутылок.',
     options: [
       { label: 'Драться', get hint() { return `шанс ${Math.round(clamp(0.35 + S.strength / 150 + S.form / 300, 0.15, 0.85) * 100)}%`; }, run: () => {
           const chance = clamp(0.35 + S.strength / 150 + S.form / 300, 0.15, 0.85);

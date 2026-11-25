@@ -3,11 +3,11 @@
 }
 
 .courtyard539 #hubList .courtyard-hub539 {
-  --courtyard-hub-ink539: #27223a;
+  --courtyard-hub-ink539: var(--cp538-ink);
   --courtyard-hub-paper539: #fff2de;
   --courtyard-hub-line539: #c49d79;
-  --courtyard-hub-title539: #262957;
-  --courtyard-hub-muted539: #654b3b;
+  --courtyard-hub-title539: var(--courtyard539-nav);
+  --courtyard-hub-muted539: var(--cp538-muted);
   width: min(100%, 860px);
   margin-inline: auto;
   min-width: 0;
@@ -87,8 +87,8 @@
 }
 
 .courtyard539 #hubList .courtyard-hub-grid539 .bh-tile:focus-visible {
-  outline: 3px solid var(--courtyard-hub-title539);
-  outline-offset: 1px;
+  outline: 2px solid var(--courtyard-hub-title539);
+  outline-offset: -4px;
 }
 
 .cartoon538.courtyard539 #hubList .courtyard-hub-grid539 .bh-tile .bh-e {
@@ -154,6 +154,9 @@
   box-shadow: 0 0 0 1px #fff2cc;
 }
 
+.courtyard539 #hubList .courtyard-hub-grid539 .bh-tile.alert .bh-t { padding-right: 8px; }
+.courtyard539 #hubList .courtyard-hub-grid539 .courtyard-hub-primary539.alert .bh-t { padding-right: 25px; }
+
 .courtyard539 #hubList .courtyard-goal539 {
   margin-top: 4px;
 }
@@ -187,4 +190,8 @@
 
 @media (min-width: 710px) {
   .courtyard539 #hubList .courtyard-hub-grid539 { gap: 10px; padding: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .design536.cartoon538.courtyard539 #hubList .courtyard-hub-grid539 .bh-tile { transition: none; }
 }

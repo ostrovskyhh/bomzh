@@ -605,7 +605,7 @@ HOOKS.tick.push(() => {
   S.chapterIntro = null;
   openModal(`<div class="chapter-card mex"><div class="cc-sky">${sceneSVG(0)}</div><div class="cc-num">ГЛАВА III</div><div class="cc-title">Мексика</div>
     <p>¡Hola, amigo! — Привет, друг! Ты сбежал за океан с горстью долларов. Здесь всё по-другому: доллары вместо рублей, тако вместо шавермы, мариачи вместо метро. Список друзей сохранится. Знать испанский заранее не нужно: в обучении есть русские подсказки.</p>
-    <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 работ и 40 своих мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span><span>🦂 Картель и бандиты</span></div>
+    <div class="cc-list"><span>💵 Всё в долларах</span><span>🛖 Гамак → гасиенда</span><span>🌮 15 работ и 40 своих мини-игр</span><span>🦎 Новые животные</span><span>🎺 Мариачи и кумбия</span><span>🗣️ Испанский</span><span>🦂 Люди Койота и «Скорпионы»</span></div>
     <button class="btn primary wide" data-act="close">Вперёд! · ¡Vamos!</button></div>`, { center: true });
   sfx('levelup');
 });

@@ -6,7 +6,22 @@ body.courtyard539.design536[data-city] {
   --ct-lavender: #f4dfb6;
   --ct-line: #d7b78f;
   --ct-accent: #272d58;
+  --cp538-paper: #fffaf0;
+  --cp538-cream: #fff0d5;
+  --cp538-line: #dbc09d;
+  --cp538-shadow: #ab7b462b;
+  --cp538-ink: #282442;
+  --cp538-muted: #624d42;
+  --cp538-lavender: #f1e8d9;
+  --cp538-lilac-line: #d8bd99;
+  --cp538-violet: #3b4379;
+  --cp538-deep-violet: #2d355f;
+  --cp538-mint: #e9f4e3;
+  --cp538-mint-line: #b6cdb0;
+  --cp538-green: #245a43;
   --courtyard539-nav: #222752;
+  --courtyard539-focus: #4b4188;
+  --courtyard539-amber: linear-gradient(#ffe292, #ffc256);
   --courtyard539-local: #fabe52;
   --courtyard539-ground: #e8c696;
   --card: #fff9e9;
@@ -36,6 +51,20 @@ html:has(body.courtyard539) { background: #252a51; }
   box-shadow: inset 0 -1px #dab38188;
 }
 
+.courtyard539.cartoon538.design536 .topbar #resBottles {
+  color: #25543b;
+  background: #edf4dc;
+  border-color: #c2caac;
+}
+
+.courtyard539.cartoon538.design536 .topbar #resCaps b {
+  background: var(--courtyard539-nav);
+}
+
+.courtyard539.cartoon538.design536 .topbar #xpFill {
+  background: #7863aa;
+}
+
 .courtyard539.cartoon538.design536 :is(.tabbar, #app > #tabbar) {
   background: linear-gradient(180deg, #333a6b, var(--courtyard539-nav));
   border-color: #484e7f;
@@ -54,6 +83,26 @@ html:has(body.courtyard539) { background: #252a51; }
   filter: drop-shadow(0 2px 0 #151832aa);
 }
 
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528 {
+  color: #fff1d7;
+  background: transparent;
+  filter: none;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528 > span {
+  opacity: .74;
+  filter: grayscale(.88) drop-shadow(0 2px 0 #151832aa);
+}
+
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528::after {
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  background: #fff0cc;
+  border-radius: 5px;
+}
+
 .courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] {
   color: #352116;
   background: linear-gradient(#ffdb6d, #ffad28);
@@ -62,7 +111,54 @@ html:has(body.courtyard539) { background: #252a51; }
 }
 
 .courtyard539.cartoon538.design536 #tabbar :is(.design536-brand, .design536-brand i) { color: #fff1d7; }
-.courtyard539 #tabbar button:focus-visible { outline-color: #fff2ae; }
+.courtyard539.design536 #tabbar button:focus-visible { outline: 2px solid #fff2ae; outline-offset: 1px; }
+.courtyard539.design536 #tabbar button[aria-current="page"]:focus-visible { outline-color: #282447; outline-offset: -5px; }
+
+.courtyard539.design536 :is(.topbar, #screen-game, #screen-life, #screen-shop, #screen-tasks, .chat524)
+  :where(button, [role="button"], summary, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--courtyard539-focus);
+  outline-offset: -2px;
+}
+
+.courtyard539.cartoon538.design536 .beta-back .bb-back,
+.courtyard539.cartoon538 .catalog-tabs536 button[aria-current="page"] {
+  color: #422b27;
+  border-color: #c2a077;
+  background: #ffebc3;
+}
+
+.courtyard539.cartoon538 .catalog-tabs536 > button { min-height: 44px; }
+
+.courtyard539.cartoon538.design536 #screen-life .business-dashboard :is([data-act="bizCollectAll"], [data-act="bizCollect"]).btn.primary:not(:disabled) {
+  background: var(--courtyard539-amber);
+  color: #392617;
+  box-shadow: inset 0 -2px #b67d388c;
+}
+
+.courtyard539.cartoon538 .business-dashboard .business-hero {
+  background: radial-gradient(ellipse at 93% 0, #d5eccb, transparent 68%), var(--cp538-mint);
+}
+
+.courtyard539.cartoon538 .chat524 {
+  --c524-bg: #fff4df;
+  --c524-onaccent: #fff9e8;
+}
+
+.courtyard539 .chat524 .c524-channel[aria-pressed="true"] {
+  color: #462a1c;
+  background: #ffe8b4;
+  border-color: #ac793b;
+  box-shadow: none;
+}
+
+.courtyard539 .chat524 button.c524-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.courtyard539 .chat524 :is(.c524-channel, .c524-nav button) { min-height: 42px; }
+.courtyard539 .chat524 :is(#chatText, .c524-send) { min-height: 44px; }
+.courtyard539 .chat524 :is(.c524-send, .c524-action.c524-primary) .c524-icon { color: inherit; }
 
 .courtyard539-scenery { display: none; }
 .courtyard539 .scene[data-courtyard539-scenery] .cartoon538-yard-art { display: none; }
@@ -122,7 +218,7 @@ html:has(body.courtyard539) { background: #252a51; }
 }
 
 .courtyard539.cartoon538.design536 #screen-game.redesign536-home .actions > #exchangeBtn {
-  background: linear-gradient(#ffe99d, #ffc752);
+  background: var(--courtyard539-amber);
 }
 
 .courtyard539.cartoon538.design536 #screen-game.redesign536-home.nb534-hungry .actions > #eatBtn,
@@ -131,18 +227,30 @@ html:has(body.courtyard539) { background: #252a51; }
   border-color: #bd6541;
 }
 
-.courtyard539-setting { margin-block: 8px 14px; }
-.courtyard539-setting .switch { flex: 0 0 auto; }
-
 @media (max-width: 899px) {
   .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .scene {
     flex-basis: clamp(220px, 48dvh, 450px);
   }
 }
 
+@media (max-width: 370px) {
+  .courtyard539 .redesign536-home .bar {
+    column-gap: 3px;
+    padding-inline: 5px;
+  }
+  .courtyard539 .redesign536-home .home536-stat-title { letter-spacing: -.02em; }
+  .courtyard539 .redesign536-home .bar > span { font-variant-numeric: tabular-nums; }
+}
+
 @media (max-width: 899px) and (max-height: 600px) {
   .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .scene {
     flex-basis: clamp(187px, 43dvh, 258px);
     min-height: 187px;
+  }
+}
+
+@media (hover: hover) {
+  .courtyard539.design536 #tabbar button[data-hub]:not([aria-current="page"]):hover {
+    background: #ffffff1c;
   }
 }

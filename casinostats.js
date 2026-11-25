@@ -65,7 +65,7 @@ EXTRA_TABS.fun.casino = () => {
 
 // ---------- Достижения казино ----------
 ACHS.push(
-  { id: 'cs_slots', name: 'Однорукий бандит', emoji: '🎰', fn: () => cst().games.slots || 0, goals: [50, 300, 1500, 5000], unit: 'спинов в слотах' },
+  { id: 'cs_slots', name: 'Мастер слотов', emoji: '🎰', fn: () => cst().games.slots || 0, goals: [50, 300, 1500, 5000], unit: 'спинов в слотах' },
   { id: 'cs_bj', name: 'Двадцать одно', emoji: '🃏', fn: () => cst().games.bj || 0, goals: [25, 150, 700, 3000], unit: 'раздач в блекджек' },
   { id: 'cs_roul', name: 'Крутите барабан', emoji: '🎡', fn: () => cst().games.roul || 0, goals: [25, 150, 700, 3000], unit: 'спинов рулетки' },
   { id: 'cs_dice', name: 'Кости Михалыча', emoji: '🎲', fn: () => cst().games.dice || 0, goals: [25, 150, 700, 3000], unit: 'бросков костей' },

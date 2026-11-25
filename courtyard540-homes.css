@@ -1,0 +1,11 @@
+.courtyard539 #scene[data-courtyard540-indoor] .courtyard539-scenery {
+  object-position: 50% 60%;
+}
+
+.courtyard539 #scene[data-courtyard540-indoor]:has(.p-night) .courtyard539-scenery {
+  filter: brightness(.90) saturate(.92);
+}
+
+.courtyard539 #scene[data-courtyard540-indoor] .weather-fx {
+  opacity: .13;
+}

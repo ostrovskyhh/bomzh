@@ -17,10 +17,16 @@ ACTIONS.foodJump520=kind=>{if(!['food','drinks'].includes(kind))return;document.
 
 // Self Premium always goes through the existing authenticated workbench and review.
 const premiumAdminBefore520=openAdmin;openAdmin=function(){
- premiumAdminBefore520();if(!S.admin)return;const nav=document.querySelector('#modalRoot .a6-nav');if(!nav||document.querySelector('#modalRoot .admin520-self'))return;
- nav.insertAdjacentHTML('beforebegin','<button class="btn primary wide admin520-self" data-act="myPremium520">👑 Выдать себе Premium</button><button class="btn wide" data-act="webPayments520">ЮKassa для веб-версии</button>');
+ premiumAdminBefore520();if(!S.admin)return;
+ const body=document.querySelector('#modalRoot .a6-body');if(!body)return;
+ if(ADM_TAB==='hero'&&!body.querySelector('[data-act="myPremium520"]')){
+  body.insertAdjacentHTML('afterbegin',`<button class="btn wide admin520-self" data-act="myPremium520">👑 ${a6Text('Выдать себе Premium','Grant myself Premium')}</button>`);
+ }
+ if(ADM_TAB==='server'&&!body.querySelector('[data-act="webPayments520"]')){
+  body.insertAdjacentHTML('beforeend',`<button class="btn wide" data-act="webPayments520">${a6Text('ЮKassa для веб-версии','YooKassa for the web version')}</button>`);
+ }
  if(ADM_TAB==='hero'&&A6.card?.player.uid===adminSelfUid513()&&A6.group==='subscriptions'){
-  const body=document.querySelector('#modalRoot .a6-body');body?.insertAdjacentHTML('afterbegin',`<section class="a6-section admin520-premium"><h3>Premium для моего героя</h3><p>Подписка продлевается от конца действующего срока. Выдача без оплаты и подарков за покупку.</p><div class="a6-filter">${[1,3,7,30].map(n=>`<button class="btn" data-act="myPremiumDays520" data-id="${n}">+${n} дн.</button>`).join('')}</div><p>Выбери срок, затем проверь изменения перед применением.</p></section>`);
+  body.insertAdjacentHTML('afterbegin',`<section class="a6-section admin520-premium"><h3>Premium для моего героя</h3><p>Подписка продлевается от конца действующего срока. Выдача без оплаты и подарков за покупку.</p><div class="a6-filter">${[1,3,7,30].map(n=>`<button class="btn" data-act="myPremiumDays520" data-id="${n}">+${n} дн.</button>`).join('')}</div><p>Выбери срок, затем проверь изменения перед применением.</p></section>`);
  }
 };
 ACTIONS.myPremium520=async()=>{

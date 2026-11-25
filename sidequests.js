@@ -4,7 +4,7 @@
 
 const SIDE_MAX = 3;
 const sg = (key, need, text) => ({ key, need, text });
-const SIDE_GROUPS = { pals: '🍻 Кореша', gang: '🏴 Архив', friends: '🤝 Друзья', hood: '🏘️ Район' };
+const SIDE_GROUPS = { pals: '🍻 Кореша', friends: '🤝 Друзья', hood: '🏘️ Район' };
 
 const SIDE = [
   // ---------- Кореша Засранска ----------
@@ -34,22 +34,6 @@ const SIDE = [
     req: () => (S.pets || []).length > 0, reqText: 'нужен свой питомец', goals: [sg('petWalk', 2, 'Сходи на 2 прогулки с питомцем')], reward: { money: 2000, xp: 150 }, every: 8 },
   { id: 'h_date', group: 'hood', who: '💐', from: 'Цветочница', title: 'Романтический заказ', text: 'Помоги продать цветы: своди кого-нибудь на свидание — увидят, какой ты галантный, и разберут букеты.',
     req: () => level() >= 4, reqText: '4 уровень', goals: [sg('date', 2, 'Сходи на 2 свидания')], reward: { money: 2500, xp: 200 }, every: 12 },
-  // ---------- Архив: можно сдать только поручения, завершённые до загрузки новой версии ----------
-  { id: 'g_treasury', group: 'gang', who: '💰', from: 'Казначей банды', title: 'Взнос в общак', text: 'Общак сам себя не наполнит. Скинься — банде на апгрейды.',
-    goals: [sg('clanDonate', 1, 'Внеси деньги в общак')], reward: { caps: 1, xp: 200 }, every: 8 },
-  { id: 'g_hold', group: 'gang', who: '🏴', from: 'Главарь банды', title: 'Держать район', text: 'Конкуренты борзеют. Покажи на районе, чья тут власть.',
-    goals: [sg('fightWin', 5, 'Выиграй 5 драк')], reward: { money: 4000, xp: 300 }, every: 6 },
-  { id: 'g_wall', group: 'gang', who: '🧱', from: 'Главарь банды', title: 'Стенка на стенку', text: 'Сегодня стенка. Каждый боец на счету — не подведи своих.',
-    goals: [sg('gangWall', 1, 'Сходи на «Стенку на стенку»')], reward: { money: 6000, xp: 400, caps: 1 }, every: 12 },
-  { id: 'g_honor', group: 'gang', who: '⚔️', from: 'Бойцы банды', title: 'Честь банды', text: 'Говорят, в соседней банде есть резкие парни. Победи живого игрока — пусть знают наших.',
-    goals: [sg('onlineWin', 1, 'Победи живого игрока в онлайн-бою')], reward: { money: 8000, xp: 500, caps: 1 }, every: 12 },
-  { id: 'g_pot', group: 'gang', who: '🍲', from: 'Повар банды', title: 'Общий котёл', text: 'Скидываемся в котёл — вечером кому-то повезёт.',
-    goals: [sg('gangPot', 1, 'Купи билет в «Котёл» банды')], reward: { money: 2000, xp: 150 }, every: 8 },
-  {id:'g_yard_help',group:'gang',who:'🏡',from:'Соседи по двору',title:'Своими руками',text:'Открой двор банды и помоги с общей стройкой или историей. Нужен новый вклад после принятия поручения.',goals:[sg('yardHelp',1,'Засчитай 1 новый вклад во двор')],reward:{money:500,xp:100}},
-  {id:'g_yard_story',group:'gang',who:'📖',from:'Свои люди',title:'Есть что вспомнить',text:'Прими участие в совместной истории и доведи её до финала.',after:'g_yard_help',goals:[sg('yardStory',1,'Заверши 1 новую общую историю с личным вкладом')],reward:{money:1500,xp:150,caps:1},every:48},
-  {id:'g_district_prep',group:'gang',who:'📦',from:'Команда двора',title:'Каждая роль важна',text:'Запишись на подходящую роль и подготовь её новым действием. Новичок может помочь разведкой или снабжением.',after:'g_yard_help',goals:[sg('gangPrep',1,'Подготовь 1 новую роль к встрече')],reward:{money:500,xp:100}},
-  {id:'g_district_assist',group:'gang',who:'🤝',from:'Свои люди',title:'Кто-то ждёт помощи',text:'Откликнись на просьбу товарища и выполни настоящее поручение для общего дела.',after:'g_yard_help',goals:[sg('gangAssist',1,'Выполни 1 новую просьбу товарища')],reward:{money:500,xp:100}},
-  {id:'g_district_coop',group:'gang',who:'🚚',from:'Соседний двор',title:'Между дворами',text:'Помоги завершить общую поставку с союзной бандой. Вклад каждой стороны важен.',after:'g_yard_story',goals:[sg('gangCoop',1,'Заверши 1 новую поставку с личным вкладом')],reward:{money:1000,xp:150}},
   // ---------- Друзья (онлайн) ----------
   { id: 'f_gift', group: 'friends', who: '🎁', from: 'Сердце Валеры', title: 'Подарок корешу', text: 'Давно не радовал друзей. Отправь кому-нибудь подарок.',
     req: () => onlineOn(), reqText: 'в игре внутри Telegram', goals: [sg('friendGift', 1, 'Отправь подарок другу')], reward: { money: 1500, xp: 150 }, every: 12 },
@@ -59,23 +43,33 @@ const SIDE = [
     req: () => onlineOn(), reqText: 'в игре внутри Telegram', goals: [sg('chatMsg', 3, 'Напиши 3 сообщения в чат')], reward: { money: 1000, xp: 100 }, every: 24 },
 ];
 
+// Keep earned, unclaimed rewards addressable while old quests are no longer offered.
+const RETIRED_SIDE = [
+  { id: 'g_treasury', goals: [sg('clanDonate', 1)], reward: { caps: 1, xp: 200 } },
+  { id: 'g_hold', goals: [sg('fightWin', 5)], reward: { money: 4000, xp: 300 } },
+  { id: 'g_wall', goals: [sg('gangWall', 1)], reward: { money: 6000, xp: 400, caps: 1 } },
+  { id: 'g_honor', goals: [sg('onlineWin', 1)], reward: { money: 8000, xp: 500, caps: 1 } },
+  { id: 'g_pot', goals: [sg('gangPot', 1)], reward: { money: 2000, xp: 150 } },
+  { id: 'g_yard_help', goals: [sg('yardHelp',1)], reward: {money:500,xp:100} },
+  { id: 'g_yard_story', goals: [sg('yardStory',1)], reward: {money:1500,xp:150,caps:1} },
+  { id: 'g_district_prep', goals: [sg('gangPrep',1)], reward: {money:500,xp:100} },
+  { id: 'g_district_assist', goals: [sg('gangAssist',1)], reward: {money:500,xp:100} },
+  { id: 'g_district_coop', goals: [sg('gangCoop',1)], reward: {money:1000,xp:150} },
+];
+
 function sideState() { if (!S.side) S.side = { active: {}, done: {} }; return S.side; }
 function sideProg(q, g) { const a = sideState().active[q.id]; return Math.max(0, counter(g.key) - ((a && a.base[g.key]) || 0)); }
-function sideReady(q) {
-  if (q.group === 'gang') return sideState().active[q.id]?.retiredReady === true;
-  return q.goals.every((g) => sideProg(q, g) >= g.need);
-}
+function sideReady(q) { return q.goals.every((g) => sideProg(q, g) >= g.need); }
+function retiredSideReady(q) { return S.side?.active[q.id]?.retiredReady === true; }
 function snapshotRetiredSideQuests() {
   if (!S.side?.active) return;
-  for (const q of SIDE) {
+  for (const q of RETIRED_SIDE) {
     const a = S.side.active[q.id];
-    if (q.group === 'gang' && a && a.retiredReady === undefined) {
-      a.retiredReady = q.goals.every((g) => sideProg(q, g) >= g.need);
-    }
+    if (a && a.retiredReady === undefined) a.retiredReady = sideReady(q);
   }
 }
 HOOKS.load.push(snapshotRetiredSideQuests);
-function sideActive() { return SIDE.filter((q) => q.group !== 'gang' && sideState().active[q.id]); }
+function sideActive() { return SIDE.filter((q) => sideState().active[q.id]); }
 function sideSlotsUsed() { return sideActive().length; }
 function sideCityOk(q) { return !q.city || q.city === (typeof city === 'function' ? city() : 'zas'); }
 function sideCdLeft(q) { const d = sideState().done[q.id]; return q.every && d ? Math.max(0, d.at + q.every * 3600000 - Date.now()) : 0; }
@@ -84,7 +78,7 @@ function sideSkipped(q) { const s = sideState().skip; return s && s.id === q.id 
 function sideCrimeOk(q) { return !q.crime || (S.quest && S.quest.path === 'dark'); }
 function sideAvailable(q) {
   const st = sideState();
-  if (q.group === 'gang' || st.active[q.id] || !sideCityOk(q) || !sideCrimeOk(q)) return false;
+  if (st.active[q.id] || !sideCityOk(q) || !sideCrimeOk(q)) return false;
   if (!q.every && st.done[q.id]) return false;
   if (q.after && !st.done[q.after]) return false;
   return true;
@@ -109,7 +103,7 @@ function sideCard(q, mode) {
       <div class="goals">${q.goals.map((g) => { const c = Math.min(g.need, sideProg(q, g)); return `<div class="goal ${c >= g.need ? 'ok' : ''}"><span>${c >= g.need ? '✅' : '▫️'} ${g.text}</span><b>${c}/${g.need}</b><div class="progress"><div style="width:${(c / g.need) * 100}%"></div></div></div>`; }).join('')}</div>
       <div class="q-reward">🎁 ${sideRewardText(q)}</div>
       <div class="btn-row"><button class="btn ${ready ? 'primary' : ''}" data-act="sideDone" data-id="${q.id}" ${ready ? '' : `disabled data-why="${esc('Ещё нужно: '+missing)}"`}>${ready ? 'Сдать поручение' : 'Выполняется…'}</button>
-        ${q.group === 'gang' ? '' : `<button class="btn small" data-act="sideDrop" data-id="${q.id}">Отказаться</button>`}</div></div>`;
+        <button class="btn small" data-act="sideDrop" data-id="${q.id}">Отказаться</button></div></div>`;
   }
   const ok = !q.req || q.req();
   const cd = sideCdLeft(q);
@@ -142,8 +136,9 @@ EXTRA_TABS.tasks.side = () => {
   const doneN = Object.values(st.done).reduce((a, d) => a + (d.n || 1), 0);
   let html = `<div class="info-card">🤝 Необязательные поручения от корешей, соседей и друзей. Деньги, опыт, крышки — и шанс найти марку для коллекции. Можно держать до ${SIDE_MAX} поручений сразу. Выполнено: <b>${doneN}</b></div>`;
   html += active.length ? `<div class="subhead">Взятые · ${sideSlotsUsed()}/${SIDE_MAX}</div>${active.map((q) => sideCard(q, 'active')).join('')}` : '';
-  const archived = SIDE.filter((q) => q.group === 'gang' && sideReady(q));
-  if (archived.length) html += `<div class="subhead">Завершённые поручения из архива</div>${archived.map((q) => sideCard(q, 'active')).join('')}`;
+  const archived = RETIRED_SIDE.filter(retiredSideReady);
+  if (archived.length) html += `<div class="subhead">Завершённые поручения из архива</div>${archived.map((q) => `<div class="sq-card active ready">
+    <div class="sq-foot"><b>🎁 ${sideRewardText(q)}</b><button class="btn primary small" data-act="sideDone" data-id="${q.id}">Забрать награду</button></div></div>`).join('')}`;
   const offers = sideOffers();
   const freeIn = sideFreeRerollIn();
   html += `<div class="subhead">Предлагают · ${offers.length}</div><small class="sq-note">Не нравится поручение — замени: ${freeIn ? `бесплатно через <b>${leftText(freeIn)}</b> или за 🟡 ${SIDE_REROLL_CAPS}` : '<b>одна бесплатная замена доступна</b>, дальше раз в час или за 🟡 ' + SIDE_REROLL_CAPS}</small>`;
@@ -160,10 +155,10 @@ Object.assign(ACTIONS, {
     sfx('quest');
     toast(`📜 Поручение взято: ${q.title}`, 'good');
   },
-  sideDrop: (id) => { delete sideState().active[id]; toast('Поручение отменено'); },
+  sideDrop: (id) => { if (SIDE.some((q) => q.id === id)) { delete sideState().active[id]; toast('Поручение отменено'); } },
   sideReroll: (id) => {
     const st = sideState();
-    if (!(st.offers || []).includes(id)) return;
+    if (!(st.offers || []).includes(id) || !SIDE.some((q) => q.id === id)) return;
     if (sideFreeRerollIn()) {
       if (S.caps < SIDE_REROLL_CAPS) { toast(`Нужно ${SIDE_REROLL_CAPS} крышек или подожди ${leftText(sideFreeRerollIn())}`, 'bad'); return; }
       S.caps -= SIDE_REROLL_CAPS;
@@ -175,8 +170,9 @@ Object.assign(ACTIONS, {
     save();
   },
   sideDone: (id) => {
-    const q = SIDE.find((x) => x.id === id), st = sideState();
-    if (!q || !st.active[id] || !sideReady(q)) return;
+    const archived = RETIRED_SIDE.find((q) => q.id === id);
+    const q = archived || SIDE.find((x) => x.id === id), st = sideState();
+    if (!q || !st.active[id] || !(archived ? retiredSideReady(q) : sideReady(q))) return;
     const r = sideReward(q);
     delete st.active[id];
     st.done[id] = { at: Date.now(), n: ((st.done[id] && st.done[id].n) || 0) + 1 };
@@ -187,6 +183,11 @@ Object.assign(ACTIONS, {
     if (r.buff) addEffect(r.buff[0], r.buff[1]);
     track('sideDone');
     sfx('quest'); confetti(40);
+    if (archived) {
+      resultModal({ emoji: '🎁', title: 'Награда за завершённое поручение', text: sideRewardText(q), btn: 'Отлично' });
+      save();
+      return;
+    }
     const next = SIDE.find((x) => x.after === id && sideCityOk(x));
     resultModal({ emoji: q.who, title: `${q.from}: «Спасибо, выручил!»`, text: `Поручение «${q.title}» выполнено.<br>Награда: <b>${sideRewardText(q).replace(/ · /g, ', ')}</b>${next ? `<br><br>Новое поручение: «${next.title}» (${next.from})` : ''}`, btn: 'Отлично' });
     save();
@@ -197,7 +198,7 @@ Object.assign(ACTIONS, {
 HOOKS.hud.push(() => {
   const st = S.side;
   if (!st) return;
-  if (SIDE.some((q) => st.active[q.id] && sideReady(q))) { const d = $('tasksDot'); if (d) d.classList.remove('hidden'); }
+  if (RETIRED_SIDE.some(retiredSideReady) || SIDE.some((q) => st.active[q.id] && sideReady(q))) { const d = $('tasksDot'); if (d) d.classList.remove('hidden'); }
 });
 // Переезд: засранские поручения корешей отменяются (повторяемые остаются)
 if (typeof doMove === 'function') doMove = (function (orig) {

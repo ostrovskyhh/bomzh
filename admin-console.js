@@ -1,6 +1,9 @@
 // Server-authorized workbench; client admin flag only controls visibility.
 const A6={schema:null,card:null,list:null,loading:false,query:'',city:'',filter:'all',sort:'recent',offset:0,group:'wallet',fieldSearch:'',ops:[],plan:null,audit:null,auditOffset:0,auditUid:0,confirm:null};
 const A6_TABS=[['home','📊','Обзор'],['hero','🧑','Мой герой'],['players','👥','Игроки'],['reports','🐞','Обращения'],['comms','📢','Связь'],['tools','🧰','Проверка игр'],['audit','🕘','История'],['server','🖥️','Сервер']];
+const A6_NAV_GROUPS=[['Работа','Work',['home','players','reports','comms']],['Управление','Management',['hero','audit','tools','server']]];
+const A6_NAV_EN={home:'Overview',hero:'My character',players:'Players',reports:'Reports',comms:'Messages',tools:'Game testing',audit:'History',server:'Server'};
+const a6Text=(ru,en)=>typeof I18N!=='undefined'&&I18N.lang==='en'?en:ru;
 const a6attr=x=>esc(String(x??'')).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const a6id=p=>encodeURIComponent(JSON.stringify(p));
 function a6at(state,path){return path.reduce((v,k)=>v?.[k],state);}
@@ -23,14 +26,38 @@ function a6options(path){const c=a6catalog(),s=a6draft(),root=path[0];if(root===
 function a6queue(op){A6.reason=$('a6Reason')?.value??A6.reason;const draft=a6draft();if(op.path[0]==='$level'){A6.ops=A6.ops.filter(x=>x.path[0]!=='xp'&&x.path[0]!=='$level');A6.ops.push(op);openAdmin();return;}a6put(draft,op.path,op.kind==='delta'?(a6at(draft,op.path)||0)+Number(op.value):op.value,op.kind==='remove');const ancestor=A6.ops.find(x=>x.path.length<op.path.length&&x.path.every((k,i)=>op.path[i]===k));if(ancestor){ancestor.value=structuredClone(a6at(draft,ancestor.path));ancestor.kind='set';}else{A6.ops=A6.ops.filter(x=>!(op.path.length<=x.path.length&&op.path.every((k,i)=>x.path[i]===k)));A6.ops.push(op);}openAdmin();}
 function a6basket(){return A6.ops.length?`<section class="a6-basket"><h3>Изменения: ${A6.ops.length}</h3>${A6.ops.map((o,i)=>`<div><span>${esc(a6name(o.path))} · ${o.kind==='delta'?'прибавить / списать':o.kind==='remove'?'удалить':'задать'}: ${esc(a6value(o.value))}</span><button class="btn small" data-act="a6Drop" data-id="${i}">×</button></div>`).join('')}<textarea id="a6Reason" maxlength="300" placeholder="Почему меняем? (необязательно)">${esc(A6.reason||'')}</textarea><button class="btn primary wide" data-act="a6Preview">1. Проверить изменения</button><button class="btn wide" data-act="a6Clear">Отменить все изменения</button></section>`:'';}
 function a6playerList(){
- const r=A6.list;return `<div class="a6-filter"><input id="a6Query" value="${a6attr(A6.query)}" placeholder="Имя, Telegram ID или игровой ID"><button class="btn" data-act="a6Find">Найти</button><select id="a6City"><option value="">Все города</option>${Object.entries(A6.schema?.catalog.cities||{}).map(([k,c])=>`<option value="${k}" ${A6.city===k?'selected':''}>${c.name}</option>`).join('')}</select><select id="a6Filter">${[['all','Все игроки'],['online','Сейчас онлайн'],['vip','С VIP'],['banned','С ограничениями']].map(([k,n])=>`<option value="${k}" ${A6.filter===k?'selected':''}>${n}</option>`).join('')}</select><select id="a6Sort">${[['recent','По активности'],['money','По деньгам'],['level','По уровню']].map(([k,n])=>`<option value="${k}" ${A6.sort===k?'selected':''}>${n}</option>`).join('')}</select></div><p>${r?`Найдено: ${r.total}`:'Загружаю игроков…'}</p>${(r?.players||[]).map(p=>`<button class="a6-person" data-act="a6Pick" data-id="${p.uid}"><b>${p.online?'🟢':'⚪'} ${esc(p.name)}</b><small>ID ${p.uid} · ${esc(p.pid||'')} · ${esc(A6.schema?.catalog.cities[p.city]?.name||p.city)}</small><span>⭐ ${p.level} · 💰 ${fmt(p.money)} · 🟡 ${fmt(p.caps)} ${p.vip?'· VIP':''}</span></button>`).join('')}<div class="a6-pager"><button class="btn" data-act="a6Page" data-id="-1" ${A6.offset<=0?'disabled':''}>←</button><span>${A6.offset+1}–${Math.min(A6.offset+25,r?.total||0)}</span><button class="btn" data-act="a6Page" data-id="1" ${A6.offset+25>=(r?.total||0)?'disabled':''}>→</button></div>`;
+ const t=a6Text,r=A6.list;
+ const options=(entries,selected)=>entries.map(([id,label])=>`<option value="${a6attr(id)}" ${selected===id?'selected':''}>${esc(label)}</option>`).join('');
+ const cities=[['',t('Все города','All cities')],...Object.entries(A6.schema.catalog.cities).map(([id,city])=>[id,city.name])];
+ const filters=[['all',t('Все игроки','All players')],['online',t('Сейчас онлайн','Online now')],['vip',t('С VIP','With VIP')],['banned',t('С ограничениями','Restricted')]];
+ const sorts=[['recent',t('По активности','Recent activity')],['money',t('По деньгам','Money')],['level',t('По уровню','Level')]];
+ const heading=t('Поиск игроков','Find players');
+ const hint=t('Имя, Telegram ID или игровой ID','Name, Telegram ID, or player ID');
+ const rows=(r?.players||[]).map(p=>`<button type="button" class="a6-person a6-result" data-act="a6Pick" data-id="${p.uid}"><b class="a6-result-name" data-i18n-user><i class="a6-status-dot ${p.online?'on':''}" role="img" aria-label="${p.online?t('Онлайн','Online'):t('Офлайн','Offline')}"></i>${esc(p.name)}${p.vip?'<em> VIP</em>':''}</b><small>ID ${p.uid} · ${esc(p.pid||'—')} · ${esc(A6.schema.catalog.cities[p.city]?.name||p.city)}</small><span class="a6-result-stats">⭐ ${p.level} · 💰 ${fmt(p.money)} · 🟡 ${fmt(p.caps)}</span></button>`).join('');
+ const empty=!r?t('Загружаю игроков…','Loading players…'):t('Никого не нашли. Попробуй другое имя, ID или фильтр.','No matches. Try another name, ID, or filter.');
+ return `<section class="a6-section a6-player-search"><h3>${heading}</h3>
+   <form id="a6PlayerSearch" role="search">
+     <label for="a6Query">${hint}</label><div class="a6-search-row"><input id="a6Query" type="search" value="${a6attr(A6.query)}" autocomplete="off" enterkeyhint="search"><button class="btn primary" type="button" data-act="a6Find">${t('Найти','Search')}</button></div>
+     <div class="a6-search-options"><label>${t('Город','City')}<select id="a6City">${options(cities,A6.city)}</select></label><label>${t('Статус','Status')}<select id="a6Filter">${options(filters,A6.filter)}</select></label><label>${t('Сортировка','Sort')}<select id="a6Sort">${options(sorts,A6.sort)}</select></label></div>
+   </form></section>
+   ${r?`<p class="a6-results-count" role="status">${t('Найдено','Results')} · ${fmt(r.total)}</p>`:''}
+   <div class="a6-results">${rows||`<p class="a6-empty">${empty}</p>`}</div>
+   ${r?.total>25?`<div class="a6-pager"><button class="btn" data-act="a6Page" data-id="-1" aria-label="${t('Предыдущая страница','Previous page')}" ${A6.offset<=0?'disabled':''}>←</button><span>${A6.offset+1}–${Math.min(A6.offset+25,r.total)}</span><button class="btn" data-act="a6Page" data-id="1" aria-label="${t('Следующая страница','Next page')}" ${A6.offset+25>=r.total?'disabled':''}>→</button></div>`:''}`;
 }
 function a6serviceCard(c){return `<section class="a6-section"><h3>Связь и ограничения</h3><textarea id="a6Note" maxlength="300" placeholder="Личное сообщение игроку"></textarea><button class="btn wide" data-act="a6Note">Проверить сообщение</button><div class="a6-filter"><select id="a6BanKind"><option value="chat">Чат</option><option value="top">Топ игроков</option></select><select id="a6BanTime"><option value="60">На 1 час</option><option value="1440">На сутки</option><option value="10080">На неделю</option><option value="-1">Бессрочно</option><option value="0">Снять ограничение</option></select><input id="a6BanReason" placeholder="Комментарий (необязательно)"><button class="btn" data-act="a6Ban">Проверить</button></div><p>${(c.bans||[]).map(b=>`${esc(b.kind)}: ${b.until>Date.now()/1000?'действует':'истекло'} · ${esc(b.reason||'')}`).join('<br>')||'Ограничений нет'}</p></section>`;}
 function a6pending(c){return `<section class="a6-section"><h3>Ожидают получения</h3>${(c.pending?.gifts||[]).map(g=>`<div class="a6-leaf"><section><b>Подарок №${g.id}</b><small>${fmt(g.money)} ₽ · ${g.caps} крышек · ${g.levels} ур. · ${esc(g.note||'')}</small></section><button class="btn small" data-act="a6Cancel" data-id="gift:${g.id}">Отменить</button></div>`).join('')}${(c.pending?.commands||[]).map(x=>`<div class="a6-leaf"><section><b>Команда №${x.id}</b><small>${esc(x.cmd)}</small></section><button class="btn small" data-act="a6Cancel" data-id="cmd:${x.id}">Отменить</button></div>`).join('')||''}<small>Полученные подарки и уже выполненные команды отменить здесь нельзя.</small></section>`;}
-function a6gang(c){const g=c.gang;return g?.clan_id?`<section class="a6-section"><h3>Архив банд</h3><p>${esc(g.clan_name)} · роль ${esc(g.role)} · ID ${g.clan_id}</p></section>`:'';}
+function a6playerHeader(c,group){
+ const t=a6Text;
+ const links=[['wallet',t('Деньги и ресурсы','Money and resources')],['subscriptions',t('Подписки','Subscriptions')],['service',t('Связь и обращения','Contact and reports')]];
+ return `<section class="a6-player-head"><h3><span data-i18n-user>${esc(c.player.name)}</span></h3><p>Telegram ID: <b>${c.player.uid}</b> · ${t('игровой ID','player ID')} ${esc(c.player.pid||'—')}</p>
+   <small>${admAgo(c.player.last_seen)} · ${t('версия профиля','profile version')} ${c.rev}</small>
+   ${c.activeWallet?`<p class="a6-error">${t('Идёт онлайн-ставка. Правки профиля заблокированы до завершения.','An online bet is in progress. Profile editing is locked until it ends.')}</p>`:''}
+   <div class="a6-player-jumps" aria-label="${t('Частые действия с игроком','Common player actions')}">${links.filter(([id])=>id==='service'||A6.schema.groups[id]).map(([id,label])=>`<button class="btn ${id===group?'primary':''}" data-act="a6Group" data-id="${id}" ${id===group?'aria-current="true"':''}>${label}</button>`).join('')}</div>
+   <div class="a6-filter"><button class="btn" data-act="a6Reload">${t('Обновить карточку','Refresh profile')}</button><button class="btn" data-act="a6PlayerAudit">${t('История игрока','Player history')}</button><button class="btn" data-act="a6Export">${t('Копия для поддержки','Copy for support')}</button></div></section>`;
+}
 function a6card(){
  const c=A6.card,s=a6draft(),groups=A6.schema.groups;const roots=Object.keys(A6.schema.roots).filter(k=>(A6.schema.roots[k].group===A6.group)&&(A6.fieldSearch===''||`${k} ${A6.schema.roots[k].label} ${A6.schema.roots[k].help||''}`.toLowerCase().includes(A6.fieldSearch.toLowerCase())));
- return `<button class="btn" data-act="a6Back">← К списку</button><section class="a6-player-head"><h3>${esc(c.player.name)}</h3><p>Telegram ID: <b>${c.player.uid}</b> · игровой ID ${esc(c.player.pid||'—')}</p><small>${admAgo(c.player.last_seen)} · версия профиля ${c.rev} · ${c.hasSave?'сохранение найдено':'игрок ещё не сохранялся'}</small>${c.activeWallet?'<p class="a6-error">Идёт онлайн-ставка. Правки профиля заблокированы до завершения.</p>':''}<div class="a6-filter"><button class="btn" data-act="a6Reload">Обновить карточку</button><button class="btn" data-act="a6PlayerAudit">История игрока</button><button class="btn" data-act="a6Export">Копия для поддержки</button></div></section><nav class="a6-groups">${Object.entries(groups).map(([id,n])=>`<button class="btn ${id===A6.group?'primary':''}" data-act="a6Group" data-id="${id}">${n}</button>`).join('')}<button class="btn" data-act="a6Group" data-id="service">Связь, банда и обращения</button></nav>${a6basket()}${A6.group==='service'?`${a6serviceCard(c)}${a6pending(c)}${a6gang(c)}<section class="a6-section"><h3>Обращения игрока</h3>${c.reports.map(x=>`<button class="a6-person" data-act="a6Report" data-id="${x.id}"><b>№${x.id} · ${esc(x.status)}</b><small>${esc(x.text.slice(0,150))}</small></button>`).join('')||'<p>Обращений нет</p>'}</section><details><summary>Последние события игры</summary><pre>${esc(JSON.stringify(c.log,null,2))}</pre></details>`:`<div class="a6-filter"><input id="a6FieldSearch" placeholder="Найти параметр в разделе" value="${a6attr(A6.fieldSearch)}"><button class="btn" data-act="a6FieldSearch">Найти</button></div>${A6.group==='progress'?'<button class="btn wide" data-act="a6Edit" data-id="'+a6id(['$level'])+'">⭐ Установить уровень</button><small>Административная смена города не является обычным переездом. Городские поля проверяются вместе. Автоматические награды за уровень не выдаются.</small>':''}${roots.map(k=>a6node([k],s[k]??null)).join('')}<details class="a6-section"><summary>Пакетное изменение раздела</summary><small>Только игровые параметры. Служебные поля и чеки недоступны. Перед записью покажем полный список изменений.</small><textarea id="a6Import" placeholder="JSON с параметрами раздела"></textarea><button class="btn" data-act="a6Import">Добавить в изменения</button></details>`}`;
+ return `<button class="btn" data-act="a6Back">← К списку</button>${a6playerHeader(c,A6.group)}<nav class="a6-groups">${Object.entries(groups).map(([id,n])=>`<button class="btn ${id===A6.group?'primary':''}" data-act="a6Group" data-id="${id}">${n}</button>`).join('')}<button class="btn" data-act="a6Group" data-id="service">Связь и обращения</button></nav>${a6basket()}${A6.group==='service'?`${a6serviceCard(c)}${a6pending(c)}<section class="a6-section"><h3>Обращения игрока</h3>${c.reports.map(x=>`<button class="a6-person" data-act="a6Report" data-id="${x.id}"><b>№${x.id} · ${esc(x.status)}</b><small>${esc(x.text.slice(0,150))}</small></button>`).join('')||'<p>Обращений нет</p>'}</section><details><summary>Последние события игры</summary><pre>${esc(JSON.stringify(c.log,null,2))}</pre></details>`:`<div class="a6-filter"><input id="a6FieldSearch" placeholder="Найти параметр в разделе" value="${a6attr(A6.fieldSearch)}"><button class="btn" data-act="a6FieldSearch">Найти</button></div>${A6.group==='progress'?'<button class="btn wide" data-act="a6Edit" data-id="'+a6id(['$level'])+'">⭐ Установить уровень</button><small>Административная смена города не является обычным переездом. Городские поля проверяются вместе. Автоматические награды за уровень не выдаются.</small>':''}${roots.map(k=>a6node([k],s[k]??null)).join('')}<details class="a6-section"><summary>Пакетное изменение раздела</summary><small>Только игровые параметры. Служебные поля и чеки недоступны. Перед записью покажем полный список изменений.</small><textarea id="a6Import" placeholder="JSON с параметрами раздела"></textarea><button class="btn" data-act="a6Import">Добавить в изменения</button></details>`}`;
 }
 function a6audit(){const r=A6.audit;return `<div class="a6-filter"><input id="a6AuditUid" type="number" value="${A6.auditUid||''}" placeholder="ID игрока или все"><button class="btn" data-act="a6AuditFind">Показать</button></div><h3>Правки профилей</h3>${(r?.operations||[]).map(o=>`<details class="a6-section"><summary>№${o.id} · игрок ${o.target} · ${new Date(o.created*1000).toLocaleString()}</summary><p>Администратор: ${o.actor}<br>${esc(o.reason||'Комментарий не указан')}</p><pre>${esc(JSON.stringify(JSON.parse(o.changes),null,2))}</pre>${!o.undone_by&&!o.undo_of?`<button class="btn" data-act="a6Undo" data-id="${o.id}">Подготовить откат</button>`:`<p>${o.undone_by?'Отменена операцией '+o.undone_by:'Операция отката'}</p>`}</details>`).join('')||'<p>Правок пока нет</p>'}<div class="a6-pager"><button class="btn" data-act="a6AuditPage" data-id="-1" ${A6.auditOffset?'':'disabled'}>←</button><span>${A6.auditOffset+1} / ${r?.total||0}</span><button class="btn" data-act="a6AuditPage" data-id="1" ${A6.auditOffset+25<(r?.total||0)?'':'disabled'}>→</button></div><h3>Команды, подарки и модерация</h3>${(r?.events||[]).map(e=>`<div class="a6-event"><b>${esc(e.route)}</b><small>${new Date(e.created*1000).toLocaleString()} · админ ${e.actor} · игрок ${e.target||'—'}</small><p>${esc(e.summary)}</p></div>`).join('')}`;}
 async function a6request(route,body={}){const r=await apiPost('admin/workbench/'+route,body);if(r.error)throw Error(r.error);return r;}
@@ -38,15 +65,102 @@ async function a6loadSchema(){if(A6.schema)return;A6.schema=await a6request('sch
 async function a6loadList(){if(A6.loading)return;A6.loading=true;try{await a6loadSchema();A6.list=await a6request('list',{query:A6.query,city:A6.city,filter:A6.filter,sort:A6.sort,offset:A6.offset});}catch(e){toast(e.message,'bad');}finally{A6.loading=false;if(ADM_TAB==='players')openAdmin();}}
 async function a6pick(uid){if(A6.loading)return;A6.loading=true;try{await a6loadSchema();const c=await a6request('player',{uid:+uid});A6.card=c;A6.ops=[];A6.reason='';A6.resetReason=true;A6.plan=null;ADM_TAB=A6.self513&&+uid===adminSelfUid513()?'hero':'players';}catch(e){toast(e.message,'bad');}finally{A6.loading=false;openAdmin();}}
 async function a6loadAudit(){if(A6.loading)return;A6.loading=true;try{A6.audit=await a6request('audit',{uid:A6.auditUid,offset:A6.auditOffset});}catch(e){toast(e.message,'bad');}finally{A6.loading=false;if(ADM_TAB==='audit')openAdmin();}}
+
+function a6navigation(tab){
+ return `<nav class="a6-nav" aria-label="${a6Text('Разделы админки','Admin sections')}">${A6_NAV_GROUPS.map(([ru,en,ids])=>`
+   <section class="a6-nav-group"><h4>${a6Text(ru,en)}</h4><div>${ids.map(id=>{
+     const [,icon,label]=A6_TABS.find(item=>item[0]===id);
+     return `<button type="button" ${id===tab?'class="on" aria-current="page"':''} data-act="admTab" data-id="${id}"><i aria-hidden="true">${icon}</i><span>${a6Text(label,A6_NAV_EN[id])}</span></button>`;
+   }).join('')}</div></section>`).join('')}</nav>`;
+}
+
+function a6shortcut([icon,label,detail,act,id]){
+ return `<button type="button" data-act="${act}" ${id?`data-id="${id}"`:''}><i aria-hidden="true">${icon}</i><span><b>${label}</b><small>${detail}</small></span><i aria-hidden="true">›</i></button>`;
+}
+
+function a6summary(){
+ const template=document.createElement('template');
+ template.innerHTML=adm4Home();
+ const labels=['All players','Online now','Active today','Active this week','Restricted players','Pending commands'];
+ if(a6Text(false,true))template.content.querySelectorAll('.adm4-kpi small').forEach((item,i)=>{item.textContent=labels[i];});
+ template.content.querySelectorAll('.adm4-who b').forEach(item=>item.setAttribute('data-i18n-user',''));
+ return template.innerHTML;
+}
+
+function a6home(query){
+ const t=a6Text,draft=A6.card&&A6.ops.length;
+ const shortcuts=[
+   ['🗂️',t('Разобрать обращения','Review reports'),t('Ошибки и идеи игроков','Player bugs and ideas'),'admTab','reports'],
+   ['🎁',t('Подготовить подарок','Prepare a gift'),t('Деньги, крышки и уровни','Money, caps, and levels'),'giftOpen',''],
+   ['📢',t('Сообщения игрокам','Player messages'),t('Объявления и личные сообщения','Announcements and direct messages'),'admTab','comms'],
+   ['🕘',t('Проверить историю','Check history'),t('Изменения профилей и команды','Profile changes and commands'),'admTab','audit'],
+ ];
+ const summary=a6summary();
+ return `<section class="a6-welcome">
+   <h3>${t('Найти игрока','Find a player')}</h3>
+   ${draft?`<p>${t('Есть черновик для игрока','There is a draft for')} <b data-i18n-user>${esc(A6.card.player.name)}</b>.</p><button class="btn primary" data-act="admTab" data-id="${A6.self513?'hero':'players'}">${t('Вернуться к черновику','Return to draft')}</button>`:`
+   <form id="a6HomeSearch" role="search">
+     <label for="a6HomeQuery">${t('Имя, Telegram ID или игровой ID','Name, Telegram ID, or player ID')}</label>
+     <div class="a6-search-row"><input id="a6HomeQuery" type="search" value="${a6attr(query)}" autocomplete="off" enterkeyhint="search"><button class="btn primary" type="submit">${t('Найти','Search')}</button></div>
+   </form>`}
+ </section>
+ <section class="a6-shortcuts" aria-label="${t('Быстрые действия','Quick actions')}">${shortcuts.map(a6shortcut).join('')}</section>
+ <details class="a6-section a6-summary" open><summary>${t('Активность и сводка','Activity and overview')}</summary>${summary}</details>`;
+}
+
+function a6communications(){
+ const t=a6Text;
+ const links=[
+   ['📢',t('Рассылка всем игрокам','Broadcast to all players'),t('Объявление в игре с возможностью отправки в Telegram','Write an in-game announcement and optionally send it on Telegram'),'bcOpen',''],
+   ['🎁',t('Подарок игроку','Player gift'),t('Подготовить деньги, крышки или уровни','Prepare money, caps, or levels'),'giftOpen',''],
+   ['✉️',t('Написать одному игроку','Message one player'),t('Найти получателя и открыть «Связь и обращения»','Find the recipient and open “Contact and reports”'),'admTab','players'],
+ ];
+ return `<h3>${t('Сообщения и подарки','Messages and gifts')}</h3>${onlineOn()?'':adm4Need()}
+ <div class="a6-shortcuts">${links.map(a6shortcut).join('')}</div>`;
+}
+
 openAdmin=function(){
- if(!S.admin)return;if(!A6.resetReason)A6.reason=$('a6Reason')?.value??A6.reason;A6.resetReason=false;const tab=A6_TABS.some(x=>x[0]===ADM_TAB)?ADM_TAB:'home';ADM_TAB=tab;
- const bodies={home:()=>`<div class="a6-welcome"><h3>Управление игрой</h3><p>Найди игрока, проверь его профиль и подготовь изменения. Каждая правка подтверждается отдельно и попадает в историю.</p><button class="btn primary" data-act="admTab" data-id="players">Найти игрока</button></div>${adm4Home()}`,hero:admHero,players:()=>A6.schema?(A6.card?a6card():a6playerList()):'<p>Загружаю справочники…</p>',reports:feedbackAdminPage,comms:()=>`<h3>Сообщения и подарки</h3>${adm4Comms()}`,tools:()=>`<h3>Инструменты администратора</h3><p>Эти кнопки относятся к твоему персонажу. Для другого игрока используй его карточку.</p><details class="a6-section"><summary>Мой персонаж — проверка механик</summary>${adminHeroSandbox513()}</details><details class="a6-section"><summary>Города, сюжет и мини-игры</summary>${admWorld()}</details>`,audit:a6audit,server:()=>`<h3>Сервер и диагностика</h3>${admServer()}<details><summary>Моя копия сохранения</summary>${admSave()}</details>`};
- const scroll=document.querySelector('#modalRoot .sheet')?.scrollTop||0;
- openModal(`<div class="adm4 a6" data-tab="${tab}"><header class="a6-top"><div><h3>🛠️ Панель управления</h3><small>${onlineOn()?'Сервер подключён':'Локальный режим'} · ${CURRENT_VERSION}</small></div><button class="btn" data-act="a6Refresh">⟳</button></header><nav class="a6-nav">${A6_TABS.map(([id,e,n])=>`<button class="${id===tab?'on':''}" data-act="admTab" data-id="${id}">${e}<span>${n}</span></button>`).join('')}</nav><div class="a6-body">${bodies[tab]()}</div><button class="btn wide" data-act="settings">Закрыть панель</button></div>`,{center:true});
- if(document.querySelector('#modalRoot .sheet'))document.querySelector('#modalRoot .sheet').scrollTop=scroll;
+ if(!S.admin)return;
+ if(!A6.resetReason)A6.reason=$('a6Reason')?.value??A6.reason;
+ A6.resetReason=false;
+ const t=a6Text,tab=A6_TABS.some(x=>x[0]===ADM_TAB)?ADM_TAB:'home',connected=onlineOn();
+ ADM_TAB=tab;
+ const query=$('a6HomeQuery')?.value??A6.query;
+ const bodies={
+   home:()=>a6home(query),hero:admHero,
+   players:()=>A6.schema?(A6.card?a6card():a6playerList()):`<p role="status">${connected?t('Загружаю игроков…','Loading players…'):t('Для поиска игроков открой игру через Telegram при доступном сервере.','Open the game from Telegram with an active server connection to find players.')}</p>`,
+   reports:feedbackAdminPage,comms:a6communications,
+   tools:()=>`<h3>${t('Проверка игр','Game testing')}</h3><details class="a6-section"><summary>${t('Мой персонаж — проверка механик','My character and game mechanics')}</summary>${adminHeroSandbox513()}</details><details class="a6-section"><summary>${t('Города, сюжет и мини-игры','Cities, story, and mini-games')}</summary>${admWorld()}</details>`,
+   audit:a6audit,server:()=>`<h3>${t('Сервер и диагностика','Server and diagnostics')}</h3>${admServer()}<details><summary>${t('Моя копия сохранения','My save backup')}</summary>${admSave()}</details>`,
+ };
+ const old=document.querySelector('#modalRoot .a6-console');
+ const sameTab=old?.dataset.tab===tab;
+ const scroll=sameTab?old.closest('.sheet').scrollTop:0;
+ const focus=old?.contains(document.activeElement)&&document.activeElement.id;
+ openModal(`<div class="adm4 a6 a6-console" data-tab="${tab}">
+   <header class="a6-top"><div><h3>${t('Панель управления','Admin console')}</h3><small><i class="a6-status-dot ${connected?'on':''}" aria-hidden="true"></i>${connected?t('Сервер подключён','Server connected'):t('Локальный режим','Offline mode')} · ${CURRENT_VERSION}</small></div>
+   <div class="a6-top-actions"><button type="button" class="btn" data-act="a6Refresh" aria-label="${t('Обновить данные','Refresh data')}">⟳</button><button type="button" class="btn" data-act="settings" aria-label="${t('Вернуться в настройки','Back to settings')}">✕</button></div></header>
+   <div class="a6-layout"><aside class="a6-sidebar">${a6navigation(tab)}</aside><div class="a6-body" aria-label="${t(A6_TABS.find(x=>x[0]===tab)[2],A6_NAV_EN[tab])}">${bodies[tab]()}</div></div>
+ </div>`,{center:true});
+ const frame=document.querySelector('#modalRoot .a6-console');
+ if(frame){
+   frame.closest('.sheet').scrollTop=scroll;
+   if(sameTab&&focus)$(focus)?.focus({preventScroll:true});
+   $('a6HomeSearch')?.addEventListener('submit',event=>{
+     event.preventDefault();
+     if(A6.loading||(A6.card&&A6.ops.length))return;
+     A6.query=$('a6HomeQuery').value.trim();A6.city='';A6.filter='all';A6.sort='recent';A6.offset=0;A6.card=null;A6.list=null;A6.ops=[];
+     ACTIONS.admTab('players');
+   });
+   $('a6PlayerSearch')?.addEventListener('submit',event=>{event.preventDefault();ACTIONS.a6Find();});
+ }
  if(tab==='home')adm4Load('home');if(tab==='players'&&!A6.card&&!A6.list&&!A6.loading&&onlineOn())a6loadList();if(tab==='audit'&&!A6.audit&&!A6.loading&&onlineOn())a6loadAudit();
 };
-function a6recipient(plan){const who=A6.card?.player;return `<div class="a6-recipient"><small>Изменяем профиль игрока</small><b>${who&&String(who.uid)===String(plan.uid)?esc(who.name):'Игрок'}</b><span>Номер аккаунта: ${plan.uid}</span></div>`;}
+function a6recipient(plan){
+ const who=A6.card?.player,t=a6Text;
+ const target=who&&String(who.uid)===String(plan.uid)?esc(who.name):t('Игрок','Player');
+ return `<div class="a6-recipient"><small>${t('Изменяем профиль игрока','Editing player profile')}</small><b data-i18n-user>${target}</b><span>${t('Номер аккаунта','Account ID')}: ${plan.uid}</span></div>`;
+}
 function a6reviewValue(path,value){
  if(typeof a6present==='function')return a6present(path,value);
  if(value===null||value===undefined)return 'Не задано';

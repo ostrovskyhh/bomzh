@@ -13,22 +13,24 @@ async function giftClaim() {
     const lines = [],balanceBefore=S.money,capsBefore=S.caps;
     if (cmds.some((c) => c.type === 'wipe')) { adminWipe(); return; }
     cmds.forEach((c) => adminApply(c, lines));
+    const archivedPotNote = '🍲 Ты сорвал «Котёл» банды!';
+    const pot = gifts.length > 0 && gifts.every((g) => g.note?.startsWith(archivedPotNote));
     gifts.forEach((g) => {
       if (g.money) { addMoney(g.money); lines.push(`💰 +${fmt(g.money)} ₽`); }
       if (g.caps) { addCaps(g.caps); lines.push(`🟡 +${fmt(g.caps)} крышек`); }
       if (g.levels) { giftLevels(g.levels); lines.push(`⭐ +${g.levels} ур.`); }
-      if (g.note) lines.push(`<i>«${esc(g.note)}»</i>`);
+      if (g.note) lines.push(`<i>«${esc(g.note.replace(archivedPotNote, '🍲 Выигрыш в давнем розыгрыше.'))}»</i>`);
     });
     save(true);
     confetti(70); sfx('jackpot');
-    const pot = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍲'));
+
     const yard = gifts.length && gifts.every((g) => (g.note || '').startsWith('🏡'));
     const community = gifts.length && gifts.every((g) => (g.note || '').startsWith('🍾 За вступление'));
     const promo = gifts.length && gifts.every(g => (g.note||'').startsWith('📣 Первый новый')||(g.note||'').startsWith('🎁 Приглашение друга:'));
     if(typeof returnNotice==='function'){
       returnNotice({key:'gift:'+gifts.map(g=>g.id).join(',')+':'+cmds.map(c=>c.id||c.type+':'+c.n+':'+c.text).join('|'),kind:'gift',title:gifts.length?'Подарки и награды':'Сообщение администрации',body:lines.join('<br>'),money:Math.max(0,S.money-balanceBefore),caps:Math.max(0,S.caps-capsBefore)});return;
     }
-    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: promo ? '📣' : yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: promo ? 'Награда за приглашение!' : yard ? 'Награда за общее дело!' : pot ? 'Котёл банды твой!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
+    queuePopup('gift' + Date.now(), 1, () => resultModal({ emoji: promo ? '📣' : yard ? '🏡' : pot ? '🍲' : community ? '🍾' : gifts.length ? '🎁' : '🛠️', title: promo ? 'Награда за приглашение!' : yard ? 'Награда за общее дело!' : pot ? 'Выигрыш из архива!' : community ? 'Награда за вступление в беседу!' : gifts.length ? 'Подарок от администрации!' : 'Администрация изменила твой прогресс', text: lines.join('<br>'), btn: pot ? 'Ура!' : 'Спасибо!' }));
   } catch (e) { /* сервер выключен — заберём позже */ }
 }
 // Команды админа для этой игры (3.1): деньги ±, уровни, VIP, лечение, долги, сообщение
