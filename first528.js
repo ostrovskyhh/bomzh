@@ -278,9 +278,23 @@ returnBody = (function (orig) {
     let html = orig(all).replace('<small>С ВОЗВРАЩЕНИЕМ</small>', '<small>МИХАЛЫЧ</small>').replace('Вот что произошло, пока ты отходил', 'Пока тебя не было, я всё записал')
       .replace(/<p class="rh-safe">[^<]*<\/p>/, '');
     if (list.length) html = html.replace('<div class="rh-items">', `<section class="rh-ready528"><b>Что уже готово</b>${list.map((x) => `<span>${x}</span>`).join('')}</section><div class="rh-items">`);
+    if (!all && typeof neighborhood534View === 'function') {
+      const scope = neighborhood534View();
+      const network = scope.network.active || scope.network.offer;
+      const garage = scope.active || scope.offer;
+      const next = network || garage;
+      if (next) {
+        const label = neighborhood534Text('К заказу', 'Open order');
+        html = html.replace('<div class="rh-items">', `<section class="rh-ready528"><b>${esc(next.title)}</b><button class="btn small" data-act="returnNeighborhood534" data-id="${network ? 'network' : 'garage'}">${label}</button></section><div class="rh-items">`);
+      }
+    }
     return html;
   };
 })(returnBody);
+ACTIONS.returnNeighborhood534 = (id) => {
+  ACTIONS.returnLater();
+  ACTIONS.neighborhood534Open?.(id);
+};
 
 // ---------- Дела на 5 минут и одна кнопка «что дальше» ----------
 function next528() {

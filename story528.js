@@ -189,7 +189,11 @@ completeQuest = (function (orig) {
     orig(q);
     const l = LETTERS_528[q.id];
     if (l && typeof returnNotice === 'function') returnNotice({ key: 'letter528:' + q.id, kind: 'news', title: l[0], body: l[1] });
-    if (q.id === 'cn_chapter50_25') { if (S.fin528) return; S.fin528 = Date.now(); popupAfter528(() => playCutscene('finale528')); }
+    if (q.id === 'cn_chapter50_25' && city() === 'cn' && S.quest.idx >= WORLD50.cn.chapters.length && !S.fin528) {
+      S.fin528 = Date.now();
+      save(true);
+      popupAfter528(() => playCutscene('finale528', () => ACTIONS.neighborhood534Open?.('network')));
+    }
   };
 })(completeQuest);
 function popupAfter528(fn) {

@@ -886,7 +886,11 @@ async function serverWrite(force) {
     if (j.conflict) {
       // Пока это окно было открыто, играли на другом устройстве
       const remote = parseSave(j.data);
-      if (remote) { if (j.rev > (remote.rev || 0)) remote.rev = j.rev; adoptOrAsk(remote); }
+      if (remote) {
+        if (j.rev > (remote.rev || 0)) remote.rev = j.rev;
+        if (j.neighborhoodUpdated) showNeighborhoodSavePick(remote);
+        else adoptOrAsk(remote);
+      }
     } else if (j.ok) serverBase = Math.max(serverBase, j.rev || 0);
   } catch (e) { /* сервер выключен — сохранимся в следующий раз */ }
   srvBusy = false;
@@ -910,6 +914,16 @@ function adoptOrAsk(remote) {
   serverReady = false;
   ALT_SAVE = remote;
   if (typeof showSavePick === 'function') showSavePick();
+}
+let neighborhoodSaveRemote = null;
+function showNeighborhoodSavePick(remote) {
+  neighborhoodSaveRemote = remote;
+  ALT_SAVE = null;
+  SAVE_LOCK = true;
+  openModal(`<h3>На сервере есть прогресс района</h3>
+    <p>Выбранный путь или заказ уже сохранён. Чтобы продолжить здесь, загрузи серверный профиль. Перед загрузкой можно скачать копию этого устройства.</p>
+    <div class="btns"><button class="btn wide" data-act="adminSyncBackup">Скачать мою копию</button>
+    <button class="btn primary wide" data-act="neighborhoodSaveUseServer">Загрузить профиль</button></div>`, { center: true, locked: true });
 }
 function adoptSave(remote) {
   SAVE_LOCK = true;
@@ -1822,6 +1836,13 @@ function updateTimers() {
 
 const ACTIONS = {
   close: () => closeModal(),
+  neighborhoodSaveUseServer: () => {
+    if (!neighborhoodSaveRemote) return;
+    const remote = neighborhoodSaveRemote;
+    neighborhoodSaveRemote = null;
+    const rev = Math.max(remote.rev || 0, S.rev || 0, REV_FLOOR) + 1;
+    adoptSave({ ...remote, rev, savedAt: Date.now() });
+  },
 
   // --- главный экран ---
   exchange: (part, button) => exchangeTrade509(Math.floor(S.bottles * +part), button),
