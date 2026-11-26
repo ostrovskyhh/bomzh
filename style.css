@@ -2040,7 +2040,7 @@ body.beta .pet-slot.lv-phop { animation: none; }
 .f3-bar { position: relative; height: 34px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); overflow: hidden; touch-action: none; }
 .f3-zone { position: absolute; top: 0; bottom: 0; background: rgba(108,195,106,.35); border-left: 2px solid var(--green); border-right: 2px solid var(--green); }
 .f3-zone i { position: absolute; left: 41%; width: 18%; top: 0; bottom: 0; background: rgba(242,179,61,.75); }
-.f3-mark { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: #fff; border-radius: 2px; box-shadow: 0 0 8px #fff; }
+.f3-mark { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: #252033; border-radius: 2px; box-shadow: 0 0 0 2px #fff; }
 .f3-tap { font-size: 18px; padding: 14px; touch-action: none; }
 .f3-def { display: flex; align-items: center; gap: 14px; justify-content: center; }
 .f3-target { position: relative; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; background: rgba(229,83,75,.15); border: 2px solid rgba(229,83,75,.6); font-size: 34px; }
