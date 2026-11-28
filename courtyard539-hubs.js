@@ -1,7 +1,7 @@
 // The courtyard uses the existing hub destinations, statuses and unlocks.
 const courtyardHubLayouts539 = {
   me: {
-    order: ['shop:housing', 'shop:clothes', 'shop:transport', 'shop:pets', 'shop:food', 'life:skills', 'life:health', 'life:gym', 'act:bottleShop', 'shop:season'],
+    order: ['shop:housing', 'shop:clothes', 'shop:transport', 'act:neighborhood534Open', 'act:personalNetwork534', 'shop:pets', 'shop:food', 'life:skills', 'life:health', 'life:gym', 'act:bottleShop', 'shop:season'],
     wide: ['shop:season'],
   },
   money: {
@@ -19,7 +19,7 @@ const courtyardHubLayouts539 = {
     primary: 'fun:friends',
   },
   goals: {
-    order: ['tasks:story', 'tasks:side', 'tasks:tasks', 'tasks:pass', 'tasks:ach', 'tasks:coll', 'tasks:prestige', 'act:neighborhood534Open', 'act:valeraRoute536Open'],
+    order: ['tasks:story', 'tasks:side', 'tasks:tasks', 'tasks:pass', 'tasks:ach', 'tasks:coll', 'tasks:prestige', 'act:valeraRoute536Open'],
     wide: ['tasks:story'],
   },
 };

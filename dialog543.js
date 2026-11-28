@@ -13,8 +13,9 @@
     if (sheet.querySelector('.set2')) kind = 'settings';
     else if (sheet.querySelector('.story-art') && sheet.querySelector('[data-act="levelGuide"]')) kind = 'profile';
     else if (sheet.querySelector('.story-access-confirm521, .divorce-confirm')) kind = 'confirm';
+    else if (sheet.querySelector('#returnSummary')) kind = 'return';
     else return;
-    const heading = sheet.querySelector('h3');
+    const heading = sheet.querySelector(kind === 'return' ? '#returnTitle' : 'h3');
     if (!heading) return;
     if (!heading.id) heading.id = 'dialog543Title';
     sheet.dataset.dialog543 = kind;
@@ -62,11 +63,11 @@
     const sheet = root.querySelector('[data-dialog543]');
     if (!sheet || sheet.parentElement.dataset.locked || event.defaultPrevented || event.isComposing) return;
     if (event.key === 'Escape') {
-      const cancel = sheet.querySelector(cancelConfirmation) ||
+      const cancel = sheet.querySelector(cancelConfirmation) || sheet.querySelector('[data-act="returnLater"]') ||
         sheet.querySelector('.set2 > .btns [data-act="close"], .btns [data-act="close"]');
       if (cancel) { event.preventDefault(); cancel.click(); }
     } else if (event.key === 'Tab') {
-      const stops = [...sheet.querySelectorAll('button, a[href], input, select, textarea, [tabindex]')]
+      const stops = [...sheet.querySelectorAll('button, summary, a[href], input, select, textarea, [tabindex]')]
         .filter(el => !el.disabled && el.tabIndex >= 0 && el.getClientRects().length && getComputedStyle(el).visibility === 'visible');
       const index = stops.indexOf(document.activeElement);
       if (stops.length && (event.shiftKey ? index <= 0 : index === stops.length - 1)) {

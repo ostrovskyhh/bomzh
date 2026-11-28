@@ -403,7 +403,7 @@ function neighborhood534View() {
   const local = neighborhood534JobView(route ? neighborhood534LocalJob(state, route) : null, state);
   const network = neighborhood534JobView(eligible && networkRoute ? neighborhood534NetworkJob(state, networkRoute) : null, state);
   const firstOutcome = route && state.firstJobAt && ['careful', 'quick'].includes(state.outcomes?.firstJob) ? route.first[state.outcomes.firstJob] : null;
-  const title = neighborhood534Text('Жизнь района', 'Neighborhood life');
+  const title = neighborhood534Text('Мой гараж', 'My garage');
   const entryTitle = route ? neighborhood534Text(...route.label) : neighborhood534Text('Гараж Михалыча', 'Mikhailych’s garage');
   let next = neighborhood534Text('Выбери, что открыть в старом гараже.', 'Decide what to open in the old garage.');
   if (local.active) next = local.active.title;

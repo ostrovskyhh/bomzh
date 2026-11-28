@@ -1632,15 +1632,19 @@ button:disabled { pointer-events: none; }
 .set-profile small { display: block; font-size: 11px; color: var(--muted); } .set-profile b { display: block; font-size: 18px; }
 .set-name-next { display: block; font-size: 11.5px; color: var(--gold); margin-top: 2px; }
 .info-card.warn-soft { background: rgba(242,179,61,.1); box-shadow: inset 0 0 0 1px rgba(242,179,61,.3); }
-.joy-card { padding: 12px; margin-bottom: 10px; border-radius: 16px; background: linear-gradient(135deg, #2E2A16, #3C3418); box-shadow: inset 0 0 0 1px rgba(242,199,68,.25); }
+.joy-card { padding: 14px; margin-bottom: 10px; border-radius: 16px; background: #293a33; color: #fffaee; }
 .joy-head { display: flex; gap: 10px; align-items: center; } .joy-e { font-size: 34px; }
-.joy-head b { display: block; } .joy-head small { display: block; font-size: 12px; color: var(--muted); }
+.joy-head b { display: block; color: #fffaee; } .joy-head small { display: block; font-size: 13px; color: #e3e9d9; }
 .joy-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0 6px; }
-.joy-scale div { text-align: center; padding: 5px 0; border-radius: 10px; background: rgba(255,255,255,.05); opacity: .55; }
-.joy-scale div.on { opacity: 1; background: rgba(242,199,68,.22); box-shadow: inset 0 0 0 1px var(--gold); }
-.joy-scale span { display: block; font-size: 18px; } .joy-scale small { font-size: 9.5px; color: var(--muted); }
-.joy-next { display: block; font-size: 11.5px; color: var(--gold); }
-.joy-more summary { font-size: 12px; color: var(--muted); margin-top: 6px; cursor: pointer; } .joy-more ul { margin: 6px 0 0; padding-left: 18px; font-size: 12px; }
+.joy-scale div { text-align: center; padding: 5px 0; border-radius: 10px; background: #3a4c43; color: #fffaee; }
+.joy-scale div.on { background: #ffda90; color: #342819; box-shadow: inset 0 -3px #b57b21; font-weight: 800; }
+.joy-scale span { display: block; font-size: 18px; } .joy-scale small { font-size: 12px; color: inherit; }
+.joy-next { display: block; font-size: 13px; color: #ffdf9d; }
+.joy-more summary { font-size: 13px; color: #e3e9d9; padding: 8px 0 2px; cursor: pointer; }
+.joy-more ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+.joy-card ~ .card.locked { opacity: 1; }
+.joy-card ~ .card.locked .thumb { filter: grayscale(.65); }
+.joy-card ~ .card .tag-line { background: #fff0d4; color: #754516; border-radius: 5px; padding: 1px 4px; width: fit-content; }
 .train-note { display: block; margin-top: 8px; padding: 6px 8px; border-radius: 10px; background: rgba(108,195,106,.12); font-size: 12px; }
 .uw-chapter { display: block; text-align: center; font-size: 11px; letter-spacing: 1px; color: #FF7A6A; font-weight: 800; }
 .uw-info .btn { margin-top: 8px; }

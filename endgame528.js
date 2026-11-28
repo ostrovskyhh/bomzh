@@ -33,7 +33,6 @@ HOOKS.mods.push((m) => {
   if (!f) return;
   FUND_528.forEach((p) => { if (f[p.id] && p.mods) for (const k in p.mods) m[k] *= p.mods[k]; });
 });
-ADVICE.push({ id: 'fund528', cond: () => { const p = S.storySeen && level() >= 12 && fundNext528(); return !!p && S.money >= fundCost528(p); }, get t() { const p = fundNext528(); return p ? `${p.emoji} Денег хватает на «${p.name}». Район ждёт: Задания → Район` : ''; } });
 function fundHTML528() {
   const f = fundState528(), built = FUND_528.filter((p) => f[p.id]).length, next = fundNext528();
   return `<div class="subhead">Фонд района · ${built} из ${FUND_528.length}</div>
@@ -114,7 +113,7 @@ ACTIONS.trial528 = (key) => {
   toast(`🏅 Испытание пройдено: +${fmt(m)} ₽ и 4 🟡`, 'good');
   renderCurrent(false);
 };
-EXTRA_TABS.tasks.district528 = () => `<div class="premium-hero"><div class="e">🏘️</div><div><b>Твой район</b><p>Цели на месяцы вперёд, когда денег уже больше, чем дел.</p></div></div>${districtGoal529()}${mentorBox531()}${trialsHTML528()}${fundHTML528()}`;
+EXTRA_TABS.tasks.trials528 = () => trialsHTML528() + mentorBox531();
 
 // ---------- Дубли и заказы коллекционера ----------
 const DUP_SWAP_528 = 5;

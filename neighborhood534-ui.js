@@ -154,7 +154,7 @@ function nb534Canvas(view, style, card = false) {
   const network = NB534_UI.tab === 'network';
   nb534Paint(g, network ? 3 : view.stage, view.route === 'market', style, network && view.network.route === 'fair');
   if (card) {
-    const title = network ? nb534Text('Сеть Валеры', 'Valera’s Network') : nb534Text('Жизнь района', 'Neighborhood life');
+    const title = network ? nb534Text('Сеть Валеры', 'Valera’s Network') : nb534Text('Мой гараж', 'My garage');
     const subtitle = (network ? view.network.routeLabel : view.routeLabel) || nb534Text('Мой гараж', 'My garage');
     g.fillStyle = '#241a16';
     g.fillRect(0, 356, 800, 162);
@@ -236,8 +236,8 @@ function nb534ProjectMarkup(view) {
 }
 
 function nb534CosmeticMarkup(view) {
-  if (NB534_UI.tab !== 'garage' || !view.firstOrderDone || typeof FIRST_KEY_STARS_534 === 'undefined') return '';
   const owned = nb534IsOwned();
+  if (NB534_UI.tab !== 'garage' || (!owned && !view.firstOrderDone) || typeof FIRST_KEY_STARS_534 === 'undefined') return '';
   const applied = S.settings?.neighborhood534Style !== 'original';
   return `<div class="nb534-panel nb534-cosmetic"${owned ? '' : ' data-nb534-offer'}>
     <h3>${nb534Text('Первый ключ', 'First Key')}</h3>
@@ -265,8 +265,8 @@ function nb534Page() {
   NB534_UI.lastView = JSON.stringify(view);
   const networkTab = NB534_UI.tab === 'network' && view.network.eligible;
   const route = networkTab ? view.network : view;
-  const title = networkTab ? nb534Text('Сеть Валеры', 'Valera’s Network') : nb534Text('Жизнь района', 'Neighborhood life');
-  const back = NB534_UI.origin?.screen === 'hub' ? nb534Text('Цели', 'Goals') : nb534Text('Домой', 'Home');
+  const title = networkTab ? nb534Text('Сеть Валеры', 'Valera’s Network') : nb534Text('Мой гараж', 'My garage');
+  const back = NB534_UI.origin?.screen === 'hub' ? BETA_HUBS.find(hub => hub.id === NB534_UI.origin.hub)?.n : null;
   const artStyle = nb534IsOwned() && S.settings?.neighborhood534Style !== 'original' ? 'key' : 'original';
   const showProjects = !networkTab && view.route;
   const available = networkTab ? view.network.eligible : view.unlocked;
@@ -278,8 +278,8 @@ function nb534Page() {
     : nb534Button(nb534Text('Посмотреть открытку', 'Preview the postcard'), 'neighborhood534Postcard') : '';
 
   return `<div class="nb534-page${available && !route.route ? ' nb534-selecting' : ''}" data-i18n-ignore>
-    <div class="nb534-top">${nb534Button(`‹ ${back}`, 'neighborhood534Back')}
-      ${view.network.eligible ? nb534Button(networkTab ? nb534Text('К гаражу', 'Garage') : nb534Text('Сеть Валеры', 'Valera’s Network'), 'neighborhood534Tab', networkTab ? 'garage' : 'network') : ''}
+    <div class="nb534-top">${nb534Button(`‹ ${back ? I18N.t(back) : nb534Text('Назад', 'Back')}`, 'neighborhood534Back')}
+      ${view.network.eligible && (!networkTab || nb534PersonalGarage()) ? nb534Button(networkTab ? nb534Text('К гаражу', 'Garage') : nb534Text('Сеть Валеры', 'Valera’s Network'), 'neighborhood534Tab', networkTab ? 'garage' : 'network') : ''}
     </div>
     <header class="nb534-hero${artStyle === 'key' ? ' nb534-key-sign' : ''}"><img src="${nb534GarageArt(view, artStyle)}" width="800" height="356" alt=""><div><h1 id="nb534Title" tabindex="-1">${title}</h1>
       ${route.routeLabel ? `<p>${esc(route.routeLabel)}</p>` : ''}</div></header>
@@ -294,9 +294,9 @@ function nb534Page() {
         ${(networkTab ? showPostcard : view.stage >= view.projects.length) ? nb534MilestonesMarkup(route) : ''}
         ${route.firstOutcome ? nb534Disclosure('nb534FirstOrder', nb534Text('Первый заказ', 'First order'), `<p class="nb534-memory">${esc(route.firstOutcome)}</p>`) : ''}
         ${postcard ? nb534Disclosure('nb534Postcard', nb534Text('Открытка', 'Postcard'), postcard) : ''}
-        ${cosmetic ? nb534Disclosure('nb534Cosmetic', nb534Text('Облик гаража', 'Garage appearance'), cosmetic) : ''}
       </div>` : ''}
     </div>` : `<div class="nb534-content"><p class="nb534-panel">${esc(view.lockedReason || nb534Text('Гараж откроется по сюжету.', 'The garage unlocks during the story.'))}</p></div>`}
+    ${cosmetic ? nb534Disclosure('nb534Cosmetic', nb534Text('Облик гаража', 'Garage appearance'), cosmetic) : ''}
   </div>`;
 }
 
@@ -317,6 +317,7 @@ function nb534ShareFile() {
 }
 
 function nb534Open(tab = 'garage') {
+  if (tab === 'network' ? !neighborhood534NetworkEligible() : !nb534PersonalGarage()) return;
   if (currentScreen !== NB534_SCREEN) NB534_UI.origin = { screen: currentScreen, tab: TABS[currentScreen], hub: BNAV.hub, button: document.activeElement };
   const view = neighborhood534View();
   NB534_UI.tab = tab === 'network' && view.network.eligible ? 'network' : 'garage';
@@ -324,7 +325,7 @@ function nb534Open(tab = 'garage') {
   NB534_UI.preview = false;
   NB534_UI.postcard = '';
   neighborhood534Enter();
-  BNAV.hub = 'goals';
+  BNAV.hub = 'me';
   showScreen(NB534_SCREEN);
   $('screen-' + NB534_SCREEN).scrollTop = 0;
   nb534Focus('nb534Title');
@@ -352,7 +353,7 @@ Object.assign(ACTIONS, {
     if (NB534_UI.preview) nb534Metric('preview');
   },
   neighborhood534Style: () => {
-    if (currentScreen !== NB534_SCREEN || !neighborhood534View().firstOrderDone || !nb534IsOwned()) return;
+    if (currentScreen !== NB534_SCREEN || NB534_UI.tab !== 'garage' || !nb534IsOwned()) return;
     if (!S.settings) S.settings = {};
     S.settings.neighborhood534Style = S.settings.neighborhood534Style === 'original' ? 'key' : 'original';
     NB534_UI.postcard = '';
@@ -467,14 +468,23 @@ HOOKS.tick.push(() => {
   if (JSON.stringify(neighborhood534View()) !== NB534_UI.lastView) renderCurrent(false);
 });
 
-const nb534Goals = BETA_HUBS.find((hub) => hub.id === 'goals');
-nb534Goals.groups[0][1].push({ act: 'neighborhood534Open', id: 'neighborhood534', e: '🏘️', get n() { return nb534Text('Жизнь района', 'Neighborhood life'); } });
-BETA_STATUS['act:neighborhood534'] = () => {
-  const view = neighborhood534View();
-  if (view.network.started) return nb534Text('Междугородние поручения', 'Intercity orders');
-  if (view.firstOrderDone) return view.routeLabel;
-  return view.unlocked ? nb534Text('Первый гараж', 'Your first garage') : nb534Text('Откроется по сюжету', 'Unlocked in the story');
-};
+// Previously started garages and their purchased decor belong to the player.
+function nb534PersonalGarage() {
+  return !!(neighborhood534Route(neighborhood534State()) || nb534IsOwned());
+}
+
+const nb534PersonalItems = BETA_HUBS.find(hub => hub.id === 'me').groups[1][1];
+nb534PersonalItems.push({
+  act: 'neighborhood534Open', id: 'personalGarage', e: '🔧',
+  get hide() { return !nb534PersonalGarage(); },
+  get n() { return nb534Text('Мой гараж', 'My garage'); },
+});
+nb534PersonalItems.push({
+  act: 'personalNetwork534', id: 'personalNetwork', e: '🚚',
+  get hide() { return !neighborhood534NetworkEligible(); },
+  get n() { return nb534Text('Сеть Валеры', 'Valera’s Network'); },
+});
+ACTIONS.personalNetwork534 = () => nb534Open('network');
 
 function nb534HomeRender() {
   if (currentScreen !== 'game') return;
@@ -488,26 +498,8 @@ function nb534HomeRender() {
     next528Render();
     return;
   }
-  const view = neighborhood534View();
   const story = next528();
-  const garageNext = view.projects.find((project) => project.current && !project.done);
-  const storyStep = story ? { label: nb534Text('Сюжет', 'Story'), title: story.t, action: story.act, id: story.id || '' } : null;
-  const garage = view.unlocked ? {
-    label: nb534Text('Жизнь района', 'Neighborhood life'),
-    title: view.active?.title || view.offer?.title || garageNext?.label || (view.route ? nb534Text('Открыть доску заказов', 'Open the order board') : nb534Text('Открыть свой гараж', 'Open your garage')),
-    action: 'neighborhood534Open', id: 'garage',
-  } : null;
-  const network = view.network.eligible ? {
-    label: nb534Text('Сеть Валеры', 'Valera’s Network'),
-    title: view.network.active?.title || view.network.offer?.title || (view.network.started ? nb534Text('Открыть доску сети', 'Open the network board') : nb534Text('Выбрать направление сети', 'Choose a network route')),
-    action: 'neighborhood534Open', id: 'network',
-  } : null;
-  const garageReady = garage && (!view.firstOrderDone || garageNext || view.offer);
-  const networkReady = network && (!view.network.started || view.network.offer);
-  const main = network && view.network.active ? network : garage && view.active ? garage
-    : networkReady && (!story || view.network.started) ? network : garageReady ? garage : storyStep || network || garage;
-  const other = main !== storyStep && storyStep ? storyStep : main !== network && network ? network : main !== garage ? garage : null;
-  const link = other ? { ...other, label: other === storyStep ? nb534Text('К сюжету', 'Story') : other === network ? nb534Text('К сети', 'Network') : nb534Text('К гаражу', 'Garage') } : null;
+  const main = story ? { label: nb534Text('Сюжет', 'Story'), title: story.t, action: story.act, id: story.id || '' } : null;
   const unwell = S.health <= 15;
   const hungry = S.food <= 15;
   const tired = S.energy <= 10 && !S.busy;
@@ -515,9 +507,9 @@ function nb534HomeRender() {
   const urgent = unwell ? { label: nb534Text('Мало здоровья · К врачу', 'Low health · See a doctor'), action: 'goStat', id: 'health' }
     : rentDue ? { label: nb534Text('Долг за жильё · К счетам', 'Rent due · View bills'), action: 'hubGo528', id: 'shop:housing' } : null;
 
-  const html = `${main ? `<div class="nb534-home-task"><button id="nb534HomeMain" type="button" data-act="${main.action}" data-id="${nb534Attr(main.id)}"><small>${esc(main.label)}</small><strong>${esc(main.title)}</strong><span aria-hidden="true">›</span></button>${link ? nb534Button(link.label, link.action, link.id, 'nb534-home-link') : ''}</div>` : ''}
+  const html = `${main ? `<div class="nb534-home-task"><button id="nb534HomeMain" type="button" data-act="${main.action}" data-id="${nb534Attr(main.id)}"><small>${esc(main.label)}</small><strong>${esc(main.title)}</strong><span aria-hidden="true">›</span></button></div>` : ''}
     ${urgent ? `<div class="nb534-urgent">${nb534Button(urgent.label, urgent.action, urgent.id)}</div>` : ''}`;
-  const objectiveHtml = typeof redesign536HomeMarkup === 'function' ? redesign536HomeMarkup(main, link, urgent) : html;
+  const objectiveHtml = typeof redesign536HomeMarkup === 'function' ? redesign536HomeMarkup(main, urgent) : html;
   if (panel.dataset.html !== objectiveHtml) {
     const restoreMain = document.activeElement?.id === 'nb534HomeMain';
     const restoreButton = panel.contains(document.activeElement) && document.activeElement.dataset.nb534Focus;
@@ -528,8 +520,6 @@ function nb534HomeRender() {
   }
   panel.hidden = !objectiveHtml;
   const ready = [];
-  const routeShortcut = typeof redesign536HomeRoute === 'function' && redesign536HomeRoute();
-  if (routeShortcut) ready.push(routeShortcut);
   if (!dailyState().claimedToday) ready.push(nb534Button(nb534Text('🎁 Бонус дня', '🎁 Daily bonus'), 'hubGo528', 'tasks:tasks'));
   if (typeof businessTotals === 'function' && businessTotals().cash >= 1) ready.push(nb534Button(nb534Text('🏪 Касса бизнеса', '🏪 Business cash'), 'hubGo528', 'life:business'));
   const extrasHtml = ready.join('');
@@ -544,7 +534,7 @@ function nb534HomeRender() {
   home.classList.toggle('nb534-unwell', unwell);
   home.classList.toggle('nb534-hungry', hungry);
   home.classList.toggle('nb534-tired', tired);
-  home.classList.toggle('nb534-story', main?.action === 'openQuest' || link?.action === 'openQuest');
+  home.classList.toggle('nb534-story', main?.action === 'openQuest');
 }
 
 const nb534HudIndex = HOOKS.hud.indexOf(next528Render);

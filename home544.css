@@ -1,0 +1,166 @@
+.courtyard539 #screen-game #scene .scene-info[data-mode="compact"] {
+  justify-self: start;
+  width: max-content;
+  max-width: calc(100% - 84px);
+}
+.courtyard539 #screen-game #scene .scene-info[data-mode="compact"] .loc-name { width: auto; }
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home > .bars {
+  gap: 0 14px;
+  margin: 0;
+  padding: 2px 12px;
+  border: 1px solid #c8b999;
+  border-radius: 0 0 17px 17px;
+  background: #fff9ed;
+}
+.courtyard539 #screen-game.redesign536-home .bar {
+  grid-template: 'icon title' auto 'value value' auto 'meter meter' 5px / 17px minmax(0,1fr);
+  min-height: 59px;
+  align-content: center;
+  gap: 3px 4px;
+  padding: 5px 2px 7px;
+}
+.courtyard539 #screen-game.redesign536-home .bar:nth-child(n+3) { border-top: 1px solid #e7dcc7; border-radius: 0; }
+.courtyard539 #screen-game.redesign536-home .bar .home536-stat-title { font-size: 12px; font-weight: 700; }
+.courtyard539 #screen-game.redesign536-home .bar > span {
+  color: #302b22;
+  font-size: 17px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.08;
+  text-align: left;
+}
+.courtyard539 #screen-game.redesign536-home .bar .track { height: 5px; background: #e4dac7; }
+.courtyard539 #screen-game.redesign536-home .bar .fill.energy { background: #bb780a; }
+.courtyard539 #screen-game.redesign536-home .bar .fill.food { background: #c4662d; }
+.courtyard539 #screen-game.redesign536-home .bar .fill.health { background: #c14753; }
+.courtyard539 #screen-game.redesign536-home .bar .fill.mood { background: #287c70; }
+.courtyard539 #screen-game.redesign536-home .bar:focus-visible { outline-color: #205f5a; }
+
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home > .actions { margin: 7px 0 0; }
+.courtyard539.cartoon538.design536 #screen-game.redesign536-home .actions > #exchangeBtn {
+  background: #f8e8c6;
+  border-color: #d5b782;
+}
+.courtyard539 #screen-game #home543Yield {
+  gap: 2px 0;
+  padding: 6px 0;
+  color: #3c362b;
+  background: transparent;
+  border-radius: 0;
+}
+.courtyard539 #screen-game #home543Yield > div { grid-template-columns: 20px minmax(0, 1fr); gap: 1px 5px; padding-inline: 6px; }
+.courtyard539 #screen-game #home543Yield > div + div { border-color: #d7cbb6; }
+.courtyard539 #screen-game #home543Yield .ic { width: 20px; height: 20px; background: transparent; }
+.courtyard539 #screen-game #home543Yield dt { color: #5a5144; }
+.courtyard539 #screen-game #home543Yield b { font-size: 14px; }
+
+#home544Events {
+  flex: none;
+  min-width: 0;
+  margin: 3px 0 7px;
+  border: 1px solid #d8c8a9;
+  border-radius: 12px;
+  background: #fff9ed;
+  color: #322d23;
+}
+#home544Events > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: inherit;
+  list-style: none;
+  cursor: pointer;
+}
+#home544Events > summary::-webkit-details-marker { display: none; }
+#home544Events > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin: -3px 2px 0 0;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+#home544Events[open] > summary::after { margin-top: 4px; transform: rotate(225deg); }
+#home544Events > summary strong { font-size: 14px; }
+#home544EventsHint { margin-inline-start: auto; color: #635746; font-size: 12px; }
+#home544Events .home544-pins, #home544Events .scene-right,
+#home544Events #effects, #home544Events #nb534HomeExtras:not([hidden]) {
+  position: static;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+#home544Events[open] { padding-bottom: 7px; }
+#home544Events .home544-pins, #home544Events .scene-right, #home544Events #nb534HomeExtras { padding-inline: 7px; }
+#home544Events :is(.home544-pins > [data-act],.chip,.boost-badge,.nb534-button) {
+  position: static;
+  max-width: 100%;
+  min-height: 44px;
+  margin-bottom: 4px;
+  padding: 5px 9px;
+  border: 1px solid #ddcdae;
+  border-radius: 9px;
+  background: #fff5df;
+  color: #3e3425;
+  box-shadow: none;
+  animation: none;
+}
+#home544Events .home544-pins > [role="button"] { cursor: pointer; }
+#home544Events :is(.home544-pins small,.home536-route small) { color: #605443; }
+#home544Events .home544-pins b { white-space: normal; font-size: 13px; }
+#home544Events .home544-pins small { white-space: normal; font-size: 11px; }
+#home544Events .chip.bad { background: #fce5dd; border-color: #c98674; color: #572c24; }
+#home544Events .chip.good { background: #e7eedb; border-color: #95aa83; color: #2d452b; }
+#home544Events .home544-effect-name { font-size: 13px; }
+#home544Events :focus-visible { outline: 2px solid #205f5a; outline-offset: -2px; }
+
+@media (max-width: 899px) {
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > #scene {
+    order: -10;
+    flex: 1 0 clamp(180px,44dvh,445px);
+    border-radius: 17px 17px 0 0;
+  }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .bars { order: -9; }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .actions { order: -8; }
+  .courtyard539 #screen-game #home543Yield { order: -7; }
+  .courtyard539 #screen-game > #home544Events { order: -6; }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > #next528 { order: -5; }
+}
+@media (max-width: 899px) and (max-height: 550px) {
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > #scene { flex-basis: 37dvh; min-height: 135px; }
+  .courtyard539 #screen-game #scene .scene-info[data-mode="compact"] { max-width: calc(50% - 20px); }
+  .courtyard539 #screen-game.redesign536-home .bar {
+    min-height: 44px;
+    grid-template: 'icon title' auto 'value value' auto 'meter meter' 4px / 13px minmax(0,1fr);
+    gap: 2px 3px;
+    padding-block: 3px;
+  }
+  .courtyard539 #screen-game.redesign536-home .bar > span { font-size: 14px; }
+  .courtyard539 #screen-game.redesign536-home .bar .home536-stat-title { font-size: 11px; }
+  .courtyard539 #screen-game.redesign536-home .bar .track { height: 4px; }
+  .courtyard539 #screen-game.redesign536-home .bar i { width: 13px; height: 13px; }
+}
+@media (min-width: 900px) {
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home.active {
+    grid-template-columns: minmax(0,1.4fr) minmax(270px,1fr);
+    grid-template-rows: auto auto auto auto 1fr;
+    gap: 8px 14px;
+  }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > #scene {
+    grid-area: 1/1/6/2;
+    align-self: start;
+    height: clamp(315px,60dvh,580px);
+    min-height: 0;
+    border-radius: 17px;
+  }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .bars { grid-area: 1/2; border-radius: 14px; }
+  .courtyard539.cartoon538.design536 #screen-game.redesign536-home > .actions { grid-area: 2/2; margin: 0; }
+  .courtyard539 #screen-game.redesign536-home > #home543Yield { grid-area: 3/2; }
+  .courtyard539 #screen-game.redesign536-home > #home544Events { grid-area: 4/2; margin: 0; }
+  .courtyard539 #screen-game.redesign536-home > #next528 { grid-area: 5/2; }
+}

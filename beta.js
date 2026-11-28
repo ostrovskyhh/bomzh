@@ -32,7 +32,7 @@ const BETA_HUBS = [
   ] },
   { id: 'goals', e: '🎯', n: 'Цели', sub: 'куда идти дальше', groups: [
     ['История', [{ s: 'tasks', t: 'story' }, { s: 'tasks', t: 'side' }]],
-    ['Каждый день', [{ s: 'tasks', t: 'tasks' }, { s: 'tasks', t: 'pass' }]],
+    ['Каждый день', [{ s: 'tasks', t: 'tasks' }, { s: 'tasks', t: 'pass' }, { s: 'tasks', t: 'trials528' }]],
     ['Трофеи', [{ s: 'tasks', t: 'ach' }, { s: 'tasks', t: 'coll' }, { s: 'tasks', t: 'prestige' }]],
   ] },
 ];

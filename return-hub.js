@@ -35,19 +35,76 @@ function returnItemHTML(n){
   const language=n.action==='release'?releaseLanguage():null,t=text=>language&&typeof I18N!=='undefined'?I18N.inLanguage(text,language):text;
   return `<article class="rh-item ${n.read?'read':''}" ${language?`data-i18n-ignore lang="${language}"`:''}><div><span>${{income:'💰',gift:'🎁',news:'📰',event:'🔔'}[n.kind]||'🔔'}</span><b>${esc(t(n.title))}</b>${n.money>0?`<strong>+${incomeMoney(n.money)}</strong>`:''}${n.caps>0?`<strong>+${fmt(n.caps)} крышек</strong>`:''}</div><p>${esc(t(n.body)).replace(/\n/g,'<br>')}</p>${n.action?`<button class="btn small" data-act="returnOpen" data-id="${esc(n.key)}">${t('Подробнее ›')}</button>`:''}</article>`;
 }
-function returnBody(all=false){
-  // Settle with the same trusted clock used by collection before showing the till.
-  if(typeof businessTick==='function')businessTick();
-  const st=returnState(),items=all?st.items:returnUnread(),money=items.reduce((n,x)=>n+x.money,0),cash=typeof businessTotals==='function'?businessTotals().cash:0;
-  return `<header class="rh-head"><div class="rh-avatar">${valeraSVG(S.eq,lookState())}</div><div><small>С ВОЗВРАЩЕНИЕМ</small><h2>Вот что произошло, пока ты отходил</h2><p>${st.away?`Тебя не было ${playFmt(st.away*1000)}`:'Все важные события в одном месте'}</p></div></header>
-    ${money>0?`<section class="rh-income"><small>Уже начислено на баланс</small><b>+${incomeMoney(money)}</b></section>`:''}
-    ${cash>=1?`<section class="rh-till"><b>🏪 В кассах бизнесов: <span data-return-cash>${incomeMoney(cash)}</span></b><small>Соберём общей кнопкой, с учётом удержаний.</small></section>`:''}
-    <div class="rh-items">${items.length?items.map(returnItemHTML).join(''):'<p>Новых событий нет. Можно продолжать играть.</p>'}</div>
-    <p class="rh-safe">Подарки и награды уже сохранены. Повторное открытие не начисляет их заново.</p>
-    <button class="btn primary wide" data-act="returnCollect">Забрать всё и играть</button><div class="rh-bottom"><button class="btn" data-act="returnLater">Позже</button><button class="btn" data-act="returnHistory">История событий</button></div>`;
+function returnBody(all, cash) {
+  const state = returnState();
+  const unread = state.items.filter(n => !n.read);
+  const credited = unread.reduce((sum, note) => sum + note.money, 0);
+  const ready = !all && typeof ready528 === 'function' ? ready528() : [];
+  const count = unread.length + ready.length;
+  const hasCash = cash >= 1;
+  const title = all ? 'История событий' : 'С возвращением!';
+  const header = `<header class="rh-head"><div><h2 id="returnTitle">${title}</h2>
+    ${!all && state.away ? `<p><span>Вне игры</span> · <span>${playFmt(state.away * 1000)}</span></p>` : ''}</div>
+    <button class="rh-close" data-act="returnLater" aria-label="Закрыть"><span aria-hidden="true">×</span></button></header>`;
+  const history = `<button class="rh-history" data-act="returnHistory">История событий</button>`;
+  const itemList = notes => `<div class="rh-items">${notes.map(returnItemHTML).join('')}</div>`;
+  if (all) {
+    return header + `<div class="rh-scroll">${state.items.length ? itemList(state.items) : '<p class="rh-empty">Пока нет событий</p>'}</div>
+      <footer class="rh-foot"><button class="btn wide" data-act="returnSummary">К сводке</button></footer>`;
+  }
+  const totals = credited > 0 || hasCash ? `<dl class="rh-totals">
+    ${credited > 0 ? `<div><dt>Уже на балансе</dt><dd data-return-income>+${incomeMoney(credited)}</dd></div>` : ''}
+    ${hasCash ? `<div><dt>К сбору с бизнесов</dt><dd data-return-cash>${incomeMoney(cash)}</dd></div>` : ''}</dl>` : '';
+  const readyList = ready.length ? `<section class="rh-ready"><h3>Сейчас доступно</h3><ul>${ready.map(label => `<li>${esc(label)}</li>`).join('')}</ul></section>` : '';
+  const details = count ? `<details class="rh-details"><summary><span>Подробности</span><span class="rh-count">(${count})</span></summary>
+    ${readyList}${itemList(unread)}${state.items.length > unread.length && unread.length ? history : ''}</details>` : '';
+  const historyLink = state.items.length && !unread.length ? history : '';
+  return header + `<div class="rh-scroll">${totals}${details}${historyLink}
+    ${!totals && !count && !state.items.length ? '<p class="rh-empty">Пока нет событий</p>' : ''}</div>
+    <footer class="rh-foot"><button class="btn primary wide" data-act="returnCollect">${hasCash ? 'Собрать и играть' : 'Продолжить игру'}</button></footer>`;
 }
-function returnRefresh(){const el=$('returnSummary');if(el){if(typeof businessTick==='function')businessTick();const cash=businessTotals().cash,sig=returnState().items.map(n=>n.key+':'+n.read).join('|')+':'+(cash>=1)+':'+returnState().away;if(el.dataset.signature!==sig){el.innerHTML=returnBody(el.dataset.all==='1');el.dataset.signature=sig;}const value=el.querySelector('[data-return-cash]');if(value&&value.textContent!==incomeMoney(cash))value.textContent=incomeMoney(cash);}const bell=$('returnBell');if(bell){const n=returnUnread().length;bell.querySelector('b').textContent=n>99?'99+':String(n);bell.classList.toggle('unread',n>0);bell.setAttribute('aria-label','Уведомления: '+n);}}
-function openReturnSummary(all=false){if(!LOADED)return;RETURN_EXPLICIT=true;try{openModal(`<section id="returnSummary" class="return-summary" data-all="${all?'1':'0'}">${returnBody(all)}</section>`,{center:true});}finally{RETURN_EXPLICIT=false;}if(RETURN_ARRIVAL)RETURN_ARRIVAL.shown=true;returnRefresh();}
+function returnRefresh() {
+  const el = $('returnSummary');
+  if (el) {
+    // The till and payout use the same clock, tax and withholding rules.
+    if (typeof businessTick === 'function') businessTick();
+    const state = returnState(), cash = businessTotals().cash;
+    const signature = state.items.map(n => n.key + ':' + n.read).join('|') + ':' + (cash >= 1) + ':' + state.away;
+    if (el.dataset.signature !== signature) {
+      const wasOpen = el.querySelector('details')?.open;
+      const top = el.querySelector('.rh-scroll')?.scrollTop || 0;
+      const focused = el.contains(document.activeElement) ? document.activeElement : null;
+      el.innerHTML = returnBody(el.dataset.all === '1', cash);
+      el.dataset.signature = signature;
+      const details = el.querySelector('details');
+      if (wasOpen && details) details.open = true;
+      if (focused) {
+        const target = focused.matches('summary') ? el.querySelector('summary')
+          : [...el.querySelectorAll('[data-act]')].find(node => node.dataset.act === focused.dataset.act && node.dataset.id === focused.dataset.id);
+        target?.focus({preventScroll:true});
+      }
+      el.querySelector('.rh-scroll').scrollTop = top;
+    }
+    const value = el.querySelector('[data-return-cash]');
+    if (value && value.textContent !== incomeMoney(cash)) value.textContent = incomeMoney(cash);
+  }
+  const bell = $('returnBell');
+  if (bell) {
+    const n = returnUnread().length;
+    bell.querySelector('b').textContent = n > 99 ? '99+' : String(n);
+    bell.classList.toggle('unread', n > 0);
+    bell.setAttribute('aria-label', 'Уведомления: ' + n);
+  }
+}
+function openReturnSummary(all=false) {
+  if (!LOADED) return;
+  RETURN_EXPLICIT = true;
+  try {
+    openModal(`<section id="returnSummary" class="return-summary" data-all="${all ? '1' : '0'}"></section>`, {center:true});
+    returnRefresh();
+  } finally { RETURN_EXPLICIT = false; }
+  if (RETURN_ARRIVAL) RETURN_ARRIVAL.shown = true;
+}
 ACTIONS.returnSummary=()=>openReturnSummary();ACTIONS.returnHistory=()=>openReturnSummary(true);
 ACTIONS.returnLater=()=>{if(RETURN_ARRIVAL){RETURN_ARRIVAL.shown=true;RETURN_ARRIVAL.active=false;}closeModal();};
 ACTIONS.returnCollect=()=>{

@@ -10,3 +10,17 @@
 .w50-story .w50-dialogue > small { color: #edc488; }
 .w50-dialogue .goal.ok span { color: #a8ebbd; }
 .w50-dialogue .goal .go-arrow { color: #ffcf83; }
+
+.w50-map-card {
+  display: grid;
+  gap: 8px;
+  padding: clamp(12px, 3vw, 18px);
+}
+.w50-map-card > h3, .w50-map-card > p { margin: 0; }
+.w50-map-card > h3 { color: #fff6e7; font-size: 19px; }
+.w50-map-card > p, .w50-town .w50-secret > p { color: #e1e7ee; }
+.w50-map-card > b { color: #ffda92; font-size: 14px; }
+.w50-map-card > .btn { margin: 4px 0 0; }
+.w50-banner > div { background: linear-gradient(transparent, #132234 46%); }
+.w50-banner h2, .w50-town .w50-secret > h3 { color: #fff6e7; }
+.w50-banner small { color: #ffda92; }

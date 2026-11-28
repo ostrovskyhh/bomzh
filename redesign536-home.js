@@ -11,34 +11,20 @@ const HOME536_GLYPHS = {
   trash: '<path d="M4 7h16m-14 0 1 13h10l1-13m-8-3h4m-4 6v6m4-6v6"/>',
   eat: '<path d="M4 4v6a3 3 0 0 0 6 0V4M7 4v16m12-16v16m0-16c-3 0-5 3-5 7h5"/>',
   sleep: '<path d="M4 18v-7m0 5h16m0 2v-6a2 2 0 0 0-2-2H9v6m0-3H4m7-9h5l-5 4h5"/>',
-  route: '<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M9 18h7a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h7"/>',
 };
 
 function home536Glyph(name) {
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + HOME536_GLYPHS[name] + '</svg>';
 }
 
-function redesign536HomeMarkup(main, link, urgent) {
-  const category = main && main.action === 'neighborhood534Open' ? main.id : 'story';
-  const cta = main ? '<div class="nb534-home-task home536-objective" data-home536-category="' + category + '">' +
+function redesign536HomeMarkup(main, urgent) {
+  const cta = main ? '<div class="nb534-home-task home536-objective" data-home536-category="story">' +
     '<button id="nb534HomeMain" type="button" data-act="' + main.action + '" data-id="' + nb534Attr(main.id) + '">' +
     '<span class="home536-objective-copy"><small>' + esc(main.label) + '</small><strong>' + esc(main.title) + '</strong></span>' +
-    '<span class="home536-arrow" aria-hidden="true">→</span></button>' +
-    (link ? nb534Button(link.label, link.action, link.id, 'nb534-home-link') : '') + '</div>' : '';
+    '<span class="home536-arrow" aria-hidden="true">→</span></button></div>' : '';
   const warning = urgent ? '<div class="nb534-urgent home536-warning">' +
     nb534Button(urgent.label, urgent.action, urgent.id) + '</div>' : '';
   return cta + warning;
-}
-
-function redesign536HomeRoute() {
-  if (typeof valeraRoute536View !== 'function') return '';
-  const route = valeraRoute536View();
-  if (!route) return '';
-  return '<button type="button" class="nb534-button home536-route" data-act="valeraRoute536Open" data-nb534-focus="valeraRoute536Open:"' +
-    (route.ready ? ' data-ready' : '') + '><span class="home536-route-icon">' + home536Glyph('route') + '</span>' +
-    '<span><strong>' + esc(route.title || nb534Text('Маршрут Валеры', 'Valera’s Route')) + '</strong>' +
-    (route.subtitle ? '<small>' + esc(route.subtitle) + '</small>' : '') + '</span>' +
-    '<span class="home536-route-arrow" aria-hidden="true">›</span></button>';
 }
 
 function home536SetLanguage() {
