@@ -888,7 +888,8 @@ async function serverWrite(force) {
       const remote = parseSave(j.data);
       if (remote) {
         if (j.rev > (remote.rev || 0)) remote.rev = j.rev;
-        if (j.neighborhoodUpdated) showNeighborhoodSavePick(remote);
+        if (j.barterUpdated && typeof barter545Reconcile === 'function') barter545Reconcile(remote);
+        else if (j.neighborhoodUpdated) showNeighborhoodSavePick(remote);
         else adoptOrAsk(remote);
       }
     } else if (j.ok) serverBase = Math.max(serverBase, j.rev || 0);
@@ -2034,7 +2035,7 @@ const ACTIONS = {
   reset: () => {
     const doReset = () => {
       const campaign73 = typeof prestigeIdentity73 === 'function' ? prestigeIdentity73() : {};
-      S = { ...freshState(), ...campaign73 }; save();
+      S = { ...freshState(), ...campaign73, ...(S.barterRev545 ? { barterRev545: S.barterRev545 } : {}) }; save();
       SAVE_LOCK = true;
       // Стираем облачную копию и перезаписываем серверную, иначе после перезапуска старый прогресс «вернётся»
       const wipeCloud = () => {

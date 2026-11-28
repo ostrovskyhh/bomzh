@@ -170,7 +170,7 @@ EXTRA_TABS.fun.market = () => {
       const it = ITEMS[id], p = itemPrice(id), prev = itemPrice(id, Date.now() - 3600000);
       const trend = p >= prev ? '<span style="color:var(--green)">▲</span>' : '<span style="color:var(--red)">▼</span>';
       return card({ thumb: it.emoji, title: `${it.name} ×${S.inv[id]}`, desc: `Сейчас: <b>${fmt(p)} ₽</b> ${trend} · обычно ~${fmt(it.base)} ₽`,
-        btn: `<div class="btn-col"><button class="btn primary small" data-act="sellItem" data-id="${id}:1">Продать 1</button>${S.inv[id] > 1 ? `<button class="btn small" data-act="sellItem" data-id="${id}:all">Все</button>` : ''}</div>` });
+        btn: `<div class="btn-col"><button class="btn primary small" data-act="sellItem" data-id="${id}:1">Продать 1</button>${S.inv[id] > 1 ? `<button class="btn small" data-act="sellItem" data-id="${id}:all">Продать стопку</button>` : ''}</div>` });
     }).join('') : '<div class="info-card">Сумка пуста. Хлам находится в мусорках, его можно продать Шнырю.</div>'}
     <div class="subhead">Товар дня · обновится через <span data-until="${Date.now() + slotLeft * 1000}"></span></div>
     ${currentDeals().map((d) => card({ thumb: d.emoji, title: d.name, desc: d.desc,

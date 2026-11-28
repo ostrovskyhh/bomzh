@@ -76,16 +76,45 @@ showStory = (function (orig) {
 })(showStory);
 
 // ---------- Обучение: три действия вместо экзамена ----------
+function tutStoryHint545() {
+  const q = currentQuest();
+  if (q?.id === 'start') {
+    const sale = q.goals.find(g => g.key === 'sold');
+    const left = Math.max(0, sale.need - sale.cur());
+    if (left) return redesign536Text('До награды за главу осталось сдать бутылок: ' + left + '. Прогресс виден на значке сюжета.', 'Bottles left to sell for the chapter reward: ' + left + '. Tap the story icon to see your progress.');
+    if (goalsDone(q)) return redesign536Text('Первая глава пройдена! Нажми на значок сюжета, чтобы забрать награду.', 'First chapter complete! Tap the story icon to collect your reward.');
+  }
+  return redesign536Text('Нажми на значок сюжета, чтобы увидеть цель текущей главы.', 'Tap the story icon to see your current chapter goal.');
+}
+HOOKS.track.push((key, amount) => {
+  const t = S.tut;
+  if (key === 'sold' && amount > 0 && t && !t.done && (t.step === 1 || t.step === 2)) t.sold545 = true;
+});
 TUT.splice(0, TUT.length,
   { sel: '#valera', text: 'Закон парка, Валера: что лежит, то твоё. Тапай по себе и собирай бутылки!', done: () => counter('taps') - (S.tut.base || 0) >= 10 },
-  { sel: '#exchangeBtn', text: 'Тара есть, неси Шнырю. Открой обменник.', done: () => !!$('exBody') },
-  { sel: '[data-act="exchange"][data-id="1"]', text: 'Шнырь обдерёт, но по-соседски. Нажми «Всё».', done: () => counter('sold') > 0 || !$('exBody') },
-  { sel: '#questPin', text: 'Это план, Валера. Без плана ты просто мужик с бутылкой. Появился «!» — жми на значок, награда твоя.', btn: 'Понятно' },
+  { sel: '#exchangeBtn', text: 'Тара есть, неси Шнырю. Открой обменник.', done: () => !!$('exBody') || S.tut.sold545 },
+  { sel: '[data-act="exchange"][data-id="1"]', text: 'Шнырь обдерёт, но по-соседски. Нажми «Всё».', done: () => {
+    if (!S.tut.sold545) return false;
+    if ($('exBody')) closeModal();
+    return true;
+  } },
+  { sel: '#questPin', get text() { return tutStoryHint545(); }, btn: 'Понятно' },
 );
 tutOffer = function () { S.tut = { step: 0, done: false, base: counter('taps') }; showScreen('game'); };
 tutRender = (function (orig) {
   return function () {
     if (CUT && $('tutSpot')) { $('tutSpot').style.opacity = 0; if ($('tutBubble')) $('tutBubble').style.opacity = 0; return; }
+    const t = S.tut;
+    if (t && !t.done && !t.sold545) {
+      const closedWithoutSale = t.step === 2 && !$('exBody');
+      const oldFalseFinish = t.step === 3 && currentQuest()?.id === 'start' && counter('sold') === 0;
+      if (closedWithoutSale || oldFalseFinish) t.step = 1;
+    }
+    const bubble = $('tutBubble');
+    if (t?.step === 3 && bubble && bubble.dataset.storyHint !== TUT[3].text) {
+      bubble.dataset.storyHint = TUT[3].text;
+      delete bubble.dataset.step;
+    }
     orig();
   };
 })(tutRender);
@@ -317,26 +346,28 @@ HOOKS.init.push(() => {
 HOOKS.hud.push(next528Render);
 
 // ---------- Разделы открываются постепенно (только новые сохранения) ----------
-const HUB_OPEN_528 = {
-  me: () => questDone528('start'),
-  goals: () => questDone528('trash'),
-  fun: () => questDone528('basics'),
-  money: () => questDone528('choice'),
-  people: () => !fs528First() || questDone528('choice'),
-};
+const HUB_CHAPTER_528 = { me: 'start', goals: 'trash', fun: 'basics', money: 'choice', people: 'choice' };
 function questDone528(id) {
   const i = questList().findIndex((q) => q.id === id);
   return i < 0 || S.quest.idx > i;
 }
-function hubOpen528(id) { return !S.fs528 || !HUB_OPEN_528[id] || HUB_OPEN_528[id](); }
+function hubOpen528(id) {
+  return !S.fs528 || !HUB_CHAPTER_528[id] || (id === 'people' && !fs528First()) || questDone528(HUB_CHAPTER_528[id]);
+}
+function hubLockReason545(id) {
+  const q = q528(HUB_CHAPTER_528[id]);
+  const title = I18N.t(q.title);
+  return id === 'people'
+    ? redesign536Text('После главы «' + title + '» или через 20 ч от начала игры.', 'Complete “' + title + '” or wait until 20 hours after starting the game.')
+    : redesign536Text('После главы «' + title + '».', 'Complete “' + title + '” to unlock.');
+}
 ACTIONS.betaHub = (function (orig) {
   return function (id) {
     if (hubOpen528(id)) return orig(id);
-    toast('🧔 Не всё сразу, Валера. Сначала глава сюжета');
+    showHubLock545(id);
   };
 })(ACTIONS.betaHub);
 HOOKS.hud.push(() => {
-  if (!S.fs528) return;
   document.querySelectorAll('#tabbar [data-hub]').forEach((b) => b.classList.toggle('fs-lock528', !hubOpen528(b.dataset.hub)));
 });
 
