@@ -65,11 +65,26 @@ function garageDraw547(state) {
   if (!el) return;
   if (!state.garageAccess && !g.available) { el.innerHTML=`<h3>${t('Гаражный верстак','Garage workbench')}</h3><p>${t('Закончи первый заказ в своём гараже.','Finish the first job in your garage.')}</p>`; return; }
   const station = garageStation547(), chosen = GARAGE_STATIONS547[station];
+  const missingMaterials = new Set();
   const jobs = (g.radio ? ['lamp','sign'] : ['radio']).map(key=>{
     const row = GARAGE_RECIPES547[key], done = g.doneToday.includes(key);
     const qty = `${t('Провод','Wire')} ×${row[2]} · ${t('лом','scrap')} ×${row[3]}`;
-    return `<article><div><strong>${t(row[0],row[1])}</strong><small>${qty}${key==='radio'?'':' · '+t('1 эскиз','1 sketch')}</small></div>${garageButton547(done?t('Готово','Done'):key==='radio'?t('Собрать','Build'):t('Выполнить','Complete'),'garageMake547',key,done || (S.inv?.copper||0)<row[2] || (S.inv?.scrap||0)<row[3])}</article>`;
+    const shortage=[];
+    if(!done) for(const [item,cost] of [['copper',row[2]],['scrap',row[3]]]) {
+      const deficit=cost-(S.inv?.[item]||0);
+      if(deficit>0) {missingMaterials.add(item);shortage.push(`${marketWord547(MARKET_ITEMS547,item)} ×${deficit}`);}
+    }
+    const hint=shortage.length?`<small>${t('Не хватает','Still needed')} · ${shortage.join(' · ')}</small>`:'';
+    return `<article><div><strong>${t(row[0],row[1])}</strong><small>${qty}${key==='radio'?'':' · '+t('1 эскиз','1 sketch')}</small>${hint}</div>${garageButton547(done?t('Готово','Done'):key==='radio'?t('Собрать','Build'):t('Выполнить','Complete'),'garageMake547',key,done || shortage.length>0)}</article>`;
   }).join('');
+  let supplies='';
+  if(city()==='zas') {
+    supplies=missingMaterials.size?
+      [...missingMaterials].map(item=>garageButton547(item==='copper'?t('Найти провод','Find wire'):t('Найти лом','Find scrap'),'marketFindMaterial547',item)).join(' '):
+      garageButton547(t('Найти материалы на рынке','Find supplies at the market'),'marketFindMaterial547','all');
+  } else if(missingMaterials.size) {
+    supplies=`<p class="gr547-stock">${t('Купить провод и лом у игроков можно в Засранске.','Player listings for wire and scrap are available in Zasransk.')}</p>`;
+  }
   const finishes = Object.entries(GARAGE_STYLES547).filter(([key])=>key!=='mosaic' || (g.styles.includes('mint')&&g.styles.includes('cherry'))).map(([key,row])=>{
     const owned = g.styles.includes(key), selected = g.style === key;
     return garageButton547(t(row[0],row[1])+(selected?' ✓':owned?'':` · ${row[2]} ✎`),owned?'garageStyle547':'garageFinish547',key,selected || (!owned && g.sketches < row[2]));
@@ -78,7 +93,7 @@ function garageDraw547(state) {
     <div class="gr547-stage">${garageRadio547(g.style,station)}<div><b>${g.radio?t(chosen[0],chosen[1]):t('Радиола Валеры','Valera’s radio')}</b><small>${g.radio?`FM ${chosen[2]}`:t('Самодельная, из находок со двора','Hand-built from courtyard finds')}</small></div></div>
     ${g.radio?`<div class="gr547-stations">${GARAGE_STATIONS547.map((v,i)=>`<button data-act="garageTune547" data-id="${i}" aria-pressed="${station===i}">${v[2]} FM</button>`).join('')}</div><h4>${t('Заказы на сегодня','Today’s repairs')}</h4>`:''}
     ${jobs}<p class="gr547-stock">${t('В сумке','In your bag')} · ${t('провод','wire')} ×${S.inv?.copper||0} · ${t('лом','scrap')} ×${S.inv?.scrap||0}</p>
-    ${garageButton547(t('Найти материалы на рынке','Find supplies at the market'),'marketOpen547','goods')}
+    ${supplies}
     ${g.radio?`<h4>${t('Корпус радиолы','Radio cabinet')} · ✎ ${g.sketches}</h4><div class="gr547-finishes">${finishes}</div>`:''}`;
 }
 function garageObserve547(board) {
@@ -129,6 +144,38 @@ ACTIONS.garageStyle547 = style => garageChange547('style',{style});
 HOOKS.hud.push(garageHome547);
 HOOKS.screen.push(garageStop547);
 document.addEventListener('visibilitychange',()=>{ if (document.hidden) garageStop547(); });
+let marketGlassReturn547=null;
+function marketVisitGlass547() {
+  const ctx=marketForm547;
+  if(!ctx?.el.isConnected||MARKET_UI547.sending||!glass546Eligible()) return;
+  const {kind,id}=ctx.model;
+  marketGlassReturn547={kind,id,pattern:ctx.el.elements.pattern?.value,qty:ctx.el.elements.qty?.value};
+  closeModal();
+  ACTIONS.glassOpen546();
+}
+ACTIONS.marketResumeGlass547=async()=>{
+  const draft=marketGlassReturn547;
+  if(!draft) return;
+  marketGlassReturn547=null;
+  marketOpen547('art');
+  const board=await marketLoad547('market',true);
+  if(!marketScene547()||!MARKET_UI547.players||MARKET_UI547.tab!=='art'||modalOpen()) return;
+  if(!board) {toast(marketError547(MARKET_UI547.errors.market||'unavailable'),'bad');return;}
+  marketShowForm547(draft.kind,draft.id);
+  const ctx=marketForm547;
+  if(!ctx?.el.isConnected||ctx.model.id!==draft.id||ctx.model.kind!==draft.kind) return;
+  if(draft.pattern&&ctx.el.elements.pattern) ctx.el.elements.pattern.value=draft.pattern;
+  if(ctx.el.elements.qty&&Number(draft.qty)>0) ctx.el.elements.qty.value=String(Math.max(1,Math.min(Number(draft.qty),Number(ctx.el.elements.qty.max))));
+  marketQuote547(ctx.el,ctx.model);
+};
+HOOKS.screen.push(()=>{if(!glassScreen546()) marketGlassReturn547=null;});
 const garageWorkshopBefore547 = EXTRA_TABS.tasks.glass546;
-EXTRA_TABS.tasks.glass546 = () => garageWorkshopBefore547() + (glass546Eligible() ?
-  `<button class="btn wide gl546-entry" data-act="marketOpen547" data-id="art" data-i18n-ignore>${marketLang547('Ярмарка и заказы игроков','Fair & player commissions')} ↗</button>` : '');
+EXTRA_TABS.tasks.glass546 = () => {
+  const workshop=garageWorkshopBefore547();
+  if(!glass546Eligible()) return workshop;
+  if(marketGlassReturn547) {
+    const label=marketGlassReturn547.kind==='craft'?marketLang547('Вернуться к своему витражу','Return to your panel'):marketLang547('Вернуться к заказу','Return to the commission');
+    return `<button type="button" class="btn wide gl546-entry" data-act="marketResumeGlass547" data-i18n-ignore>← ${label}</button>`+workshop;
+  }
+  return workshop+`<button type="button" class="btn wide gl546-entry" data-act="marketOpen547" data-id="art" data-i18n-ignore>${marketLang547('Ярмарка и заказы игроков','Fair & player commissions')} ↗</button>`;
+};

@@ -2,7 +2,7 @@
 // are read from the server. The browser keeps only the current section and open form.
 const marketText547 = (ru,en) => I18N.lang === 'en' ? en : ru;
 const MARKET_UI547 = { players:false, tab:'goods', boards:{market:null,loans:null}, readAt:{market:0,loans:0},
-  reading:{market:false,loans:false}, errors:{market:'',loans:''}, sending:false, limit:8, friend:null };
+  reading:{market:false,loans:false}, errors:{market:'',loans:''}, sending:false, limit:8, friend:null, material:'all', intent:'all',fromBench:false };
 const MARKET_ITEMS547 = { scrap:['Металлолом','Scrap metal'], copper:['Медный провод','Copper wire'] };
 const MARKET_PATTERNS547 = {amber:['Янтарные ромбы','Amber diamonds'],wave:['Морская волна','Sea wave']};
 const MARKET_KINDS547 = {buy:['Куплю','Wanted'],sell:['Продам','For sale'],barter:['Обмен другу','Friend swap'],
@@ -96,7 +96,7 @@ function marketOrder547(o) {
    if (o.forMe) {act='take';button=t('Обменяться','Swap');}
  } else if (o.kind==='buy'||o.kind==='sell') {
    note.push(marketMoneyLine547(t('Цена партии','Lot price'),marketCash547(o.price)));
-   note.push(marketMoneyLine547(t('За штуку','Price each'),marketCash547(o.price/o.qty)));
+   note.push(marketMoneyLine547(o.kind==='buy'?t('После комиссии за штуку','Net per item'):t('За штуку','Price each'),marketCash547((o.kind==='buy'?o.net:o.price)/o.qty)));
    note.push(marketMoneyLine547(t('Шнырь за всю партию','Shnyr for this lot'),marketCash547(itemPrice(o.item)*o.qty)));
    note.push(marketMoneyLine547(t('После комиссии','After fee'),marketCash547(o.net)));
    act='take'; button=o.kind==='buy'?t('Продать','Sell')+' · '+marketCash547(o.net):t('Купить','Buy')+' · '+marketCash547(o.price);
@@ -124,12 +124,19 @@ function marketOrder547(o) {
  <div class="m547-facts">${note.join('')}</div><small class="m547-till">${t('До','Until')} ${marketTime547(o.expiresAt)}</small>
  <div class="m547-tools">${canAct?marketBtn547(button,act,o.id,'primary',MARKET_UI547.sending):''}${cancel}</div></article>`;
 }
-function marketTerms547(l) {
- const t=marketText547, terms=[
-   marketMoneyLine547(t('Сумма','Principal'),marketCash547(l.amount)),
+function marketTerms547(l,confirming=false) {
+ const t=marketText547,borrower=l.role==='borrower';
+ const principal=confirming
+   ? (borrower?t('Ты получишь','You receive'):t('Ты передашь','You lend'))
+   : t('Сумма займа','Original loan');
+ const collateral=confirming
+   ? (borrower?t('Твой провод в залог','Wire held from your bag'):t('Провод друга в залог','Wire held from your friend'))
+   : t('Залог проводом','Wire collateral');
+ const terms=[
+   marketMoneyLine547(principal,marketCash547(l.amount)),
    marketMoneyLine547(t('Срок','Term'),`${l.days} ${t('дн.','days')}`),
    marketMoneyLine547(t('Из чистых продаж','From net sales'),`${Number(l.share)||0}%`),
-   marketMoneyLine547(t('Залог проводом','Wire collateral'),`${Number(l.pledge)||0} ${t('шт.','pcs')}`)];
+   marketMoneyLine547(collateral,`${Number(l.pledge)||0} ${t('шт.','pcs')}`)];
  if(l.status==='active' && l.pledge) terms.push(marketMoneyLine547(t('Сейчас в залоге','Currently held'),`${l.held} ${t('шт.','pcs')}`));
  if(l.status==='active' && l.creditorRemaining!=null && l.creditorRemaining!==l.remaining) terms.push(marketMoneyLine547(t('Кредитору после переезда','Lender receives after moving'),marketCash547(l.creditorRemaining)));
  return `<div class="m547-facts">${terms.join('')}</div>`;
@@ -151,7 +158,9 @@ function marketLoanCard547(l) {
    if(l.held>0&&(owed||l.overdue)) actions.push(btn(owed?t('Отдать залог','Give collateral'):t('Забрать залог','Claim collateral'),'settle'));
    if(!owed) actions.push(btn(t('Простить остаток','Forgive balance'),'forgive'));
  }
- return `<article class="m547-order"><div class="m547-row"><div><small>${marketEsc547(l.otherName)} · ${l.overdue?t('Просрочено','Overdue'):marketWord547(MARKET_LOAN_STATUS547,l.status)}</small><strong>${owed?t('Беру в долг','Borrowing'):t('Даю в долг','Lending')} · ${marketCash547(active?l.remaining:l.amount)}</strong></div></div>
+ const role=active?(owed?t('Ты должен','You owe'):t('Тебе должны','Owed to you')):(owed?t('Беру в долг','Borrowing'):t('Даю в долг','Lending'));
+ const balance=owed?l.remaining:(l.creditorRemaining??l.remaining);
+ return `<article class="m547-order"><div class="m547-row"><div><small>${marketEsc547(l.otherName)} · ${l.overdue?t('Просрочено','Overdue'):marketWord547(MARKET_LOAN_STATUS547,l.status)}</small><strong>${role} · ${marketCash547(active?balance:l.amount)}</strong></div></div>
  ${marketTerms547(l)}${offered||active?`<small>${offered?t('Ответ до','Reply by'):t('Вернуть до','Due by')} ${marketTime547(offered?l.expiresAt:l.dueAt)}</small>`:''}
  ${active&&l.extensionDays?`<p>${t('Запрошено продление на','Extension requested for')} ${Number(l.extensionDays)} ${t('дн.','days')}</p>`:''}<div class="m547-tools">${actions.join('')}</div></article>`;
 }
@@ -165,14 +174,23 @@ function marketHistory547(h) {
  if(!amount.length) {
    if(h.item&&h.qty) amount.push(`${marketWord547(MARKET_ITEMS547,h.item)} ×${marketNum547(h.qty)}`);
    if(h.action==='contribute') amount.push(`${marketNum547(h.qty)} ${t('стекла','panes')}`);
-   if(h.price>0) amount.push(`${h.action==='paid'?t('Выплата','Payout'):h.kind==='auction'?t('Ставка','Bid'):t('Сумма','Amount')} ${marketCash547(h.price)}`);
+   const materialSale=['buy','sell'].includes(h.kind)&&['take','filled'].includes(h.action);
+   if(materialSale) {
+     amount.push(`${t('Цена партии','Lot price')} ${marketCash547(h.price)}`);
+     const seller=(h.kind==='sell'&&h.action==='filled')||(h.kind==='buy'&&h.action==='take');
+     if(seller) {
+       const net=marketNet547(h.price);
+       amount.push(`${t('Комиссия','Market fee')} ${marketCash547(h.price-net)}`);
+       amount.push(`${t('После комиссии, до выплаты долга','After fee, before IOU repayments')} ${marketCash547(net)}`);
+     }
+   } else if(h.price>0) amount.push(`${h.action==='paid'?t('Выплата','Payout'):h.kind==='auction'?t('Ставка','Bid'):t('Сумма','Amount')} ${marketCash547(h.price)}`);
  }
  return `<li><div><b>${marketWord547(actions,h.action)||marketWord547(MARKET_KINDS547,h.kind)||t('Операция','Transaction')}</b><small>${marketTime547(h.at)}${h.counterparty?' · '+marketEsc547(h.counterparty):''}</small></div><span>${marketEsc547(amount.join(' · '))}</span></li>`;
 }
 function marketPiece547(p) {
  const t=marketText547;
  const credit=(p.contributors||[]).map(c=>`${marketEsc547(c.name)} ×${marketNum547(c.panes)}`).join(', ');
- return `<article class="m547-order"><div class="m547-row">${marketArtwork547(p)}<div><small>${t('Мастер','Maker')} · ${marketEsc547(p.makerName)}</small><strong>${marketWord547(MARKET_PATTERNS547,p.pattern)} <small>#${Number(p.id)}</small></strong></div></div><div class="m547-tools">
+ return `<article class="m547-order" data-m547-piece="${Number(p.id)}" tabindex="-1"><div class="m547-row">${marketArtwork547(p)}<div><small>${t('Мастер','Maker')} · ${marketEsc547(p.makerName)}</small><strong>${marketWord547(MARKET_PATTERNS547,p.pattern)} <small>#${Number(p.id)}</small></strong></div></div><div class="m547-tools">
  ${credit?`<small>${t('Вложили стекло','Contributors')} · ${credit}</small>`:''}
  ${p.listed?`<small>${t('Выставлено на ярмарке','Listed at the fair')}</small>`:marketBtn547(p.displayed?t('В гараже ✓','On display ✓'):t('В гараж','Display'),'display',p.id,'soft',p.displayed)+(p.tradable===false?`<small>${p.souvenirReason==='guest'?t('Выставочная работа с вкладом гостей','Exhibition panel with guest signatures'):t('Сувенир из прошлого города или круга','Souvenir from a previous city or prestige')}</small>`:marketBtn547(t('Продать','Sell'),'fair',p.id)+marketBtn547(t('На аукцион','Auction'),'auction',p.id))}</div></article>`;
 }
@@ -188,6 +206,30 @@ function marketList547(rows,render,empty) {
  const limit=MARKET_UI547.limit;
  return rows.length?`<div class="m547-list">${rows.slice(0,limit).map(render).join('')}</div>
  ${rows.length>limit?marketBtn547(marketText547('Показать ещё','Show more')+` (${rows.length-limit})`,'more'):''}`:marketEmpty547(empty);
+}
+function marketGoods547(orders,town) {
+ const t=marketText547,u=MARKET_UI547;
+ const filters=marketSelect547('material',t('Материал','Material'),[['all',t('Все материалы','All materials')],...marketChoice547(MARKET_ITEMS547)],u.material)+
+   marketSelect547('intent',t('Показывать','Show'),[['all',t('Все заявки','All listings')],['buy',t('Хочу купить','I want to buy')],['sell',t('Хочу продать','I want to sell')]],u.intent);
+ const filtered=orders.filter(o=>{
+   if(!['buy','sell','barter'].includes(o.kind)) return false;
+   if(u.material!=='all'&&o.item!==u.material&&!(o.kind==='barter'&&o.wantItem===u.material)) return false;
+   if(u.intent==='all') return true;
+   return !o.mine&&o.kind===(u.intent==='buy'?'sell':'buy');
+ });
+ let sorting='';
+ if(u.intent==='buy') {
+   filtered.sort((a,b)=>a.price/a.qty-b.price/b.qty);
+   sorting=t('Сначала дешевле за штуку.','Lowest price per item first.');
+ } else if(u.intent==='sell') {
+   filtered.sort((a,b)=>b.net/b.qty-a.net/a.qty);
+   sorting=t('Сначала больше выручка за штуку после комиссии.','Highest net price per item first.');
+ }
+ const filteredView=u.intent!=='all'||u.material!=='all';
+ const actions=town?`<details class="m547-posting" data-fold="material-post"><summary class="m547-btn">${t('Разместить заявку','Post order')}</summary><div class="m547-tools">${marketBtn547(t('Выставить товар','List goods'),'new','sell')}${marketBtn547(t('Заказать сырьё','Request materials'),'new','buy')}${marketBtn547(t('Обмен с другом','Swap with friend'),'new','barter')}</div></details>`:'';
+ const empty=filteredView?t('По этим условиям заявок нет.','No listings match these filters.'):t('Заявок пока нет.','No listings yet.');
+ return marketHeading547(t('Доска сырья','Materials board'),actions)+(!town?`<p class="m547-note">${t('Купля, продажа и обмен сырья доступны в Засранске.','Visit Zasransk to trade or swap materials.')}</p>`:'')+
+   `<div class="m547-filters">${filters}</div>`+(sorting?`<p class="m547-note">${sorting}</p>`:'')+marketList547(filtered,marketOrder547,empty);
 }
 function marketPanel547() {
  const t=marketText547,u=MARKET_UI547,area=marketArea547(),board=u.boards[area],town=city()==='zas';
@@ -206,10 +248,7 @@ function marketPanel547() {
  } else {
    const orders=board.orders||[];
    if(u.tab==='goods') {
-     content=marketHeading547(t('Доска сырья','Materials board'))+`<p class="m547-note">${town?t('Выбери партию металла или провода. Цена в заявке указана за всю партию.','Pick a lot of metal or wire. Listings show the price of the whole lot.'):t('Купля, продажа и обмен сырья доступны в Засранске.','Visit Zasransk to trade or swap materials.')}</p>`+
-     (town?`<div class="m547-tools">${primary('sell','Продам','Sell')}${option('buy','Куплю','Buy')}${option('barter','Обмен с другом','Swap with friend')}</div>`:'')+
-     marketList547(orders.filter(o=>['buy','sell','barter'].includes(o.kind)),marketOrder547,t('Заявок пока нет. Первую партию можно выставить у Шныря в Засранске.','No listings yet. Post the first lot at Shnyr’s in Zasransk.'));
-     content+=marketStats547(board.statistics);
+     content=marketGoods547(orders,town)+marketStats547(board.statistics);
    } else if(u.tab==='art') {
      content=marketHeading547(t('Ярмарка витражей','Glass fair'))+`<p class="m547-note">${t('Доска твоего города и круга престижа. Купи витраж с подписью мастера или закажи свой узор для гаража.','Market for your city and prestige. Buy a signed panel or commission a design for your garage.')}</p>
      <div class="m547-tools">${primary('commission','Заказать витраж','Commission')}${option('group','Сборный заказ','Group order')}${option('craft','Сделать самому','Craft')}</div>`+
@@ -224,6 +263,7 @@ function marketPanel547() {
    }
  }
  if(board&&u.errors[area]) content=`<p class="m547-error" role="status">${marketError547(u.errors[area])}</p>`+content;
+ if(u.fromBench&&u.tab==='goods') content=`<div>${marketBtn547(t('← К верстаку','← Back to workbench'),'backBench')}</div>`+content;
  return `${nav}<div class="m547-content" data-i18n-ignore>${content}</div>${marketIsOnline547()&&board?`<footer>${marketBtn547(u.reading[area]?t('Обновляем…','Refreshing…'):t('Обновить','Refresh'),'reload','','quiet',!!u.reading[area])}</footer>`:''}`;
 }
 const MARKET_LOAN_ACTIONS547=['offer','settings','accept','decline','repay','extend','approve','forgive','settle'];
@@ -260,7 +300,8 @@ function marketFormModel547(kind,id=0,person=null) {
  const name=person?.name||person?.pid||'';
  if(['buy','sell','barter','commission','group','fair','auction'].includes(kind)) {action='post';args.kind=kind;}
  if(['buy','sell','barter'].includes(kind)) {
-   fields=marketSelect547('item',kind==='barter'?t('Отдаю','I give'):t('Материал','Material'),marketChoice547(MARKET_ITEMS547),'scrap')+lot();
+   const material=kind!=='barter'&&Object.hasOwn(MARKET_ITEMS547,MARKET_UI547.material)?MARKET_UI547.material:'scrap';
+   fields=marketSelect547('item',kind==='barter'?t('Отдаю','I give'):t('Материал','Material'),marketChoice547(MARKET_ITEMS547),material)+lot();
    if(kind==='barter') {
      fields=friends()+fields+marketSelect547('wantItem',t('Получаю','I get'),marketChoice547(MARKET_ITEMS547),'copper')+marketInput547('wantQty',t('Сколько получить','Quantity to receive'),1,99,1);
      description=t('Твои предметы подождут друга 48 часов. При отмене вернутся в сумку.','Your items are held for your friend for 48 hours. Withdrawing returns them to your bag.');
@@ -325,18 +366,18 @@ function marketFormModel547(kind,id=0,person=null) {
  } else if(MARKET_LOAN_ACTIONS547.includes(kind)) {
    if(!l) return null;
    args.id=id;
-   if(kind==='repay') fields=marketInput547('amount',t('Сумма возврата, ₽','Payment amount, ₽'),1,l.remaining,l.remaining);
+   if(kind==='repay') fields=marketInput547('amount',t('Сумма возврата, ₽','Payment amount, ₽'),1,l.remaining,Math.min(l.remaining,Math.max(1,Math.floor(S.money))));
    if(kind==='extend') fields=days();
-   const detail={accept:t('При принятии кредитор передаст сумму, а залог заёмщика будет отложен.','Accepting transfers the principal and reserves the borrower’s collateral.'),
+   const detail={accept:t('Перевод при подтверждении','Transfer on acceptance'),
      decline:l.status==='active'?t('Отменить предложенное продление? Действующий срок расписки сохранится.','Cancel the proposed extension? The current due date stays in place.'):t('Предложение будет закрыто. Перевода денег не будет.','Close this offer without transferring money.'),
-     repay:t('Сумма уйдёт из твоего кошелька в погашение остатка.','Rubles leave your wallet and reduce the balance.'),
+     repay:t('Ты должен','You owe')+' '+marketCash547(l.remaining),
      extend:t('Продлить можно один раз после согласия второй стороны.','The term can be extended once when the other party agrees.'),
      approve:t('Срок увеличится на согласованное число дней.','Add the agreed extension to the due date.')+` (${l.extensionDays||0})`,
      forgive:`${t('Простить оставшийся долг','Forgive the remaining balance of')} ${marketCash547(l.remaining)}? ${t('Удержанный провод вернётся заёмщику. Это окончательно закроет расписку.','The held wire returns to the borrower. This closes the IOU permanently.')}`,
      settle:`${t('Кредитор получит весь остаток залога','The lender receives all remaining collateral')} (${l.held} ${t('шт. провода','wire')}) ${t('вместо','instead of')} ${marketCash547(l.remaining)}. ${t('Долг будет закрыт.','The debt will close.')}`};
    description=`${l.otherName} · ${detail[kind]}`;
  } else return null;
- return {kind,id,person,area,action,title,args,description,fields,confirm,loan:l};
+ return {kind,id,person,area,action,title,args,description,fields,confirm,loan:l,order:o};
 }
 let marketForm547=null;
 const MARKET_READS547={market:null,loans:null},MARKET_GEN547={market:0,loans:0};
@@ -354,10 +395,12 @@ function marketPaint547() {
  const mount=document.getElementById('m547Panel');
  if(!mount||!MARKET_UI547.players||!marketScene547()) return;
  const active=document.activeElement?.closest('[data-m547-action]'),restore=active&&mount.contains(active)?[active.dataset.m547Action,active.dataset.m547Id||'']:null;
+ const filter=mount.querySelector('.m547-filters select:focus')?.name;
  const opened=[...mount.querySelectorAll('details[open]')].map(x=>x.dataset.fold||x.querySelector('summary')?.textContent);
  mount.innerHTML=marketPanel547();
  for(const x of mount.querySelectorAll('details')) if(opened.includes(x.dataset.fold||x.querySelector('summary')?.textContent)) x.open=true;
  if(restore) [...mount.querySelectorAll('[data-m547-action]')].find(b=>b.dataset.m547Action===restore[0]&&(b.dataset.m547Id||'')===restore[1])?.focus({preventScroll:true});
+ if(filter) mount.querySelector(`.m547-filters [name="${filter}"]`)?.focus({preventScroll:true});
 }
 function marketBoardSeen547(area,board) {
  const u=MARKET_UI547;
@@ -422,11 +465,52 @@ function marketQuote547(form,model,changed='') {
  } else if(k==='offer') {
    const pledged=marketNumberValue547(form,'pledge');
    quote=marketRisk547(pledged>0);
- } else if(k==='accept') quote=marketTerms547(model.loan)+marketRisk547(model.loan.pledge>0);
- if(['craft','contribute'].includes(k)) quote+=marketMoneyLine547(t('Готовое стекло в артели','Finished glass at workshop'),marketNum547(S.glass546?.stock||0));
+ } else if(k==='accept') {
+   quote=marketTerms547(model.loan,true)+marketRisk547(model.loan.pledge>0);
+ } else if(k==='repay') {
+   const loan=model.loan,payment=marketNumberValue547(form,'amount'),wallet=Math.floor(S.money);
+   form.querySelector('[type=submit]').disabled=MARKET_UI547.sending||!Number.isSafeInteger(payment)||payment<1||payment>Math.min(wallet,loan.remaining);
+   quote=marketMoneyLine547(t('В кошельке','Your wallet'),marketCash547(wallet));
+   if(Number.isSafeInteger(payment)&&payment>0&&payment<=loan.remaining) {
+     if(payment>wallet) {
+       quote+=marketMoneyLine547(t('Не хватает для платежа','Shortfall for this payment'),marketCash547(payment-wallet));
+     } else {
+       const remaining=loan.remaining-payment;
+       quote+=marketMoneyLine547(t('Остаток долга','Remaining balance'),marketCash547(remaining));
+       if(loan.held>0) {
+         const released=loan.held-Math.ceil(loan.pledge*remaining/loan.amount);
+         quote+=marketMoneyLine547(t('Вернётся в сумку','Returned to your bag'),`${marketWord547(MARKET_ITEMS547,'copper')} ×${marketNum547(released)}`);
+       }
+       if(loan.creditorRemaining!=null&&loan.creditorRemaining!==loan.remaining)
+         quote+=marketMoneyLine547(t('Друг получит после переезда','Friend receives after moving'),marketCash547(Math.floor(loan.creditorRemaining*payment/loan.remaining)));
+     }
+   }
+ }
+ if(k==='craft'||k==='contribute'||(k==='take'&&model.order?.kind==='commission')) {
+   const stock=glass546Count(S.glass546?.stock),eligible=glass546Eligible();
+   const needed=k==='contribute'?(model.order.currentGoal||4)-model.order.raised:4;
+   const amount=form.elements.namedItem('qty'),requested=amount?qty:needed;
+   if(amount) {
+     amount.max=String(Math.min(stock,needed));
+     amount.disabled=stock===0||!eligible;
+   }
+   quote+=marketMoneyLine547(t('Готовое стекло в артели','Finished glass at workshop'),marketNum547(stock));
+   if(!eligible) {
+     quote+=`<small>${t('Артель откроется после финала Китая или при втором престиже.','Finish the China story or reach prestige 2 to open the Glassworks.')}</small>`;
+   } else if(stock<needed) {
+     if(k==='contribute'&&stock>0) quote+=marketMoneyLine547(t('Можно внести сейчас, шт.','You can contribute now'),marketNum547(stock));
+     quote+=marketMoneyLine547(k==='contribute'?t('До полного заказа не хватает, шт.','Panes short of the full order'):t('Не хватает стёкол, шт.','More panes needed'),marketNum547(needed-stock));
+     quote+=marketBtn547(t('В стекольную артель','Go to the Glassworks'),'glassWorkshop');
+   }
+   form.querySelector('[type=submit]').disabled=MARKET_UI547.sending||!eligible||!Number.isSafeInteger(requested)||requested<1||requested>Math.min(stock,needed);
+ }
  const pattern=form.elements.namedItem('pattern')?.value;
  if(pattern) quote=`<span class="m547-preview">${marketArtwork547({pattern})}<b>${marketWord547(MARKET_PATTERNS547,pattern)}</b></span>`+quote;
- q.innerHTML=quote;
+ // Blurring a number field can fire change while the player is tapping the workshop link.
+ if(form.marketQuoteMarkup547!==quote) {
+   form.marketQuoteMarkup547=quote;
+   q.innerHTML=quote;
+ }
 }
 function marketShowForm547(kind,id,person) {
  const t=marketText547,model=marketFormModel547(kind,id,person);
@@ -460,34 +544,55 @@ async function marketSubmit547(e) {
  if(!ctx||form!==ctx.el) return;
  e.preventDefault();
  const u=MARKET_UI547,m=ctx.model,t=marketText547,err=form.querySelector('[role=alert]'),submit=form.querySelector('[type=submit]');
- if(u.sending||!form.reportValidity())return;
+ if(u.sending||submit.disabled||!form.reportValidity())return;
  const args={...m.args};
  for(const [key,value] of new FormData(form)) args[key]=['qty','price','wantQty','days','amount','share','pledge'].includes(key)?Number(value):value;
  if(m.kind==='group') args.openGuests=form.elements.namedItem('openGuests').checked;
+ let acquiredPiece=null;
  u.sending=true;++MARKET_GEN547[m.area];submit.disabled=true;err.hidden=true;
  const label=submit.textContent;submit.textContent=t('Подождите…','Please wait…');
  try {
    const r=await marketChange547(m.area,m.action,args);
    if(!r?.ok) throw Error(r?.error||'unavailable');
    marketBoardSeen547(m.area,r);
-   if(form.isConnected) closeModal();
-   toast(m.kind==='offer'?t('Предложение отправлено','Offer sent'):t('Готово','Done'),'good');
+   if(form.isConnected) {
+     closeModal();
+     const pieceId=m.kind==='craft'?r.receipt?.id:m.kind==='take'&&m.order?.kind==='fair'?m.order.pieceId:null;
+     const index=pieceId?r.pieces?.findIndex(piece=>piece.id===pieceId):-1;
+     if(index>=0&&marketScene547()&&u.players) {
+       u.tab='mine';u.limit=Math.max(8,index+1);acquiredPiece=pieceId;
+     }
+   }
+   const result=acquiredPiece?t('Витраж в твоей коллекции','Panel added to your collection'):
+     m.kind==='offer'?t('Предложение отправлено','Offer sent'):t('Готово','Done');
+   toast(result,'good');
  } catch (error) {
    if(form.isConnected) {err.textContent=marketIssue547(error);err.hidden=false;}
    else toast(marketIssue547(error),'bad');
    if(['closed','stale','bid','sync'].includes(error?.code||error?.message)) u.readAt[m.area]=0;
  } finally {
-   u.sending=false;submit.disabled=false;submit.textContent=label;marketPaint547();
+   u.sending=false;submit.disabled=false;submit.textContent=label;
+   if(form.isConnected) marketQuote547(form,m);
+   marketPaint547();
+   if(acquiredPiece) {
+     const card=document.querySelector(`#m547Panel [data-m547-piece="${acquiredPiece}"]`);
+     card?.focus({preventScroll:true});card?.scrollIntoView({block:'nearest'});
+   }
  }
 }
-function marketOpen547(target='goods',person=null) {
+function marketOpen547(target='goods',person=null,fromBench=false) {
  const tab={buy:'goods',sell:'goods',barter:'goods',group:'art',commission:'art',craft:'art',offer:'loans'}[target]||target;
  const u=MARKET_UI547;
  if(!['goods','art','mine','loans'].includes(tab))return;
  if(modalOpen())closeModal();
- u.players=true;u.tab=tab;u.limit=8;u.friend=person;
+ u.players=true;u.tab=tab;u.limit=8;u.friend=person;u.fromBench=fromBench;
  showScreen('fun','market');
  if(tab!==target) marketCompose547(target,0,person);
+}
+function marketFindMaterial547(item) {
+ if(city()!=='zas'||(item!=='all'&&!Object.hasOwn(MARKET_ITEMS547,item))) return;
+ MARKET_UI547.material=item;MARKET_UI547.intent=item==='all'?'all':'buy';
+ marketOpen547('goods',null,true);
 }
 function marketFriend547(pid,name) {
  const t=marketText547,person={pid:String(pid),name};MARKET_UI547.friend=person;
@@ -497,16 +602,20 @@ function marketFriend547(pid,name) {
 }
 function marketClick547(e) {
  const b=e.target.closest?.('[data-m547-action]');
+ const posting=document.querySelector('.m547-posting[open]');
+ if(posting&&(!posting.contains(e.target)||b)) posting.open=false;
  if(!b||b.disabled) return;
  const a=b.dataset.m547Action,id=b.dataset.m547Id,u=MARKET_UI547;
  if(a==='close') {if(!u.sending)closeModal();return;}
+ if(a==='glassWorkshop') {marketVisitGlass547();return;}
+ if(a==='backBench'&&u.fromBench) {u.fromBench=false;marketPaint547();ACTIONS.garageBench547();return;}
  if(a==='friends') {if(modalOpen())closeModal();showScreen('fun','friends');return;}
  if(a==='visitLoans') {marketOpen547('loans');return;}
  if(a==='friend') {marketFriend547(id,b.closest('[data-m547-friend]')?.dataset.m547Friend||'');return;}
  if(a==='backVisit') {if(modalOpen())closeModal();ACTIONS.frVisit(id);return;}
  if(a==='friendKind') {marketOpen547(id,u.friend);return;}
  if(a==='toMaker') {marketOpen547('commission',{pid:String(id),name:b.closest('.m547-piece')?.querySelector('small')?.textContent?.split(' · ').slice(1).join(' · ')||''});return;}
- if(a==='mode') {u.players=id==='players';u.friend=null;renderCurrent(false);if(u.players)marketLoad547(marketArea547());return;}
+ if(a==='mode') {u.players=id==='players';if(!u.players)u.fromBench=false;u.friend=null;renderCurrent(false);if(u.players)marketLoad547(marketArea547());return;}
  if(a==='tab') {if(!['goods','art','mine','loans'].includes(id))return;u.tab=id;u.friend=null;u.limit=8;marketPaint547();marketLoad547(marketArea547());return;}
  if(a==='more') {u.limit+=8;marketPaint547();return;}
  if(a==='reload') {marketLoad547(marketArea547(),true);return;}
@@ -518,10 +627,24 @@ EXTRA_TABS.fun.market=()=>{marketCheckRealm547();return marketModeSwitch547()+(M
 const marketFriendTab547=EXTRA_TABS.fun.friends;
 EXTRA_TABS.fun.friends=()=>`${marketIsOnline547()?`<div class="m547-friend-entry" data-i18n-ignore>${marketBtn547(marketText547('Расписки с друзьями','IOUs with friends'),'visitLoans')}</div>`:''}${marketFriendTab547()}`;
 ACTIONS.marketOpen547=target=>marketOpen547(target);
+ACTIONS.marketFindMaterial547=marketFindMaterial547;
 document.addEventListener('click',marketClick547);
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape') return;
+ const posting=e.target.closest?.('.m547-posting[open]');
+ if(posting) {posting.open=false;posting.querySelector('summary').focus();}
+});
+document.addEventListener('change',e=>{
+ const field=e.target;
+ if(!field.matches?.('.m547-filters select')) return;
+ if(field.name==='material') MARKET_UI547.material=field.value;
+ else if(field.name==='intent') MARKET_UI547.intent=field.value;
+ MARKET_UI547.limit=8;
+ marketPaint547();
+});
 document.addEventListener('submit',marketSubmit547);
 for(const event of ['input','change']) document.addEventListener(event,e=>{const ctx=marketForm547;if(ctx?.el.contains(e.target)) marketQuote547(ctx.el,ctx.model,e.target.name);});
-HOOKS.screen.push(()=>{if(marketScene547()&&MARKET_UI547.players) marketLoad547(marketArea547());});
+HOOKS.screen.push(()=>{if(!marketScene547()) MARKET_UI547.fromBench=false;else if(MARKET_UI547.players) marketLoad547(marketArea547());});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&marketScene547()&&MARKET_UI547.players) marketLoad547(marketArea547());});
 HOOKS.tick.push(()=>{
  const u=MARKET_UI547,area=marketArea547();
