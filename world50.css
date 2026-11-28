@@ -4,3 +4,9 @@
 @media(prefers-reduced-motion:reduce){.w50-story *,.w50-town *,.w50-arena *{animation:none!important;transition:none!important}}
 .w50-game>header{display:flex;justify-content:space-between;gap:10px;padding:8px 0}.w50-game>header b{white-space:nowrap;font-size:14px}.w50-game>p{font-size:14px;line-height:1.5}.w50-feedback{min-height:22px;color:#f7d098}.w50-dialogue blockquote b{display:block;margin-bottom:5px}
 .w50-circuit>.btn{width:100%;height:auto;min-height:48px;border-radius:14px;font-size:16px;color:#172332;background:var(--gold)}
+
+/* World chapters keep their night-blue paper in every city theme. */
+.w50-story .w50-dialogue { color: #fff3dd; }
+.w50-story .w50-dialogue > small { color: #edc488; }
+.w50-dialogue .goal.ok span { color: #a8ebbd; }
+.w50-dialogue .goal .go-arrow { color: #ffcf83; }

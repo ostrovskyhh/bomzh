@@ -1,0 +1,40 @@
+.courtyard539.cartoon538 .redesign536-home #valera:not(.busy) {
+  height: 81%;
+  bottom: 3%;
+}
+
+.courtyard539.cartoon538 .redesign536-home #valera .courtyard539-portrait {
+  filter: drop-shadow(0 2px 1px #28202138);
+}
+
+.courtyard539.cartoon538 .redesign536-home #valera.tired .courtyard539-portrait {
+  filter: saturate(.72) brightness(.93) drop-shadow(0 2px 1px #28202138);
+}
+
+.courtyard539 #scene .court543-ill > .court543-skin {
+  filter: saturate(.68) hue-rotate(12deg);
+}
+
+.courtyard539 #scene:has(.weather-fx.p-night):not([data-courtyard540-indoor]) .court543-face {
+  filter: brightness(.91) saturate(.88);
+}
+
+.courtyard539 #scene .lv-say {
+  left: 8px;
+  right: 8px;
+  bottom: 40px;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  margin-inline: auto;
+  padding: 5px 10px;
+  border: 1px solid #fff1ce88;
+  border-radius: 7px;
+  background: #29372ff5;
+  color: #fff7e5;
+  text-align: center;
+  font-weight: 650;
+  transform: translateY(3px);
+  box-shadow: 0 2px 5px #211b1830;
+}
+.courtyard539 #scene .lv-say.show { transform: none; }
+.courtyard539 #scene .lv-say::after { content: none; }

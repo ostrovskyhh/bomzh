@@ -6,7 +6,7 @@ function citySetIcon510(el,c,key,art){if(!el)return;const mark=c+':'+key;if(el.d
 function cityDecor510(root=document){
  if(!root?.querySelectorAll)return;const c=city();
  if(!WORLD50[c]){root.querySelectorAll('[data-city-decor510]').forEach(el=>{if(CITY_DOM_ORIGINAL510.has(el))el.innerHTML=CITY_DOM_ORIGINAL510.get(el);delete el.dataset.cityDecor510;});return;}
- root.querySelectorAll('#tabbar [data-hub]>span').forEach(el=>{const id=el.parentElement.dataset.hub;citySetIcon510(el,c,({me:'clothes',tasks:'story',home:'home',money:'money',fun:'fun',people:'people'})[id]||'world');});
+ root.querySelectorAll('#tabbar [data-hub]>span').forEach(el=>{const id=el.parentElement.dataset.hub;citySetIcon510(el,c,({me:'clothes',goals:'story',home:'home',money:'money',fun:'fun',people:'people'})[id]||'world');});
  root.querySelectorAll('.bh-tile[data-id] .bh-e').forEach(el=>citySetIcon510(el,c,CITY_TILES510[el.parentElement.dataset.id.split(':').at(-1)]||'world'));
  for(const [id,key] of Object.entries({exchangeBtn:'money',trashBtn:'trash',eatBtn:'food',sleepBtn:'sleep'}))citySetIcon510(root.querySelector('#'+id+' .act-emoji'),c,key);
  root.querySelectorAll('.business-card,.business-detail').forEach(el=>{const name=el.querySelector('h3')?.textContent,i=BUSINESSES.findIndex(b=>b.name===name);if(i>=0)citySetIcon510(el.querySelector('.business-emblem'),c,'business:'+i,cityBusiness510(c,i));});

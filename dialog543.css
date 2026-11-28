@@ -1,0 +1,162 @@
+/* Player controls and the three reading surfaces used outside of live games. */
+.story-art > .profile543-scenery {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 60%;
+}
+.courtyard539.cartoon538.design536 .topbar :is(#resCaps, #settingsBtn) {
+  box-sizing: border-box;
+  min-width: 44px;
+  min-height: 44px;
+}
+.courtyard539.cartoon538.design536 .topbar #settingsBtn {
+  display: grid;
+  place-items: center;
+  font-size: 0;
+  color: #463e31;
+  background: #f9eed8;
+  border: 1px solid #baab90;
+}
+.courtyard539 .topbar #settingsBtn::before {
+  content: "";
+  width: 21px;
+  height: 21px;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='m9.2 3 .6-1h4.4l.6 2.2 2 .9 2.1-.7 2.2 3.8-1.5 1.7.2 2.1 1.6 1.8-2.2 3.8-2.3-.5-1.8 1.1-.5 2.8h-4.5l-.6-2.5-1.9-1-2.2.5-2.2-3.8 1.6-1.7V10L3.2 8.3l2.2-3.8 2.3.6 1.8-1z'/%3E%3Ccircle cx='12' cy='11.7' r='3.3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.courtyard539 :is(.topbar button, [data-dialog543] :is(button, a, input, select, textarea)):focus-visible {
+  outline: 3px solid #935000;
+  outline-offset: -3px;
+}
+.courtyard539.design536.cartoon538 #modalRoot .sheet[data-dialog543] {
+  --dialog-ink: #282b27;
+  --dialog-secondary: #5d5548;
+  --dialog-line: #d9ccb7;
+  --dialog-paper: #fffaf0;
+  text-align: left;
+  color: var(--dialog-ink);
+  background: var(--dialog-paper);
+  border: 1px solid var(--dialog-line);
+  border-radius: 21px;
+  box-shadow: 0 12px 42px #231d1940;
+  padding: clamp(13px, 3vw, 24px);
+  scroll-padding-block: 8px 62px;
+}
+#modalRoot .sheet[data-dialog543] h3 {
+  color: var(--dialog-ink);
+  font-size: clamp(19px, 4vw, 24px);
+  line-height: 1.18;
+  margin: 0 0 13px;
+  overflow-wrap: anywhere;
+}
+#modalRoot [data-dialog543] :is(.set2-me, .set-grp, .stat-grid) { color: var(--dialog-ink); }
+#modalRoot [data-dialog543] :is(p, small, .set-hint, .set-grp-t) { color: var(--dialog-secondary); }
+#modalRoot [data-dialog543] .language-card {
+  background: #2d3831;
+  color: #fff7e6;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px;
+  gap: 8px;
+  text-align: left;
+}
+#modalRoot [data-dialog543] .language-card b { color: #fff7e6; font-size: 14px; }
+#modalRoot [data-dialog543] .language-card small { color: #e8e3d4; opacity: 1; margin-top: 2px; }
+#modalRoot [data-dialog543] .language-options { border-radius: 9px; background: #202c25; padding: 3px; gap: 2px; }
+#modalRoot [data-dialog543] .language-options .btn {
+  min-height: 44px;
+  color: #fff7e6;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  box-shadow: none;
+}
+#modalRoot [data-dialog543] .language-options .btn.on {
+  outline: none;
+  background: #f7d28e;
+  color: #302819;
+}
+#modalRoot [data-dialog543] .language-options .btn:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+#modalRoot [data-dialog543] .set2-me {
+  background: #f3ebda;
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 12px;
+  min-width: 0;
+}
+#modalRoot [data-dialog543] .set2-me > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+#modalRoot [data-dialog543] .set2-tile {
+  display: grid;
+  grid-template-columns: 1.4em minmax(0,1fr);
+  align-content: start;
+  align-items: baseline;
+  gap: 4px 6px;
+  min-height: 66px;
+  padding: 10px;
+  border-radius: 11px;
+  border: 1px solid var(--dialog-line);
+  background: #fffcf6;
+  color: var(--dialog-ink);
+  overflow-wrap: anywhere;
+}
+#modalRoot [data-dialog543] .set2-tile > span { font-size: 17px; }
+#modalRoot [data-dialog543] .set2-tile > b { font-size: 14px; }
+#modalRoot [data-dialog543] .set2-tile > small { grid-column: 1 / -1; font-size: 12px; line-height: 1.3; }
+#modalRoot [data-dialog543] .set2-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+#modalRoot [data-dialog543] .set2-back { color: #654311; }
+#modalRoot [data-dialog543] .set2 > .btns {
+  position: sticky;
+  bottom: 0;
+  padding-block: 8px 0;
+  background: var(--dialog-paper);
+  z-index: 1;
+}
+#modalRoot [data-dialog543] .set2 > .btns::after {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 24px;
+  background: var(--dialog-paper);
+  pointer-events: none;
+}
+#modalRoot [data-dialog543] .set2 > .btns .btn {
+  min-height: 44px;
+  color: #fff7e7;
+  background: #2d3831;
+  box-shadow: none;
+  border: 1px solid #26312a;
+}
+#modalRoot [data-dialog543="profile"] .stat-grid {
+  gap: 6px;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+}
+#modalRoot [data-dialog543="profile"] .stat-grid > div {
+  padding: 10px;
+  background: #f3ebda;
+  color: var(--dialog-secondary);
+  border-radius: 9px;
+  overflow-wrap: anywhere;
+}
+#modalRoot [data-dialog543="profile"] .stat-grid b { color: var(--dialog-ink); }
+#modalRoot [data-dialog543="profile"] :is(.btn-row,.btns) .btn,
+#modalRoot [data-dialog543="confirm"] .btn { min-height: 44px; }
+#modalRoot [data-dialog543="confirm"] :is(.story-access-confirm521, .divorce-confirm) {
+  color: var(--dialog-ink);
+  background: var(--dialog-paper);
+  text-align: left;
+}
+#modalRoot [data-dialog543="confirm"] p { line-height: 1.48; }
+@media (max-width: 360px) {
+  #modalRoot [data-dialog543] .set2-grid { grid-template-columns: 1fr; gap: 5px; }
+  #modalRoot [data-dialog543] .set2-tile { grid-template-columns: 22px minmax(0,1fr); }
+  #modalRoot [data-dialog543] .set2-tile > span { grid-row: span 2; }
+  #modalRoot [data-dialog543] .set2-tile > small { grid-column: 2; }
+}
+@media (max-height: 520px) {
+  #modalRoot .sheet[data-dialog543] { padding: 12px; }
+  #modalRoot [data-dialog543] .set2-tile { min-height: 56px; padding: 7px 9px; }
+  #modalRoot [data-dialog543="profile"] .story-art { height: 112px; }
+}

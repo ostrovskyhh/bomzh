@@ -1,0 +1,232 @@
+/* The same six destinations across the game. Regional drawings stay in their own icon slots. */
+.courtyard539.cartoon538.design536 #app > #tabbar {
+  --nav-ink: #222b2c;
+  --nav-paper: #fff7e8;
+  --nav-muted: #c4cbc5;
+  --nav-accent: #ffce83;
+  flex-shrink: 0;
+  align-items: stretch;
+  gap: 2px;
+  padding: 4px max(4px, env(safe-area-inset-right)) calc(4px + var(--safe-bottom)) max(4px, env(safe-area-inset-left));
+  background: var(--nav-ink);
+  color: var(--nav-paper);
+  border: 0;
+  border-top: 1px solid #59615c;
+  box-shadow: 0 -2px 7px #29211620;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub] {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  grid-template-rows: 24px auto;
+  gap: 2px;
+  padding: 3px 1px;
+  color: #e5e7de;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  box-shadow: none;
+  font-size: clamp(10.5px, 3vw, 12px);
+  line-height: 1.12;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub] > span {
+  width: 34px;
+  height: 24px;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  filter: none;
+  opacity: 1;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub] > b {
+  min-width: 0;
+  max-width: 100%;
+  font-weight: 550;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] {
+  color: var(--nav-accent);
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] > span {
+  background: var(--nav-accent);
+  color: var(--nav-ink);
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] > b { font-weight: 750; }
+
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528 {
+  color: var(--nav-muted);
+  filter: none;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: max(1px, calc(50% - 21px));
+  width: 12px;
+  height: 13px;
+  background: #e6dfca url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23343d38' stroke-width='1.7'%3E%3Crect x='3.6' y='7' width='8.8' height='6.5' rx='1.6'/%3E%3Cpath d='M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.courtyard539.cartoon538.design536 #tabbar .dot[data-hubdot] {
+  top: 2px;
+  right: max(1px, calc(50% - 19px));
+  width: 7px;
+  height: 7px;
+  background: #fa8a70;
+  box-shadow: 0 0 0 2px var(--nav-ink);
+  pointer-events: none;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button.fs-lock528 .dot[data-hubdot] {
+  right: auto;
+  left: max(1px, calc(50% - 19px));
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub]:focus-visible {
+  outline: 2px solid var(--nav-paper);
+  outline-offset: -2px;
+}
+
+.courtyard539.cartoon538.design536 #tabbar button[data-hub]:active {
+  background-color: #404a46;
+}
+
+/* A stable silhouette for each destination in the starter cities. */
+#tabbar [data-hub="home"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Cpath d='m2.5 11 9.5-8 9.5 8M5.5 9v11h4.7v-5.8h3.6V20h4.7V9'/%3E%3C/svg%3E"); }
+#tabbar [data-hub="me"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Ccircle cx='12' cy='7.5' r='3.8'/%3E%3Cpath d='M4.4 20v-1.4c0-3.4 3-5.3 5-5.6l2.6 2.5 2.6-2.5c2 .3 5 2.2 5 5.6V20z'/%3E%3C/svg%3E"); }
+#tabbar [data-hub="money"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Cpath d='M20.2 8v-2h-15a2.2 2.2 0 0 0 0 4h15v9H5.4A2.4 2.4 0 0 1 3 16.6V8.1M21 12h-4a1.6 1.6 0 0 0 0 3.2h4Z'/%3E%3C/svg%3E"); }
+#tabbar [data-hub="fun"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Cpath d='M8 6.5h8c2.1 0 3.3 1.1 3.8 3l1.7 6.7c.6 2.7-1.7 4-3.5 2.3L15.2 16H8.8L6 18.5c-1.8 1.7-4.1.4-3.5-2.3l1.7-6.7c.5-1.9 1.7-3 3.8-3ZM8 9.3v4M6 11.3h4M15.5 12.2h.1m2-2h.1'/%3E%3C/svg%3E"); }
+#tabbar [data-hub="people"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Ccircle cx='9' cy='8' r='3.3'/%3E%3Cpath d='M2.8 19.4v-1.6a5.3 5.3 0 0 1 5.3-5.3h1.8a5.3 5.3 0 0 1 5.3 5.3v1.6zM15.3 4.8a3.2 3.2 0 0 1 .3 6.2m1.1 2a5 5 0 0 1 4.5 5.1v1.3h-3.1'/%3E%3C/svg%3E"); }
+#tabbar [data-hub="goals"] { --nav-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' fill='none' stroke-linejoin='round' stroke-linecap='round' stroke-width='1.8'%3E%3Cpath d='M5 21V4.5c5-4.2 8.5 3 14.5-.5l-1.7 4.3 1.7 3.6c-6 3.5-9.5-3.7-14.5.5'/%3E%3C/svg%3E"); }
+
+@supports (mask-image: none) or (-webkit-mask-image: none) {
+  .courtyard539.cartoon538.design536 #tabbar button[data-hub] > span:not([data-city-decor510]) {
+    font-size: 0;
+  }
+  #tabbar button[data-hub] > span:not([data-city-decor510])::before {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background: currentColor;
+    -webkit-mask: var(--nav-symbol) center / contain no-repeat;
+    mask: var(--nav-symbol) center / contain no-repeat;
+  }
+}
+
+@media (hover: hover) {
+  .courtyard539.cartoon538.design536 #tabbar button[data-hub]:not([aria-current="page"]):hover {
+    color: var(--nav-paper);
+    background-color: #37413e;
+  }
+}
+
+@media (min-width: 900px) {
+  .courtyard539.cartoon538.design536 #app > #tabbar {
+    min-height: 0;
+    gap: 4px;
+    padding: 16px 10px;
+    border: 0;
+    border-inline-end: 1px solid #505851;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-padding-block: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #717971 var(--nav-ink);
+  }
+  .courtyard539.cartoon538.design536 #tabbar .design536-brand {
+    align-items: center;
+    gap: 10px;
+    padding: 4px 4px 16px;
+    margin: 0 0 10px;
+    border-color: #4a534d;
+    color: var(--nav-paper);
+    font-size: 16px;
+    line-height: 1.18;
+  }
+  .courtyard539.cartoon538.design536 #tabbar .design536-brand i {
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    height: 32px;
+    border: 1px solid #7f785e;
+    border-radius: 9px;
+    background: #343c36;
+    color: var(--nav-accent);
+  }
+  .courtyard539.cartoon538.design536 #tabbar button[data-hub] {
+    flex: 0 0 auto;
+    grid-template: auto / 30px minmax(0, 1fr);
+    min-height: 45px;
+    align-items: center;
+    justify-items: start;
+    gap: 10px;
+    padding: 6px 20px 6px 8px;
+    font-size: 14px;
+    text-align: start;
+  }
+  .courtyard539.cartoon538.design536 #tabbar button[data-hub] > span {
+    width: 30px;
+    height: 29px;
+  }
+  .courtyard539.cartoon538.design536 #tabbar button[data-hub] > b { text-align: start; }
+  .courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] {
+    color: var(--nav-ink);
+    background: var(--nav-accent);
+  }
+  .courtyard539.cartoon538.design536 #tabbar button[aria-current="page"]:focus-visible {
+    outline-color: var(--nav-ink);
+  }
+  .courtyard539.cartoon538.design536 #tabbar button.fs-lock528::after {
+    right: 6px;
+    top: calc(50% - 6px);
+  }
+  .courtyard539.cartoon538.design536 #tabbar .dot[data-hubdot],
+  .courtyard539.cartoon538.design536 #tabbar button.fs-lock528 .dot[data-hubdot] {
+    left: 31px;
+    right: auto;
+    top: 7px;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 480px) {
+  .courtyard539.cartoon538.design536 #app > #tabbar { padding-block: 5px; gap: 1px; }
+  .courtyard539.cartoon538.design536 #tabbar .design536-brand { display: none; }
+}
+
+@media (forced-colors: active) {
+  #tabbar button[data-hub] > span:not([data-city-decor510])::before {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+  .courtyard539.cartoon538.design536 #tabbar button[aria-current="page"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    text-decoration: underline;
+  }
+}
+
+/* Telegram's stable layout height can outlast the visible viewport during text entry. */
+@media (max-width: 899px), (pointer: coarse) {
+  .courtyard539.design536 #app {
+    max-height: min(100dvh, var(--tg-viewport-height, 100dvh), var(--nav543-visible-height, 100dvh));
+  }
+  html[data-nav543-keyboard] .courtyard539 #modalRoot > .backdrop {
+    top: var(--nav543-visible-top);
+    bottom: auto;
+    height: var(--nav543-visible-height);
+  }
+  html[data-nav543-keyboard] .courtyard539 #modalRoot > .backdrop > .sheet {
+    max-height: 100%;
+  }
+}
