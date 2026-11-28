@@ -1,0 +1,180 @@
+#glass546 {
+  --gl-ink: #302a24;
+  --gl-muted: #62564a;
+  --gl-paper: #fffaf0;
+  --gl-line: #d5c2a5;
+  --gl-green: #285646;
+  display: grid;
+  gap: 12px;
+  max-width: 800px;
+  margin: 4px auto 14px;
+  color: var(--gl-ink);
+  font: inherit;
+}
+#glass546, #glass546 * { box-sizing: border-box; }
+#glass546 h3, #glass546 p { margin: 0; color: inherit; }
+#glass546 h3 { font-size: 1.16rem; line-height: 1.18; }
+#glass546 button, #glass546 input { font: inherit; }
+#glass546 button { cursor: pointer; }
+#glass546 :is(button, input):focus-visible {
+  outline: 3px solid #186984;
+  outline-offset: 2px;
+}
+#glass546 .gl546-station, #glass546 .gl546-cabinet {
+  border: 1px solid var(--gl-line);
+  border-radius: 16px;
+  background: var(--gl-paper);
+  box-shadow: 0 2px 0 rgb(84 58 26 / 9%);
+}
+#glass546Scene {
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  border-radius: 15px 15px 0 0;
+  background: #2e4540;
+  max-height: 252px;
+}
+#glass546Scene > svg { display: block; width: 100%; height: auto; }
+#glass546 .gl546-body, #glass546 .gl546-cabinet { padding: clamp(12px, 3vw, 20px); }
+#glass546 .gl546-heading, #glass546 .gl546-meter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#glass546 .gl546-stock {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #ebe5d6;
+  color: #483d31;
+  font-size: .83rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#glass546 .gl546-modes { min-width: 0; margin: 12px 0 0; padding: 0; border: 0; }
+#glass546 legend, #glass546 .gl546-meter-head { padding: 0; font-size: .91rem; font-weight: 650; }
+#glass546 .gl546-modes > div, #glass546 .gl546-designs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 7px;
+}
+#glass546 .gl546-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--gl-line);
+  border-radius: 10px;
+  background: #fffdf6;
+  color: var(--gl-ink);
+  cursor: pointer;
+}
+#glass546 .gl546-choice:has(:checked) {
+  border-color: var(--gl-green);
+  background: #e8f1e4;
+  box-shadow: inset 0 0 0 1px var(--gl-green);
+}
+#glass546 .gl546-choice:has(:focus-visible) { outline: 3px solid #186984; outline-offset: 2px; }
+#glass546 .gl546-choice input { flex: none; width: 15px; height: 15px; margin: 2px 0; accent-color: var(--gl-green); }
+#glass546 .gl546-choice span { display: grid; gap: 2px; }
+#glass546 .gl546-choice b, #glass546 .gl546-design b { color: var(--gl-ink); font-size: .92rem; line-height: 1.14; }
+#glass546 .gl546-choice small, #glass546 .gl546-design small, #glass546 .gl546-caption, #glass546 .gl546-receipt {
+  color: var(--gl-muted);
+  font-size: .84rem;
+  line-height: 1.34;
+}
+#glass546 .gl546-choice b { margin-bottom: 3px; }
+#glass546 .gl546-caption, #glass546 .gl546-receipt { margin-top: 8px; }
+#glass546 .gl546-receipt { padding: 8px 9px; border-left: 3px solid #b07831; background: #f7efdd; }
+#glass546 .gl546-primary, #glass546 .gl546-secondary {
+  display: block;
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--gl-green);
+  border-radius: 8px;
+  background: var(--gl-green);
+  color: #fffaf0;
+  font-weight: 750;
+  line-height: 1.25;
+  padding: 8px 11px;
+}
+#glass546 .gl546-primary, #glass546 .gl546-clock { margin-top: 10px; }
+#glass546 .gl546-secondary { background: #fffaf0; color: var(--gl-green); }
+#glass546 button:disabled { cursor: default; color: #62594b; background: #e7e0d3; border-color: #cdc1ae; opacity: 1; }
+#glass546 .gl546-home {
+  min-height: 44px;
+  border: 0;
+  padding: 3px 0;
+  background: transparent;
+  color: var(--gl-green);
+  font-size: .88rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+#glass546 .gl546-batch { margin-top: 15px; }
+#glass546 .gl546-meter-head strong { color: var(--gl-green); font-variant-numeric: tabular-nums; }
+#glass546 progress {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 9px;
+  margin: 6px 0;
+  border: 0;
+  border-radius: 5px;
+  color: var(--gl-green);
+  background: #e1d7c5;
+  overflow: hidden;
+}
+#glass546 progress::-webkit-progress-bar { background: #e1d7c5; }
+#glass546 progress::-webkit-progress-value { background: var(--gl-green); }
+#glass546 progress::-moz-progress-bar { background: var(--gl-green); }
+#glass546 .gl546-design {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--gl-line);
+  border-radius: 10px;
+}
+#glass546 .gl546-equipped { border-color: #64877a; background: #edf3e9; }
+#glass546 .gl546-lamp {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 74px;
+  margin-bottom: 3px;
+  background: radial-gradient(ellipse at center, #fff5d3 0, #f0e4cb 100%);
+  border-radius: 6px;
+}
+#glass546 .gl546-lamp svg { max-width: 100%; max-height: 74px; }
+#glass546 .gl546-lamp > svg { width: 56px; height: 64px; }
+#glass546 .gl546-design .gl546-secondary { margin-top: auto; }
+#glass546 .gl546-design b + button, #glass546 .gl546-design small + button { margin-top: 4px; }
+#hubLock545 .gl546-entry { grid-column: 1 / -1; }
+#glass546 .gl546-equipped .gl546-secondary { color: #355449; background: #e0eade; border-color: #b4c9b8; }
+@media (max-width: 370px) {
+  #glass546 .gl546-choice { padding: 8px 6px; gap: 4px; }
+  #glass546 .gl546-choice input { width: 13px; height: 13px; }
+}
+@media (max-width: 600px) and (max-height: 560px) {
+  #glass546Scene { max-height: 78px; align-items: center; }
+  #glass546 .gl546-body { display: flex; flex-direction: column; padding: 8px 10px; }
+  #glass546 .gl546-body .gl546-heading { min-height: 24px; }
+  #glass546 .gl546-modes { margin-top: 3px; }
+  #glass546 .gl546-modes legend {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%);
+  }
+  #glass546 .gl546-modes > div { margin-top: 2px; }
+  #glass546 .gl546-choice { padding: 6px; }
+  #glass546 .gl546-body > .gl546-primary { margin-top: 6px; }
+  #glass546 .gl546-materials { order: 1; }
+}
+@media (min-width: 980px) {
+  #glass546 { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .85fr); align-items: start; }
+}

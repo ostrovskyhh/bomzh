@@ -157,22 +157,25 @@
     check('дети: после развода видны в «Свиданиях»', EXTRA_TABS.fun.dates().includes(S.kids[0].name), S.kids[0] && S.kids[0].name);
     // Счета: днём закрытая игра ставит срок на паузу, а с 00:00 до 07:00 МСК аренда идёт (правило 5.23).
     // Часы зафиксированы: иначе результат зависел бы от времени запуска теста.
-    const rentAfter8h = async (hourMsk) => {
-      const realNow = Date.now, clock = { epoch: businessClock.epoch, mono: businessClock.mono };
-      const t = Date.UTC(2026, 10, 5, hourMsk - 3), shift = t - realNow();
-      Date.now = () => realNow() + shift;
-      businessClock.epoch = t; businessClock.mono = businessMono();
-      S.housing = Math.max(S.housing, 4); S.housingMode = 'rent'; S.debt = 0; S.missed = 0; S.autopayUntil = 0; delete S.rent523;
-      S.billDue = Date.now() + 10 * 60000; S.billSeen = Date.now() - 8 * 3600000; // «проспал» 8 часов
-      await sl(600);
-      const r = { debt: S.debt, left: Math.round((S.billDue - Date.now()) / 60000) };
-      Date.now = realNow; businessClock.epoch = clock.epoch; businessClock.mono = clock.mono;
-      delete S.rent523; S.billDue = Date.now() + MONTH_MS; S.billSeen = Date.now();
-      return r;
+    const rentAfter8h = (hourMsk) => {
+      const originalState = S, originalNow = Date.now, originalBusinessNow = businessNow;
+      const t = Date.UTC(2026, 10, 5, hourMsk - 3);
+      try {
+        Date.now = businessNow = () => t;
+        S = { ...originalState, housing: Math.max(originalState.housing, 4), housingMode: 'rent',
+          debt: 0, missed: 0, autopayUntil: 0, rent523: null, billDue: t + 10 * 60000, billSeen: t - 8 * 3600000 };
+        housingBillsPause522();
+        housingBillsTick522();
+        return { debt: S.debt, missed: S.missed, left: (S.billDue - t) / 60000 };
+      } finally {
+        S = originalState;
+        Date.now = originalNow;
+        businessNow = originalBusinessNow;
+      }
     };
-    const rentDay = await rentAfter8h(20), rentNight = await rentAfter8h(8);
-    check('счета: 8 часов днём с закрытой игрой — срок на паузе', rentDay.debt === 0 && Math.abs(rentDay.left - 490) <= 2, `долг ${rentDay.debt}, до оплаты ${rentDay.left} мин`);
-    check('счета: ночь с закрытой игрой — аренда идёт 7 часов, просрочки нет', rentNight.debt === 0 && S.missed === 0 && Math.abs(rentNight.left - 70) <= 2, `долг ${rentNight.debt}, до оплаты ${rentNight.left} мин`);
+    const rentDay = rentAfter8h(20), rentNight = rentAfter8h(8);
+    check('счета: 8 часов днём с закрытой игрой — срок на паузе', rentDay.debt === 0 && rentDay.left === 490, `долг ${rentDay.debt}, до оплаты ${rentDay.left} мин`);
+    check('счета: ночь с закрытой игрой — аренда идёт 7 часов, просрочки нет', rentNight.debt === 0 && rentNight.missed === 0 && rentNight.left === 70, `долг ${rentNight.debt}, до оплаты ${rentNight.left} мин`);
     // Турнир 3.0: экран показывает рейтинг, открытые бои и зачёт
     (0, eval)('onlineOn = () => true');
     TOUR.data = { phase: 'open', startHour: 9, endHour: 21, fights: 12, minFights: 6, ratingStart: 1000, unlocked: 4, endsIn: 3600, prize: 0, pool: 1, sponsor: 1,

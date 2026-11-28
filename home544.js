@@ -11,8 +11,8 @@ function home544Events() {
     pin.tabIndex = 0;
     pin.setAttribute('role', 'button');
   }
-  const effects = $('effects').children;
-  for (const chip of effects) {
+  const effects = $('effects');
+  for (const chip of effects.querySelectorAll(':scope > .chip[data-id]')) {
     const spec = EFFECTS[chip.dataset.id];
     const diagnosed = chip.firstElementChild.textContent !== '❓';
     const text = diagnosed && spec ? I18N.t(spec.name) : (en ? 'Unknown condition' : 'Неизвестное состояние');
@@ -26,7 +26,7 @@ function home544Events() {
     if (name.textContent !== text) name.textContent = text;
   }
   const extras = $('nb534HomeExtras');
-  const count = pins.length + effects.length + Number(!$('boostBadge').classList.contains('hidden')) +
+  const count = pins.length + effects.childElementCount + Number(!$('boostBadge').classList.contains('hidden')) +
     (extras && !extras.hidden ? extras.children.length : 0);
   events.hidden = !count;
   // A ready chest is immediately recognisable, even before opening the list.
