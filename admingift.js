@@ -47,6 +47,7 @@ function adminApply(c, lines) {
 }
 // Сброс прогресса по решению админа: как кнопка «Сбросить прогресс», только без вопроса
 function adminWipe() {
+  if ((S.marketRev547 || serverOk()) && typeof marketResetProfile547 === 'function') return marketResetProfile547();
   S = { ...freshState(), ...(S.barterRev545 ? { barterRev545: S.barterRev545 } : {}) }; save();
   SAVE_LOCK = true;
   const done = () => { if (cloudOk()) tg.CloudStorage.removeItems([`${SAVE_KEY}_meta`, SAVE_KEY], () => location.reload()); else location.reload(); };

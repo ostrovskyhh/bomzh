@@ -34,6 +34,7 @@ ACTIONS.frVisit = async (pid) => {
         <button class="btn primary" data-act="frGiftMenu" data-id="${esc(pid)}" data-name="${esc(r.name)}">🎁 Подарить</button>
         <button class="btn" data-act="duelFight" data-id="${esc(pid)}">🥊 На бой</button>
         <button class="btn" data-act="duelRpsMenu" data-id="${esc(pid)}" data-name="${esc(r.name)}">✊ КНБ</button></div>
+      ${typeof marketVisitHTML547 === 'function' ? marketVisitHTML547(pid, r.marketDisplay, r.name) : ''}
       <details class="fv2-more"><summary>📊 Сравнить статистику</summary>${topStatsHTML(st)}</details>
       <div class="btns" style="flex-direction:column;gap:8px"><button class="btn primary wide" data-act="close">Уйти домой</button>
         <button class="btn wide" data-act="frRemove" data-id="${esc(pid)}" data-name="${esc(r.name)}">Удалить из друзей</button></div></div>`, { center: true });

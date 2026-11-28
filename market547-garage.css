@@ -1,0 +1,28 @@
+#gr547Bench{color:#342a22;text-align:left;background:#fff7e7;border-radius:16px;padding:14px;max-width:490px;margin:auto}
+#gr547Bench header,#gr547Bench article{display:flex;align-items:center;gap:12px;justify-content:space-between}
+#gr547Bench h3,#gr547Bench h4{color:#33281f;margin:0}
+#gr547Bench h4{margin:17px 0 5px;font-size:1rem}
+#gr547Bench article{padding:11px 0;border-bottom:1px solid #d3c2a5}
+#gr547Bench small,.gr547-stage small,.gr547-visit span{display:block;font-size:.82rem}
+#gr547Bench small,#gr547Bench .gr547-stock{color:#56483b}
+.gr547-stage{display:flex;align-items:center;gap:14px;margin:14px 0;padding:14px;background:#e5ebe1;border-radius:14px;color:#263b35}
+.gr547-stage small{margin-top:5px}
+.gr547-radio{--cabinet:#ab693c;--edge:#674531;position:relative;width:94px;height:72px;flex:none;filter:drop-shadow(0 2px 1px #413a312a)}
+.gr547-mint{--cabinet:#80afa1;--edge:#375f55}.gr547-cherry{--cabinet:#b05c59;--edge:#643b41}
+.gr547-handle{position:absolute;inset:1px 23% 40%;border:4px solid #4a433b;border-radius:10px}
+.gr547-case{position:absolute;inset:11px 0 2px;border:3px solid var(--edge);border-radius:10px;background:var(--cabinet);box-shadow:inset 0 2px 1px #ffefc580}
+.gr547-scale{position:absolute;inset:6px 7px auto;height:16px;border:1px solid #534330;background:#f6df9f;color:#483a2a;display:flex;align-items:center;justify-content:space-between;padding:0 5px;font:700 9px/1 monospace}
+.gr547-scale i{height:10px;width:15px;background:repeating-linear-gradient(90deg,#786139 0 1px,transparent 1px 4px)}
+.gr547-grille{position:absolute;inset:28px 32px 6px 8px;border-radius:3px;background:repeating-linear-gradient(0deg,#624433 0 2px,#ceab7d 2px 4px)}
+.gr547-knob{position:absolute;right:9px;bottom:6px;width:16px;height:16px;border-radius:50%;background:#f1d5a3;border:3px solid #634d3c}
+.gr547-finishes,.gr547-stations{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.gr547-button,.gr547-stations button,.gr547-x{min-height:42px;cursor:pointer;font:inherit;font-weight:650;color:#263b35;background:#e5ebe1;border:1px solid #a6b4a6;border-radius:9px;padding:6px 10px}
+.gr547-x{font-size:1.2rem;border:none;background:transparent}
+.gr547-stations button[aria-pressed=true]{background:#315a50;color:white}
+.gr547-button:disabled{color:#625b4d;background:#e9e4d8;border-color:#d0c4af;cursor:default}
+.gr547-visit{display:flex;align-items:center;justify-content:center;gap:10px}
+.gr547-visit .gr547-radio{zoom:.78}
+#marketArtAtHome547{position:absolute;z-index:2;bottom:10%;right:5%;width:clamp(33px,9%,64px);pointer-events:none;filter:drop-shadow(1px 3px 2px #382d24a6);transform:rotate(3deg)}
+#marketArtAtHome547 svg{width:100%;height:auto;display:block}
+
+.gr547-mosaic{--cabinet:#c79764;--edge:#4c5043}.gr547-mosaic .gr547-case{background:repeating-conic-gradient(from 45deg,#9abba4 0 25%,#bd7968 0 50%,#dec58a 0 75%,#7a9693 0) 0 0/19px 19px}

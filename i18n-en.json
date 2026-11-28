@@ -1,4 +1,10 @@
 {
+  "Рынок игроков": "Player market",
+  "На рынке Шныря открой «Игроки». В Засранске можно продать находки, оставить заказ на провод или лом и предложить другу обмен.": "At Shnyr’s market, open Players. In Zasransk you can sell finds, place an order for wire or scrap, or offer a friend a swap.",
+  "На гаражном верстаке собери радиолу из двух проводов и одного лома. За ремонт ламп и вывесок дают эскизы для новых корпусов.": "Build a radio at your garage workbench with two wires and one piece of scrap. Repair lamps and signs to earn sketches for new cabinet finishes.",
+  "Заказывай именные витражи, собирай стекло вместе и выставляй работы на ярмарке по своей цене или с торгами. Подпись мастера видна в гостях.": "Commission signed stained glass, pool your panes and sell pieces at the fair for a fixed price or by auction. Visitors can see the maker’s signature.",
+  "Между друзьями появились добровольные беспроцентные расписки. Обе стороны заранее видят сумму, срок, залог и долю выручки на погашение.": "Friends can agree to interest-free IOUs. Both players see the amount, due date, collateral and repayment share before accepting.",
+  "Шнырь открыл прилавки для игроков. В «Деньги → Рынок → Игроки» закажи провод для гаражной радиолы или продай лишний лом. Мастера стекольной артели принимают заказы на подписанные витражи и устраивают торги. С другом теперь можно обменяться находками или оформить беспроцентную расписку с понятным сроком и условиями возврата.": "Shnyr has opened stalls for players. In Money → Market → Players, order wire for your garage radio or sell spare scrap. Glassworkers can take commissions for signed stained glass and put pieces up for auction. Friends can swap finds or agree on an interest-free IOU with a clear due date and repayment terms.",
   "$1=[скрыто]": "$ 1 = [hidden]",
   "скрыто": "covertly",
   "Не загрузился ресурс": "It's not loaded",

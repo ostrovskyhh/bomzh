@@ -55,7 +55,7 @@ function glass546View() {
 
 function glass546Guard() {
   if (!glass546Eligible()) return { ok: false, code: 'locked' };
-  if (!LOADED || SAVE_LOCK || ALT_SAVE) return { ok: false, code: 'busy' };
+  if (!LOADED || SAVE_LOCK || ALT_SAVE || (typeof marketSyncBusy547 === 'function' && marketSyncBusy547())) return { ok: false, code: 'busy' };
   return null;
 }
 

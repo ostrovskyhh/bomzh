@@ -289,6 +289,7 @@ function nb534Page() {
         ${nb534PathChoices(choices, networkTab ? 'neighborhood534Network' : 'neighborhood534Choose')}
       </section>` : ''}
       ${route.route ? nb534JobMarkup(route, networkTab || view.stage >= view.projects.length) : ''}
+      ${!networkTab && view.firstOrderDone && typeof garageEntry547 === 'function' ? garageEntry547() : ''}
       ${showProjects ? nb534ProjectMarkup(view) : ''}
       ${route.route ? `<div class="nb534-secondary">
         ${(networkTab ? showPostcard : view.stage >= view.projects.length) ? nb534MilestonesMarkup(route) : ''}

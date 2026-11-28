@@ -881,6 +881,7 @@ async function serverWrite(force) {
   if (!serverReady || SAVE_LOCK || !serverOk()) return;
   if (srvBusy) { srvAgain = true; return; } // запишем сразу после текущего запроса, а не через 15 секунд
   srvBusy = true; srvLastAt = Date.now();
+  const sentMarketMarker = S.marketRev547 || 0;
   try {
     const j = await serverCall('put', { data: JSON.stringify(S), savedAt: S.savedAt, rev: S.rev || 0, base: serverBase, force: !!force });
     if (j.conflict) {
@@ -888,11 +889,16 @@ async function serverWrite(force) {
       const remote = parseSave(j.data);
       if (remote) {
         if (j.rev > (remote.rev || 0)) remote.rev = j.rev;
-        if (j.barterUpdated && typeof barter545Reconcile === 'function') barter545Reconcile(remote);
+        if (j.marketTransition && typeof marketRecovery547 === 'function') marketRecovery547(remote, j.marketTransition);
+        else if (j.marketUpdated && typeof marketReceive547 === 'function') marketReceive547(remote);
+        else if (j.barterUpdated && typeof barter545Reconcile === 'function') barter545Reconcile(remote);
         else if (j.neighborhoodUpdated) showNeighborhoodSavePick(remote);
         else adoptOrAsk(remote);
       }
-    } else if (j.ok) serverBase = Math.max(serverBase, j.rev || 0);
+    } else if (j.ok) {
+      serverBase = Math.max(serverBase, j.rev || 0);
+      if (!j.stale && typeof marketCheckpoint547 === 'function') marketCheckpoint547(j.rev, sentMarketMarker);
+    }
   } catch (e) { /* сервер выключен — сохранимся в следующий раз */ }
   srvBusy = false;
   if (srvAgain) { srvAgain = false; setTimeout(serverWrite, 300); }
@@ -1029,11 +1035,14 @@ function load(done) {
     if (finished) return;
     finished = true; clearTimeout(timer);
     const all = [local, device, cloud, server].filter(Boolean).sort((a, b) => (newerSave(a, b) ? -1 : newerSave(b, a) ? 1 : 0));
-    if (all[0]) S = all[0];
+    const marketMerged = (all[0] === local || all[0] === server) && typeof marketStartup547 === 'function'
+      ? marketStartup547(local, server) : null;
+    if (marketMerged || all[0]) S = marketMerged || all[0];
     REV_FLOOR = Math.max(0, ...all.map((s) => s.rev || 0));
     // Конфликт: новее оказалось сохранение с меньшим прогрессом (играл на двух устройствах раздельно)
-    const alt = all.slice(1).sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
-    if (alt && (alt.xp || 0) > (all[0].xp || 0) * 1.02 + 50) ALT_SAVE = alt;
+    const alternatives = marketMerged ? all.filter(candidate => candidate !== local && candidate !== server) : all.slice(1);
+    const alt = alternatives.sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
+    if (alt && (alt.xp || 0) > (S.xp || 0) * 1.02 + 50) ALT_SAVE = alt;
     LOADED = true;
     done();
     if (serverReady && !ALT_SAVE && (!server || (S.rev || 0) > serverBase || newerSave(S, server))) setTimeout(() => serverWrite(), 1500);
@@ -2035,6 +2044,7 @@ const ACTIONS = {
   reset: () => {
     const doReset = () => {
       const campaign73 = typeof prestigeIdentity73 === 'function' ? prestigeIdentity73() : {};
+      if ((S.marketRev547 || serverOk()) && typeof marketResetProfile547 === 'function') return marketResetProfile547(campaign73);
       S = { ...freshState(), ...campaign73, ...(S.barterRev545 ? { barterRev545: S.barterRev545 } : {}) }; save();
       SAVE_LOCK = true;
       // Стираем облачную копию и перезаписываем серверную, иначе после перезапуска старый прогресс «вернётся»
